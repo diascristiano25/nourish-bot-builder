@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,10 +17,12 @@ import {
   Download,
   Share2,
   Edit,
-  Calendar
+  Calendar,
+  Settings
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import MealPlanDocument from '@/components/MealPlanDocument';
 
 interface MealItem {
   food: string;
@@ -64,6 +66,15 @@ interface Patient {
   full_name: string;
 }
 
+interface NutritionistProfile {
+  full_name: string;
+  crn: string | null;
+  phone: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
+  secondary_color: string | null;
+}
+
 const mealIcons: Record<string, React.ReactNode> = {
   'Café da Manhã': <Coffee className="w-5 h-5" />,
   'Lanche da Manhã': <Cookie className="w-5 h-5" />,
@@ -87,10 +98,14 @@ export default function MealPlanView() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const documentRef = useRef<HTMLDivElement>(null);
   
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [patient, setPatient] = useState<Patient | null>(null);
+  const [nutritionist, setNutritionist] = useState<NutritionistProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -100,12 +115,13 @@ export default function MealPlanView() {
 
   useEffect(() => {
     if (user && planId) {
-      fetchMealPlan();
+      fetchData();
     }
   }, [user, planId]);
 
-  const fetchMealPlan = async () => {
+  const fetchData = async () => {
     try {
+      // Fetch meal plan
       const { data: planData, error: planError } = await supabase
         .from('meal_plans')
         .select('*')
@@ -114,13 +130,13 @@ export default function MealPlanView() {
 
       if (planError) throw planError;
       
-      // Transform the data to match our interface
       const transformedPlan: MealPlan = {
         ...planData,
         plan_data: planData.plan_data as unknown as MealPlanData,
       };
       setMealPlan(transformedPlan);
 
+      // Fetch patient
       const { data: patientData, error: patientError } = await supabase
         .from('patients')
         .select('full_name')
@@ -129,6 +145,16 @@ export default function MealPlanView() {
 
       if (patientError) throw patientError;
       setPatient(patientData);
+
+      // Fetch nutritionist profile
+      const { data: nutritionistData, error: nutritionistError } = await supabase
+        .from('nutritionists')
+        .select('full_name, crn, phone, logo_url, primary_color, secondary_color')
+        .eq('user_id', user!.id)
+        .single();
+
+      if (nutritionistError) throw nutritionistError;
+      setNutritionist(nutritionistData);
     } catch (error: any) {
       toast({
         title: "Erro ao carregar cardápio",
@@ -138,6 +164,103 @@ export default function MealPlanView() {
       navigate(`/patients/${id}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!documentRef.current || !mealPlan || !patient || !nutritionist) {
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Dados incompletos. Configure seu perfil primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDownloading(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
+      const canvas = await html2canvas(documentRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const fileName = `cardapio_${patient.full_name.replace(/\s+/g, '_')}_${format(new Date(), 'dd-MM-yyyy')}.pdf`;
+      pdf.save(fileName);
+
+      toast({
+        title: "PDF gerado com sucesso",
+        description: `Arquivo "${fileName}" baixado.`,
+      });
+    } catch (error: any) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!mealPlan || !patient) return;
+
+    setSharing(true);
+    try {
+      const shareText = `Cardápio: ${mealPlan.title}\nPaciente: ${patient.full_name}\n\nGerado por NutriFlow`;
+      
+      if (navigator.share) {
+        await navigator.share({
+          title: mealPlan.title,
+          text: shareText,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast({
+          title: "Copiado!",
+          description: "Informações copiadas para a área de transferência.",
+        });
+      }
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        toast({
+          title: "Erro ao compartilhar",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -154,6 +277,7 @@ export default function MealPlanView() {
   }
 
   const planData = mealPlan.plan_data;
+  const hasNutritionistProfile = nutritionist && nutritionist.full_name;
 
   return (
     <div className="min-h-screen bg-background">
@@ -170,17 +294,48 @@ export default function MealPlanView() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon">
-              <Share2 className="w-4 h-4" />
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={handleShare}
+              disabled={sharing}
+            >
+              {sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
             </Button>
-            <Button variant="outline" size="icon">
-              <Download className="w-4 h-4" />
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={handleDownloadPDF}
+              disabled={downloading || !hasNutritionistProfile}
+              title={!hasNutritionistProfile ? "Configure seu perfil primeiro" : "Baixar PDF"}
+            >
+              {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-3xl space-y-6">
+        {/* Aviso de perfil incompleto */}
+        {!hasNutritionistProfile && (
+          <Card className="border-warning bg-warning/10">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <Settings className="w-8 h-8 text-warning" />
+                <div className="flex-1">
+                  <p className="font-medium">Configure seu perfil</p>
+                  <p className="text-sm text-muted-foreground">
+                    Adicione seu nome, CRN e logo para que apareçam nos documentos exportados.
+                  </p>
+                </div>
+                <Button onClick={() => navigate('/profile')} variant="outline">
+                  Configurar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Summary Card */}
         <Card className="border-0 shadow-md gradient-card">
           <CardContent className="pt-6">
@@ -308,6 +463,18 @@ export default function MealPlanView() {
           </Button>
         </div>
       </main>
+
+      {/* Hidden document for PDF generation */}
+      {nutritionist && (
+        <div className="fixed left-[-9999px] top-0">
+          <MealPlanDocument
+            ref={documentRef}
+            mealPlan={mealPlan}
+            patientName={patient.full_name}
+            nutritionist={nutritionist}
+          />
+        </div>
+      )}
     </div>
   );
 }
