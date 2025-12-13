@@ -113,7 +113,13 @@ export default function MealPlanView() {
         .single();
 
       if (planError) throw planError;
-      setMealPlan(planData as MealPlan);
+      
+      // Transform the data to match our interface
+      const transformedPlan: MealPlan = {
+        ...planData,
+        plan_data: planData.plan_data as unknown as MealPlanData,
+      };
+      setMealPlan(transformedPlan);
 
       const { data: patientData, error: patientError } = await supabase
         .from('patients')

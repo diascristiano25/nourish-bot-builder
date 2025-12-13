@@ -118,22 +118,24 @@ export default function NewPatient() {
 
     try {
       // Create patient
+      const patientInsert = {
+        nutritionist_id: nutritionistId,
+        full_name: fullName.trim(),
+        email: email.trim() || null,
+        phone: phone.trim() || null,
+        birth_date: birthDate || null,
+        gender: gender || null,
+        goal: goal as "hypertrophy" | "weight_loss" | "maintenance" | "health" | "performance" | null || null,
+        activity_level: activityLevel as "sedentary" | "light" | "moderate" | "active" | "very_active" | null || null,
+        allergies: allergies.length > 0 ? allergies : null,
+        dietary_restrictions: restrictions.length > 0 ? restrictions : null,
+        medical_conditions: medicalConditions.trim() || null,
+        notes: notes.trim() || null,
+      };
+
       const { data: patient, error: patientError } = await supabase
         .from('patients')
-        .insert({
-          nutritionist_id: nutritionistId,
-          full_name: fullName.trim(),
-          email: email.trim() || null,
-          phone: phone.trim() || null,
-          birth_date: birthDate || null,
-          gender: gender || null,
-          goal: goal || null,
-          activity_level: activityLevel || null,
-          allergies: allergies.length > 0 ? allergies : null,
-          dietary_restrictions: restrictions.length > 0 ? restrictions : null,
-          medical_conditions: medicalConditions.trim() || null,
-          notes: notes.trim() || null,
-        })
+        .insert(patientInsert)
         .select('id')
         .single();
 
