@@ -1,23 +1,40 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface PatientData {
-  name: string;
-  age: number | null;
-  gender: string | null;
-  weight: number | null;
-  height: number | null;
-  goal: string | null;
-  activityLevel: string | null;
-  allergies: string[];
-  dietaryRestrictions: string[];
-  medicalConditions: string | null;
-  targetCalories: number | null;
-  additionalNotes: string;
+// Zod schema for strict input validation
+const PatientDataSchema = z.object({
+  name: z.string()
+    .min(1, "Patient name is required")
+    .max(100, "Patient name too long")
+    .transform(s => s.trim()),
+  age: z.number().int().min(0).max(150).nullable(),
+  gender: z.enum(['male', 'female', 'other']).nullable(),
+  weight: z.number().min(1).max(500).nullable(),
+  height: z.number().min(30).max(300).nullable(),
+  goal: z.string().max(100).nullable(),
+  activityLevel: z.string().max(50).nullable(),
+  allergies: z.array(z.string().max(100)).max(20).default([]),
+  dietaryRestrictions: z.array(z.string().max(100)).max(20).default([]),
+  medicalConditions: z.string().max(500).nullable(),
+  targetCalories: z.number().int().min(500).max(10000).nullable(),
+  additionalNotes: z.string().max(1000).default("")
+    .transform(s => s.trim()),
+});
+
+// Sanitize text to prevent prompt injection
+function sanitizeText(text: string): string {
+  if (!text) return "";
+  // Remove potential command overrides and excessive repetition
+  return text
+    .replace(/\b(ignore|forget|disregard|override|system|assistant|user)[\s:]+/gi, "")
+    .replace(/(.)\1{10,}/g, "$1$1$1") // Limit repeated chars
+    .slice(0, 1000);
 }
 
 serve(async (req) => {
@@ -27,7 +44,72 @@ serve(async (req) => {
   }
 
   try {
-    const { patientData } = await req.json() as { patientData: PatientData };
+    // === AUTH GUARD ===
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('Missing or invalid Authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Missing authentication token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+    // Create Supabase client with user's token to verify auth
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('Auth verification failed:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Invalid or expired token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Authenticated user:', user.id);
+
+    // === INPUT VALIDATION ===
+    let rawBody;
+    try {
+      rawBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const validationResult = PatientDataSchema.safeParse(rawBody.patientData);
+    
+    if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Validation failed',
+          details: validationResult.error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message
+          }))
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const patientData = validationResult.data;
+
+    // Sanitize text fields to prevent prompt injection
+    patientData.additionalNotes = sanitizeText(patientData.additionalNotes);
+    if (patientData.medicalConditions) {
+      patientData.medicalConditions = sanitizeText(patientData.medicalConditions);
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
