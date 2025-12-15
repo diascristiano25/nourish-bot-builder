@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NewPatient from "./pages/NewPatient";
+import EditPatient from "./pages/EditPatient";
 import PatientDetail from "./pages/PatientDetail";
 import GenerateMealPlan from "./pages/GenerateMealPlan";
 import MealPlanView from "./pages/MealPlanView";
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/patients/new" element={<NewPatient />} />
                 <Route path="/patients/:id" element={<PatientDetail />} />
+                <Route path="/patients/:id/edit" element={<EditPatient />} />
                 <Route path="/patients/:id/meal-plan/generate" element={<GenerateMealPlan />} />
                 <Route path="/patients/:id/meal-plan/:planId" element={<MealPlanView />} />
                 <Route path="/patients/:id/meal-plan/:planId/grocery-list" element={<GroceryList />} />
