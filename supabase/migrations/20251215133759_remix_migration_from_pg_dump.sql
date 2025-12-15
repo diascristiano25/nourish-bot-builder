@@ -57,6 +57,38 @@ CREATE TYPE public.patient_goal AS ENUM (
 
 
 --
+-- Name: get_user_account_status(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.get_user_account_status() RETURNS text
+    LANGUAGE sql STABLE SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+  SELECT COALESCE(
+    (SELECT account_status FROM public.nutritionists WHERE user_id = auth.uid()),
+    'active'
+  )
+$$;
+
+
+--
+-- Name: is_current_user_admin(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.is_current_user_admin() RETURNS boolean
+    LANGUAGE sql STABLE SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.nutritionists
+    WHERE user_id = auth.uid()
+      AND is_admin = true
+  )
+$$;
+
+
+--
 -- Name: update_updated_at_column(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -125,7 +157,10 @@ CREATE TABLE public.nutritionists (
     primary_color text DEFAULT '#4a7c59'::text,
     secondary_color text DEFAULT '#2d5a3d'::text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    is_admin boolean DEFAULT false NOT NULL,
+    account_status text DEFAULT 'active'::text NOT NULL,
+    CONSTRAINT nutritionists_account_status_check CHECK ((account_status = ANY (ARRAY['active'::text, 'suspended'::text])))
 );
 
 
@@ -251,6 +286,20 @@ ALTER TABLE ONLY public.nutritionists
 
 ALTER TABLE ONLY public.patients
     ADD CONSTRAINT patients_nutritionist_id_fkey FOREIGN KEY (nutritionist_id) REFERENCES public.nutritionists(id) ON DELETE CASCADE;
+
+
+--
+-- Name: nutritionists Admins can update any nutritionist; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Admins can update any nutritionist" ON public.nutritionists FOR UPDATE USING ((public.is_current_user_admin() = true));
+
+
+--
+-- Name: nutritionists Admins can view all nutritionists; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Admins can view all nutritionists" ON public.nutritionists FOR SELECT USING ((public.is_current_user_admin() = true));
 
 
 --
