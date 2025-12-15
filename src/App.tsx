@@ -11,6 +11,7 @@ import NewPatient from "./pages/NewPatient";
 import PatientDetail from "./pages/PatientDetail";
 import GenerateMealPlan from "./pages/GenerateMealPlan";
 import MealPlanView from "./pages/MealPlanView";
+import GroceryList from "./pages/GroceryList";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,7 @@ function App() {
               <Route path="/patients/:id" element={<PatientDetail />} />
               <Route path="/patients/:id/meal-plan/generate" element={<GenerateMealPlan />} />
               <Route path="/patients/:id/meal-plan/:planId" element={<MealPlanView />} />
+              <Route path="/patients/:id/meal-plan/:planId/grocery-list" element={<GroceryList />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
