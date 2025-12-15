@@ -150,19 +150,30 @@ export default function GenerateMealPlan() {
         ? differenceInYears(new Date(), new Date(patient.birth_date))
         : null;
 
+      // Calculate target calories - ensure it's a valid number or null
+      let calculatedCalories: number | null = null;
+      if (targetCalories && targetCalories.trim() !== '') {
+        const parsed = parseInt(targetCalories, 10);
+        if (!isNaN(parsed) && parsed >= 500 && parsed <= 10000) {
+          calculatedCalories = parsed;
+        }
+      } else {
+        calculatedCalories = calculateTDEE();
+      }
+
       const patientData = {
         name: patient.full_name,
-        age,
-        gender: patient.gender,
-        weight: anthropometric?.weight_kg,
-        height: anthropometric?.height_cm,
+        age: age !== null && age >= 0 ? age : null,
+        gender: patient.gender || null,
+        weight: anthropometric?.weight_kg ?? null,
+        height: anthropometric?.height_cm ?? null,
         goal: patient.goal ? goalLabels[patient.goal] : null,
         activityLevel: patient.activity_level ? activityLabels[patient.activity_level] : null,
         allergies: patient.allergies || [],
         dietaryRestrictions: patient.dietary_restrictions || [],
-        medicalConditions: patient.medical_conditions,
-        targetCalories: targetCalories ? parseInt(targetCalories) : calculateTDEE(),
-        additionalNotes,
+        medicalConditions: patient.medical_conditions || null,
+        targetCalories: calculatedCalories,
+        additionalNotes: additionalNotes || '',
       };
 
       // Call the edge function
