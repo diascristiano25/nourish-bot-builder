@@ -18,7 +18,8 @@ import {
   Share2,
   Edit,
   Calendar,
-  Settings
+  Settings,
+  ShoppingCart
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -446,21 +447,32 @@ export default function MealPlanView() {
         )}
 
         {/* Actions */}
-        <div className="flex gap-4 pt-4">
+        <div className="flex flex-col gap-3 pt-4">
           <Button 
-            variant="outline" 
-            className="flex-1"
-            onClick={() => navigate(`/patients/${id}`)}
+            variant="default"
+            className="w-full"
+            onClick={() => navigate(`/patients/${id}/meal-plan/${planId}/grocery-list`)}
           >
-            Voltar ao Paciente
+            <ShoppingCart className="mr-2 w-4 h-4" />
+            Gerar Lista de Compras
           </Button>
-          <Button 
-            className="flex-1"
-            onClick={() => navigate(`/patients/${id}/meal-plan/generate`)}
-          >
-            <Edit className="mr-2 w-4 h-4" />
-            Gerar Novo
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => navigate(`/patients/${id}`)}
+            >
+              Voltar ao Paciente
+            </Button>
+            <Button 
+              variant="secondary"
+              className="flex-1"
+              onClick={() => navigate(`/patients/${id}/meal-plan/generate`)}
+            >
+              <Edit className="mr-2 w-4 h-4" />
+              Gerar Novo
+            </Button>
+          </div>
         </div>
       </main>
 
