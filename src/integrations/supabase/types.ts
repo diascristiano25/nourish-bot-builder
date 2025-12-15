@@ -123,10 +123,12 @@ export type Database = {
       }
       nutritionists: {
         Row: {
+          account_status: string
           created_at: string
           crn: string | null
           full_name: string
           id: string
+          is_admin: boolean
           logo_url: string | null
           phone: string | null
           primary_color: string | null
@@ -135,10 +137,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          account_status?: string
           created_at?: string
           crn?: string | null
           full_name: string
           id?: string
+          is_admin?: boolean
           logo_url?: string | null
           phone?: string | null
           primary_color?: string | null
@@ -147,10 +151,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          account_status?: string
           created_at?: string
           crn?: string | null
           full_name?: string
           id?: string
+          is_admin?: boolean
           logo_url?: string | null
           phone?: string | null
           primary_color?: string | null
@@ -227,7 +233,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_account_status: { Args: never; Returns: string }
+      is_current_user_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       activity_level:
