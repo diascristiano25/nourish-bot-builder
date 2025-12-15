@@ -111,11 +111,16 @@ export default function GenerateMealPlan() {
     if (!anthropometric?.weight_kg || !anthropometric?.height_cm || !patient?.birth_date) {
       return null;
     }
-    
+
     const age = differenceInYears(new Date(), new Date(patient.birth_date));
+    // Guard against invalid/future birth dates (can explode the formula)
+    if (!Number.isFinite(age) || age < 0 || age > 150) {
+      return null;
+    }
+
     const weight = anthropometric.weight_kg;
     const height = anthropometric.height_cm;
-    
+
     // Mifflin-St Jeor Equation
     if (patient.gender === 'male') {
       return Math.round(10 * weight + 6.25 * height - 5 * age + 5);
@@ -191,7 +196,7 @@ export default function GenerateMealPlan() {
           nutritionist_id: patient.nutritionist_id,
           title: planTitle || `Cardápio - ${patient.full_name}`,
           description: additionalNotes || null,
-          total_calories: data.totalCalories || parseInt(targetCalories) || calculateTDEE(),
+          total_calories: data.totalCalories || calculatedCalories || calculateTDEE() || null,
           plan_data: data.mealPlan,
           is_active: true,
         })
