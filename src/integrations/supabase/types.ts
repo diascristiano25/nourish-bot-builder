@@ -183,6 +183,7 @@ export type Database = {
           nutritionist_id: string
           phone: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null
@@ -200,6 +201,7 @@ export type Database = {
           nutritionist_id: string
           phone?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null
@@ -217,6 +219,7 @@ export type Database = {
           nutritionist_id?: string
           phone?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -234,7 +237,9 @@ export type Database = {
     }
     Functions: {
       get_user_account_status: { Args: never; Returns: string }
+      get_user_type: { Args: never; Returns: string }
       is_current_user_admin: { Args: never; Returns: boolean }
+      is_user_patient: { Args: never; Returns: boolean }
     }
     Enums: {
       activity_level:

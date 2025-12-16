@@ -19,11 +19,13 @@ import {
   Edit,
   Calendar,
   Settings,
-  ShoppingCart
+  ShoppingCart,
+  Pencil
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import MealPlanDocument from '@/components/MealPlanDocument';
+import MealPlanEditor from '@/components/MealPlanEditor';
 
 interface MealItem {
   food: string;
@@ -107,6 +109,8 @@ export default function MealPlanView() {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -265,6 +269,44 @@ export default function MealPlanView() {
     }
   };
 
+  const handleSaveEdit = async (updatedData: MealPlanData) => {
+    if (!mealPlan) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('meal_plans')
+        .update({
+          plan_data: updatedData as any,
+          total_calories: updatedData.totalCalories,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', mealPlan.id);
+
+      if (error) throw error;
+
+      setMealPlan({
+        ...mealPlan,
+        plan_data: updatedData,
+        total_calories: updatedData.totalCalories || null,
+      });
+      setIsEditing(false);
+      
+      toast({
+        title: "Cardápio salvo",
+        description: "As alterações foram salvas com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao salvar",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen gradient-subtle flex items-center justify-center">
@@ -296,10 +338,18 @@ export default function MealPlanView() {
           </div>
           <div className="flex items-center gap-2">
             <Button 
+              variant={isEditing ? "secondary" : "outline"}
+              size="icon"
+              onClick={() => setIsEditing(!isEditing)}
+              title="Editar cardápio"
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button 
               variant="outline" 
               size="icon"
               onClick={handleShare}
-              disabled={sharing}
+              disabled={sharing || isEditing}
             >
               {sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
             </Button>
@@ -307,7 +357,7 @@ export default function MealPlanView() {
               variant="outline" 
               size="icon"
               onClick={handleDownloadPDF}
-              disabled={downloading || !hasNutritionistProfile}
+              disabled={downloading || !hasNutritionistProfile || isEditing}
               title={!hasNutritionistProfile ? "Configure seu perfil primeiro" : "Baixar PDF"}
             >
               {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
@@ -337,6 +387,16 @@ export default function MealPlanView() {
           </Card>
         )}
 
+        {/* Edit Mode */}
+        {isEditing ? (
+          <MealPlanEditor 
+            planData={planData} 
+            onSave={handleSaveEdit} 
+            onCancel={() => setIsEditing(false)}
+            saving={saving}
+          />
+        ) : (
+          <>
         {/* Summary Card */}
         <Card className="border-0 shadow-md gradient-card">
           <CardContent className="pt-6">
@@ -474,6 +534,8 @@ export default function MealPlanView() {
             </Button>
           </div>
         </div>
+          </>
+        )}
       </main>
 
       {/* Hidden document for PDF generation */}
