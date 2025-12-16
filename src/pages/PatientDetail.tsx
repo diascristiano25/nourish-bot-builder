@@ -241,6 +241,28 @@ export default function PatientDetail() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                if (patient.email) {
+                  const link = `${window.location.origin}/patient-auth`;
+                  navigator.clipboard.writeText(link);
+                  toast({
+                    title: "Link copiado!",
+                    description: "Envie este link para o paciente acessar o portal.",
+                  });
+                } else {
+                  toast({
+                    title: "Email não cadastrado",
+                    description: "Cadastre o email do paciente para gerar o link de acesso.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
+              Copiar Link de Acesso
+            </Button>
             <Button variant="outline" size="icon" onClick={() => navigate(`/patients/${id}/edit`)}>
               <Edit className="w-4 h-4" />
             </Button>

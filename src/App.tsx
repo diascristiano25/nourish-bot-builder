@@ -7,6 +7,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { AccountStatusGuard } from "@/components/AccountStatusGuard";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import PatientAuth from "./pages/PatientAuth";
+import PatientPortal from "./pages/PatientPortal";
 import Dashboard from "./pages/Dashboard";
 import NewPatient from "./pages/NewPatient";
 import EditPatient from "./pages/EditPatient";
@@ -33,6 +35,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/patient-auth" element={<PatientAuth />} />
+                <Route path="/patient-portal" element={<PatientPortal />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/patients/new" element={<NewPatient />} />

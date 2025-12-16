@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.generate-grocery-list]
 verify_jwt = false
+
+[functions.send-patient-magic-link]
+verify_jwt = true
