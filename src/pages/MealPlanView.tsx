@@ -244,26 +244,35 @@ export default function MealPlanView() {
     try {
       const shareText = `Cardápio: ${mealPlan.title}\nPaciente: ${patient.full_name}\n\nGerado por NutriFlow`;
       
-      if (navigator.share) {
-        await navigator.share({
-          title: mealPlan.title,
-          text: shareText,
-        });
-      } else {
-        await navigator.clipboard.writeText(shareText);
-        toast({
-          title: "Copiado!",
-          description: "Informações copiadas para a área de transferência.",
-        });
+      // Try Web Share API first, but only if supported and likely to work
+      if (navigator.share && navigator.canShare && navigator.canShare({ text: shareText })) {
+        try {
+          await navigator.share({
+            title: mealPlan.title,
+            text: shareText,
+          });
+          return; // Success, exit early
+        } catch (shareError: any) {
+          // If user cancelled, don't show error
+          if (shareError.name === 'AbortError') {
+            return;
+          }
+          // Fall through to clipboard fallback
+        }
       }
+      
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(shareText);
+      toast({
+        title: "Copiado!",
+        description: "Informações copiadas para a área de transferência.",
+      });
     } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        toast({
-          title: "Erro ao compartilhar",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Erro ao compartilhar",
+        description: "Não foi possível compartilhar. Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       setSharing(false);
     }
