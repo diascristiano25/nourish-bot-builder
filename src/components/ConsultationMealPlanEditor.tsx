@@ -274,7 +274,15 @@ export function ConsultationMealPlanEditor({ patientId, patientName = 'Paciente'
 
   const handleSelectFood = useCallback((food: Omit<FoodItem, 'id'>) => {
     if (selectedMealId) {
-      addFood(selectedMealId, food);
+      setMeals(prev => prev.map(meal => {
+        if (meal.id === selectedMealId) {
+          return {
+            ...meal,
+            alimentos: [...meal.alimentos, { ...food, id: generateId() }]
+          };
+        }
+        return meal;
+      }));
     }
     setFoodModalOpen(false);
   }, [selectedMealId]);
