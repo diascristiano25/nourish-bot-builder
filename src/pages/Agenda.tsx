@@ -136,7 +136,7 @@ export default function Agenda() {
               {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
             </p>
           </div>
-          <Button onClick={() => setDialogOpen(true)} className="gap-2">
+          <Button onClick={() => setDialogOpen(true)} className="gap-2" data-tour="agenda-new-btn">
             <Plus className="w-4 h-4" />
             Novo Agendamento
           </Button>

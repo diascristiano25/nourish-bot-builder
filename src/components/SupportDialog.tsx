@@ -309,7 +309,7 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" data-tour="support-button">
           <HelpCircle className="h-5 w-5" />
         </Button>
       </DialogTrigger>

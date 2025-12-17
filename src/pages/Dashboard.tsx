@@ -227,6 +227,7 @@ export default function Dashboard() {
                 size="sm"
                 onClick={() => setZenMode(!zenMode)}
                 className="rounded-lg gap-2"
+                data-tour="zen-mode"
               >
                 {zenMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 Modo Zen
@@ -235,7 +236,7 @@ export default function Dashboard() {
               {/* Customize Sheet */}
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-lg gap-2">
+                  <Button variant="outline" size="sm" className="rounded-lg gap-2" data-tour="customize-dashboard">
                     <Settings2 className="w-4 h-4" />
                     Personalizar
                   </Button>

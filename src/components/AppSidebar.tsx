@@ -21,13 +21,17 @@ interface NavItem {
   href: string;
 }
 
-const navItems: NavItem[] = [
-  { label: 'Home', icon: Home, href: '/dashboard' },
-  { label: 'Pacientes', icon: Users, href: '/patients' },
-  { label: 'Agenda', icon: Calendar, href: '/agenda' },
-  { label: 'Biblioteca', icon: BookOpen, href: '/biblioteca' },
-  { label: 'Financeiro', icon: DollarSign, href: '/financeiro' },
-  { label: 'Configurações', icon: Settings, href: '/profile' },
+interface NavItemWithTour extends NavItem {
+  tourId?: string;
+}
+
+const navItems: NavItemWithTour[] = [
+  { label: 'Home', icon: Home, href: '/dashboard', tourId: 'nav-home' },
+  { label: 'Pacientes', icon: Users, href: '/patients', tourId: 'nav-pacientes' },
+  { label: 'Agenda', icon: Calendar, href: '/agenda', tourId: 'nav-agenda' },
+  { label: 'Biblioteca', icon: BookOpen, href: '/biblioteca', tourId: 'nav-biblioteca' },
+  { label: 'Financeiro', icon: DollarSign, href: '/financeiro', tourId: 'nav-financeiro' },
+  { label: 'Configurações', icon: Settings, href: '/profile', tourId: 'nav-config' },
 ];
 
 interface AppSidebarProps {
@@ -86,6 +90,7 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
               key={item.href}
               variant="ghost"
               onClick={() => handleNavigation(item.href)}
+              data-tour={item.tourId}
               className={cn(
                 "w-full justify-start gap-3 h-11 rounded-lg transition-colors",
                 isCollapsed && "justify-center px-0",

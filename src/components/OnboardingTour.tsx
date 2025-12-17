@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Joyride, { CallBackProps, STATUS, Step, ACTIONS, EVENTS } from 'react-joyride';
-import { useNavigate } from 'react-router-dom';
 
 interface OnboardingTourProps {
   nutritionistId: string;
@@ -11,11 +10,11 @@ interface OnboardingTourProps {
 const TOUR_COMPLETED_KEY = 'nutriflow_tour_completed';
 
 export function OnboardingTour({ nutritionistId, onComplete, forceStart = false }: OnboardingTourProps) {
-  const navigate = useNavigate();
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
 
   const steps: Step[] = [
+    // BOAS-VINDAS
     {
       target: 'body',
       content: (
@@ -26,18 +25,99 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
             Vamos te mostrar como o <strong>FlowTech Group</strong> simplifica sua rotina de atendimentos nutricionais.
           </p>
           <p className="text-sm text-muted-foreground">
-            Este tour leva menos de 2 minutos. Vamos lá? 🚀
+            Este tour completo leva cerca de 3 minutos. Vamos lá? 🚀
           </p>
         </div>
       ),
       placement: 'center',
       disableBeacon: true,
-      styles: {
-        options: {
-          width: 400,
-        },
-      },
+      styles: { options: { width: 420 } },
     },
+    // SIDEBAR - HOME
+    {
+      target: '[data-tour="nav-home"]',
+      content: (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-primary">🏠 Dashboard</h3>
+          <p className="text-sm text-muted-foreground">
+            Sua central de comando. Veja estatísticas, próximas consultas e atalhos rápidos.
+          </p>
+        </div>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    // SIDEBAR - PACIENTES
+    {
+      target: '[data-tour="nav-pacientes"]',
+      content: (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-primary">👥 Pacientes</h3>
+          <p className="text-sm text-muted-foreground">
+            Gerencie todos os seus pacientes em um só lugar. Cadastre, edite e acompanhe a evolução de cada um.
+          </p>
+        </div>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    // SIDEBAR - AGENDA
+    {
+      target: '[data-tour="nav-agenda"]',
+      content: (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-primary">📅 Agenda</h3>
+          <p className="text-sm text-muted-foreground">
+            Organize suas consultas com o calendário interativo. Agende, reagende e marque consultas como realizadas.
+          </p>
+        </div>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    // SIDEBAR - BIBLIOTECA
+    {
+      target: '[data-tour="nav-biblioteca"]',
+      content: (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-primary">📚 Biblioteca</h3>
+          <p className="text-sm text-muted-foreground">
+            Crie sua biblioteca pessoal de <strong>alimentos e receitas</strong> personalizados para usar nas prescrições.
+          </p>
+        </div>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    // SIDEBAR - FINANCEIRO
+    {
+      target: '[data-tour="nav-financeiro"]',
+      content: (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-primary">💰 Financeiro</h3>
+          <p className="text-sm text-muted-foreground">
+            Controle suas receitas e despesas. Visualize gráficos de faturamento e gerencie pendências.
+          </p>
+        </div>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    // SIDEBAR - CONFIGURAÇÕES
+    {
+      target: '[data-tour="nav-config"]',
+      content: (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-primary">⚙️ Configurações</h3>
+          <p className="text-sm text-muted-foreground">
+            Personalize seu perfil: <strong>logo, cores, CRN e assinatura</strong> que aparecem nos PDFs e Portal do Paciente.
+          </p>
+        </div>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    // NOVO PACIENTE
     {
       target: '[data-tour="new-patient"]',
       content: (
@@ -51,6 +131,7 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
       placement: 'bottom',
       disableBeacon: true,
     },
+    // NOVA CONSULTA / IA
     {
       target: '[data-tour="ai-consultation"]',
       content: (
@@ -67,6 +148,49 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
       placement: 'bottom',
       disableBeacon: true,
     },
+    // MODO ZEN
+    {
+      target: '[data-tour="zen-mode"]',
+      content: (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-primary">🧘 Modo Zen</h3>
+          <p className="text-sm text-muted-foreground">
+            Ative para uma interface <strong>mais limpa e focada</strong>. Esconde estatísticas e exibe apenas o essencial.
+          </p>
+        </div>
+      ),
+      placement: 'bottom',
+      disableBeacon: true,
+    },
+    // PERSONALIZAR DASHBOARD
+    {
+      target: '[data-tour="customize-dashboard"]',
+      content: (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-primary">🎛️ Personalizar</h3>
+          <p className="text-sm text-muted-foreground">
+            Escolha quais widgets exibir no seu Dashboard. O sistema se adapta ao <strong>seu fluxo de trabalho</strong>.
+          </p>
+        </div>
+      ),
+      placement: 'bottom',
+      disableBeacon: true,
+    },
+    // SUPORTE
+    {
+      target: '[data-tour="support-button"]',
+      content: (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-primary">💬 Suporte</h3>
+          <p className="text-sm text-muted-foreground">
+            Dúvidas ou problemas? Abra um ticket e nossa equipe responde em até 24h. Você também pode <strong>reiniciar este tour</strong> por aqui!
+          </p>
+        </div>
+      ),
+      placement: 'bottom',
+      disableBeacon: true,
+    },
+    // PORTAL DO PACIENTE
     {
       target: '[data-tour="patient-portal"]',
       content: (
@@ -82,7 +206,9 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
       ),
       placement: 'bottom',
       disableBeacon: true,
+      spotlightClicks: false,
     },
+    // CONFIGURAÇÕES - PROFILE
     {
       target: '[data-tour="profile-settings"]',
       content: (
@@ -96,6 +222,7 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
       placement: 'bottom',
       disableBeacon: true,
     },
+    // FINALIZAÇÃO
     {
       target: 'body',
       content: (
@@ -103,32 +230,26 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
           <div className="text-3xl">🎉</div>
           <h2 className="text-xl font-bold text-primary">Pronta para começar!</h2>
           <p className="text-muted-foreground">
-            Você já conhece o essencial do NutriFlow. Qualquer dúvida, acesse o <strong>Suporte</strong> no menu.
+            Você já conhece o NutriFlow completo. Qualquer dúvida, acesse o <strong>Suporte</strong> no topo da página.
           </p>
           <p className="text-sm text-muted-foreground">
-            Dica: Você pode reiniciar este tour a qualquer momento pelo menu de Suporte.
+            Dica: Você pode reiniciar este tour a qualquer momento pelo botão de Suporte.
           </p>
         </div>
       ),
       placement: 'center',
       disableBeacon: true,
-      styles: {
-        options: {
-          width: 400,
-        },
-      },
+      styles: { options: { width: 420 } },
     },
   ];
 
   useEffect(() => {
-    // Check if tour should run
     const tourCompleted = localStorage.getItem(`${TOUR_COMPLETED_KEY}_${nutritionistId}`);
     
     if (forceStart) {
       setStepIndex(0);
       setRun(true);
     } else if (!tourCompleted) {
-      // Small delay to let the page render
       const timer = setTimeout(() => {
         setRun(true);
       }, 1000);
@@ -141,12 +262,10 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
     if (finishedStatuses.includes(status)) {
-      // Tour completed or skipped
       localStorage.setItem(`${TOUR_COMPLETED_KEY}_${nutritionistId}`, 'true');
       setRun(false);
       onComplete?.();
     } else if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
-      // Go to next step
       const nextIndex = index + (action === ACTIONS.PREV ? -1 : 1);
       setStepIndex(nextIndex);
     }
@@ -172,7 +291,7 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
       }}
       styles={{
         options: {
-          primaryColor: 'hsl(142, 26%, 39%)', // Primary mint green
+          primaryColor: 'hsl(142, 26%, 39%)',
           backgroundColor: 'hsl(var(--card))',
           textColor: 'hsl(var(--foreground))',
           arrowColor: 'hsl(var(--card))',
@@ -215,12 +334,10 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
   );
 }
 
-// Helper function to restart tour
 export function restartOnboardingTour(nutritionistId: string) {
   localStorage.removeItem(`${TOUR_COMPLETED_KEY}_${nutritionistId}`);
 }
 
-// Helper function to check if tour was completed
 export function isTourCompleted(nutritionistId: string): boolean {
   return localStorage.getItem(`${TOUR_COMPLETED_KEY}_${nutritionistId}`) === 'true';
 }
