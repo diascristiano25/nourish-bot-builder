@@ -33,9 +33,17 @@ export default function Index() {
             <img src={logoImg} alt="NutriFlow" className="w-12 h-12 object-contain" />
             <span className="font-bold text-xl">NutriFlow</span>
           </div>
-          <Button onClick={() => navigate('/auth')} variant="outline">
-            Entrar
-          </Button>
+          <nav className="flex items-center gap-6">
+            <a 
+              href="mailto:suportenutriflow@gmail.com" 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Contato
+            </a>
+            <Button onClick={() => navigate('/auth')} variant="hero">
+              Acessar Sistema
+            </Button>
+          </nav>
         </header>
 
         {/* Hero Content */}
