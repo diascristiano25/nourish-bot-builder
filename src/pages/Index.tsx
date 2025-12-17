@@ -581,9 +581,19 @@ export default function Index() {
             {/* Divider */}
             <div className="border-t border-border pt-6">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <p className="text-sm text-muted-foreground text-center md:text-left">
-                  © 2025 NutriFlow | FlowTech Group - CNPJ: 46.684.547/0001-54. Todos os direitos reservados.
-                </p>
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-muted-foreground text-center md:text-left">
+                    © 2025 NutriFlow | FlowTech Group - CNPJ: 46.684.547/0001-54. Todos os direitos reservados.
+                  </p>
+                  {/* Discrete admin link */}
+                  <a 
+                    href="/admin-master"
+                    className="text-xs text-muted-foreground/30 hover:text-muted-foreground/50 transition-colors"
+                    title="Admin"
+                  >
+                    •
+                  </a>
+                </div>
                 <a 
                   href="mailto:contato@flowtechgroup.com.br"
                   className="text-sm text-primary hover:text-primary/80 transition-colors"

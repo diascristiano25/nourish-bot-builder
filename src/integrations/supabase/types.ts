@@ -298,6 +298,7 @@ export type Database = {
           crn: string | null
           full_name: string
           id: string
+          is_active: boolean
           is_admin: boolean
           logo_url: string | null
           phone: string | null
@@ -312,6 +313,7 @@ export type Database = {
           crn?: string | null
           full_name: string
           id?: string
+          is_active?: boolean
           is_admin?: boolean
           logo_url?: string | null
           phone?: string | null
@@ -326,6 +328,7 @@ export type Database = {
           crn?: string | null
           full_name?: string
           id?: string
+          is_active?: boolean
           is_admin?: boolean
           logo_url?: string | null
           phone?: string | null

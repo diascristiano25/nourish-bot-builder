@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
 // Routes that don't require account status check
-const PUBLIC_ROUTES = ['/auth', '/access-denied', '/'];
+const PUBLIC_ROUTES = ['/auth', '/access-denied', '/subscription-expired', '/', '/sobre', '/privacidade'];
 
 export function useAccountStatus() {
   const { user, loading: authLoading } = useAuth();
@@ -34,6 +34,8 @@ export function useAccountStatus() {
 
         if (data === 'suspended') {
           navigate('/access-denied', { replace: true });
+        } else if (data === 'inactive') {
+          navigate('/subscription-expired', { replace: true });
         }
       } catch (error) {
         console.error('Account status check failed:', error);
