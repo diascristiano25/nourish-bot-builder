@@ -118,6 +118,7 @@ export default function PatientDetail() {
   const [anthropometrics, setAnthropometrics] = useState<Anthropometric[]>([]);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
+  const [latestWeight, setLatestWeight] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [sendingMagicLink, setSendingMagicLink] = useState(false);
@@ -165,6 +166,19 @@ export default function PatientDetail() {
 
       if (mealError) throw mealError;
       setMealPlans(mealData || []);
+
+      // Fetch latest weight from weight_logs (for chart consistency)
+      const { data: weightData } = await supabase
+        .from('weight_logs')
+        .select('weight')
+        .eq('patient_id', id)
+        .order('recorded_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (weightData) {
+        setLatestWeight(Number(weightData.weight));
+      }
 
       // Fetch consultations (completed appointments)
       const { data: consultData, error: consultError } = await supabase
@@ -265,14 +279,21 @@ export default function PatientDetail() {
   };
 
   const latestAnthropometric = anthropometrics[0];
+  
+  // Get the latest non-null height from anthropometrics
+  const latestHeight = anthropometrics.find(a => a.height_cm !== null)?.height_cm || null;
+  
+  // Use weight_logs weight (same as chart) or fall back to anthropometrics
+  const displayWeight = latestWeight ?? latestAnthropometric?.weight_kg ?? null;
+  
   const age = patient?.birth_date 
     ? differenceInYears(new Date(), new Date(patient.birth_date))
     : null;
 
   const calculateBMI = () => {
-    if (latestAnthropometric?.weight_kg && latestAnthropometric?.height_cm) {
-      const heightM = latestAnthropometric.height_cm / 100;
-      return (latestAnthropometric.weight_kg / (heightM * heightM)).toFixed(1);
+    if (displayWeight && latestHeight) {
+      const heightM = latestHeight / 100;
+      return (displayWeight / (heightM * heightM)).toFixed(1);
     }
     return null;
   };
@@ -395,7 +416,7 @@ export default function PatientDetail() {
             <CardContent className="pt-4 text-center">
               <Scale className="w-5 h-5 text-primary mx-auto mb-2" />
               <p className="text-2xl font-bold">
-                {latestAnthropometric?.weight_kg || '-'}
+                {displayWeight || '-'}
                 <span className="text-sm font-normal text-muted-foreground"> kg</span>
               </p>
               <p className="text-xs text-muted-foreground">Peso</p>
@@ -405,7 +426,7 @@ export default function PatientDetail() {
             <CardContent className="pt-4 text-center">
               <TrendingUp className="w-5 h-5 text-success mx-auto mb-2" />
               <p className="text-2xl font-bold">
-                {latestAnthropometric?.height_cm || '-'}
+                {latestHeight || '-'}
                 <span className="text-sm font-normal text-muted-foreground"> cm</span>
               </p>
               <p className="text-xs text-muted-foreground">Altura</p>

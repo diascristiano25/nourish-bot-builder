@@ -185,7 +185,7 @@ export default function Consultation() {
       
       if (nutriError || !nutri) throw new Error('Nutricionista não encontrado');
 
-      // 2. Update patient data if weight/height/conditions changed
+      // 2. Update patient data if conditions changed
       const patientUpdates: Record<string, any> = {};
       if (structuredData.healthConditions) {
         patientUpdates.medical_conditions = structuredData.healthConditions;
@@ -198,18 +198,35 @@ export default function Consultation() {
           .eq('id', selectedPatientId);
       }
 
-      // 3. Create anthropometrics record if weight/height provided
-      if (structuredData.weight || structuredData.height) {
+      // 3. Create anthropometrics record ONLY with provided values
+      const hasAnyMeasurement = structuredData.weight || structuredData.height || 
+                                structuredData.waist || structuredData.hip || structuredData.bodyFat;
+      
+      if (hasAnyMeasurement) {
         await supabase
           .from('anthropometrics')
           .insert({
             patient_id: selectedPatientId,
-            weight_kg: structuredData.weight ? parseFloat(structuredData.weight) : null,
-            height_cm: structuredData.height ? parseFloat(structuredData.height) : null,
-            waist_cm: structuredData.waist ? parseFloat(structuredData.waist) : null,
-            hip_cm: structuredData.hip ? parseFloat(structuredData.hip) : null,
-            body_fat_percentage: structuredData.bodyFat ? parseFloat(structuredData.bodyFat) : null,
-            notes: 'Registro via consulta'
+            notes: 'Registro via consulta',
+            weight_kg: structuredData.weight ? parseFloat(structuredData.weight) : undefined,
+            height_cm: structuredData.height ? parseFloat(structuredData.height) : undefined,
+            waist_cm: structuredData.waist ? parseFloat(structuredData.waist) : undefined,
+            hip_cm: structuredData.hip ? parseFloat(structuredData.hip) : undefined,
+            body_fat_percentage: structuredData.bodyFat ? parseFloat(structuredData.bodyFat) : undefined,
+          });
+      }
+
+      // 4. Also add to weight_logs for chart consistency
+      if (structuredData.weight) {
+        const today = new Date().toISOString().split('T')[0];
+        await supabase
+          .from('weight_logs')
+          .upsert({
+            patient_id: selectedPatientId,
+            weight: parseFloat(structuredData.weight),
+            recorded_at: today,
+          }, {
+            onConflict: 'patient_id,recorded_at',
           });
       }
 
