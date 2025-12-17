@@ -5,7 +5,6 @@ import {
   Calendar, 
   DollarSign, 
   Settings,
-  Leaf,
   ChevronLeft,
   LogOut
 } from 'lucide-react';
@@ -13,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import logoImg from '@/assets/logo.png';
 
 interface NavItem {
   label: string;
@@ -51,9 +51,7 @@ export function AppSidebar() {
         "h-16 flex items-center border-b border-border/50 px-4",
         collapsed ? "justify-center" : "gap-3"
       )}>
-        <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0">
-          <Leaf className="w-5 h-5 text-primary-foreground" />
-        </div>
+        <img src={logoImg} alt="NutriFlow" className="w-9 h-9 object-contain flex-shrink-0" />
         {!collapsed && (
           <span className="font-semibold text-foreground text-lg">NutriFlow</span>
         )}

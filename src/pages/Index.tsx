@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Leaf, ArrowRight, Users, Sparkles, FileText, Loader2 } from 'lucide-react';
+import { ArrowRight, Users, Sparkles, FileText, Loader2 } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 export default function Index() {
   const { user, loading } = useAuth();
@@ -29,9 +30,7 @@ export default function Index() {
         {/* Header */}
         <header className="flex items-center justify-between mb-16">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
-              <Leaf className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="NutriFlow" className="w-12 h-12 object-contain" />
             <span className="font-bold text-xl">NutriFlow</span>
           </div>
           <Button onClick={() => navigate('/auth')} variant="outline">
