@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,8 @@ import {
   Save,
   Target,
   Search,
-  Star
+  Star,
+  Brain
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -92,6 +93,7 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
     mealTemplates.map(t => ({ ...t, id: generateId(), alimentos: [] }))
   );
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingMessage, setGeneratingMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [goals, setGoals] = useState({
     calories: 2000,
@@ -167,37 +169,40 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
   }, [user]);
 
   // All foods combined
-  const allFoods = [...customFoods, ...customRecipes, ...tacoFoods];
+  const allFoods = useMemo(() => [...customFoods, ...customRecipes, ...tacoFoods], [customFoods, customRecipes]);
   
-  const filteredFoods = allFoods.filter(f => 
-    f.nome.toLowerCase().includes(foodSearchTerm.toLowerCase())
+  const filteredFoods = useMemo(() => 
+    allFoods.filter(f => f.nome.toLowerCase().includes(foodSearchTerm.toLowerCase())),
+    [allFoods, foodSearchTerm]
   );
 
-  const openFoodModal = (mealId: string) => {
+  const openFoodModal = useCallback((mealId: string) => {
     setSelectedMealId(mealId);
     setFoodSearchTerm('');
     setFoodModalOpen(true);
-  };
+  }, []);
 
-  const handleSelectFood = (food: Omit<FoodItem, 'id'>) => {
+  const handleSelectFood = useCallback((food: Omit<FoodItem, 'id'>) => {
     if (selectedMealId) {
       addFood(selectedMealId, food);
     }
     setFoodModalOpen(false);
-  };
+  }, [selectedMealId]);
 
-  // Calculate totals
-  const totals = meals.reduce((acc, meal) => {
-    meal.alimentos.forEach(food => {
-      acc.calorias += food.calorias;
-      acc.carboidratos += food.carboidratos;
-      acc.proteinas += food.proteinas;
-      acc.gorduras += food.gorduras;
-    });
-    return acc;
-  }, { calorias: 0, carboidratos: 0, proteinas: 0, gorduras: 0 });
+  // Calculate totals with useMemo for performance
+  const totals = useMemo(() => {
+    return meals.reduce((acc, meal) => {
+      meal.alimentos.forEach(food => {
+        acc.calorias += food.calorias;
+        acc.carboidratos += food.carboidratos;
+        acc.proteinas += food.proteinas;
+        acc.gorduras += food.gorduras;
+      });
+      return acc;
+    }, { calorias: 0, carboidratos: 0, proteinas: 0, gorduras: 0 });
+  }, [meals]);
 
-  const addFood = (mealId: string, food: Omit<FoodItem, 'id'>) => {
+  const addFood = useCallback((mealId: string, food: Omit<FoodItem, 'id'>) => {
     setMeals(prev => prev.map(meal => {
       if (meal.id === mealId) {
         return {
@@ -207,9 +212,9 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
       }
       return meal;
     }));
-  };
+  }, []);
 
-  const removeFood = (mealId: string, foodId: string) => {
+  const removeFood = useCallback((mealId: string, foodId: string) => {
     setMeals(prev => prev.map(meal => {
       if (meal.id === mealId) {
         return {
@@ -219,15 +224,35 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
       }
       return meal;
     }));
-  };
+  }, []);
 
   const handleGenerateWithAI = async () => {
     setIsGenerating(true);
     
-    // Simulate AI generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Elegant loading messages
+    const messages = [
+      'Analisando perfil do paciente...',
+      'Calculando necessidades calóricas...',
+      'Selecionando alimentos ideais...',
+      'Balanceando macronutrientes...',
+      'Montando plano alimentar...',
+      'Finalizando dieta personalizada...'
+    ];
     
-    // Fill with example diet
+    let messageIndex = 0;
+    setGeneratingMessage(messages[0]);
+    
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % messages.length;
+      setGeneratingMessage(messages[messageIndex]);
+    }, 600);
+    
+    // Simulate AI generation (3-4 seconds)
+    await new Promise(resolve => setTimeout(resolve, 3500));
+    
+    clearInterval(messageInterval);
+    
+    // Fill with example diet targeting ~2000 kcal
     const exampleDiet: Meal[] = [
       {
         id: generateId(),
@@ -270,18 +295,20 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
         horario: '19:00',
         alimentos: [
           { id: generateId(), nome: 'Frango grelhado', porcao: '120g', calorias: 132, carboidratos: 0, proteinas: 25, gorduras: 3 },
-          { id: generateId(), nome: 'Batata doce', porcao: '100g', calorias: 86, carboidratos: 20, proteinas: 2, gorduras: 0 },
+          { id: generateId(), nome: 'Batata doce', porcao: '150g', calorias: 129, carboidratos: 30, proteinas: 3, gorduras: 0 },
           { id: generateId(), nome: 'Salada verde', porcao: '1 prato', calorias: 25, carboidratos: 5, proteinas: 2, gorduras: 0 },
+          { id: generateId(), nome: 'Azeite de oliva', porcao: '1 colher (10ml)', calorias: 90, carboidratos: 0, proteinas: 0, gorduras: 10 },
         ]
       },
     ];
     
     setMeals(exampleDiet);
     setIsGenerating(false);
+    setGeneratingMessage('');
     
     toast({
-      title: "Dieta gerada com sucesso!",
-      description: "Revise os alimentos e ajuste conforme necessário.",
+      title: "✨ Dieta gerada com sucesso!",
+      description: "Plano de ~1.636 kcal pronto para revisão.",
     });
   };
 
@@ -431,12 +458,12 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
           <Button 
             onClick={handleGenerateWithAI}
             disabled={isGenerating}
-            className="w-full gap-2"
+            className="w-full gap-2 relative overflow-hidden"
           >
             {isGenerating ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Gerando...
+                <span className="animate-pulse">Gerando...</span>
               </>
             ) : (
               <>
@@ -448,7 +475,7 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
           <Button 
             variant="outline" 
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || isGenerating}
             className="w-full gap-2"
           >
             {isSaving ? (
@@ -467,7 +494,28 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
       </div>
 
       {/* Right Column - Meal Editor */}
-      <div className="lg:col-span-2 space-y-4">
+      <div className="lg:col-span-2 space-y-4 relative">
+        {/* AI Generating Overlay */}
+        {isGenerating && (
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-20 flex items-center justify-center rounded-xl">
+            <div className="text-center space-y-4 p-8">
+              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                <Brain className="w-8 h-8 text-primary animate-pulse" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg font-semibold text-foreground">Gerando plano inteligente</p>
+                <p className="text-sm text-primary animate-pulse min-h-[20px]">
+                  {generatingMessage}
+                </p>
+              </div>
+              <div className="flex justify-center gap-1">
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        )}
         <Accordion type="multiple" defaultValue={['cafe', 'almoco', 'lanche', 'jantar']} className="space-y-3">
           {meals.map((meal) => {
             const MealIcon = mealIcons[meal.tipo] || Coffee;
