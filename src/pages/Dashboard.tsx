@@ -46,6 +46,15 @@ interface NutritionistProfile {
   crn: string | null;
 }
 
+interface Appointment {
+  id: string;
+  date_time: string;
+  patient: {
+    id: string;
+    full_name: string;
+  };
+}
+
 const goalLabels: Record<string, string> = {
   hypertrophy: 'Hipertrofia',
   weight_loss: 'Emagrecimento',
@@ -70,6 +79,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [profile, setProfile] = useState<NutritionistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [zenMode, setZenMode] = useState(false);
@@ -115,6 +125,8 @@ export default function Dashboard() {
 
       if (profileData || profile) {
         const nutritionistId = profileData?.id || profile?.id;
+        
+        // Fetch patients
         const { data: patientsData, error: patientsError } = await supabase
           .from('patients')
           .select('id, full_name, email, goal, created_at')
@@ -123,6 +135,28 @@ export default function Dashboard() {
 
         if (patientsError) throw patientsError;
         setPatients(patientsData || []);
+
+        // Fetch upcoming appointments
+        const { data: appointmentsData, error: appointmentsError } = await supabase
+          .from('appointments')
+          .select(`
+            id,
+            date_time,
+            patient:patients(id, full_name)
+          `)
+          .eq('nutritionist_id', nutritionistId)
+          .eq('status', 'scheduled')
+          .gte('date_time', new Date().toISOString())
+          .order('date_time')
+          .limit(3);
+
+        if (appointmentsError) throw appointmentsError;
+        
+        const formattedAppointments = (appointmentsData || []).map(item => ({
+          ...item,
+          patient: Array.isArray(item.patient) ? item.patient[0] : item.patient
+        }));
+        setAppointments(formattedAppointments as Appointment[]);
       }
     } catch (error: any) {
       console.error('Error fetching data:', error);
@@ -279,20 +313,60 @@ export default function Dashboard() {
             {/* Upcoming Appointments */}
             {preferences.agenda && (
               <Card className="bg-card border-border/50 animate-slide-up lg:col-span-1" style={{ animationDelay: '0.05s' }}>
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-4 flex flex-row items-center justify-between">
                   <CardTitle className="text-base font-medium flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-primary" />
                     Próximos Pacientes
                   </CardTitle>
+                  {appointments.length > 0 && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 text-xs text-muted-foreground"
+                      onClick={() => navigate('/agenda')}
+                    >
+                      Ver agenda
+                      <ChevronRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  )}
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8">
-                    <Clock className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">Nenhuma consulta agendada</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">
-                      {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
-                    </p>
-                  </div>
+                  {appointments.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Clock className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">Nenhuma consulta agendada</p>
+                      <Button 
+                        variant="link" 
+                        size="sm" 
+                        className="mt-2 h-auto p-0 text-primary"
+                        onClick={() => navigate('/agenda')}
+                      >
+                        Agendar consulta
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {appointments.map((apt) => (
+                        <div
+                          key={apt.id}
+                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={() => navigate('/agenda')}
+                        >
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Clock className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {apt.patient?.full_name || 'Paciente'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(apt.date_time), "d 'de' MMM, HH:mm", { locale: ptBR })}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}

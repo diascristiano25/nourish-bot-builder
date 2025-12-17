@@ -61,6 +61,44 @@ export type Database = {
           },
         ]
       }
+      appointments: {
+        Row: {
+          created_at: string
+          date_time: string
+          id: string
+          notes: string | null
+          nutritionist_id: string
+          patient_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          date_time: string
+          id?: string
+          notes?: string | null
+          nutritionist_id: string
+          patient_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          date_time?: string
+          id?: string
+          notes?: string | null
+          nutritionist_id?: string
+          patient_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meal_plans: {
         Row: {
           created_at: string
