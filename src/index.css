@@ -7,17 +7,17 @@
 @layer base {
   :root {
     /* NutriFlow "Zen" Design System - Calm, Clean, Minimal */
-    --background: 150 10% 98%;
-    --foreground: 210 20% 20%;
+    --background: 0 0% 99%;
+    --foreground: 220 15% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 20% 20%;
+    --card-foreground: 220 15% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 20%;
+    --popover-foreground: 220 15% 20%;
 
-    /* Mint Green Primary - Calming Health Color */
-    --primary: 158 64% 42%;
+    /* Mint Green Primary #10B981 = hsl(160, 84%, 39%) */
+    --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
 
     /* Soft Mint Secondary */
