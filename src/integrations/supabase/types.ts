@@ -301,6 +301,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_admin: boolean
+          is_master_admin: boolean
           logo_url: string | null
           phone: string | null
           primary_color: string | null
@@ -317,6 +318,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_admin?: boolean
+          is_master_admin?: boolean
           logo_url?: string | null
           phone?: string | null
           primary_color?: string | null
@@ -333,6 +335,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_admin?: boolean
+          is_master_admin?: boolean
           logo_url?: string | null
           phone?: string | null
           primary_color?: string | null
@@ -564,6 +567,7 @@ export type Database = {
       get_user_account_status: { Args: never; Returns: string }
       get_user_type: { Args: never; Returns: string }
       is_current_user_admin: { Args: never; Returns: boolean }
+      is_current_user_master_admin: { Args: never; Returns: boolean }
       is_user_patient: { Args: never; Returns: boolean }
     }
     Enums: {

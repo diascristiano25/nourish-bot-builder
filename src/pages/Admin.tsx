@@ -59,8 +59,6 @@ interface TicketMessage {
   created_at: string;
 }
 
-const MASTER_ADMIN_EMAIL = 'admin@flowtechgroup.com.br';
-
 const priorityConfig = {
   low: { label: 'Baixa', color: 'bg-slate-500', order: 1 },
   normal: { label: 'Normal', color: 'bg-blue-500', order: 2 },
@@ -99,14 +97,26 @@ export default function Admin() {
     }
 
     if (user) {
-      if (user.email === MASTER_ADMIN_EMAIL) {
+      checkMasterAdminStatus();
+    }
+  }, [user, authLoading, navigate]);
+
+  const checkMasterAdminStatus = async () => {
+    try {
+      const { data, error } = await supabase.rpc('is_current_user_master_admin');
+      if (error) throw error;
+      
+      if (data) {
         setIsMasterAdmin(true);
         fetchData();
       } else {
         checkAdminStatus();
       }
+    } catch (error) {
+      console.error('Error checking master admin status:', error);
+      navigate('/dashboard');
     }
-  }, [user, authLoading, navigate]);
+  };
 
   useEffect(() => {
     if (messagesEndRef.current) {
