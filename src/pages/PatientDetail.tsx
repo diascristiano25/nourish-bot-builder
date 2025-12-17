@@ -281,17 +281,12 @@ export default function PatientDetail() {
     }
   };
 
-  const handleCopyAccessLink = () => {
-    const link = `${window.location.origin}/app/${patient?.id}`;
-    const textToCopy = nutritionistName 
-      ? `Seu Plano Alimentar por ${nutritionistName}: ${link}`
-      : link;
-    navigator.clipboard.writeText(textToCopy);
+  const handleCopyPortalLink = () => {
+    const portalUrl = `https://nourish-bot-builder.lovable.app/paciente/${patient?.id}`;
+    navigator.clipboard.writeText(portalUrl);
     toast({
       title: "Link copiado!",
-      description: nutritionistName 
-        ? `"Seu Plano Alimentar por ${nutritionistName}" - Envie para o paciente.`
-        : "Envie este link para o paciente visualizar sua dieta.",
+      description: "Envie via WhatsApp para o seu paciente.",
     });
   };
 
@@ -392,11 +387,13 @@ export default function PatientDetail() {
             </AlertDialog>
             <Button 
               variant="outline" 
-              size="icon"
-              onClick={handleCopyAccessLink}
-              title="Copiar link de acesso"
+              size="sm"
+              onClick={handleCopyPortalLink}
+              title="Copiar Link do Portal"
+              className="gap-2"
             >
               <Copy className="w-4 h-4" />
+              Copiar Link
             </Button>
             <Button 
               variant="outline" 

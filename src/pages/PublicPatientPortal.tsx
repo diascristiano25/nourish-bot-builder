@@ -345,6 +345,13 @@ export default function PublicPatientPortal() {
             </p>
           )}
         </footer>
+
+        {/* Authority Footer */}
+        <div className="text-center pb-8">
+          <p className="text-xs text-muted-foreground/60">
+            Desenvolvido por FlowTech Group sob licença de {nutritionist?.full_name || 'Nutricionista'}
+          </p>
+        </div>
       </main>
     </div>
   );
