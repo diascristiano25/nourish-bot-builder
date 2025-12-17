@@ -19,8 +19,7 @@ import GenerateMealPlan from "./pages/GenerateMealPlan";
 import MealPlanView from "./pages/MealPlanView";
 import GroceryList from "./pages/GroceryList";
 import Profile from "./pages/Profile";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminMaster from "./pages/AdminMaster";
+import Admin from "./pages/Admin";
 import AccessDenied from "./pages/AccessDenied";
 import SubscriptionExpired from "./pages/SubscriptionExpired";
 import NotFound from "./pages/NotFound";
@@ -54,8 +53,7 @@ function App() {
                 <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="/subscription-expired" element={<SubscriptionExpired />} />
-                <Route path="/admin-master" element={<AdminMaster />} />
-                <Route path="/admin-flowtech" element={<AdminMaster />} />
+                <Route path="/admin" element={<Admin />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/consulta" element={<Consultation />} />
                 <Route path="/consulta/:patientId" element={<Consultation />} />
@@ -70,7 +68,6 @@ function App() {
                 <Route path="/patients/:id/meal-plan/:planId" element={<MealPlanView />} />
                 <Route path="/patients/:id/meal-plan/:planId/grocery-list" element={<GroceryList />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AccountStatusGuard>

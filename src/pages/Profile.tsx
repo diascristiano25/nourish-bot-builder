@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader2, Save, Upload, User, Link2, Image } from 'lucide-react';
+import { PageTour, profileTourSteps } from '@/components/PageTour';
 
 interface NutritionistProfile {
   id: string;
@@ -127,6 +128,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageTour tourKey="profile" steps={profileTourSteps} run />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -193,7 +195,7 @@ export default function Profile() {
         </Card>
 
         {/* Logo */}
-        <Card className="border-0 shadow-md">
+        <Card className="border-0 shadow-md" data-tour="profile-logo">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Image className="w-5 h-5" />
@@ -331,7 +333,7 @@ export default function Profile() {
         </Card>
 
         {/* Cores do Tema */}
-        <Card className="border-0 shadow-md">
+        <Card className="border-0 shadow-md" data-tour="profile-colors">
           <CardHeader>
             <CardTitle>Cores da Marca</CardTitle>
             <CardDescription>
@@ -400,7 +402,7 @@ export default function Profile() {
         </Card>
 
         {/* Assinatura de Email */}
-        <Card className="border-0 shadow-md">
+        <Card className="border-0 shadow-md" data-tour="profile-signature">
           <CardHeader>
             <CardTitle>Assinatura de E-mail</CardTitle>
             <CardDescription>

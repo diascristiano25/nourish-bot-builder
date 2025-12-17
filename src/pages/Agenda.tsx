@@ -11,6 +11,7 @@ import { Calendar as CalendarIcon, Clock, User, Plus, Loader2, CheckCircle2, XCi
 import { format, isSameDay, startOfDay, endOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import { PageTour, agendaTourSteps } from '@/components/PageTour';
 
 interface Appointment {
   id: string;
@@ -127,6 +128,7 @@ export default function Agenda() {
 
   return (
     <AppLayout>
+      <PageTour tourKey="agenda" steps={agendaTourSteps} run />
       <div className="p-6 md:p-8">
         <div className="mb-8 flex items-center justify-between">
           <div>

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { PageTour, patientsTourSteps } from '@/components/PageTour';
 
 const Patients = () => {
   const navigate = useNavigate();
@@ -47,6 +49,7 @@ const Patients = () => {
 
   return (
     <AppLayout>
+      <PageTour tourKey="patients" steps={patientsTourSteps} run />
       <div className="p-6 md:p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
