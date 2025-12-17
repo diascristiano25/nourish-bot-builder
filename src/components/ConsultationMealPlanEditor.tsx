@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,9 +14,20 @@ import {
   Moon,
   Loader2,
   Save,
-  Target
+  Target,
+  Search,
+  Star
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface FoodItem {
   id: string;
@@ -26,6 +37,7 @@ interface FoodItem {
   carboidratos: number;
   proteinas: number;
   gorduras: number;
+  isCustom?: boolean;
 }
 
 interface Meal {
@@ -55,8 +67,8 @@ const mealIcons: Record<string, React.ElementType> = {
   'jantar': Moon,
 };
 
-// Mock food database (to be replaced with real API)
-const mockFoods: Omit<FoodItem, 'id'>[] = [
+// Mock TACO foods (Brazilian Table of Food Composition)
+const tacoFoods: Omit<FoodItem, 'id'>[] = [
   { nome: 'Pão integral', porcao: '2 fatias (50g)', calorias: 130, carboidratos: 24, proteinas: 5, gorduras: 2 },
   { nome: 'Ovo cozido', porcao: '2 unidades', calorias: 140, carboidratos: 1, proteinas: 12, gorduras: 10 },
   { nome: 'Banana', porcao: '1 unidade média', calorias: 105, carboidratos: 27, proteinas: 1, gorduras: 0 },
@@ -75,6 +87,7 @@ const generateId = () => Math.random().toString(36).substring(2, 9);
 
 export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMealPlanEditorProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [meals, setMeals] = useState<Meal[]>(
     mealTemplates.map(t => ({ ...t, id: generateId(), alimentos: [] }))
   );
@@ -86,6 +99,92 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
     protein: 150,
     fat: 65
   });
+  
+  // Food selection modal state
+  const [foodModalOpen, setFoodModalOpen] = useState(false);
+  const [selectedMealId, setSelectedMealId] = useState<string | null>(null);
+  const [foodSearchTerm, setFoodSearchTerm] = useState('');
+  const [customFoods, setCustomFoods] = useState<Omit<FoodItem, 'id'>[]>([]);
+  const [customRecipes, setCustomRecipes] = useState<Omit<FoodItem, 'id'>[]>([]);
+
+  // Fetch custom foods and recipes
+  useEffect(() => {
+    const fetchCustomItems = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: nutritionist } = await supabase
+          .from('nutritionists')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (!nutritionist) return;
+        
+        const [foodsResult, recipesResult] = await Promise.all([
+          supabase
+            .from('custom_foods')
+            .select('*')
+            .eq('nutritionist_id', nutritionist.id),
+          supabase
+            .from('custom_recipes')
+            .select('*')
+            .eq('nutritionist_id', nutritionist.id)
+        ]);
+        
+        if (foodsResult.data) {
+          setCustomFoods(foodsResult.data.map(f => ({
+            nome: f.name,
+            porcao: `1 ${f.unit_type}`,
+            calorias: Number(f.kcal),
+            carboidratos: Number(f.carb),
+            proteinas: Number(f.protein),
+            gorduras: Number(f.fat),
+            isCustom: true
+          })));
+        }
+        
+        if (recipesResult.data) {
+          setCustomRecipes(recipesResult.data.map(r => {
+            const macros = r.estimated_macros as { kcal: number; protein: number; carb: number; fat: number };
+            return {
+              nome: r.name,
+              porcao: '1 porção',
+              calorias: macros.kcal,
+              carboidratos: macros.carb,
+              proteinas: macros.protein,
+              gorduras: macros.fat,
+              isCustom: true
+            };
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching custom items:', error);
+      }
+    };
+    
+    fetchCustomItems();
+  }, [user]);
+
+  // All foods combined
+  const allFoods = [...customFoods, ...customRecipes, ...tacoFoods];
+  
+  const filteredFoods = allFoods.filter(f => 
+    f.nome.toLowerCase().includes(foodSearchTerm.toLowerCase())
+  );
+
+  const openFoodModal = (mealId: string) => {
+    setSelectedMealId(mealId);
+    setFoodSearchTerm('');
+    setFoodModalOpen(true);
+  };
+
+  const handleSelectFood = (food: Omit<FoodItem, 'id'>) => {
+    if (selectedMealId) {
+      addFood(selectedMealId, food);
+    }
+    setFoodModalOpen(false);
+  };
 
   // Calculate totals
   const totals = meals.reduce((acc, meal) => {
@@ -433,21 +532,15 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
 
                   {/* Add Food */}
                   <div className="border-t border-border/50 pt-3">
-                    <p className="text-xs text-muted-foreground mb-2">Adicionar alimento:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {mockFoods.slice(0, 6).map((food, idx) => (
-                        <Button
-                          key={idx}
-                          variant="outline"
-                          size="sm"
-                          className="h-7 text-xs"
-                          onClick={() => addFood(meal.id, food)}
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                          {food.nome}
-                        </Button>
-                      ))}
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-2"
+                      onClick={() => openFoodModal(meal.id)}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Adicionar Alimento
+                    </Button>
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -455,6 +548,125 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
           })}
         </Accordion>
       </div>
+
+      {/* Food Selection Modal */}
+      <Dialog open={foodModalOpen} onOpenChange={setFoodModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Selecionar Alimento</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar alimento..."
+                value={foodSearchTerm}
+                onChange={(e) => setFoodSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Tabs defaultValue="all" className="w-full">
+              <TabsList className="w-full">
+                <TabsTrigger value="all" className="flex-1">Todos</TabsTrigger>
+                <TabsTrigger value="custom" className="flex-1">Meus Alimentos</TabsTrigger>
+                <TabsTrigger value="taco" className="flex-1">Tabela TACO</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="all" className="mt-4 max-h-[400px] overflow-y-auto">
+                <div className="space-y-2">
+                  {filteredFoods.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">Nenhum alimento encontrado</p>
+                  ) : (
+                    filteredFoods.map((food, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectFood(food)}
+                        className="w-full p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-colors text-left flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-3">
+                          {food.isCustom && (
+                            <Star className="w-4 h-4 text-primary" />
+                          )}
+                          <div>
+                            <p className="font-medium text-sm">{food.nome}</p>
+                            <p className="text-xs text-muted-foreground">{food.porcao}</p>
+                          </div>
+                        </div>
+                        <div className="text-right text-xs text-muted-foreground">
+                          <span className="font-medium text-foreground">{food.calorias}</span> kcal
+                          <br />
+                          C:{food.carboidratos} P:{food.proteinas} G:{food.gorduras}
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="custom" className="mt-4 max-h-[400px] overflow-y-auto">
+                <div className="space-y-2">
+                  {[...customFoods, ...customRecipes].filter(f => 
+                    f.nome.toLowerCase().includes(foodSearchTerm.toLowerCase())
+                  ).length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">Nenhum alimento personalizado</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Cadastre na página "Biblioteca"
+                      </p>
+                    </div>
+                  ) : (
+                    [...customFoods, ...customRecipes].filter(f => 
+                      f.nome.toLowerCase().includes(foodSearchTerm.toLowerCase())
+                    ).map((food, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectFood(food)}
+                        className="w-full p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-colors text-left flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Star className="w-4 h-4 text-primary" />
+                          <div>
+                            <p className="font-medium text-sm">{food.nome}</p>
+                            <p className="text-xs text-muted-foreground">{food.porcao}</p>
+                          </div>
+                        </div>
+                        <div className="text-right text-xs text-muted-foreground">
+                          <span className="font-medium text-foreground">{food.calorias}</span> kcal
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="taco" className="mt-4 max-h-[400px] overflow-y-auto">
+                <div className="space-y-2">
+                  {tacoFoods.filter(f => 
+                    f.nome.toLowerCase().includes(foodSearchTerm.toLowerCase())
+                  ).map((food, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSelectFood(food)}
+                      className="w-full p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-colors text-left flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="font-medium text-sm">{food.nome}</p>
+                        <p className="text-xs text-muted-foreground">{food.porcao}</p>
+                      </div>
+                      <div className="text-right text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">{food.calorias}</span> kcal
+                        <br />
+                        C:{food.carboidratos} P:{food.proteinas} G:{food.gorduras}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -6,7 +6,8 @@ import {
   DollarSign, 
   Settings,
   ChevronLeft,
-  LogOut
+  LogOut,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,7 @@ const navItems: NavItem[] = [
   { label: 'Home', icon: Home, href: '/dashboard' },
   { label: 'Pacientes', icon: Users, href: '/patients' },
   { label: 'Agenda', icon: Calendar, href: '/agenda' },
+  { label: 'Biblioteca', icon: BookOpen, href: '/biblioteca' },
   { label: 'Financeiro', icon: DollarSign, href: '/financeiro' },
   { label: 'Configurações', icon: Settings, href: '/profile' },
 ];
