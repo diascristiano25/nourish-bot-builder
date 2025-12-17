@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.send-patient-magic-link]
 verify_jwt = true
+
+[functions.generate-recipe]
+verify_jwt = false
