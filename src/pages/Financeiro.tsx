@@ -176,7 +176,7 @@ const Financeiro = () => {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="gap-2" data-tour="financeiro-new-btn">
                 <Plus className="w-4 h-4" />
                 Novo Lançamento
               </Button>

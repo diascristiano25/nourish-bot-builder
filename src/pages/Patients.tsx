@@ -53,7 +53,7 @@ const Patients = () => {
             <h1 className="text-2xl font-semibold text-foreground mb-2">Pacientes</h1>
             <p className="text-muted-foreground">Gerencie seus pacientes</p>
           </div>
-          <Button onClick={() => navigate('/patients/new')} className="gap-2">
+          <Button onClick={() => navigate('/patients/new')} className="gap-2" data-tour="patients-new-btn">
             <Plus className="w-4 h-4" />
             Novo Paciente
           </Button>

@@ -460,6 +460,7 @@ export default function Biblioteca() {
               <TabsTrigger 
                 value="foods" 
                 className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"
+                data-tour="biblioteca-foods-tab"
               >
                 <Apple className="w-4 h-4" />
                 Alimentos Personalizados
@@ -468,6 +469,7 @@ export default function Biblioteca() {
               <TabsTrigger 
                 value="recipes" 
                 className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"
+                data-tour="biblioteca-recipes-tab"
               >
                 <ChefHat className="w-4 h-4" />
                 Minhas Receitas
@@ -486,7 +488,7 @@ export default function Biblioteca() {
                   if (!open) resetFoodForm();
                 }}>
                   <DialogTrigger asChild>
-                    <Button className="gap-2">
+                    <Button className="gap-2" data-tour="biblioteca-new-food">
                       <Plus className="w-4 h-4" />
                       Novo Alimento
                     </Button>
@@ -654,7 +656,7 @@ export default function Biblioteca() {
                   if (!open) resetRecipeForm();
                 }}>
                   <DialogTrigger asChild>
-                    <Button className="gap-2">
+                    <Button className="gap-2" data-tour="biblioteca-new-recipe">
                       <Plus className="w-4 h-4" />
                       Nova Receita
                     </Button>
