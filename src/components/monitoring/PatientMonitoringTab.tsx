@@ -56,12 +56,12 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
 
   const fetchData = async () => {
     try {
-      // Fetch all weight logs
+      // Fetch all weight logs (ordered by creation time for accuracy)
       const { data: weights, error: weightsError } = await supabase
         .from('weight_logs')
-        .select('id, weight, recorded_at')
+        .select('id, weight, recorded_at, created_at')
         .eq('patient_id', patientId)
-        .order('recorded_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (weightsError) throw weightsError;
       setWeightLogs(weights?.map(w => ({

@@ -167,12 +167,12 @@ export default function PatientDetail() {
       if (mealError) throw mealError;
       setMealPlans(mealData || []);
 
-      // Fetch latest weight from weight_logs (for chart consistency)
+      // Fetch latest weight from weight_logs (ordered by creation time, not date)
       const { data: weightData } = await supabase
         .from('weight_logs')
         .select('weight')
         .eq('patient_id', id)
-        .order('recorded_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
       
