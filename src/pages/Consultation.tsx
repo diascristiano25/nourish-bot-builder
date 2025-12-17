@@ -270,13 +270,25 @@ export default function Consultation() {
         });
 
       if (appointmentError) throw appointmentError;
+
+      // 5. Criar registro financeiro automático (R$ 150,00 por consulta)
+      await supabase
+        .from('financial_records')
+        .insert({
+          nutritionist_id: nutri.id,
+          record_type: 'Receita',
+          amount: 150.00,
+          description: `Consulta - ${selectedPatientName}`,
+          record_date: new Date().toISOString().split('T')[0],
+          status: 'completed'
+        });
       
       toast({
         title: '✅ Consulta finalizada!',
         description: `Todos os dados de ${selectedPatientName} foram salvos com sucesso.`,
       });
 
-      // 5. Redirect to patient summary
+      // 6. Redirect to patient summary
       navigate(`/patients/${selectedPatientId}`);
       
     } catch (error: any) {
