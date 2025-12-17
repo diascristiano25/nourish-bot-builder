@@ -21,6 +21,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AccessDenied from "./pages/AccessDenied";
 import NotFound from "./pages/NotFound";
 import Consultation from "./pages/Consultation";
+import Agenda from "./pages/Agenda";
+import Financeiro from "./pages/Financeiro";
+import Patients from "./pages/Patients";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +44,9 @@ function App() {
                 <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/consulta" element={<Consultation />} />
+                <Route path="/agenda" element={<Agenda />} />
+                <Route path="/financeiro" element={<Financeiro />} />
+                <Route path="/patients" element={<Patients />} />
                 <Route path="/patients/new" element={<NewPatient />} />
                 <Route path="/patients/:id" element={<PatientDetail />} />
                 <Route path="/patients/:id/edit" element={<EditPatient />} />
