@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,7 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Shield, Users, Clock, CheckCircle, XCircle, MessageSquare, Send } from 'lucide-react';
+import { Loader2, Shield, Users, Clock, CheckCircle, XCircle, MessageSquare, Send, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -33,15 +34,21 @@ interface Nutritionist {
 
 interface SupportTicket {
   id: string;
+  ticket_number: number;
   subject: string;
   message: string;
   status: string;
-  admin_response: string | null;
-  responded_at: string | null;
   created_at: string;
   nutritionist: {
     full_name: string;
   };
+}
+
+interface TicketMessage {
+  id: string;
+  sender_type: string;
+  message: string;
+  created_at: string;
 }
 
 // Master admin email - only this user can access
@@ -56,8 +63,12 @@ export default function AdminMaster() {
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
-  const [response, setResponse] = useState('');
-  const [responding, setResponding] = useState(false);
+  const [messages, setMessages] = useState<TicketMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [newMessage, setNewMessage] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [closingTicket, setClosingTicket] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -74,6 +85,12 @@ export default function AdminMaster() {
       }
     }
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const checkAdminStatus = async () => {
     try {
@@ -119,11 +136,10 @@ export default function AdminMaster() {
         .from('support_tickets')
         .select(`
           id,
+          ticket_number,
           subject,
           message,
           status,
-          admin_response,
-          responded_at,
           created_at,
           nutritionist:nutritionists(full_name)
         `)
@@ -139,6 +155,24 @@ export default function AdminMaster() {
       setTickets(formattedTickets as SupportTicket[]);
     } catch (error) {
       console.error('Error fetching tickets:', error);
+    }
+  };
+
+  const fetchMessages = async (ticketId: string) => {
+    setLoadingMessages(true);
+    try {
+      const { data, error } = await supabase
+        .from('support_ticket_messages')
+        .select('id, sender_type, message, created_at')
+        .eq('ticket_id', ticketId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    } finally {
+      setLoadingMessages(false);
     }
   };
 
@@ -210,31 +244,77 @@ export default function AdminMaster() {
     }
   };
 
-  const handleRespondTicket = async () => {
-    if (!selectedTicket || !response.trim()) return;
+  const handleSendMessage = async () => {
+    if (!selectedTicket || !newMessage.trim()) return;
 
-    setResponding(true);
+    setSendingMessage(true);
+    try {
+      const { error } = await supabase
+        .from('support_ticket_messages')
+        .insert({
+          ticket_id: selectedTicket.id,
+          sender_type: 'admin',
+          message: newMessage.trim(),
+        });
+
+      if (error) throw error;
+
+      // Update ticket status to answered
+      await supabase
+        .from('support_tickets')
+        .update({ status: 'answered' })
+        .eq('id', selectedTicket.id);
+
+      setSelectedTicket({ ...selectedTicket, status: 'answered' });
+      setNewMessage('');
+      fetchMessages(selectedTicket.id);
+      fetchTickets();
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Erro ao enviar mensagem');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const handleCloseTicket = async () => {
+    if (!selectedTicket) return;
+
+    setClosingTicket(true);
     try {
       const { error } = await supabase
         .from('support_tickets')
-        .update({
-          admin_response: response.trim(),
-          status: 'closed',
-          responded_at: new Date().toISOString()
-        })
+        .update({ status: 'closed' })
         .eq('id', selectedTicket.id);
 
       if (error) throw error;
 
-      toast.success('Resposta enviada com sucesso!');
-      setSelectedTicket(null);
-      setResponse('');
+      toast.success('Ticket fechado com sucesso');
+      setSelectedTicket({ ...selectedTicket, status: 'closed' });
       fetchTickets();
     } catch (error) {
-      console.error('Error responding to ticket:', error);
-      toast.error('Erro ao enviar resposta');
+      console.error('Error closing ticket:', error);
+      toast.error('Erro ao fechar ticket');
     } finally {
-      setResponding(false);
+      setClosingTicket(false);
+    }
+  };
+
+  const openTicketConversation = (ticket: SupportTicket) => {
+    setSelectedTicket(ticket);
+    fetchMessages(ticket.id);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'open':
+        return <Badge variant="secondary">Aberto</Badge>;
+      case 'answered':
+        return <Badge className="bg-blue-500">Respondido</Badge>;
+      case 'closed':
+        return <Badge variant="outline">Fechado</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
@@ -379,6 +459,7 @@ export default function AdminMaster() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Ticket</TableHead>
                     <TableHead>Nutricionista</TableHead>
                     <TableHead>Assunto</TableHead>
                     <TableHead>Data</TableHead>
@@ -389,13 +470,16 @@ export default function AdminMaster() {
                 <TableBody>
                   {tickets.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                         Nenhum ticket de suporte
                       </TableCell>
                     </TableRow>
                   ) : (
                     tickets.map((ticket) => (
                       <TableRow key={ticket.id}>
+                        <TableCell className="font-mono text-sm">
+                          #{ticket.ticket_number}
+                        </TableCell>
                         <TableCell className="font-medium">
                           {ticket.nutritionist?.full_name || 'N/A'}
                         </TableCell>
@@ -404,18 +488,13 @@ export default function AdminMaster() {
                           {format(new Date(ticket.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={ticket.status === 'open' ? 'secondary' : 'default'}>
-                            {ticket.status === 'open' ? 'Aberto' : 'Respondido'}
-                          </Badge>
+                          {getStatusBadge(ticket.status)}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              setSelectedTicket(ticket);
-                              setResponse(ticket.admin_response || '');
-                            }}
+                            onClick={() => openTicketConversation(ticket)}
                           >
                             {ticket.status === 'open' ? 'Responder' : 'Ver'}
                           </Button>
@@ -535,54 +614,104 @@ export default function AdminMaster() {
         </div>
       </main>
 
-      {/* Ticket Response Dialog */}
+      {/* Ticket Conversation Dialog */}
       <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Ticket de Suporte</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Ticket #{selectedTicket?.ticket_number}
+              {selectedTicket && getStatusBadge(selectedTicket.status)}
+            </DialogTitle>
             <DialogDescription>
-              De: {selectedTicket?.nutritionist?.full_name || 'N/A'}
+              {selectedTicket?.nutritionist?.full_name || 'N/A'} - {selectedTicket?.subject}
             </DialogDescription>
           </DialogHeader>
           
           {selectedTicket && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium mb-1">Assunto:</p>
-                <p className="text-sm text-muted-foreground">{selectedTicket.subject}</p>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium mb-1">Mensagem:</p>
-                <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                  {selectedTicket.message}
+            <div className="flex flex-col flex-1 min-h-0">
+              <ScrollArea className="flex-1 pr-4 max-h-[350px]">
+                {loadingMessages ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.sender_type === 'admin' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[80%] rounded-lg p-3 ${
+                            msg.sender_type === 'admin'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted'
+                          }`}
+                        >
+                          <p className="text-xs font-medium mb-1">
+                            {msg.sender_type === 'admin' ? 'Suporte' : 'Nutricionista'}
+                          </p>
+                          <p className="text-sm">{msg.message}</p>
+                          <p className={`text-xs mt-1 ${
+                            msg.sender_type === 'admin' 
+                              ? 'text-primary-foreground/70' 
+                              : 'text-muted-foreground'
+                          }`}>
+                            {format(new Date(msg.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                )}
+              </ScrollArea>
+
+              {selectedTicket.status !== 'closed' ? (
+                <div className="mt-4 pt-4 border-t border-border space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Digite sua resposta..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      disabled={sendingMessage}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                    />
+                    <Button 
+                      size="icon" 
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim() || sendingMessage}
+                    >
+                      {sendingMessage ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleCloseTicket}
+                    disabled={closingTicket}
+                  >
+                    {closingTicket ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Lock className="h-4 w-4 mr-2" />
+                    )}
+                    Fechar Ticket
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-center text-sm text-muted-foreground mt-4 pt-4 border-t border-border">
+                  Este ticket foi fechado.
                 </p>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium mb-2">Sua Resposta:</p>
-                <Textarea
-                  value={response}
-                  onChange={(e) => setResponse(e.target.value)}
-                  placeholder="Digite sua resposta..."
-                  rows={4}
-                  disabled={selectedTicket.status === 'closed' || responding}
-                />
-              </div>
-              
-              {selectedTicket.status === 'open' && (
-                <Button 
-                  className="w-full" 
-                  onClick={handleRespondTicket}
-                  disabled={!response.trim() || responding}
-                >
-                  {responding ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : (
-                    <Send className="w-4 h-4 mr-2" />
-                  )}
-                  Enviar Resposta
-                </Button>
               )}
             </div>
           )}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Dialog,
@@ -13,18 +13,25 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { HelpCircle, Loader2, Send, MessageSquare } from 'lucide-react';
+import { HelpCircle, Loader2, Send, MessageSquare, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface SupportTicket {
   id: string;
+  ticket_number: number;
   subject: string;
   message: string;
   status: string;
-  admin_response: string | null;
-  responded_at: string | null;
+  created_at: string;
+}
+
+interface TicketMessage {
+  id: string;
+  sender_type: string;
+  message: string;
   created_at: string;
 }
 
@@ -40,13 +47,19 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
   const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [messages, setMessages] = useState<TicketMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [newMessage, setNewMessage] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const fetchTickets = async () => {
     setLoadingTickets(true);
     try {
       const { data, error } = await supabase
         .from('support_tickets')
-        .select('*')
+        .select('id, ticket_number, subject, message, status, created_at')
         .eq('nutritionist_id', nutritionistId)
         .order('created_at', { ascending: false });
 
@@ -59,10 +72,35 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
     }
   };
 
+  const fetchMessages = async (ticketId: string) => {
+    setLoadingMessages(true);
+    try {
+      const { data, error } = await supabase
+        .from('support_ticket_messages')
+        .select('id, sender_type, message, created_at')
+        .eq('ticket_id', ticketId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
     if (isOpen) {
       fetchTickets();
+      setSelectedTicket(null);
     }
   };
 
@@ -75,15 +113,31 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from('support_tickets').insert({
-        nutritionist_id: nutritionistId,
-        subject: subject.trim(),
-        message: message.trim(),
-      });
+      // Create ticket
+      const { data: ticketData, error: ticketError } = await supabase
+        .from('support_tickets')
+        .insert({
+          nutritionist_id: nutritionistId,
+          subject: subject.trim(),
+          message: message.trim(),
+        })
+        .select('id')
+        .single();
 
-      if (error) throw error;
+      if (ticketError) throw ticketError;
 
-      toast.success('Ticket enviado com sucesso! Responderemos em breve.');
+      // Create first message
+      const { error: messageError } = await supabase
+        .from('support_ticket_messages')
+        .insert({
+          ticket_id: ticketData.id,
+          sender_type: 'nutritionist',
+          message: message.trim(),
+        });
+
+      if (messageError) throw messageError;
+
+      toast.success('Ticket #' + ticketData.id.slice(0, 8) + ' criado com sucesso!');
       setSubject('');
       setMessage('');
       setActiveTab('history');
@@ -96,6 +150,59 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
     }
   };
 
+  const handleSendMessage = async () => {
+    if (!selectedTicket || !newMessage.trim()) return;
+
+    setSendingMessage(true);
+    try {
+      const { error } = await supabase
+        .from('support_ticket_messages')
+        .insert({
+          ticket_id: selectedTicket.id,
+          sender_type: 'nutritionist',
+          message: newMessage.trim(),
+        });
+
+      if (error) throw error;
+
+      // Update ticket status to open if it was answered
+      if (selectedTicket.status === 'answered') {
+        await supabase
+          .from('support_tickets')
+          .update({ status: 'open' })
+          .eq('id', selectedTicket.id);
+        
+        setSelectedTicket({ ...selectedTicket, status: 'open' });
+      }
+
+      setNewMessage('');
+      fetchMessages(selectedTicket.id);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Erro ao enviar mensagem');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const openTicketConversation = (ticket: SupportTicket) => {
+    setSelectedTicket(ticket);
+    fetchMessages(ticket.id);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'open':
+        return <Badge variant="secondary">Aguardando</Badge>;
+      case 'answered':
+        return <Badge className="bg-blue-500">Respondido</Badge>;
+      case 'closed':
+        return <Badge variant="outline">Fechado</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -103,112 +210,201 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
           <HelpCircle className="h-5 w-5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
             Suporte NutriFlow
           </DialogTitle>
           <DialogDescription>
-            Envie sua dúvida ou solicitação para nossa equipe
+            {selectedTicket 
+              ? `Ticket #${selectedTicket.ticket_number} - ${selectedTicket.subject}`
+              : 'Envie sua dúvida ou solicitação para nossa equipe'
+            }
           </DialogDescription>
         </DialogHeader>
 
-        {/* Tabs */}
-        <div className="flex gap-2 border-b border-border pb-2">
-          <Button
-            variant={activeTab === 'new' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveTab('new')}
-          >
-            Novo Ticket
-          </Button>
-          <Button
-            variant={activeTab === 'history' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveTab('history')}
-          >
-            Meus Tickets ({tickets.length})
-          </Button>
-        </div>
-
-        {activeTab === 'new' ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="subject">Assunto</Label>
-              <Input
-                id="subject"
-                placeholder="Ex: Dúvida sobre geração de planos"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="message">Mensagem</Label>
-              <Textarea
-                id="message"
-                placeholder="Descreva sua dúvida ou solicitação em detalhes..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                disabled={loading}
-                rows={5}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
-              )}
-              Enviar Ticket
+        {selectedTicket ? (
+          // Conversation View
+          <div className="flex flex-col flex-1 min-h-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="self-start mb-2"
+              onClick={() => setSelectedTicket(null)}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Voltar
             </Button>
-          </form>
-        ) : (
-          <div className="space-y-3 max-h-[400px] overflow-y-auto">
-            {loadingTickets ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : tickets.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">
-                Você ainda não enviou nenhum ticket
-              </p>
-            ) : (
-              tickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  className="border border-border rounded-lg p-3 space-y-2"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-medium text-sm">{ticket.subject}</h4>
-                    <Badge
-                      variant={ticket.status === 'open' ? 'secondary' : 'default'}
-                      className="text-xs"
-                    >
-                      {ticket.status === 'open' ? 'Aguardando' : 'Respondido'}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{ticket.message}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Enviado em {format(new Date(ticket.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                  </p>
-                  
-                  {ticket.admin_response && (
-                    <div className="mt-2 pt-2 border-t border-border bg-muted/50 rounded p-2">
-                      <p className="text-xs font-medium text-primary mb-1">Resposta do Suporte:</p>
-                      <p className="text-xs">{ticket.admin_response}</p>
-                      {ticket.responded_at && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Respondido em {format(new Date(ticket.responded_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                        </p>
-                      )}
-                    </div>
-                  )}
+            
+            <div className="flex items-center justify-between mb-2">
+              {getStatusBadge(selectedTicket.status)}
+              <span className="text-xs text-muted-foreground">
+                Aberto em {format(new Date(selectedTicket.created_at), "dd/MM/yyyy", { locale: ptBR })}
+              </span>
+            </div>
+
+            <ScrollArea className="flex-1 pr-4 max-h-[300px]">
+              {loadingMessages ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 </div>
-              ))
+              ) : (
+                <div className="space-y-3">
+                  {messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex ${msg.sender_type === 'nutritionist' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-lg p-3 ${
+                          msg.sender_type === 'nutritionist'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        <p className="text-sm">{msg.message}</p>
+                        <p className={`text-xs mt-1 ${
+                          msg.sender_type === 'nutritionist' 
+                            ? 'text-primary-foreground/70' 
+                            : 'text-muted-foreground'
+                        }`}>
+                          {format(new Date(msg.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </ScrollArea>
+
+            {selectedTicket.status !== 'closed' && (
+              <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+                <Input
+                  placeholder="Digite sua mensagem..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  disabled={sendingMessage}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                />
+                <Button 
+                  size="icon" 
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim() || sendingMessage}
+                >
+                  {sendingMessage ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {selectedTicket.status === 'closed' && (
+              <p className="text-center text-sm text-muted-foreground mt-4 pt-4 border-t border-border">
+                Este ticket foi fechado pelo suporte.
+              </p>
             )}
           </div>
+        ) : (
+          // Tabs View
+          <>
+            <div className="flex gap-2 border-b border-border pb-2">
+              <Button
+                variant={activeTab === 'new' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('new')}
+              >
+                Novo Ticket
+              </Button>
+              <Button
+                variant={activeTab === 'history' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('history')}
+              >
+                Meus Tickets ({tickets.length})
+              </Button>
+            </div>
+
+            {activeTab === 'new' ? (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Assunto</Label>
+                  <Input
+                    id="subject"
+                    placeholder="Ex: Dúvida sobre geração de planos"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message">Mensagem</Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Descreva sua dúvida ou solicitação em detalhes..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    disabled={loading}
+                    rows={5}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Send className="h-4 w-4 mr-2" />
+                  )}
+                  Enviar Ticket
+                </Button>
+              </form>
+            ) : (
+              <ScrollArea className="max-h-[400px]">
+                <div className="space-y-3 pr-4">
+                  {loadingTickets ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  ) : tickets.length === 0 ? (
+                    <p className="text-center py-8 text-muted-foreground">
+                      Você ainda não enviou nenhum ticket
+                    </p>
+                  ) : (
+                    tickets.map((ticket) => (
+                      <div
+                        key={ticket.id}
+                        className="border border-border rounded-lg p-3 space-y-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => openTicketConversation(ticket)}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="text-xs text-muted-foreground">
+                              #{ticket.ticket_number}
+                            </span>
+                            <h4 className="font-medium text-sm">{ticket.subject}</h4>
+                          </div>
+                          {getStatusBadge(ticket.status)}
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {ticket.message}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(ticket.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            )}
+          </>
         )}
       </DialogContent>
     </Dialog>
