@@ -128,6 +128,31 @@ export default function AdminMaster() {
     }
   };
 
+  const toggleAdmin = async (nutritionistId: string, currentStatus: boolean) => {
+    setUpdating(nutritionistId + '-admin');
+    try {
+      const { error } = await supabase
+        .from('nutritionists')
+        .update({ is_admin: !currentStatus })
+        .eq('id', nutritionistId);
+
+      if (error) throw error;
+
+      setNutritionists(prev =>
+        prev.map(n =>
+          n.id === nutritionistId ? { ...n, is_admin: !currentStatus } : n
+        )
+      );
+
+      toast.success(`Admin ${!currentStatus ? 'ativado' : 'removido'} com sucesso`);
+    } catch (error) {
+      console.error('Error toggling admin status:', error);
+      toast.error('Erro ao atualizar status de admin');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -255,13 +280,14 @@ export default function AdminMaster() {
                     <TableHead>Data de Cadastro</TableHead>
                     <TableHead>Status da Licença</TableHead>
                     <TableHead>Status do Acesso</TableHead>
+                    <TableHead>Admin</TableHead>
                     <TableHead className="text-right">Ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {nutritionists.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                         Nenhum nutricionista cadastrado
                       </TableCell>
                     </TableRow>
@@ -304,6 +330,18 @@ export default function AdminMaster() {
                                 Inativo
                               </Badge>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={nutritionist.is_admin}
+                                onCheckedChange={() => toggleAdmin(nutritionist.id, nutritionist.is_admin)}
+                                disabled={updating === nutritionist.id + '-admin'}
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                {nutritionist.is_admin ? 'Sim' : 'Não'}
+                              </span>
+                            </div>
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
