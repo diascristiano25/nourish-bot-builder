@@ -15,6 +15,7 @@ import { ptBR } from 'date-fns/locale';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { PageTour, financeiroTourSteps } from '@/components/PageTour';
 
 interface FinancialRecord {
   id: string;
@@ -168,6 +169,7 @@ const Financeiro = () => {
 
   return (
     <AppLayout>
+      <PageTour tourKey="financeiro" steps={financeiroTourSteps} run />
       <div className="p-6 md:p-8 max-w-6xl">
         <div className="mb-8 flex items-center justify-between">
           <div>

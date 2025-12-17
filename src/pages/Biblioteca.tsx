@@ -45,6 +45,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { PageTour, bibliotecaTourSteps } from '@/components/PageTour';
 
 interface CustomFood {
   id: string;
@@ -422,6 +423,7 @@ export default function Biblioteca() {
 
   return (
     <AppLayout>
+      <PageTour tourKey="biblioteca" steps={bibliotecaTourSteps} run />
       <div className="min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border/50">
