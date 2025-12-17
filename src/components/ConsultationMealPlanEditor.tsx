@@ -1,8 +1,10 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { 
   Plus, 
@@ -17,7 +19,9 @@ import {
   Target,
   Search,
   Star,
-  Brain
+  Brain,
+  FileDown,
+  Printer
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,6 +33,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface FoodItem {
   id: string;
@@ -49,8 +57,17 @@ interface Meal {
   alimentos: FoodItem[];
 }
 
+interface NutritionistProfile {
+  full_name: string;
+  crn: string | null;
+  phone: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
+}
+
 interface ConsultationMealPlanEditorProps {
   patientId?: string;
+  patientName?: string;
   onSave?: (planData: any) => void;
 }
 
@@ -86,15 +103,20 @@ const tacoFoods: Omit<FoodItem, 'id'>[] = [
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
-export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMealPlanEditorProps) {
+export function ConsultationMealPlanEditor({ patientId, patientName = 'Paciente', onSave }: ConsultationMealPlanEditorProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const pdfRef = useRef<HTMLDivElement>(null);
+  
   const [meals, setMeals] = useState<Meal[]>(
     mealTemplates.map(t => ({ ...t, id: generateId(), alimentos: [] }))
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingMessage, setGeneratingMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [pdfNotes, setPdfNotes] = useState('');
+  const [nutritionist, setNutritionist] = useState<NutritionistProfile | null>(null);
   const [goals, setGoals] = useState({
     calories: 2000,
     carbs: 250,
@@ -109,29 +131,37 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
   const [customFoods, setCustomFoods] = useState<Omit<FoodItem, 'id'>[]>([]);
   const [customRecipes, setCustomRecipes] = useState<Omit<FoodItem, 'id'>[]>([]);
 
-  // Fetch custom foods and recipes
+  // Fetch custom foods, recipes, and nutritionist profile
   useEffect(() => {
-    const fetchCustomItems = async () => {
+    const fetchData = async () => {
       if (!user) return;
       
       try {
-        const { data: nutritionist } = await supabase
+        const { data: nutri } = await supabase
           .from('nutritionists')
-          .select('id')
+          .select('id, full_name, crn, phone, logo_url, primary_color')
           .eq('user_id', user.id)
           .maybeSingle();
         
-        if (!nutritionist) return;
+        if (!nutri) return;
+        
+        setNutritionist({
+          full_name: nutri.full_name,
+          crn: nutri.crn,
+          phone: nutri.phone,
+          logo_url: nutri.logo_url,
+          primary_color: nutri.primary_color
+        });
         
         const [foodsResult, recipesResult] = await Promise.all([
           supabase
             .from('custom_foods')
             .select('*')
-            .eq('nutritionist_id', nutritionist.id),
+            .eq('nutritionist_id', nutri.id),
           supabase
             .from('custom_recipes')
             .select('*')
-            .eq('nutritionist_id', nutritionist.id)
+            .eq('nutritionist_id', nutri.id)
         ]);
         
         if (foodsResult.data) {
@@ -161,12 +191,72 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
           }));
         }
       } catch (error) {
-        console.error('Error fetching custom items:', error);
+        console.error('Error fetching data:', error);
       }
     };
     
-    fetchCustomItems();
+    fetchData();
   }, [user]);
+
+  // PDF Export function
+  const handleExportPDF = async () => {
+    if (!pdfRef.current) return;
+    
+    setIsExporting(true);
+    
+    try {
+      // Make the hidden div visible for capture
+      pdfRef.current.style.display = 'block';
+      
+      const canvas = await html2canvas(pdfRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      // Hide it again
+      pdfRef.current.style.display = 'none';
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+      
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      
+      // If content is taller than one page, add more pages
+      const totalPages = Math.ceil((imgHeight * ratio) / pdfHeight);
+      if (totalPages > 1) {
+        for (let i = 1; i < totalPages; i++) {
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', imgX, -(pdfHeight * i), imgWidth * ratio, imgHeight * ratio);
+        }
+      }
+      
+      pdf.save(`plano-alimentar-${patientName.toLowerCase().replace(/\s+/g, '-')}-${format(new Date(), 'dd-MM-yyyy')}.pdf`);
+      
+      toast({
+        title: '✅ PDF exportado com sucesso!',
+        description: 'O arquivo foi baixado para o seu dispositivo.',
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: 'Erro ao exportar PDF',
+        description: 'Tente novamente.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // All foods combined
   const allFoods = useMemo(() => [...customFoods, ...customRecipes, ...tacoFoods], [customFoods, customRecipes]);
@@ -453,6 +543,21 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
           </CardContent>
         </Card>
 
+        {/* PDF Notes */}
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Notas para o PDF</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={pdfNotes}
+              onChange={(e) => setPdfNotes(e.target.value)}
+              placeholder="Recomendações, observações para o paciente..."
+              className="min-h-[80px] text-sm"
+            />
+          </CardContent>
+        </Card>
+
         {/* Action Buttons */}
         <div className="space-y-2">
           <Button 
@@ -487,6 +592,24 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
               <>
                 <Save className="w-4 h-4" />
                 Salvar Plano
+              </>
+            )}
+          </Button>
+          <Button 
+            variant="secondary" 
+            onClick={handleExportPDF}
+            disabled={isExporting || meals.every(m => m.alimentos.length === 0)}
+            className="w-full gap-2"
+          >
+            {isExporting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Exportando...
+              </>
+            ) : (
+              <>
+                <FileDown className="w-4 h-4" />
+                Gerar e Exportar PDF
               </>
             )}
           </Button>
@@ -715,6 +838,137 @@ export function ConsultationMealPlanEditor({ patientId, onSave }: ConsultationMe
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Hidden PDF Document for Export */}
+      <div 
+        ref={pdfRef}
+        style={{ display: 'none', position: 'absolute', left: '-9999px' }}
+        className="bg-white text-black p-8 w-[800px]"
+      >
+        {/* PDF Header */}
+        <div 
+          className="p-6 rounded-lg mb-6 text-white"
+          style={{ 
+            background: `linear-gradient(135deg, ${nutritionist?.primary_color || '#4a7c59'}, ${nutritionist?.primary_color || '#2d5a3d'}dd)` 
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">{nutritionist?.full_name || 'Nutricionista'}</h1>
+              {nutritionist?.crn && (
+                <p className="text-sm opacity-90">{nutritionist.crn}</p>
+              )}
+              {nutritionist?.phone && (
+                <p className="text-sm opacity-90">{nutritionist.phone}</p>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-sm opacity-80">Data de emissão:</p>
+              <p className="font-semibold">
+                {format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Patient Info */}
+        <div className="mb-6 pb-4 border-b-2" style={{ borderColor: nutritionist?.primary_color || '#4a7c59' }}>
+          <h2 className="text-xl font-bold mb-2" style={{ color: nutritionist?.primary_color || '#4a7c59' }}>
+            Plano Alimentar Personalizado
+          </h2>
+          <p className="text-gray-600">
+            <strong>Paciente:</strong> {patientName}
+          </p>
+        </div>
+
+        {/* Nutritional Summary */}
+        <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: `${nutritionist?.primary_color || '#4a7c59'}15` }}>
+          <h3 className="font-bold mb-3" style={{ color: nutritionist?.primary_color || '#4a7c59' }}>
+            Resumo Nutricional Diário
+          </h3>
+          <div className="grid grid-cols-4 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-bold" style={{ color: nutritionist?.primary_color || '#4a7c59' }}>
+                {totals.calorias}
+              </p>
+              <p className="text-sm text-gray-600">kcal</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-blue-600">{totals.proteinas}g</p>
+              <p className="text-sm text-gray-600">Proteínas</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-orange-600">{totals.carboidratos}g</p>
+              <p className="text-sm text-gray-600">Carboidratos</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-green-600">{totals.gorduras}g</p>
+              <p className="text-sm text-gray-600">Gorduras</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Meals */}
+        <div className="space-y-4">
+          {meals.map((meal) => (
+            <div key={meal.id} className="border rounded-lg overflow-hidden">
+              <div 
+                className="p-3 text-white font-bold flex justify-between items-center"
+                style={{ backgroundColor: nutritionist?.primary_color || '#4a7c59' }}
+              >
+                <span>{meal.nome} - {meal.horario}</span>
+                <span className="text-sm font-normal opacity-90">
+                  {meal.alimentos.reduce((sum, f) => sum + f.calorias, 0)} kcal
+                </span>
+              </div>
+              {meal.alimentos.length > 0 && (
+                <table className="w-full">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="text-left p-2 text-sm font-semibold">Alimento</th>
+                      <th className="text-left p-2 text-sm font-semibold">Porção</th>
+                      <th className="text-center p-2 text-sm font-semibold">Kcal</th>
+                      <th className="text-center p-2 text-sm font-semibold">P</th>
+                      <th className="text-center p-2 text-sm font-semibold">C</th>
+                      <th className="text-center p-2 text-sm font-semibold">G</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {meal.alimentos.map((food) => (
+                      <tr key={food.id} className="border-t">
+                        <td className="p-2">{food.nome}</td>
+                        <td className="p-2 text-gray-600">{food.porcao}</td>
+                        <td className="p-2 text-center">{food.calorias}</td>
+                        <td className="p-2 text-center">{food.proteinas}g</td>
+                        <td className="p-2 text-center">{food.carboidratos}g</td>
+                        <td className="p-2 text-center">{food.gorduras}g</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Notes */}
+        {pdfNotes && (
+          <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+            <h3 className="font-bold mb-2" style={{ color: nutritionist?.primary_color || '#4a7c59' }}>
+              Observações e Recomendações
+            </h3>
+            <p className="text-gray-700 text-sm whitespace-pre-line">{pdfNotes}</p>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="mt-8 pt-4 border-t text-center text-sm text-gray-500">
+          <p>Plano alimentar gerado por NutriFlow</p>
+          <p className="mt-1">
+            Este documento é de uso pessoal e não substitui orientação profissional presencial.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
