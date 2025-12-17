@@ -298,10 +298,21 @@ export default function Consultation() {
       newData.habits = 'Dieta Vegetariana';
     }
     
-    // Parse "PESA XX" pattern
-    const weightMatch = textUpper.match(/PESA\s*(\d+)/);
-    if (weightMatch) {
-      newData.weight = weightMatch[1];
+    // Parse weight patterns: "PESA XX", "XXkg", "XX kg", "com XXkg", "está com XX"
+    const weightPatterns = [
+      /PESA\s*(\d+(?:[.,]\d+)?)/i,
+      /(\d+(?:[.,]\d+)?)\s*KG/i,
+      /COM\s*(\d+(?:[.,]\d+)?)\s*(?:KG)?/i,
+      /ESTÁ\s*COM\s*(\d+(?:[.,]\d+)?)/i,
+      /PESO\s*(?:ATUAL|DE)?\s*:?\s*(\d+(?:[.,]\d+)?)/i,
+    ];
+    
+    for (const pattern of weightPatterns) {
+      const weightMatch = freeText.match(pattern);
+      if (weightMatch) {
+        newData.weight = weightMatch[1].replace(',', '.');
+        break;
+      }
     }
     
     // Parse age pattern "XX ANOS"

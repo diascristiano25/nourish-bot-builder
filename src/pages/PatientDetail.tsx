@@ -79,6 +79,13 @@ interface MealPlan {
   created_at: string;
 }
 
+interface Consultation {
+  id: string;
+  date_time: string;
+  status: string;
+  notes: string | null;
+}
+
 const goalLabels: Record<string, string> = {
   hypertrophy: 'Hipertrofia',
   weight_loss: 'Emagrecimento',
@@ -110,6 +117,7 @@ export default function PatientDetail() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [anthropometrics, setAnthropometrics] = useState<Anthropometric[]>([]);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [sendingMagicLink, setSendingMagicLink] = useState(false);
@@ -157,6 +165,17 @@ export default function PatientDetail() {
 
       if (mealError) throw mealError;
       setMealPlans(mealData || []);
+
+      // Fetch consultations (completed appointments)
+      const { data: consultData, error: consultError } = await supabase
+        .from('appointments')
+        .select('id, date_time, status, notes')
+        .eq('patient_id', id)
+        .eq('status', 'completed')
+        .order('date_time', { ascending: false });
+
+      if (consultError) throw consultError;
+      setConsultations(consultData || []);
 
     } catch (error: any) {
       console.error('Error fetching patient:', error);
@@ -576,7 +595,66 @@ export default function PatientDetail() {
             <PatientMonitoringTab patientId={patient.id} />
           </TabsContent>
 
-          <TabsContent value="history" className="mt-4">
+          <TabsContent value="history" className="mt-4 space-y-4">
+            {/* Consultation History */}
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  Histórico de Consultas
+                </CardTitle>
+                <CardDescription>
+                  Consultas realizadas com este paciente
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {consultations.length === 0 ? (
+                  <div className="text-center py-8">
+                    <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                    <p className="text-muted-foreground mb-4">Nenhuma consulta registrada</p>
+                    <Button onClick={() => navigate(`/consulta/${id}`)}>
+                      Iniciar Primeira Consulta
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {consultations.map((consultation) => {
+                      let parsedNotes = null;
+                      try {
+                        parsedNotes = consultation.notes ? JSON.parse(consultation.notes) : null;
+                      } catch {}
+                      
+                      return (
+                        <div key={consultation.id} className="p-4 rounded-xl bg-muted/50 border border-border/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-sm font-medium">
+                              {format(new Date(consultation.date_time), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: ptBR })}
+                            </p>
+                            <Badge variant="secondary" className="text-xs">Concluída</Badge>
+                          </div>
+                          {parsedNotes && (
+                            <div className="text-sm text-muted-foreground space-y-1">
+                              {parsedNotes.anamnese?.freeText && (
+                                <p className="line-clamp-2">
+                                  <strong>Anamnese:</strong> {parsedNotes.anamnese.freeText}
+                                </p>
+                              )}
+                              {parsedNotes.orientacoes && (
+                                <p className="line-clamp-1">
+                                  <strong>Orientações:</strong> {parsedNotes.orientacoes}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Anthropometric History */}
             <Card className="border-0 shadow-md">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -590,7 +668,7 @@ export default function PatientDetail() {
               <CardContent>
                 {anthropometrics.length === 0 ? (
                   <div className="text-center py-8">
-                    <Scale className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <Scale className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                     <p className="text-muted-foreground">Nenhuma medida registrada</p>
                   </div>
                 ) : (
