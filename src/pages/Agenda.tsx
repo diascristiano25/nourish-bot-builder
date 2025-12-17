@@ -206,12 +206,25 @@ export default function Agenda() {
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{format(new Date(appointment.date_time), 'HH:mm')}</span>
-                            {appointment.notes && (
-                              <>
-                                <span>•</span>
-                                <span className="truncate max-w-[200px]">{appointment.notes}</span>
-                              </>
-                            )}
+                            {appointment.notes && (() => {
+                              try {
+                                const parsed = JSON.parse(appointment.notes);
+                                const description = parsed?.anamnese?.freeText || parsed?.orientacoes || 'Consulta';
+                                return (
+                                  <>
+                                    <span>•</span>
+                                    <span className="truncate max-w-[200px]">{description}</span>
+                                  </>
+                                );
+                              } catch {
+                                return (
+                                  <>
+                                    <span>•</span>
+                                    <span className="truncate max-w-[200px]">{appointment.notes}</span>
+                                  </>
+                                );
+                              }
+                            })()}
                           </div>
                         </div>
                       </div>
