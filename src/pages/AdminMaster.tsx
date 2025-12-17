@@ -6,7 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Shield, Users, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Loader2, Shield, Users, Clock, CheckCircle, XCircle, MessageSquare, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -22,6 +31,19 @@ interface Nutritionist {
   account_status: string;
 }
 
+interface SupportTicket {
+  id: string;
+  subject: string;
+  message: string;
+  status: string;
+  admin_response: string | null;
+  responded_at: string | null;
+  created_at: string;
+  nutritionist: {
+    full_name: string;
+  };
+}
+
 // Master admin email - only this user can access
 const MASTER_ADMIN_EMAIL = 'admin@flowtechgroup.com.br';
 
@@ -29,9 +51,13 @@ export default function AdminMaster() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [nutritionists, setNutritionists] = useState<Nutritionist[]>([]);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [response, setResponse] = useState('');
+  const [responding, setResponding] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -40,12 +66,10 @@ export default function AdminMaster() {
     }
 
     if (user) {
-      // Check if user is master admin
       if (user.email === MASTER_ADMIN_EMAIL) {
         setIsMasterAdmin(true);
-        fetchNutritionists();
+        fetchData();
       } else {
-        // Check if user is a regular admin
         checkAdminStatus();
       }
     }
@@ -58,7 +82,7 @@ export default function AdminMaster() {
       
       if (data) {
         setIsMasterAdmin(true);
-        fetchNutritionists();
+        fetchData();
       } else {
         navigate('/dashboard');
       }
@@ -66,6 +90,10 @@ export default function AdminMaster() {
       console.error('Error checking admin status:', error);
       navigate('/dashboard');
     }
+  };
+
+  const fetchData = async () => {
+    await Promise.all([fetchNutritionists(), fetchTickets()]);
   };
 
   const fetchNutritionists = async () => {
@@ -82,6 +110,35 @@ export default function AdminMaster() {
       toast.error('Erro ao carregar nutricionistas');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTickets = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('support_tickets')
+        .select(`
+          id,
+          subject,
+          message,
+          status,
+          admin_response,
+          responded_at,
+          created_at,
+          nutritionist:nutritionists(full_name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      const formattedTickets = (data || []).map(ticket => ({
+        ...ticket,
+        nutritionist: Array.isArray(ticket.nutritionist) ? ticket.nutritionist[0] : ticket.nutritionist
+      }));
+      
+      setTickets(formattedTickets as SupportTicket[]);
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
     }
   };
 
@@ -153,6 +210,34 @@ export default function AdminMaster() {
     }
   };
 
+  const handleRespondTicket = async () => {
+    if (!selectedTicket || !response.trim()) return;
+
+    setResponding(true);
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({
+          admin_response: response.trim(),
+          status: 'closed',
+          responded_at: new Date().toISOString()
+        })
+        .eq('id', selectedTicket.id);
+
+      if (error) throw error;
+
+      toast.success('Resposta enviada com sucesso!');
+      setSelectedTicket(null);
+      setResponse('');
+      fetchTickets();
+    } catch (error) {
+      console.error('Error responding to ticket:', error);
+      toast.error('Erro ao enviar resposta');
+    } finally {
+      setResponding(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -174,6 +259,7 @@ export default function AdminMaster() {
     const days = differenceInDays(new Date(), new Date(n.created_at));
     return days > 60;
   }).length;
+  const openTicketsCount = tickets.filter(t => t.status === 'open').length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -203,12 +289,12 @@ export default function AdminMaster() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Painel de Administração</h1>
           <p className="text-muted-foreground">
-            Gerencie licenças e acessos dos nutricionistas cadastrados
+            Gerencie licenças, acessos e suporte dos nutricionistas
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -245,7 +331,7 @@ export default function AdminMaster() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{trialCount}</p>
-                  <p className="text-sm text-muted-foreground">Em Período de Teste</p>
+                  <p className="text-sm text-muted-foreground">Em Teste</p>
                 </div>
               </div>
             </CardContent>
@@ -259,12 +345,89 @@ export default function AdminMaster() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{expiredCount}</p>
-                  <p className="text-sm text-muted-foreground">Licenças Expiradas</p>
+                  <p className="text-sm text-muted-foreground">Expirados</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-orange-500/10 rounded-lg">
+                  <MessageSquare className="w-6 h-6 text-orange-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{openTicketsCount}</p>
+                  <p className="text-sm text-muted-foreground">Tickets Abertos</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Support Tickets */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-primary" />
+              Tickets de Suporte
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nutricionista</TableHead>
+                    <TableHead>Assunto</TableHead>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Ação</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tickets.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        Nenhum ticket de suporte
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    tickets.map((ticket) => (
+                      <TableRow key={ticket.id}>
+                        <TableCell className="font-medium">
+                          {ticket.nutritionist?.full_name || 'N/A'}
+                        </TableCell>
+                        <TableCell>{ticket.subject}</TableCell>
+                        <TableCell>
+                          {format(new Date(ticket.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={ticket.status === 'open' ? 'secondary' : 'default'}>
+                            {ticket.status === 'open' ? 'Aberto' : 'Respondido'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedTicket(ticket);
+                              setResponse(ticket.admin_response || '');
+                            }}
+                          >
+                            {ticket.status === 'open' ? 'Responder' : 'Ver'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Nutritionists Table */}
         <Card>
@@ -371,6 +534,60 @@ export default function AdminMaster() {
           <p className="mt-1">Painel de Administração Master v1.0</p>
         </div>
       </main>
+
+      {/* Ticket Response Dialog */}
+      <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Ticket de Suporte</DialogTitle>
+            <DialogDescription>
+              De: {selectedTicket?.nutritionist?.full_name || 'N/A'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedTicket && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium mb-1">Assunto:</p>
+                <p className="text-sm text-muted-foreground">{selectedTicket.subject}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium mb-1">Mensagem:</p>
+                <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                  {selectedTicket.message}
+                </p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium mb-2">Sua Resposta:</p>
+                <Textarea
+                  value={response}
+                  onChange={(e) => setResponse(e.target.value)}
+                  placeholder="Digite sua resposta..."
+                  rows={4}
+                  disabled={selectedTicket.status === 'closed' || responding}
+                />
+              </div>
+              
+              {selectedTicket.status === 'open' && (
+                <Button 
+                  className="w-full" 
+                  onClick={handleRespondTicket}
+                  disabled={!response.trim() || responding}
+                >
+                  {responding ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2" />
+                  )}
+                  Enviar Resposta
+                </Button>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

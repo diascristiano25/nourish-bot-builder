@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { AppLayout } from '@/components/AppLayout';
+import { SupportDialog } from '@/components/SupportDialog';
 import { 
   Plus, 
   Users, 
@@ -205,6 +206,9 @@ export default function Dashboard() {
               <p className="text-sm text-muted-foreground">Hoje é dia de foco.</p>
             </div>
             <div className="flex items-center gap-3">
+              {/* Support Dialog */}
+              {profile && <SupportDialog nutritionistId={profile.id} />}
+              
               {/* Zen Mode Toggle */}
               <Button
                 variant={zenMode ? "default" : "outline"}
