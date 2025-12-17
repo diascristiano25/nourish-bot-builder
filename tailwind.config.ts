@@ -12,10 +12,15 @@ export default {
         "2xl": "1400px",
       },
     },
-    extend: {
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-      },
+	extend: {
+			fontFamily: {
+				sans: ['Inter', 'system-ui', 'sans-serif'],
+			},
+			borderRadius: {
+				lg: '0.75rem',
+				md: '0.5rem',
+				sm: '0.375rem',
+			},
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
