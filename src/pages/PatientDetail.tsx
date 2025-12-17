@@ -237,11 +237,11 @@ export default function PatientDetail() {
   };
 
   const handleCopyAccessLink = () => {
-    const link = `${window.location.origin}/patient-auth`;
+    const link = `${window.location.origin}/app/${patient?.id}`;
     navigator.clipboard.writeText(link);
     toast({
       title: "Link copiado!",
-      description: "Envie este link manualmente para o paciente.",
+      description: "Envie este link para o paciente visualizar sua dieta.",
     });
   };
 
