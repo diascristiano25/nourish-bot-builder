@@ -13,6 +13,37 @@ serve(async (req) => {
   }
 
   try {
+    // 1. Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.log('No authorization header provided');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - No token provided' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create client with user's token to verify identity
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: { headers: { Authorization: authHeader } },
+        auth: { autoRefreshToken: false, persistSession: false }
+      }
+    );
+
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    if (authError || !user) {
+      console.log('Invalid token:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Invalid token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Authenticated user: ${user.id}`);
+
     const { patientEmail, patientId, redirectUrl } = await req.json();
 
     if (!patientEmail || !patientId) {
@@ -22,8 +53,47 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Sending magic link to patient: ${patientEmail}`);
+    // 2. Verify user is a nutritionist
+    const { data: nutritionist, error: nutriError } = await supabaseAuth
+      .from('nutritionists')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
 
+    if (nutriError || !nutritionist) {
+      console.log('User is not a nutritionist');
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Not a nutritionist' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 3. Verify nutritionist owns this patient
+    const { data: patientOwnership, error: ownershipError } = await supabaseAuth
+      .from('patients')
+      .select('id, nutritionist_id')
+      .eq('id', patientId)
+      .single();
+
+    if (ownershipError || !patientOwnership) {
+      console.log('Patient not found');
+      return new Response(
+        JSON.stringify({ error: 'Patient not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (patientOwnership.nutritionist_id !== nutritionist.id) {
+      console.log('Nutritionist does not own this patient');
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Patient belongs to another nutritionist' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Authorized: Nutritionist ${nutritionist.id} sending magic link to patient ${patientId}`);
+
+    // Now use admin client for privileged operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -52,14 +122,12 @@ serve(async (req) => {
 
     let userId = patient.user_id;
 
-    // If patient doesn't have a user account yet, we'll create one via magic link
+    // If patient doesn't have a user account yet, check if user exists
     if (!userId) {
-      // Check if user already exists with this email
       const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
       const existingUser = existingUsers?.users.find(u => u.email === patientEmail);
 
       if (existingUser) {
-        // Link existing user to patient
         userId = existingUser.id;
         await supabaseAdmin
           .from('patients')
@@ -98,13 +166,12 @@ serve(async (req) => {
         .eq('id', patientId);
     }
 
-    console.log('Magic link generated successfully');
+    console.log('Magic link generated successfully for patient:', patientId);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Magic link generated',
-        // Return the magic link URL for the nutritionist to share
         magicLink: data.properties?.action_link,
       }),
       { 

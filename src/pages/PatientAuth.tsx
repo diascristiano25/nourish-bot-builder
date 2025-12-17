@@ -34,7 +34,7 @@ export default function PatientAuth() {
     if (!user) return;
 
     try {
-      // Check if user is a patient
+      // Check if user is already linked as a patient
       const { data: patient } = await supabase
         .from('patients')
         .select('id')
@@ -58,24 +58,18 @@ export default function PatientAuth() {
         return;
       }
 
-      // User exists but is neither - could be a new patient from magic link
-      // Try to link them to patient record using email
-      const { data: patientByEmail } = await supabase
-        .from('patients')
-        .select('id')
-        .eq('email', user.email)
-        .is('user_id', null)
-        .single();
-
-      if (patientByEmail) {
-        // Link patient to user
-        await supabase
-          .from('patients')
-          .update({ user_id: user.id })
-          .eq('id', patientByEmail.id);
-        
-        navigate('/patient-portal');
-      }
+      // SECURITY FIX: Removed automatic email-based linking
+      // Patient accounts must be linked ONLY through the secure magic link flow
+      // initiated by the nutritionist (which uses server-side service role key)
+      
+      // User exists but has no linked patient/nutritionist record
+      // Sign them out and show error
+      await supabase.auth.signOut();
+      toast({
+        title: "Acesso negado",
+        description: "Esta conta não está associada a um paciente. Aguarde o link de acesso do seu nutricionista.",
+        variant: "destructive",
+      });
     } catch (error) {
       console.error('Error checking user type:', error);
     }
