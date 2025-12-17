@@ -238,39 +238,39 @@ export default function MealPlanView() {
   };
 
   const handleShare = async () => {
-    if (!mealPlan || !patient) return;
+    if (!mealPlan || !patient || !id) return;
 
     setSharing(true);
     try {
-      const shareText = `Cardápio: ${mealPlan.title}\nPaciente: ${patient.full_name}\n\nGerado por NutriFlow`;
+      const portalUrl = `${window.location.origin}/paciente/${id}`;
+      const shareText = `Seu Plano Alimentar por ${nutritionist?.full_name || 'seu nutricionista'}: ${portalUrl}`;
       
-      // Try Web Share API first, but only if supported and likely to work
-      if (navigator.share && navigator.canShare && navigator.canShare({ text: shareText })) {
+      // Try Web Share API first
+      if (navigator.share && navigator.canShare && navigator.canShare({ text: shareText, url: portalUrl })) {
         try {
           await navigator.share({
-            title: mealPlan.title,
-            text: shareText,
+            title: `Plano Alimentar - ${patient.full_name}`,
+            text: `Olá ${patient.full_name.split(' ')[0]}! Acesse seu plano alimentar:`,
+            url: portalUrl,
           });
-          return; // Success, exit early
+          return;
         } catch (shareError: any) {
-          // If user cancelled, don't show error
           if (shareError.name === 'AbortError') {
             return;
           }
-          // Fall through to clipboard fallback
         }
       }
       
-      // Fallback: copy to clipboard
-      await navigator.clipboard.writeText(shareText);
+      // Fallback: copy link to clipboard
+      await navigator.clipboard.writeText(portalUrl);
       toast({
-        title: "Copiado!",
-        description: "Informações copiadas para a área de transferência.",
+        title: "Link copiado!",
+        description: "Link do portal do paciente copiado. Envie via WhatsApp.",
       });
     } catch (error: any) {
       toast({
         title: "Erro ao compartilhar",
-        description: "Não foi possível compartilhar. Tente novamente.",
+        description: "Não foi possível copiar o link.",
         variant: "destructive",
       });
     } finally {
