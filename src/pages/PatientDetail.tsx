@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { PatientMonitoringTab } from '@/components/monitoring';
 import { 
   ArrowLeft, 
   Loader2, 
@@ -25,7 +26,8 @@ import {
   Trash2,
   Send,
   Copy,
-  Link
+  Link,
+  LineChart
 } from 'lucide-react';
 import { format, differenceInYears } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -440,8 +442,12 @@ export default function PatientDetail() {
 
         {/* Tabs */}
         <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="info">Informações</TabsTrigger>
+            <TabsTrigger value="monitoring">
+              <LineChart className="w-4 h-4 mr-1.5" />
+              Monitoramento
+            </TabsTrigger>
             <TabsTrigger value="history">Histórico</TabsTrigger>
             <TabsTrigger value="plans">Cardápios</TabsTrigger>
           </TabsList>
@@ -556,6 +562,11 @@ export default function PatientDetail() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Monitoring Tab */}
+          <TabsContent value="monitoring" className="mt-4">
+            <PatientMonitoringTab patientId={patient.id} />
           </TabsContent>
 
           <TabsContent value="history" className="mt-4">
