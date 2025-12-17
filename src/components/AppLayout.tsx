@@ -17,7 +17,7 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Desktop Sidebar - hidden on mobile */}
       <div className="hidden md:block">
         <AppSidebar />
@@ -39,8 +39,10 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <main className="md:ml-56 transition-all duration-300 pt-14 md:pt-0 w-full">
-        {children}
+      <main className="md:ml-56 transition-all duration-300 pt-14 md:pt-0 min-w-0">
+        <div className="w-full max-w-full overflow-x-hidden">
+          {children}
+        </div>
       </main>
     </div>
   );
