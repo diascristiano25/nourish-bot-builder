@@ -12,12 +12,18 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { 
   ArrowLeft, 
   Sparkles, 
@@ -33,8 +39,11 @@ import {
   Heart,
   CheckCircle2,
   Search,
-  UserCheck
+  UserCheck,
+  ChevronsUpDown,
+  Check
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StructuredData {
   name: string;
@@ -72,6 +81,7 @@ export default function Consultation() {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(urlPatientId || null);
   const [selectedPatientName, setSelectedPatientName] = useState<string>('');
   const [loadingPatients, setLoadingPatients] = useState(true);
+  const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
   
   const [structuredData, setStructuredData] = useState<StructuredData>({
     name: '',
@@ -260,33 +270,56 @@ export default function Consultation() {
               </Button>
             </div>
             
-            {/* Patient Selector */}
+            {/* Patient Selector with Search */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <UserCheck className="w-4 h-4" />
                 <span>Paciente:</span>
               </div>
-              <Select
-                value={selectedPatientId || ''}
-                onValueChange={handlePatientSelect}
-                disabled={loadingPatients}
-              >
-                <SelectTrigger className="w-[280px] h-9 bg-card">
-                  <SelectValue placeholder={loadingPatients ? "Carregando..." : "Selecione o paciente"} />
-                </SelectTrigger>
-                <SelectContent className="bg-card border shadow-lg z-50">
-                  {patients.map((patient) => (
-                    <SelectItem key={patient.id} value={patient.id}>
-                      {patient.full_name}
-                    </SelectItem>
-                  ))}
-                  {patients.length === 0 && !loadingPatients && (
-                    <div className="px-2 py-4 text-sm text-muted-foreground text-center">
-                      Nenhum paciente cadastrado
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
+              <Popover open={patientSelectorOpen} onOpenChange={setPatientSelectorOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={patientSelectorOpen}
+                    className="w-[280px] h-9 justify-between bg-card font-normal"
+                    disabled={loadingPatients}
+                  >
+                    {loadingPatients 
+                      ? "Carregando..." 
+                      : selectedPatientName || "Selecione o paciente"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[280px] p-0 bg-card border shadow-lg z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar paciente..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhum paciente encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        {patients.map((patient) => (
+                          <CommandItem
+                            key={patient.id}
+                            value={patient.full_name}
+                            onSelect={() => {
+                              handlePatientSelect(patient.id);
+                              setPatientSelectorOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedPatientId === patient.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {patient.full_name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {selectedPatientId && (
                 <Button
                   variant="ghost"
