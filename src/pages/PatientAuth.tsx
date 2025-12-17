@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Leaf, Loader2, Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Loader2, Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
+import logoImg from '@/assets/logo.png';
 
 const emailSchema = z.string().email('Email inválido');
 
@@ -176,9 +177,7 @@ export default function PatientAuth() {
     <div className="min-h-screen gradient-subtle flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-scale-in">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary shadow-glow mb-4">
-            <Leaf className="w-8 h-8 text-primary-foreground" />
-          </div>
+          <img src={logoImg} alt="NutriFlow" className="w-20 h-20 object-contain mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-foreground">Portal do Paciente</h1>
           <p className="text-muted-foreground mt-2">Acesse seu cardápio personalizado</p>
         </div>

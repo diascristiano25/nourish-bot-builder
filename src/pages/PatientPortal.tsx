@@ -16,12 +16,12 @@ import {
   Sun,
   Cookie,
   Moon,
-  Leaf,
   LogOut,
   CheckCircle2,
   Circle,
   TrendingUp
 } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -213,9 +213,7 @@ export default function PatientPortal() {
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-lg border-b">
         <div className="px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-              <Leaf className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="NutriFlow" className="w-8 h-8 object-contain" />
             <div>
               <p className="font-semibold text-sm">Olá, {patientName.split(' ')[0]}!</p>
               <p className="text-xs text-muted-foreground">Seu cardápio personalizado</p>
