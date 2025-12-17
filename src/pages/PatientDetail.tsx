@@ -22,7 +22,10 @@ import {
   Activity,
   TrendingUp,
   Edit,
-  Trash2
+  Trash2,
+  Send,
+  Copy,
+  Link
 } from 'lucide-react';
 import { format, differenceInYears } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -107,6 +110,7 @@ export default function PatientDetail() {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [generatingPlan, setGeneratingPlan] = useState(false);
+  const [sendingMagicLink, setSendingMagicLink] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -192,6 +196,53 @@ export default function PatientDetail() {
     navigate(`/patients/${id}/meal-plan/generate`);
   };
 
+  const handleSendMagicLink = async () => {
+    if (!patient?.email) {
+      toast({
+        title: "Email não cadastrado",
+        description: "Cadastre o email do paciente para enviar o link de acesso.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingMagicLink(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-patient-magic-link', {
+        body: {
+          patientEmail: patient.email,
+          patientId: patient.id,
+          redirectUrl: `${window.location.origin}/patient-portal`,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Link enviado!",
+        description: `Um email foi enviado para ${patient.email} com o link de acesso.`,
+      });
+    } catch (error: any) {
+      console.error('Error sending magic link:', error);
+      toast({
+        title: "Erro ao enviar link",
+        description: error.message || "Não foi possível enviar o link. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingMagicLink(false);
+    }
+  };
+
+  const handleCopyAccessLink = () => {
+    const link = `${window.location.origin}/patient-auth`;
+    navigator.clipboard.writeText(link);
+    toast({
+      title: "Link copiado!",
+      description: "Envie este link manualmente para o paciente.",
+    });
+  };
+
   const latestAnthropometric = anthropometrics[0];
   const age = patient?.birth_date 
     ? differenceInYears(new Date(), new Date(patient.birth_date))
@@ -241,27 +292,45 @@ export default function PatientDetail() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  disabled={sendingMagicLink || !patient.email}
+                >
+                  {sendingMagicLink ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="mr-2 h-4 w-4" />
+                  )}
+                  Enviar Acesso
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Enviar link de acesso?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Um email será enviado para <strong>{patient.email}</strong> com um link mágico. 
+                    Ao clicar, o paciente será autenticado e terá acesso ao portal.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSendMagicLink}>
+                    <Send className="mr-2 h-4 w-4" />
+                    Enviar Email
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button 
               variant="outline" 
-              size="sm"
-              onClick={() => {
-                if (patient.email) {
-                  const link = `${window.location.origin}/patient-auth`;
-                  navigator.clipboard.writeText(link);
-                  toast({
-                    title: "Link copiado!",
-                    description: "Envie este link para o paciente acessar o portal.",
-                  });
-                } else {
-                  toast({
-                    title: "Email não cadastrado",
-                    description: "Cadastre o email do paciente para gerar o link de acesso.",
-                    variant: "destructive",
-                  });
-                }
-              }}
+              size="icon"
+              onClick={handleCopyAccessLink}
+              title="Copiar link de acesso"
             >
-              Copiar Link de Acesso
+              <Copy className="w-4 h-4" />
             </Button>
             <Button variant="outline" size="icon" onClick={() => navigate(`/patients/${id}/edit`)}>
               <Edit className="w-4 h-4" />
