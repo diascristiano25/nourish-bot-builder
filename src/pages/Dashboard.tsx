@@ -3,25 +3,35 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { 
   Leaf, 
   Plus, 
-  Search, 
   Users, 
-  FileText, 
-  TrendingUp, 
-  LogOut,
-  User,
+  Calendar,
+  Clock,
   ChevronRight,
   Loader2,
-  Calendar
+  Settings2,
+  LogOut,
+  User,
+  Sparkles,
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useWidgetPreferences, WidgetPreferences } from '@/hooks/useWidgetPreferences';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 interface Patient {
   id: string;
@@ -29,7 +39,6 @@ interface Patient {
   email: string | null;
   goal: string | null;
   created_at: string;
-  activity_level: string | null;
 }
 
 interface NutritionistProfile {
@@ -46,13 +55,16 @@ const goalLabels: Record<string, string> = {
   performance: 'Performance',
 };
 
-const goalColors: Record<string, string> = {
-  hypertrophy: 'bg-info/10 text-info border-info/20',
-  weight_loss: 'bg-success/10 text-success border-success/20',
-  maintenance: 'bg-warning/10 text-warning border-warning/20',
-  health: 'bg-primary/10 text-primary border-primary/20',
-  performance: 'bg-accent text-accent-foreground border-accent',
-};
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Bom dia';
+  if (hour < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
+function getFirstName(fullName: string): string {
+  return fullName.split(' ')[0];
+}
 
 export default function Dashboard() {
   const { user, signOut, loading: authLoading } = useAuth();
@@ -61,7 +73,7 @@ export default function Dashboard() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [profile, setProfile] = useState<NutritionistProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const { preferences, updatePreference, loaded: prefsLoaded } = useWidgetPreferences();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -77,7 +89,6 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
-      // Fetch nutritionist profile
       const { data: profileData, error: profileError } = await supabase
         .from('nutritionists')
         .select('id, full_name, crn')
@@ -87,7 +98,6 @@ export default function Dashboard() {
       if (profileError) throw profileError;
       
       if (!profileData) {
-        // Create profile if it doesn't exist
         const { data: newProfile, error: createError } = await supabase
           .from('nutritionists')
           .insert({ 
@@ -103,12 +113,11 @@ export default function Dashboard() {
         setProfile(profileData);
       }
 
-      // Fetch patients if we have profile
       if (profileData || profile) {
         const nutritionistId = profileData?.id || profile?.id;
         const { data: patientsData, error: patientsError } = await supabase
           .from('patients')
-          .select('id, full_name, email, goal, created_at, activity_level')
+          .select('id, full_name, email, goal, created_at')
           .eq('nutritionist_id', nutritionistId)
           .order('created_at', { ascending: false });
 
@@ -127,183 +136,244 @@ export default function Dashboard() {
     }
   };
 
-  const filteredPatients = patients.filter(patient =>
-    patient.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
   };
 
-  if (authLoading || loading) {
+  const recentPatients = patients.slice(0, 4);
+  const patientsThisMonth = patients.filter(p => {
+    const created = new Date(p.created_at);
+    const now = new Date();
+    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+  }).length;
+
+  if (authLoading || loading || !prefsLoaded) {
     return (
-      <div className="min-h-screen gradient-subtle flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Carregando...</p>
+          <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">Carregando...</p>
         </div>
       </div>
     );
   }
 
+  const widgetLabels: Record<keyof WidgetPreferences, string> = {
+    agenda: 'Agenda do Dia',
+    recentPatients: 'Pacientes Recentes',
+    quickActions: 'Ações Rápidas',
+    stats: 'Estatísticas',
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
-              <Leaf className="w-5 h-5 text-primary-foreground" />
+      {/* Minimal Header */}
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border/50">
+        <div className="zen-container h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+              <Leaf className="w-4 h-4 text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="font-bold text-lg">NutriFlow</h1>
-              <p className="text-xs text-muted-foreground">{profile?.full_name}</p>
-            </div>
+            <span className="font-semibold text-foreground">NutriFlow</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
-              <User className="w-5 h-5" />
+          <div className="flex items-center gap-1">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Settings2 className="w-4 h-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Personalizar Visual</SheetTitle>
+                  <SheetDescription>
+                    Escolha quais widgets exibir no seu dashboard
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-6 space-y-4">
+                  {(Object.keys(preferences) as Array<keyof WidgetPreferences>).map((key) => (
+                    <div key={key} className="flex items-center justify-between py-2">
+                      <span className="text-sm font-medium">{widgetLabels[key]}</span>
+                      <Switch
+                        checked={preferences[key]}
+                        onCheckedChange={(checked) => updatePreference(key, checked)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/profile')}>
+              <User className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
-              <LogOut className="w-5 h-5" />
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="gradient-card border-0 shadow-md">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Pacientes</p>
-                  <p className="text-3xl font-bold">{patients.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="gradient-card border-0 shadow-md">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Cardápios Ativos</p>
-                  <p className="text-3xl font-bold">0</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-success" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="gradient-card border-0 shadow-md">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Este Mês</p>
-                  <p className="text-3xl font-bold">
-                    {patients.filter(p => {
-                      const created = new Date(p.created_at);
-                      const now = new Date();
-                      return created.getMonth() === now.getMonth() && 
-                             created.getFullYear() === now.getFullYear();
-                    }).length}
-                  </p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-info" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      <main className="zen-container py-8 space-y-8">
+        {/* Greeting */}
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold text-foreground">
+            {getGreeting()}, {profile ? getFirstName(profile.full_name) : 'Nutricionista'}.
+          </h1>
+          <p className="text-muted-foreground">Hoje é dia de foco.</p>
         </div>
 
-        {/* Patients Section */}
-        <Card className="border-0 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <div>
-              <CardTitle className="text-xl">Meus Pacientes</CardTitle>
-              <CardDescription>Gerencie seus pacientes e cardápios</CardDescription>
+        {/* Stats Row */}
+        {preferences.stats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
+            <div className="zen-card p-4">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Pacientes</p>
+              <p className="text-2xl font-semibold mt-1">{patients.length}</p>
             </div>
-            <Button onClick={() => navigate('/patients/new')} className="gap-2">
-              <Plus className="w-4 h-4" />
-              Novo Paciente
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {/* Search */}
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar paciente..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            <div className="zen-card p-4">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Este Mês</p>
+              <p className="text-2xl font-semibold mt-1">{patientsThisMonth}</p>
             </div>
+            <div className="zen-card p-4">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Cardápios</p>
+              <p className="text-2xl font-semibold mt-1">—</p>
+            </div>
+            <div className="zen-card p-4">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Consultas Hoje</p>
+              <p className="text-2xl font-semibold mt-1">—</p>
+            </div>
+          </div>
+        )}
 
-            {/* Patient List */}
-            {filteredPatients.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-muted-foreground" />
+        {/* Widget Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Agenda Widget */}
+          {preferences.agenda && (
+            <Card className="zen-card border-border/50 animate-slide-up">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-medium flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  Agenda do Dia
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-6">
+                  <Clock className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Nenhuma consulta agendada</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">
+                    {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
+                  </p>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Nenhum paciente ainda</h3>
-                <p className="text-muted-foreground mb-4">
-                  Comece adicionando seu primeiro paciente
-                </p>
-                <Button onClick={() => navigate('/patients/new')} className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Adicionar Paciente
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recent Patients Widget */}
+          {preferences.recentPatients && (
+            <Card className="zen-card border-border/50 animate-slide-up" style={{ animationDelay: '0.05s' }}>
+              <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                <CardTitle className="text-base font-medium flex items-center gap-2">
+                  <Users className="w-4 h-4 text-primary" />
+                  Pacientes Recentes
+                </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 text-xs"
+                  onClick={() => navigate('/patients/new')}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Novo
                 </Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredPatients.map((patient) => (
-                  <div
-                    key={patient.id}
-                    onClick={() => navigate(`/patients/${patient.id}`)}
-                    className="group flex items-center justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="font-semibold text-primary text-lg">
-                          {patient.full_name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">{patient.full_name}</h4>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="w-3 h-3" />
-                          {format(new Date(patient.created_at), "d 'de' MMM, yyyy", { locale: ptBR })}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {patient.goal && (
-                        <Badge 
-                          variant="outline" 
-                          className={goalColors[patient.goal] || 'bg-muted'}
-                        >
-                          {goalLabels[patient.goal] || patient.goal}
-                        </Badge>
-                      )}
-                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                    </div>
+              </CardHeader>
+              <CardContent>
+                {recentPatients.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Users className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Nenhum paciente ainda</p>
+                    <Button 
+                      variant="link" 
+                      size="sm" 
+                      className="mt-2 h-auto p-0 text-primary"
+                      onClick={() => navigate('/patients/new')}
+                    >
+                      Adicionar primeiro paciente
+                    </Button>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                ) : (
+                  <div className="space-y-2">
+                    {recentPatients.map((patient) => (
+                      <div
+                        key={patient.id}
+                        onClick={() => navigate(`/patients/${patient.id}`)}
+                        className="group flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-xs font-medium text-primary">
+                              {patient.full_name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{patient.full_name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {goalLabels[patient.goal || ''] || 'Sem objetivo'}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Quick Actions Widget */}
+          {preferences.quickActions && (
+            <Card className="zen-card border-border/50 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-medium flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Ações Rápidas
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-11 text-sm font-normal border-border/50 hover:bg-primary/5 hover:border-primary/30"
+                  onClick={() => navigate('/consulta')}
+                >
+                  <Plus className="w-4 h-4 mr-3 text-primary" />
+                  Nova Consulta
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-11 text-sm font-normal border-border/50 hover:bg-primary/5 hover:border-primary/30"
+                  onClick={() => navigate('/patients/new')}
+                >
+                  <Users className="w-4 h-4 mr-3 text-primary" />
+                  Novo Paciente
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* All Patients Link */}
+        {patients.length > 0 && (
+          <div className="pt-4">
+            <Button 
+              variant="ghost" 
+              className="text-muted-foreground hover:text-foreground"
+              onClick={() => navigate('/patients')}
+            >
+              Ver todos os {patients.length} pacientes
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        )}
       </main>
     </div>
   );
