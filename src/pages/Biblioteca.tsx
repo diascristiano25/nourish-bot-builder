@@ -740,7 +740,7 @@ export default function Biblioteca() {
                                 <SelectValue placeholder="Selecione..." />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Nenhum específico</SelectItem>
+                                <SelectItem value="none">Nenhum específico</SelectItem>
                                 <SelectItem value="hipertrofia">Hipertrofia</SelectItem>
                                 <SelectItem value="emagrecimento">Emagrecimento</SelectItem>
                                 <SelectItem value="low_carb">Low Carb</SelectItem>
