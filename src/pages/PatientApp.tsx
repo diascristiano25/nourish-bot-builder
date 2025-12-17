@@ -43,6 +43,50 @@ const mealIcons: Record<string, React.ElementType> = {
   'jantar': Moon,
 };
 
+// Safe component to render meal items
+const MealItemsList = ({ items }: { items: any[] }) => {
+  // If no items, show placeholder
+  if (!items || items.length === 0) {
+    return (
+      <div className="ml-11 py-2 text-sm text-muted-foreground">
+        Nenhum alimento cadastrado para esta refeição.
+      </div>
+    );
+  }
+
+  return (
+    <ul className="space-y-2 ml-11">
+      {items.map((item, index) => {
+        // Handle string items
+        if (typeof item === 'string') {
+          return (
+            <li key={index} className="flex justify-between py-2 border-b border-border/30 last:border-0">
+              <span className="text-sm text-foreground">{item}</span>
+            </li>
+          );
+        }
+
+        // Handle object items
+        const name = item?.nome || item?.name || item?.descricao || 'Item';
+        const portion = item?.porcao || item?.portion || item?.quantidade || '';
+        const calories = item?.calorias || item?.calories;
+
+        return (
+          <li key={index} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+            <div>
+              <p className="text-sm text-foreground">{name}</p>
+              {portion && <p className="text-xs text-muted-foreground">{portion}</p>}
+            </div>
+            {calories && (
+              <span className="text-xs text-muted-foreground">{calories} kcal</span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
 export default function PatientApp() {
   const { patientId } = useParams<{ patientId: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -224,28 +268,7 @@ export default function PatientApp() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="pb-4">
-                        <div className="space-y-2 ml-11">
-                          {(meal.alimentos || meal.foods || meal.items || []).map((item: any, itemIndex: number) => (
-                            <div 
-                              key={itemIndex}
-                              className="flex items-center justify-between py-2 border-b border-border/30 last:border-0"
-                            >
-                              <div>
-                                <p className="text-sm text-foreground">
-                                  {item.nome || item.name || item.descricao || item}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {item.porcao || item.portion || item.quantidade || ''}
-                                </p>
-                              </div>
-                              {(item.calorias || item.calories) && (
-                                <span className="text-xs text-muted-foreground">
-                                  {item.calorias || item.calories} kcal
-                                </span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                        <MealItemsList items={meal.alimentos || meal.foods || meal.items || []} />
                       </AccordionContent>
                     </AccordionItem>
                   );
