@@ -47,6 +47,7 @@ function App() {
                 <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/consulta" element={<Consultation />} />
+                <Route path="/consulta/:patientId" element={<Consultation />} />
                 <Route path="/agenda" element={<Agenda />} />
                 <Route path="/financeiro" element={<Financeiro />} />
                 <Route path="/biblioteca" element={<Biblioteca />} />
