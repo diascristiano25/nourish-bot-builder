@@ -14,8 +14,12 @@ import {
   Clock,
   Zap,
   Brain,
-  ChevronDown,
-  Shield
+  Shield,
+  BookOpen,
+  Stethoscope,
+  Handshake,
+  Quote,
+  ShieldCheck
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 import {
@@ -107,6 +111,32 @@ export default function Index() {
               <Clock className="w-4 h-4 inline mr-1" />
               60 dias grátis + preço fixo de R$ 69,90/mês para sempre
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Bar */}
+      <section className="py-8 border-y border-border bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-sm">Feito com apoio da Nutrição Moderna</span>
+            </div>
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Stethoscope className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-sm">Baseado na Tabela TACO</span>
+            </div>
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Handshake className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-sm">Desenvolvido com Clínicas Parceiras</span>
+            </div>
           </div>
         </div>
       </section>
@@ -295,6 +325,103 @@ export default function Index() {
                   <Shield className="w-4 h-4 inline mr-1" />
                   Cancele quando quiser. Sem multas.
                 </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Guarantee Block */}
+      <section className="py-12 bg-primary/5">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <Card className="border-2 border-primary/30 bg-background">
+              <CardContent className="p-8">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-8 h-8 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-primary">RISCO ZERO</h3>
+                    <p className="text-muted-foreground">
+                      Use por 60 dias. Se não economizar tempo ou se não amar a ferramenta, 
+                      você não paga nada. Cancele com um clique. É a nossa garantia de que a liberdade funciona.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <Badge variant="secondary" className="mb-4 bg-primary/10 text-primary border-0">
+              Depoimentos
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              O que estão dizendo sobre a revolução do NutriFlow?
+            </h2>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <Card className="border-border hover:border-primary/30 transition-colors">
+              <CardContent className="p-6">
+                <Quote className="w-8 h-8 text-primary/30 mb-4" />
+                <p className="text-muted-foreground mb-6">
+                  "Economizei 4 horas semanais só com a Anamnese Livre. 
+                  Pela primeira vez sinto que o software trabalha para mim."
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">LT</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Dra. Luiza T.</p>
+                    <p className="text-xs text-muted-foreground">Nutricionista Clínica</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-border hover:border-primary/30 transition-colors">
+              <CardContent className="p-6">
+                <Quote className="w-8 h-8 text-primary/30 mb-4" />
+                <p className="text-muted-foreground mb-6">
+                  "A prescrição com IA é incrível, mas a liberdade de criar minhas receitas 
+                  personalizadas mudou meu jogo. É o software mais adaptável que já vi."
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">MP</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Dr. Marcos P.</p>
+                    <p className="text-xs text-muted-foreground">Nutricionista Esportivo</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-border hover:border-primary/30 transition-colors">
+              <CardContent className="p-6">
+                <Quote className="w-8 h-8 text-primary/30 mb-4" />
+                <p className="text-muted-foreground mb-6">
+                  "Meus pacientes adoram receber o cardápio pelo celular. 
+                  A lista de compras automática foi o diferencial que fidelizou minha clientela."
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">AC</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Dra. Ana C.</p>
+                    <p className="text-xs text-muted-foreground">Nutricionista Funcional</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
