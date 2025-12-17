@@ -20,7 +20,9 @@ import MealPlanView from "./pages/MealPlanView";
 import GroceryList from "./pages/GroceryList";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminMaster from "./pages/AdminMaster";
 import AccessDenied from "./pages/AccessDenied";
+import SubscriptionExpired from "./pages/SubscriptionExpired";
 import NotFound from "./pages/NotFound";
 import Consultation from "./pages/Consultation";
 import Agenda from "./pages/Agenda";
@@ -51,6 +53,8 @@ function App() {
                 <Route path="/app/:patientId" element={<PatientApp />} />
                 <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
+                <Route path="/subscription-expired" element={<SubscriptionExpired />} />
+                <Route path="/admin-master" element={<AdminMaster />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/consulta" element={<Consultation />} />
                 <Route path="/consulta/:patientId" element={<Consultation />} />

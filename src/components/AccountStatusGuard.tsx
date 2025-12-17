@@ -8,7 +8,7 @@ interface AccountStatusGuardProps {
 }
 
 // Routes that bypass the guard completely
-const BYPASS_ROUTES = ['/auth', '/access-denied', '/'];
+const BYPASS_ROUTES = ['/auth', '/access-denied', '/subscription-expired', '/', '/sobre', '/privacidade'];
 
 export function AccountStatusGuard({ children }: AccountStatusGuardProps) {
   const location = useLocation();
