@@ -10,4 +10,7 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.generate-recipe]
+verify_jwt = true
+
+[functions.public-patient-portal]
 verify_jwt = false

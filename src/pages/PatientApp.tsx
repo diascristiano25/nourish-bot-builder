@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { WeightChart } from '@/components/monitoring';
-import { Loader2, User, Utensils, Droplets, Scale, Coffee, Sun, Moon, Apple } from 'lucide-react';
+import { Loader2, User, Utensils, Droplets, Coffee, Sun, Moon, Apple } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 
 interface Patient {
@@ -103,39 +103,17 @@ export default function PatientApp() {
 
   const fetchPatientData = async () => {
     try {
-      // Fetch patient
-      const { data: patientData, error: patientError } = await supabase
-        .from('patients')
-        .select('id, full_name, goal')
-        .eq('id', patientId)
-        .single();
+      // Use secure edge function to fetch portal data
+      const { data, error: fnError } = await supabase.functions.invoke('public-patient-portal', {
+        body: { patientId }
+      });
 
-      if (patientError) throw patientError;
-      setPatient(patientData);
+      if (fnError) throw new Error('Erro ao carregar dados');
+      if (data.error) throw new Error(data.error);
 
-      // Fetch active meal plan
-      const { data: mealPlanData, error: mealPlanError } = await supabase
-        .from('meal_plans')
-        .select('id, title, description, plan_data, total_calories')
-        .eq('patient_id', patientId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (mealPlanError && mealPlanError.code !== 'PGRST116') throw mealPlanError;
-      setMealPlan(mealPlanData);
-
-      // Fetch weight logs
-      const { data: weightData, error: weightError } = await supabase
-        .from('weight_logs')
-        .select('id, weight, recorded_at')
-        .eq('patient_id', patientId)
-        .order('recorded_at', { ascending: false })
-        .limit(30);
-
-      if (weightError) console.error('Weight logs error:', weightError);
-      setWeightLogs(weightData || []);
+      setPatient(data.patient);
+      setMealPlan(data.mealPlan);
+      setWeightLogs(data.weightLogs || []);
 
     } catch (err: any) {
       console.error('Error fetching patient data:', err);
