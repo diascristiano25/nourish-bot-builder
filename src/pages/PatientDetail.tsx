@@ -288,7 +288,7 @@ export default function PatientDetail() {
   };
 
   const handleCopyPortalLink = () => {
-    const portalUrl = `${window.location.origin}/paciente/${patient?.id}`;
+    const portalUrl = `https://nutriflow.inf.br/paciente/${patient?.id}`;
     navigator.clipboard.writeText(portalUrl);
     toast({
       title: "Link copiado!",

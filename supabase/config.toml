@@ -14,3 +14,6 @@ verify_jwt = true
 
 [functions.public-patient-portal]
 verify_jwt = false
+
+[functions.iframe-headers]
+verify_jwt = false
