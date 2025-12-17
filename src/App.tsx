@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AccessDenied from "./pages/AccessDenied";
 import NotFound from "./pages/NotFound";
+import Consultation from "./pages/Consultation";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/patient-portal" element={<PatientPortal />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/consulta" element={<Consultation />} />
                 <Route path="/patients/new" element={<NewPatient />} />
                 <Route path="/patients/:id" element={<PatientDetail />} />
                 <Route path="/patients/:id/edit" element={<EditPatient />} />
