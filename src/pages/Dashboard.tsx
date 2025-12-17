@@ -65,9 +65,16 @@ const goalLabels: Record<string, string> = {
 };
 
 function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Bom dia';
-  if (hour < 18) return 'Boa tarde';
+  // Get current hour in Brasilia timezone (America/Sao_Paulo)
+  const brasiliaHour = new Date().toLocaleString('en-US', {
+    timeZone: 'America/Sao_Paulo',
+    hour: 'numeric',
+    hour12: false
+  });
+  const hour = parseInt(brasiliaHour, 10);
+  
+  if (hour >= 5 && hour < 12) return 'Bom dia';
+  if (hour >= 12 && hour < 18) return 'Boa tarde';
   return 'Boa noite';
 }
 
