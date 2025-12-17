@@ -381,6 +381,16 @@ export default function PatientDetail() {
             >
               <Copy className="w-4 h-4" />
             </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.open(`/paciente/${patient?.id}`, '_blank')}
+              title="Visualizar Portal do Paciente"
+              className="gap-2"
+            >
+              <Link className="w-4 h-4" />
+              Ver Portal
+            </Button>
             <Button variant="outline" size="icon" onClick={() => navigate(`/patients/${id}/edit`)}>
               <Edit className="w-4 h-4" />
             </Button>

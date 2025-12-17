@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import PatientAuth from "./pages/PatientAuth";
 import PatientPortal from "./pages/PatientPortal";
 import PatientApp from "./pages/PatientApp";
+import PublicPatientPortal from "./pages/PublicPatientPortal";
 import Dashboard from "./pages/Dashboard";
 import NewPatient from "./pages/NewPatient";
 import EditPatient from "./pages/EditPatient";
@@ -44,6 +45,7 @@ function App() {
                 <Route path="/patient-auth" element={<PatientAuth />} />
                 <Route path="/patient-portal" element={<PatientPortal />} />
                 <Route path="/app/:patientId" element={<PatientApp />} />
+                <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/consulta" element={<Consultation />} />
