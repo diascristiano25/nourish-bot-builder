@@ -38,7 +38,9 @@ import {
   Trash2,
   Pencil,
   Loader2,
-  Search
+  Search,
+  Sparkles,
+  PenLine
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -94,6 +96,8 @@ export default function Biblioteca() {
   const [recipeModalOpen, setRecipeModalOpen] = useState(false);
   const [savingRecipe, setSavingRecipe] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<CustomRecipe | null>(null);
+  const [recipeMode, setRecipeMode] = useState<'manual' | 'ai'>('manual');
+  const [generatingRecipe, setGeneratingRecipe] = useState(false);
   const [recipeForm, setRecipeForm] = useState({
     name: '',
     notes: '',
@@ -101,6 +105,13 @@ export default function Biblioteca() {
     protein: '',
     carb: '',
     fat: ''
+  });
+  const [aiRecipeForm, setAiRecipeForm] = useState({
+    ingredients: '',
+    servings: '2',
+    dietary_restrictions: '',
+    goal: '',
+    notes: ''
   });
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -300,7 +311,69 @@ export default function Biblioteca() {
 
   const resetRecipeForm = () => {
     setRecipeForm({ name: '', notes: '', kcal: '', protein: '', carb: '', fat: '' });
+    setAiRecipeForm({ ingredients: '', servings: '2', dietary_restrictions: '', goal: '', notes: '' });
     setEditingRecipe(null);
+    setRecipeMode('manual');
+  };
+
+  const generateRecipeWithAI = async () => {
+    if (!aiRecipeForm.ingredients.trim()) {
+      toast({
+        title: 'Erro',
+        description: 'Informe pelo menos os ingredientes principais.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setGeneratingRecipe(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-recipe', {
+        body: {
+          ingredients: aiRecipeForm.ingredients,
+          servings: aiRecipeForm.servings,
+          dietary_restrictions: aiRecipeForm.dietary_restrictions,
+          goal: aiRecipeForm.goal,
+          notes: aiRecipeForm.notes
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.recipe) {
+        const recipe = data.recipe;
+        
+        // Build notes with full recipe details
+        const notesContent = [
+          recipe.ingredients?.length ? `**Ingredientes:**\n${recipe.ingredients.join('\n')}` : '',
+          recipe.instructions ? `\n**Modo de Preparo:**\n${recipe.instructions}` : '',
+          recipe.prep_time ? `\n**Tempo de preparo:** ${recipe.prep_time}` : '',
+          recipe.servings ? `\n**Porções:** ${recipe.servings}` : '',
+          recipe.tips ? `\n**Dicas:** ${recipe.tips}` : ''
+        ].filter(Boolean).join('\n');
+
+        setRecipeForm({
+          name: recipe.name || '',
+          notes: notesContent,
+          kcal: String(recipe.macros?.kcal || 0),
+          protein: String(recipe.macros?.protein || 0),
+          carb: String(recipe.macros?.carb || 0),
+          fat: String(recipe.macros?.fat || 0)
+        });
+
+        setRecipeMode('manual');
+        toast({ title: 'Receita gerada com sucesso!', description: 'Revise e salve a receita.' });
+      }
+    } catch (error) {
+      console.error('Error generating recipe:', error);
+      toast({
+        title: 'Erro ao gerar receita',
+        description: 'Tente novamente ou crie manualmente.',
+        variant: 'destructive'
+      });
+    } finally {
+      setGeneratingRecipe(false);
+    }
   };
 
   const openEditFood = (food: CustomFood) => {
@@ -586,83 +659,204 @@ export default function Biblioteca() {
                       Nova Receita
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>
                         {editingRecipe ? 'Editar Receita' : 'Nova Receita'}
                       </DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 pt-4">
-                      <div className="space-y-2">
-                        <Label>Nome da Receita</Label>
-                        <Input
-                          placeholder="Ex: Smoothie proteico de banana"
-                          value={recipeForm.name}
-                          onChange={(e) => setRecipeForm(prev => ({ ...prev, name: e.target.value }))}
-                        />
+                    
+                    {/* Mode Toggle - Only show when not editing */}
+                    {!editingRecipe && (
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          variant={recipeMode === 'manual' ? 'default' : 'outline'}
+                          size="sm"
+                          className="flex-1 gap-2"
+                          onClick={() => setRecipeMode('manual')}
+                        >
+                          <PenLine className="w-4 h-4" />
+                          Manual
+                        </Button>
+                        <Button
+                          variant={recipeMode === 'ai' ? 'default' : 'outline'}
+                          size="sm"
+                          className="flex-1 gap-2"
+                          onClick={() => setRecipeMode('ai')}
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          Gerar com IA
+                        </Button>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Modo de Preparo / Notas</Label>
-                        <Textarea
-                          placeholder="Descreva o modo de preparo ou adicione observações..."
-                          value={recipeForm.notes}
-                          onChange={(e) => setRecipeForm(prev => ({ ...prev, notes: e.target.value }))}
-                          className="min-h-[100px]"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Macros Estimados (por porção)</Label>
-                        <div className="grid grid-cols-2 gap-4 mt-2">
+                    )}
+
+                    {/* AI Mode */}
+                    {recipeMode === 'ai' && !editingRecipe && (
+                      <div className="space-y-4 pt-4">
+                        <Card className="border-primary/20 bg-primary/5">
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-2 text-sm text-primary">
+                              <Sparkles className="w-4 h-4" />
+                              A IA vai criar uma receita completa com ingredientes, modo de preparo e macros.
+                            </div>
+                          </CardContent>
+                        </Card>
+                        
+                        <div className="space-y-2">
+                          <Label>Ingredientes Principais *</Label>
+                          <Textarea
+                            placeholder="Ex: frango, batata doce, brócolis, azeite..."
+                            value={aiRecipeForm.ingredients}
+                            onChange={(e) => setAiRecipeForm(prev => ({ ...prev, ingredients: e.target.value }))}
+                            className="min-h-[80px]"
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label>Calorias (kcal)</Label>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              value={recipeForm.kcal}
-                              onChange={(e) => setRecipeForm(prev => ({ ...prev, kcal: e.target.value }))}
-                            />
+                            <Label>Porções</Label>
+                            <Select 
+                              value={aiRecipeForm.servings}
+                              onValueChange={(v) => setAiRecipeForm(prev => ({ ...prev, servings: v }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 porção</SelectItem>
+                                <SelectItem value="2">2 porções</SelectItem>
+                                <SelectItem value="4">4 porções</SelectItem>
+                                <SelectItem value="6">6 porções</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div className="space-y-2">
-                            <Label>Proteínas (g)</Label>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              value={recipeForm.protein}
-                              onChange={(e) => setRecipeForm(prev => ({ ...prev, protein: e.target.value }))}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Carboidratos (g)</Label>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              value={recipeForm.carb}
-                              onChange={(e) => setRecipeForm(prev => ({ ...prev, carb: e.target.value }))}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Gorduras (g)</Label>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              value={recipeForm.fat}
-                              onChange={(e) => setRecipeForm(prev => ({ ...prev, fat: e.target.value }))}
-                            />
+                            <Label>Objetivo</Label>
+                            <Select 
+                              value={aiRecipeForm.goal}
+                              onValueChange={(v) => setAiRecipeForm(prev => ({ ...prev, goal: v }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">Nenhum específico</SelectItem>
+                                <SelectItem value="hipertrofia">Hipertrofia</SelectItem>
+                                <SelectItem value="emagrecimento">Emagrecimento</SelectItem>
+                                <SelectItem value="low_carb">Low Carb</SelectItem>
+                                <SelectItem value="alto_proteico">Alto Proteico</SelectItem>
+                                <SelectItem value="vegetariano">Vegetariano</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
+                        
+                        <div className="space-y-2">
+                          <Label>Restrições Alimentares</Label>
+                          <Input
+                            placeholder="Ex: sem lactose, sem glúten, sem amendoim..."
+                            value={aiRecipeForm.dietary_restrictions}
+                            onChange={(e) => setAiRecipeForm(prev => ({ ...prev, dietary_restrictions: e.target.value }))}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>Observações (opcional)</Label>
+                          <Input
+                            placeholder="Ex: receita rápida, para pré-treino, sabor suave..."
+                            value={aiRecipeForm.notes}
+                            onChange={(e) => setAiRecipeForm(prev => ({ ...prev, notes: e.target.value }))}
+                          />
+                        </div>
+                        
+                        <Button 
+                          className="w-full gap-2" 
+                          onClick={generateRecipeWithAI}
+                          disabled={generatingRecipe || !aiRecipeForm.ingredients.trim()}
+                        >
+                          {generatingRecipe ? (
+                            <><Loader2 className="w-4 h-4 animate-spin" /> Gerando receita...</>
+                          ) : (
+                            <><Sparkles className="w-4 h-4" /> Gerar Receita com IA</>
+                          )}
+                        </Button>
                       </div>
-                      <Button 
-                        className="w-full" 
-                        onClick={handleSaveRecipe}
-                        disabled={savingRecipe || !recipeForm.name.trim()}
-                      >
-                        {savingRecipe ? (
-                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
-                        ) : (
-                          editingRecipe ? 'Atualizar Receita' : 'Cadastrar Receita'
-                        )}
-                      </Button>
-                    </div>
+                    )}
+
+                    {/* Manual Mode */}
+                    {(recipeMode === 'manual' || editingRecipe) && (
+                      <div className="space-y-4 pt-4">
+                        <div className="space-y-2">
+                          <Label>Nome da Receita</Label>
+                          <Input
+                            placeholder="Ex: Smoothie proteico de banana"
+                            value={recipeForm.name}
+                            onChange={(e) => setRecipeForm(prev => ({ ...prev, name: e.target.value }))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Ingredientes e Modo de Preparo</Label>
+                          <Textarea
+                            placeholder="Descreva os ingredientes e o modo de preparo..."
+                            value={recipeForm.notes}
+                            onChange={(e) => setRecipeForm(prev => ({ ...prev, notes: e.target.value }))}
+                            className="min-h-[150px]"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Macros Estimados (por porção)</Label>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div className="space-y-2">
+                              <Label>Calorias (kcal)</Label>
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={recipeForm.kcal}
+                                onChange={(e) => setRecipeForm(prev => ({ ...prev, kcal: e.target.value }))}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Proteínas (g)</Label>
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={recipeForm.protein}
+                                onChange={(e) => setRecipeForm(prev => ({ ...prev, protein: e.target.value }))}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Carboidratos (g)</Label>
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={recipeForm.carb}
+                                onChange={(e) => setRecipeForm(prev => ({ ...prev, carb: e.target.value }))}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Gorduras (g)</Label>
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={recipeForm.fat}
+                                onChange={(e) => setRecipeForm(prev => ({ ...prev, fat: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <Button 
+                          className="w-full" 
+                          onClick={handleSaveRecipe}
+                          disabled={savingRecipe || !recipeForm.name.trim()}
+                        >
+                          {savingRecipe ? (
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
+                          ) : (
+                            editingRecipe ? 'Atualizar Receita' : 'Cadastrar Receita'
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </DialogContent>
                 </Dialog>
               </div>
