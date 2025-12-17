@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppLayout } from '@/components/AppLayout';
+import { ConsultationMealPlanEditor } from '@/components/ConsultationMealPlanEditor';
 import { 
   ArrowLeft, 
   Sparkles, 
@@ -365,12 +366,7 @@ Exemplo: 'Maria, 32 anos, busca emagrecimento. Trabalha em escritório, sedentá
             </TabsContent>
 
             <TabsContent value="plano" className="animate-fade-in">
-              <Card className="border-border/50">
-                <CardContent className="py-16 text-center">
-                  <Utensils className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="text-muted-foreground">Área de plano alimentar em desenvolvimento</p>
-                </CardContent>
-              </Card>
+              <ConsultationMealPlanEditor />
             </TabsContent>
 
             <TabsContent value="orientacoes" className="animate-fade-in">
