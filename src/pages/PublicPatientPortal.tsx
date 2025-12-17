@@ -50,6 +50,7 @@ interface NutritionistProfile {
   logo_url: string | null;
   primary_color: string | null;
   secondary_color: string | null;
+  email_signature: string | null;
 }
 
 interface Patient {
@@ -96,7 +97,7 @@ export default function PublicPatientPortal() {
       // Fetch nutritionist profile for branding
       const { data: nutritionistData, error: nutritionistError } = await supabase
         .from('nutritionists')
-        .select('full_name, crn, phone, logo_url, primary_color, secondary_color')
+        .select('full_name, crn, phone, logo_url, primary_color, secondary_color, email_signature')
         .eq('id', patientData.nutritionist_id)
         .single();
 
@@ -350,13 +351,18 @@ export default function PublicPatientPortal() {
           </>
         )}
 
-        {/* Footer */}
-        <footer className="text-center pt-8 pb-6 border-t">
+        {/* Footer with Email Signature */}
+        <footer className="text-center pt-8 pb-6 border-t space-y-3">
+          {nutritionist?.email_signature && (
+            <div className="text-sm text-muted-foreground whitespace-pre-line italic border-l-2 pl-4 mx-auto max-w-md text-left" style={{ borderColor: primaryColor }}>
+              {nutritionist.email_signature}
+            </div>
+          )}
           <p className="text-sm text-muted-foreground">
             Plano alimentar elaborado por {nutritionist?.full_name || 'seu nutricionista'}
           </p>
           {nutritionist?.phone && (
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground">
               Contato: {nutritionist.phone}
             </p>
           )}

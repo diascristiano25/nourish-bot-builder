@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -26,11 +26,12 @@ import {
 } from '@/components/ui/dialog';
 import { 
   Loader2, Shield, Users, Clock, CheckCircle, XCircle, MessageSquare, 
-  Send, Lock, Bell, AlertCircle, Filter, Headphones
+  Send, Lock, Bell, AlertCircle, Filter, Headphones, BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInDays, subDays, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import logoImg from '@/assets/logo.png';
 
 interface Nutritionist {
@@ -387,6 +388,28 @@ export default function AdminMaster() {
     return days > 60;
   }).length;
 
+  // Compute ticket volume by day for the last 14 days
+  const ticketVolumeData = useMemo(() => {
+    const days = 14;
+    const data = [];
+    const today = startOfDay(new Date());
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = subDays(today, i);
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const displayDate = format(date, 'dd/MM');
+      
+      const count = tickets.filter(ticket => {
+        const ticketDate = format(startOfDay(new Date(ticket.created_at)), 'yyyy-MM-dd');
+        return ticketDate === dateStr;
+      }).length;
+      
+      data.push({ date: displayDate, count });
+    }
+    
+    return data;
+  }, [tickets]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header with Notification Badge */}
@@ -504,6 +527,54 @@ export default function AdminMaster() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Ticket Volume Chart */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-primary" />
+              Volume de Tickets (Últimos 14 dias)
+            </CardTitle>
+            <CardDescription>
+              Monitore a estabilidade do sistema conforme novos usuários entram
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ticketVolumeData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      borderColor: 'hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                    labelFormatter={(value) => `Data: ${value}`}
+                    formatter={(value: number) => [`${value} tickets`, 'Volume']}
+                  />
+                  <Bar 
+                    dataKey="count" 
+                    fill="hsl(var(--primary))" 
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="tickets" className="space-y-6">

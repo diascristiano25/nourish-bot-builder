@@ -122,6 +122,7 @@ export default function PatientDetail() {
   const [loading, setLoading] = useState(true);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [sendingMagicLink, setSendingMagicLink] = useState(false);
+  const [nutritionistName, setNutritionistName] = useState<string>('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -137,6 +138,17 @@ export default function PatientDetail() {
 
   const fetchPatientData = async () => {
     try {
+      // Fetch nutritionist name first
+      const { data: nutriData } = await supabase
+        .from('nutritionists')
+        .select('full_name')
+        .eq('user_id', user!.id)
+        .single();
+      
+      if (nutriData) {
+        setNutritionistName(nutriData.full_name);
+      }
+
       // Fetch patient
       const { data: patientData, error: patientError } = await supabase
         .from('patients')
@@ -271,10 +283,15 @@ export default function PatientDetail() {
 
   const handleCopyAccessLink = () => {
     const link = `${window.location.origin}/app/${patient?.id}`;
-    navigator.clipboard.writeText(link);
+    const textToCopy = nutritionistName 
+      ? `Seu Plano Alimentar por ${nutritionistName}: ${link}`
+      : link;
+    navigator.clipboard.writeText(textToCopy);
     toast({
       title: "Link copiado!",
-      description: "Envie este link para o paciente visualizar sua dieta.",
+      description: nutritionistName 
+        ? `"Seu Plano Alimentar por ${nutritionistName}" - Envie para o paciente.`
+        : "Envie este link para o paciente visualizar sua dieta.",
     });
   };
 

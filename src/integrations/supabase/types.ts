@@ -296,6 +296,7 @@ export type Database = {
           account_status: string
           created_at: string
           crn: string | null
+          email_signature: string | null
           full_name: string
           id: string
           is_active: boolean
@@ -311,6 +312,7 @@ export type Database = {
           account_status?: string
           created_at?: string
           crn?: string | null
+          email_signature?: string | null
           full_name: string
           id?: string
           is_active?: boolean
@@ -326,6 +328,7 @@ export type Database = {
           account_status?: string
           created_at?: string
           crn?: string | null
+          email_signature?: string | null
           full_name?: string
           id?: string
           is_active?: boolean
@@ -439,6 +442,7 @@ export type Database = {
       support_tickets: {
         Row: {
           admin_response: string | null
+          attachment_url: string | null
           created_at: string
           id: string
           message: string
@@ -451,6 +455,7 @@ export type Database = {
         }
         Insert: {
           admin_response?: string | null
+          attachment_url?: string | null
           created_at?: string
           id?: string
           message: string
@@ -463,6 +468,7 @@ export type Database = {
         }
         Update: {
           admin_response?: string | null
+          attachment_url?: string | null
           created_at?: string
           id?: string
           message?: string

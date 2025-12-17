@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { HelpCircle, Loader2, Send, MessageSquare, ArrowLeft, AlertCircle, Clock, CheckCircle } from 'lucide-react';
+import { HelpCircle, Loader2, Send, MessageSquare, ArrowLeft, Clock, CheckCircle, Paperclip, X, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -34,6 +34,7 @@ interface SupportTicket {
   status: string;
   priority: string;
   created_at: string;
+  attachment_url?: string;
 }
 
 interface TicketMessage {
@@ -89,14 +90,19 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [ticketCreated, setTicketCreated] = useState(false);
+  const [createdTicketNumber, setCreatedTicketNumber] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchTickets = async () => {
     setLoadingTickets(true);
     try {
       const { data, error } = await supabase
         .from('support_tickets')
-        .select('id, ticket_number, subject, message, status, priority, created_at')
+        .select('id, ticket_number, subject, message, status, priority, created_at, attachment_url')
         .eq('nutritionist_id', nutritionistId)
         .order('created_at', { ascending: false });
 
@@ -138,7 +144,29 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
     if (isOpen) {
       fetchTickets();
       setSelectedTicket(null);
+      setTicketCreated(false);
+      setCreatedTicketNumber(null);
     }
+  };
+
+  const uploadAttachment = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${nutritionistId}/${Date.now()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from('ticket-attachments')
+      .upload(fileName, file);
+
+    if (error) {
+      console.error('Error uploading attachment:', error);
+      return null;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('ticket-attachments')
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,6 +178,14 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
 
     setLoading(true);
     try {
+      let attachmentUrl: string | null = null;
+      
+      if (attachment) {
+        setUploadingAttachment(true);
+        attachmentUrl = await uploadAttachment(attachment);
+        setUploadingAttachment(false);
+      }
+
       const { data: ticketData, error: ticketError } = await supabase
         .from('support_tickets')
         .insert({
@@ -157,6 +193,7 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
           subject: subject.trim(),
           message: message.trim(),
           priority,
+          attachment_url: attachmentUrl,
         })
         .select('id, ticket_number')
         .single();
@@ -173,17 +210,20 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
 
       if (messageError) throw messageError;
 
-      toast.success(`Ticket #${ticketData.ticket_number} criado com sucesso!`);
+      // Show success state
+      setCreatedTicketNumber(ticketData.ticket_number);
+      setTicketCreated(true);
       setSubject('');
       setMessage('');
       setPriority('normal');
-      setActiveTab('history');
+      setAttachment(null);
       fetchTickets();
     } catch (error) {
       console.error('Error creating ticket:', error);
       toast.error('Erro ao enviar ticket');
     } finally {
       setLoading(false);
+      setUploadingAttachment(false);
     }
   };
 
@@ -245,6 +285,22 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
     return (
       <span className={`inline-block w-2 h-2 rounded-full ${config.color}`} title={config.label} />
     );
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Arquivo muito grande. Máximo: 5MB');
+        return;
+      }
+      setAttachment(file);
+    }
+  };
+
+  const handleNewTicket = () => {
+    setTicketCreated(false);
+    setCreatedTicketNumber(null);
   };
 
   return (
@@ -373,7 +429,7 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
               <Button
                 variant={activeTab === 'new' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setActiveTab('new')}
+                onClick={() => { setActiveTab('new'); setTicketCreated(false); }}
               >
                 Novo Ticket
               </Button>
@@ -387,73 +443,146 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
             </div>
 
             {activeTab === 'new' ? (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Assunto</Label>
-                  <Input
-                    id="subject"
-                    placeholder="Ex: Dúvida sobre geração de planos"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    disabled={loading}
-                  />
+              ticketCreated ? (
+                // Success confirmation screen
+                <div className="py-8 text-center space-y-4">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="w-8 h-8 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-700">Ticket enviado!</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Ticket #{createdTicketNumber} criado com sucesso
+                    </p>
+                  </div>
+                  <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                    O time FlowTech responderá em até <strong>24 horas úteis</strong>.
+                    Você será notificado quando houver uma resposta.
+                  </p>
+                  <div className="flex gap-2 justify-center pt-2">
+                    <Button variant="outline" onClick={handleNewTicket}>
+                      Novo Ticket
+                    </Button>
+                    <Button onClick={() => setActiveTab('history')}>
+                      Ver Meus Tickets
+                    </Button>
+                  </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="priority">Prioridade</Label>
-                  <Select value={priority} onValueChange={setPriority} disabled={loading}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-slate-500" />
-                          Baixa
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="normal">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-blue-500" />
-                          Normal
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="high">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-orange-500" />
-                          Alta
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="urgent">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-red-500" />
-                          Urgente
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="subject">Assunto</Label>
+                    <Input
+                      id="subject"
+                      placeholder="Ex: Dúvida sobre geração de planos"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="priority">Prioridade</Label>
+                    <Select value={priority} onValueChange={setPriority} disabled={loading}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-slate-500" />
+                            Baixa
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="normal">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-blue-500" />
+                            Normal
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="high">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-orange-500" />
+                            Alta
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="urgent">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-red-500" />
+                            Urgente
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="message">Mensagem</Label>
-                  <Textarea
-                    id="message"
-                    placeholder="Descreva sua dúvida ou solicitação em detalhes..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    disabled={loading}
-                    rows={4}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Send className="h-4 w-4 mr-2" />
-                  )}
-                  Enviar Ticket
-                </Button>
-              </form>
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Mensagem</Label>
+                    <Textarea
+                      id="message"
+                      placeholder="Descreva sua dúvida ou solicitação em detalhes..."
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      disabled={loading}
+                      rows={4}
+                    />
+                  </div>
+
+                  {/* Attachment Section */}
+                  <div className="space-y-2">
+                    <Label>Anexo (opcional)</Label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      onChange={handleFileSelect}
+                    />
+                    {attachment ? (
+                      <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                        <Paperclip className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm flex-1 truncate">{attachment.name}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => setAttachment(null)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Paperclip className="w-4 h-4 mr-2" />
+                        Anexar print ou arquivo
+                      </Button>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Formatos aceitos: imagens e PDF (máx. 5MB)
+                    </p>
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        {uploadingAttachment ? 'Enviando anexo...' : 'Enviando...'}
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Enviar Ticket
+                      </>
+                    )}
+                  </Button>
+                </form>
+              )
             ) : (
               <ScrollArea className="max-h-[400px]">
                 <div className="space-y-3 pr-4">
@@ -485,9 +614,17 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
                         <p className="text-xs text-muted-foreground line-clamp-2">
                           {ticket.message}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(ticket.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(ticket.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                          </p>
+                          {ticket.attachment_url && (
+                            <Badge variant="outline" className="text-xs">
+                              <Paperclip className="w-3 h-3 mr-1" />
+                              Anexo
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     ))
                   )}

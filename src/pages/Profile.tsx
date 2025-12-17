@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader2, Save, Upload, User, Link2, Image } from 'lucide-react';
@@ -18,6 +19,7 @@ interface NutritionistProfile {
   logo_url: string | null;
   primary_color: string | null;
   secondary_color: string | null;
+  email_signature: string | null;
 }
 
 export default function Profile() {
@@ -37,6 +39,7 @@ export default function Profile() {
   const [primaryColor, setPrimaryColor] = useState('#4a7c59');
   const [secondaryColor, setSecondaryColor] = useState('#2d5a3d');
   const [logoUrl, setLogoUrl] = useState('');
+  const [emailSignature, setEmailSignature] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -67,6 +70,7 @@ export default function Profile() {
       setPrimaryColor(data.primary_color || '#4a7c59');
       setSecondaryColor(data.secondary_color || '#2d5a3d');
       setLogoUrl(data.logo_url || '');
+      setEmailSignature(data.email_signature || '');
     } catch (error: any) {
       toast({
         title: "Erro ao carregar perfil",
@@ -92,6 +96,7 @@ export default function Profile() {
           primary_color: primaryColor,
           secondary_color: secondaryColor,
           logo_url: logoUrl.trim() || null,
+          email_signature: emailSignature.trim() || null,
         })
         .eq('id', profile.id);
 
@@ -391,6 +396,40 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Assinatura de Email */}
+        <Card className="border-0 shadow-md">
+          <CardHeader>
+            <CardTitle>Assinatura de E-mail</CardTitle>
+            <CardDescription>
+              Esta assinatura aparecerá no rodapé do Portal do Paciente
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="emailSignature">Texto da Assinatura</Label>
+              <Textarea
+                id="emailSignature"
+                value={emailSignature}
+                onChange={(e) => setEmailSignature(e.target.value)}
+                placeholder="Ex: Atenciosamente, Dra. Maria Silva - Nutricionista Clínica"
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                Inclua sua despedida, nome e especialidade
+              </p>
+            </div>
+            
+            {emailSignature && (
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground mb-2">Prévia:</p>
+                <div className="text-sm whitespace-pre-line border-t pt-3 mt-2">
+                  {emailSignature}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>
