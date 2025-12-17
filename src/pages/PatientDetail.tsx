@@ -29,7 +29,7 @@ import {
   Link,
   LineChart
 } from 'lucide-react';
-import { format, differenceInYears } from 'date-fns';
+import { format, differenceInYears, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   AlertDialog,
@@ -478,7 +478,7 @@ export default function PatientDetail() {
                   <div className="flex items-center gap-3">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
                     <span>
-                      {format(new Date(patient.birth_date), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      {format(parseISO(patient.birth_date), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
                     </span>
                   </div>
                 )}
