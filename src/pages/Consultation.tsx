@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppLayout } from '@/components/AppLayout';
 import { ConsultationMealPlanEditor } from '@/components/ConsultationMealPlanEditor';
+import { useToast } from '@/hooks/use-toast';
 import { 
   ArrowLeft, 
   Sparkles, 
@@ -17,7 +18,11 @@ import {
   Activity,
   Utensils,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Loader2,
+  Wand2,
+  Heart,
+  CheckCircle2
 } from 'lucide-react';
 
 interface StructuredData {
@@ -31,13 +36,17 @@ interface StructuredData {
   habits: string;
   preferences: string;
   restrictions: string;
+  healthConditions: string;
 }
 
 export default function Consultation() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activePhase, setActivePhase] = useState<string>('anamnese');
   const [viewMode, setViewMode] = useState<'freeflow' | 'structured'>('freeflow');
   const [freeText, setFreeText] = useState('');
+  const [isParsing, setIsParsing] = useState(false);
+  const [hasParsed, setHasParsed] = useState(false);
   const [structuredData, setStructuredData] = useState<StructuredData>({
     name: '',
     age: '',
@@ -49,10 +58,98 @@ export default function Consultation() {
     habits: '',
     preferences: '',
     restrictions: '',
+    healthConditions: '',
   });
 
   const handleStructuredChange = (field: keyof StructuredData, value: string) => {
     setStructuredData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // AI Parsing function (simulated)
+  const parseTextToData = async () => {
+    if (!freeText.trim()) {
+      toast({
+        title: 'Texto vazio',
+        description: 'Digite algo na anamnese livre antes de analisar.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsParsing(true);
+    
+    // Simulate AI processing time
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const textUpper = freeText.toUpperCase();
+    const newData: Partial<StructuredData> = {};
+    
+    // Parse DIABETES
+    if (textUpper.includes('DIABETES')) {
+      newData.healthConditions = 'Diabetes Tipo 2';
+    }
+    
+    // Parse VEGETARIANO
+    if (textUpper.includes('VEGETARIANO') || textUpper.includes('VEGETARIANA')) {
+      newData.habits = 'Dieta Vegetariana';
+    }
+    
+    // Parse "PESA XX" pattern
+    const weightMatch = textUpper.match(/PESA\s*(\d+)/);
+    if (weightMatch) {
+      newData.weight = weightMatch[1];
+    }
+    
+    // Parse age pattern "XX ANOS"
+    const ageMatch = textUpper.match(/(\d+)\s*ANOS/);
+    if (ageMatch) {
+      newData.age = ageMatch[1];
+    }
+    
+    // Parse height pattern "1,XX" or "1.XX" meters
+    const heightMatch = freeText.match(/1[,.](\d{2})/);
+    if (heightMatch) {
+      newData.height = `1${heightMatch[1]}`;
+    }
+    
+    // Parse name (first capitalized word pattern)
+    const nameMatch = freeText.match(/^([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ][a-záàâãéèêíïóôõöúçñ]+)/);
+    if (nameMatch) {
+      newData.name = nameMatch[1];
+    }
+    
+    // Parse allergies/restrictions
+    if (textUpper.includes('ALERGIA') || textUpper.includes('INTOLERÂNCIA') || textUpper.includes('INTOLERANCIA')) {
+      const alergiaMatch = freeText.match(/alergia\s*(?:a|ao|à)?\s*([^,.]+)/i);
+      if (alergiaMatch) {
+        newData.restrictions = alergiaMatch[1].trim();
+      }
+    }
+    
+    // Parse HIPERTENSÃO
+    if (textUpper.includes('HIPERTENSÃO') || textUpper.includes('HIPERTENSAO') || textUpper.includes('PRESSÃO ALTA')) {
+      newData.healthConditions = (newData.healthConditions ? newData.healthConditions + ', ' : '') + 'Hipertensão';
+    }
+    
+    // Update structured data with parsed values
+    setStructuredData(prev => ({
+      ...prev,
+      ...newData
+    }));
+    
+    setIsParsing(false);
+    setHasParsed(true);
+    
+    // Switch to structured view to show results
+    setViewMode('structured');
+    
+    const fieldsFound = Object.keys(newData).length;
+    toast({
+      title: '✨ Análise concluída!',
+      description: fieldsFound > 0 
+        ? `${fieldsFound} campo(s) preenchido(s) automaticamente. Revise e edite se necessário.`
+        : 'Nenhum dado reconhecido. Tente usar palavras-chave como DIABETES, VEGETARIANO, PESA XX.',
+    });
   };
 
   const hasAIContent = freeText.length > 50;
@@ -62,7 +159,7 @@ export default function Consultation() {
       <div className="min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border/50">
-          <div className="px-8 h-16 flex items-center justify-between">
+          <div className="px-4 md:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
@@ -83,31 +180,31 @@ export default function Consultation() {
           </div>
         </header>
 
-        <main className="p-8 max-w-5xl mx-auto">
+        <main className="p-4 md:p-8 max-w-5xl mx-auto">
           {/* Phase Tabs */}
           <Tabs value={activePhase} onValueChange={setActivePhase} className="space-y-8">
-            <TabsList className="bg-muted/50 p-1 rounded-xl h-auto">
+            <TabsList className="bg-muted/50 p-1 rounded-xl h-auto flex-wrap">
               <TabsTrigger 
                 value="anamnese" 
-                className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                className="rounded-lg px-4 md:px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
               >
                 Anamnese
               </TabsTrigger>
               <TabsTrigger 
                 value="exames" 
-                className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                className="rounded-lg px-4 md:px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
               >
                 Exames
               </TabsTrigger>
               <TabsTrigger 
                 value="plano" 
-                className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                className="rounded-lg px-4 md:px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
               >
                 Plano Alimentar
               </TabsTrigger>
               <TabsTrigger 
                 value="orientacoes" 
-                className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                className="rounded-lg px-4 md:px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
               >
                 Orientações
               </TabsTrigger>
@@ -116,7 +213,7 @@ export default function Consultation() {
             {/* Anamnese Tab */}
             <TabsContent value="anamnese" className="space-y-6 animate-fade-in">
               {/* View Mode Toggle */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-medium text-foreground">Coleta de Dados</h2>
                   <p className="text-sm text-muted-foreground">
@@ -152,23 +249,50 @@ export default function Consultation() {
                     <Textarea
                       value={freeText}
                       onChange={(e) => setFreeText(e.target.value)}
-                      placeholder="Digite livremente as queixas, rotina e histórico do paciente... A IA organizará tudo depois.
+                      placeholder={`Digite livremente as queixas, rotina e histórico do paciente...
 
-Exemplo: 'Maria, 32 anos, busca emagrecimento. Trabalha em escritório, sedentária. Prefere alimentos naturais, não gosta de peixe. Sem alergias. Peso atual 72kg, altura 1,65m. Meta: perder 8kg em 4 meses. Come muito à noite por ansiedade...'"
-                      className="min-h-[450px] bg-card border-border/50 text-base leading-relaxed resize-none focus:border-primary/30 focus:ring-primary/10 rounded-xl p-6"
+Dica: Use palavras-chave para extração automática:
+• DIABETES → preenche Condições de Saúde
+• VEGETARIANO → preenche Hábitos Alimentares  
+• PESA 75 → preenche Peso Atual
+• 32 ANOS → preenche Idade
+• 1,65 → preenche Altura
+
+Exemplo: "Maria, 32 anos, PESA 75kg, altura 1,65m. Tem DIABETES tipo 2. É VEGETARIANA há 3 anos..."`}
+                      className="min-h-[400px] bg-card border-border/50 text-base leading-relaxed resize-none focus:border-primary/30 focus:ring-primary/10 rounded-xl p-6"
                     />
                     
                     {/* AI Status */}
                     {freeText.length > 0 && (
                       <div className="absolute bottom-4 right-4 flex items-center gap-2 text-xs text-muted-foreground bg-background/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-border/50">
                         <Sparkles className={`w-3.5 h-3.5 ${hasAIContent ? 'text-primary' : 'text-muted-foreground/50'}`} />
-                        {hasAIContent ? 'Pronto para estruturar' : 'Continue escrevendo...'}
+                        {hasAIContent ? 'Pronto para analisar' : 'Continue escrevendo...'}
                       </div>
                     )}
                   </div>
 
+                  {/* AI Parse Button */}
+                  <Button
+                    onClick={parseTextToData}
+                    disabled={isParsing || !freeText.trim()}
+                    className="w-full gap-2 h-12 text-base"
+                    size="lg"
+                  >
+                    {isParsing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Analisando texto...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="w-5 h-5" />
+                        Analisar Texto e Preencher Estruturado
+                      </>
+                    )}
+                  </Button>
+
                   {/* AI Hint */}
-                  {hasAIContent && (
+                  {hasAIContent && !hasParsed && (
                     <Card className="border-primary/20 bg-primary/5 animate-scale-in">
                       <CardContent className="py-4 px-5">
                         <div className="flex items-start gap-3">
@@ -176,9 +300,9 @@ Exemplo: 'Maria, 32 anos, busca emagrecimento. Trabalha em escritório, sedentá
                             <Sparkles className="w-4 h-4 text-primary" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">Dados detectados pela IA</p>
+                            <p className="text-sm font-medium text-foreground">Texto pronto para análise</p>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              Clique em "Visualização Estruturada" para ver os campos preenchidos automaticamente.
+                              Clique no botão acima para extrair os dados automaticamente.
                             </p>
                           </div>
                         </div>
@@ -192,12 +316,12 @@ Exemplo: 'Maria, 32 anos, busca emagrecimento. Trabalha em escritório, sedentá
               {viewMode === 'structured' && (
                 <div className="space-y-6">
                   {/* AI Notice */}
-                  {hasAIContent && (
+                  {hasParsed && (
                     <Card className="border-primary/20 bg-primary/5">
                       <CardContent className="py-3 px-4">
                         <p className="text-xs text-muted-foreground flex items-center gap-2">
-                          <Sparkles className="w-3.5 h-3.5 text-primary" />
-                          Campos preenchidos automaticamente com base nas suas anotações livres.
+                          <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                          Campos preenchidos pela IA. Todos são editáveis - corrija se necessário.
                         </p>
                       </CardContent>
                     </Card>
@@ -216,22 +340,20 @@ Exemplo: 'Maria, 32 anos, busca emagrecimento. Trabalha em escritório, sedentá
                         <Label htmlFor="name" className="text-sm text-muted-foreground">Nome</Label>
                         <Input
                           id="name"
-                          value={hasAIContent ? 'Maria Silva' : structuredData.name}
+                          value={structuredData.name}
                           onChange={(e) => handleStructuredChange('name', e.target.value)}
                           placeholder="Nome completo"
-                          disabled={hasAIContent}
-                          className="rounded-lg h-10 disabled:bg-muted/50 disabled:text-foreground"
+                          className="rounded-lg h-10"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="age" className="text-sm text-muted-foreground">Idade</Label>
                         <Input
                           id="age"
-                          value={hasAIContent ? '32' : structuredData.age}
+                          value={structuredData.age}
                           onChange={(e) => handleStructuredChange('age', e.target.value)}
                           placeholder="Ex: 32"
-                          disabled={hasAIContent}
-                          className="rounded-lg h-10 disabled:bg-muted/50 disabled:text-foreground"
+                          className="rounded-lg h-10"
                         />
                       </div>
                     </CardContent>
@@ -250,22 +372,20 @@ Exemplo: 'Maria, 32 anos, busca emagrecimento. Trabalha em escritório, sedentá
                         <Label htmlFor="weight" className="text-sm text-muted-foreground">Peso (kg)</Label>
                         <Input
                           id="weight"
-                          value={hasAIContent ? '72' : structuredData.weight}
+                          value={structuredData.weight}
                           onChange={(e) => handleStructuredChange('weight', e.target.value)}
                           placeholder="Ex: 72"
-                          disabled={hasAIContent}
-                          className="rounded-lg h-10 disabled:bg-muted/50 disabled:text-foreground"
+                          className="rounded-lg h-10"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="height" className="text-sm text-muted-foreground">Altura (cm)</Label>
                         <Input
                           id="height"
-                          value={hasAIContent ? '165' : structuredData.height}
+                          value={structuredData.height}
                           onChange={(e) => handleStructuredChange('height', e.target.value)}
                           placeholder="Ex: 165"
-                          disabled={hasAIContent}
-                          className="rounded-lg h-10 disabled:bg-muted/50 disabled:text-foreground"
+                          className="rounded-lg h-10"
                         />
                       </div>
                       <div className="space-y-2">
@@ -301,6 +421,24 @@ Exemplo: 'Maria, 32 anos, busca emagrecimento. Trabalha em escritório, sedentá
                     </CardContent>
                   </Card>
 
+                  {/* Health Conditions */}
+                  <Card className="border-border/50">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-base font-medium flex items-center gap-2">
+                        <Heart className="w-4 h-4 text-primary" />
+                        Condições de Saúde
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Textarea
+                        value={structuredData.healthConditions}
+                        onChange={(e) => handleStructuredChange('healthConditions', e.target.value)}
+                        placeholder="Diabetes, hipertensão, colesterol alto, etc."
+                        className="min-h-[80px] rounded-lg"
+                      />
+                    </CardContent>
+                  </Card>
+
                   {/* Habits */}
                   <Card className="border-border/50">
                     <CardHeader className="pb-4">
@@ -311,11 +449,10 @@ Exemplo: 'Maria, 32 anos, busca emagrecimento. Trabalha em escritório, sedentá
                     </CardHeader>
                     <CardContent>
                       <Textarea
-                        value={hasAIContent ? 'Trabalha em escritório, sedentária. Come muito à noite por ansiedade.' : structuredData.habits}
+                        value={structuredData.habits}
                         onChange={(e) => handleStructuredChange('habits', e.target.value)}
                         placeholder="Descreva a rotina do paciente, nível de atividade física, horários, etc."
-                        disabled={hasAIContent}
-                        className="min-h-[100px] rounded-lg disabled:bg-muted/50 disabled:text-foreground"
+                        className="min-h-[100px] rounded-lg"
                       />
                     </CardContent>
                   </Card>
@@ -332,21 +469,19 @@ Exemplo: 'Maria, 32 anos, busca emagrecimento. Trabalha em escritório, sedentá
                       <div className="space-y-2">
                         <Label className="text-sm text-muted-foreground">Preferências</Label>
                         <Textarea
-                          value={hasAIContent ? 'Prefere alimentos naturais' : structuredData.preferences}
+                          value={structuredData.preferences}
                           onChange={(e) => handleStructuredChange('preferences', e.target.value)}
                           placeholder="Alimentos que o paciente gosta, preferências culinárias..."
-                          disabled={hasAIContent}
-                          className="min-h-[80px] rounded-lg disabled:bg-muted/50 disabled:text-foreground"
+                          className="min-h-[80px] rounded-lg"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm text-muted-foreground">Restrições e Alergias</Label>
                         <Textarea
-                          value={hasAIContent ? 'Não gosta de peixe. Sem alergias.' : structuredData.restrictions}
+                          value={structuredData.restrictions}
                           onChange={(e) => handleStructuredChange('restrictions', e.target.value)}
                           placeholder="Alergias, intolerâncias, alimentos que evita..."
-                          disabled={hasAIContent}
-                          className="min-h-[80px] rounded-lg disabled:bg-muted/50 disabled:text-foreground"
+                          className="min-h-[80px] rounded-lg"
                         />
                       </div>
                     </CardContent>
