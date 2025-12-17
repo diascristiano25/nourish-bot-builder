@@ -404,6 +404,47 @@ export type Database = {
           },
         ]
       }
+      support_tickets: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          id: string
+          message: string
+          nutritionist_id: string
+          responded_at: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          nutritionist_id: string
+          responded_at?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          nutritionist_id?: string
+          responded_at?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_nutritionist_id_fkey"
+            columns: ["nutritionist_id"]
+            isOneToOne: false
+            referencedRelation: "nutritionists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       water_logs: {
         Row: {
           created_at: string
