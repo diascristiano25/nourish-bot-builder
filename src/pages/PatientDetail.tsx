@@ -404,6 +404,7 @@ export default function PatientDetail() {
               onClick={() => window.open(`/paciente/${patient?.id}`, '_blank')}
               title="Visualizar Portal do Paciente"
               className="gap-2"
+              data-tour="patient-portal"
             >
               <Link className="w-4 h-4" />
               Ver Portal

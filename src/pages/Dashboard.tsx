@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { AppLayout } from '@/components/AppLayout';
 import { SupportDialog } from '@/components/SupportDialog';
+import { OnboardingTour } from '@/components/OnboardingTour';
 import { 
   Plus, 
   Users, 
@@ -18,7 +19,8 @@ import {
   Settings2,
   Sparkles,
   Eye,
-  EyeOff
+  EyeOff,
+  User
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -202,6 +204,9 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
+      {/* Onboarding Tour */}
+      {profile && <OnboardingTour nutritionistId={profile.id} />}
+      
       <div className="min-h-screen">
         {/* Top Bar */}
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border/50">
@@ -305,6 +310,7 @@ export default function Dashboard() {
                   <Button 
                     className="w-full justify-start h-12 rounded-lg text-sm font-medium"
                     onClick={() => navigate('/consulta')}
+                    data-tour="ai-consultation"
                   >
                     <Plus className="w-4 h-4 mr-3" />
                     Nova Consulta
@@ -313,9 +319,19 @@ export default function Dashboard() {
                     variant="outline"
                     className="w-full justify-start h-12 rounded-lg text-sm font-medium border-border/50 hover:bg-primary/5 hover:border-primary/30"
                     onClick={() => navigate('/patients/new')}
+                    data-tour="new-patient"
                   >
                     <Users className="w-4 h-4 mr-3 text-primary" />
                     Cadastrar Paciente
+                  </Button>
+                  <Button 
+                    variant="ghost"
+                    className="w-full justify-start h-12 rounded-lg text-sm font-medium"
+                    onClick={() => navigate('/profile')}
+                    data-tour="profile-settings"
+                  >
+                    <User className="w-4 h-4 mr-3 text-muted-foreground" />
+                    Configurar Perfil
                   </Button>
                 </CardContent>
               </Card>

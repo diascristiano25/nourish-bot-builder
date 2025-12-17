@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -22,9 +23,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { HelpCircle, Loader2, Send, MessageSquare, ArrowLeft, Clock, CheckCircle, Paperclip, X, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, Loader2, Send, MessageSquare, ArrowLeft, Clock, CheckCircle, Paperclip, X, CheckCircle2, GraduationCap } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { restartOnboardingTour } from './OnboardingTour';
 
 interface SupportTicket {
   id: string;
@@ -46,6 +48,7 @@ interface TicketMessage {
 
 interface SupportDialogProps {
   nutritionistId: string;
+  onRestartTour?: () => void;
 }
 
 const priorityConfig = {
@@ -76,7 +79,7 @@ const statusConfig = {
   },
 };
 
-export function SupportDialog({ nutritionistId }: SupportDialogProps) {
+export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogProps) {
   const [open, setOpen] = useState(false);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
@@ -631,6 +634,27 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
                 </div>
               </ScrollArea>
             )}
+            
+            {/* Restart Tour Button */}
+            <Separator className="my-4" />
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full gap-2 text-primary border-primary/30 hover:bg-primary/5"
+                onClick={() => {
+                  restartOnboardingTour(nutritionistId);
+                  setOpen(false);
+                  onRestartTour?.();
+                  toast.success('Tour reiniciado! Recarregue a página para começar.');
+                  // Reload page to start tour
+                  window.location.reload();
+                }}
+              >
+                <GraduationCap className="w-4 h-4" />
+                Dúvidas? Reiniciar Tour de Treinamento
+              </Button>
+            </div>
           </>
         )}
       </DialogContent>
