@@ -56,7 +56,7 @@ interface NutritionistProfile {
 interface Patient {
   id: string;
   full_name: string;
-  nutritionist_id: string;
+  goal: string | null;
 }
 
 const mealIcons: Record<string, React.ReactNode> = {
@@ -84,43 +84,21 @@ export default function PublicPatientPortal() {
 
   const fetchData = async () => {
     try {
-      // Fetch patient data
-      const { data: patientData, error: patientError } = await supabase
-        .from('patients')
-        .select('id, full_name, nutritionist_id')
-        .eq('id', patientId)
-        .single();
+      // Use secure edge function to fetch portal data
+      const { data, error: fnError } = await supabase.functions.invoke('public-patient-portal', {
+        body: { patientId }
+      });
 
-      if (patientError) throw new Error('Paciente não encontrado');
-      setPatient(patientData);
+      if (fnError) throw new Error('Erro ao carregar dados');
+      if (data.error) throw new Error(data.error);
 
-      // Fetch nutritionist profile for branding
-      const { data: nutritionistData, error: nutritionistError } = await supabase
-        .from('nutritionists')
-        .select('full_name, crn, phone, logo_url, primary_color, secondary_color, email_signature')
-        .eq('id', patientData.nutritionist_id)
-        .single();
-
-      if (!nutritionistError && nutritionistData) {
-        setNutritionist(nutritionistData);
-      }
-
-      // Fetch latest active meal plan
-      const { data: mealPlanData, error: mealPlanError } = await supabase
-        .from('meal_plans')
-        .select('*')
-        .eq('patient_id', patientId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (mealPlanError) throw mealPlanError;
+      setPatient(data.patient);
+      setNutritionist(data.nutritionist);
       
-      if (mealPlanData) {
+      if (data.mealPlan) {
         setMealPlan({
-          ...mealPlanData,
-          plan_data: mealPlanData.plan_data as unknown as MealPlanData
+          ...data.mealPlan,
+          plan_data: data.mealPlan.plan_data as MealPlanData
         });
       }
 
