@@ -231,6 +231,73 @@ export type Database = {
           },
         ]
       }
+      water_logs: {
+        Row: {
+          created_at: string
+          date: string
+          goal_ml: number
+          id: string
+          patient_id: string
+          quantity_ml: number
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          goal_ml?: number
+          id?: string
+          patient_id: string
+          quantity_ml?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          goal_ml?: number
+          id?: string
+          patient_id?: string
+          quantity_ml?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "water_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weight_logs: {
+        Row: {
+          created_at: string
+          id: string
+          patient_id: string
+          recorded_at: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          patient_id: string
+          recorded_at?: string
+          weight: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          patient_id?: string
+          recorded_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weight_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

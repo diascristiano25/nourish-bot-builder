@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { PatientProgressTab } from '@/components/monitoring';
 import { 
   Loader2, 
   UtensilsCrossed, 
@@ -18,7 +19,8 @@ import {
   Leaf,
   LogOut,
   CheckCircle2,
-  Circle
+  Circle,
+  TrendingUp
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -86,6 +88,7 @@ export default function PatientPortal() {
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  const [patientId, setPatientId] = useState<string | null>(null);
   const [patientName, setPatientName] = useState<string>('');
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [groceryList, setGroceryList] = useState<GroceryCategory[]>([]);
@@ -120,6 +123,7 @@ export default function PatientPortal() {
         return;
       }
 
+      setPatientId(patient.id);
       setPatientName(patient.full_name);
 
       // Fetch latest meal plan
@@ -225,10 +229,14 @@ export default function PatientPortal() {
 
       <main className="pb-20">
         <Tabs defaultValue="dieta" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sticky top-14 z-40 bg-card border-b rounded-none h-12">
+          <TabsList className="grid w-full grid-cols-3 sticky top-14 z-40 bg-card border-b rounded-none h-12">
             <TabsTrigger value="dieta" className="data-[state=active]:bg-primary/10 rounded-none">
               <UtensilsCrossed className="w-4 h-4 mr-2" />
               Dieta
+            </TabsTrigger>
+            <TabsTrigger value="progresso" className="data-[state=active]:bg-primary/10 rounded-none">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Progresso
             </TabsTrigger>
             <TabsTrigger value="lista" className="data-[state=active]:bg-primary/10 rounded-none">
               <ShoppingCart className="w-4 h-4 mr-2" />
@@ -324,6 +332,11 @@ export default function PatientPortal() {
                 )}
               </>
             )}
+          </TabsContent>
+
+          {/* Progress Tab */}
+          <TabsContent value="progresso" className="mt-0 px-4 py-4">
+            {patientId && <PatientProgressTab patientId={patientId} />}
           </TabsContent>
 
           <TabsContent value="lista" className="mt-0 px-4 py-4 space-y-4">
