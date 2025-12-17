@@ -97,6 +97,11 @@ export default function Consultation() {
     healthConditions: '',
   });
 
+  // New tabs state
+  const [examesText, setExamesText] = useState('');
+  const [orientacoesText, setOrientacoesText] = useState('');
+  const [mealPlanData, setMealPlanData] = useState<any>(null);
+
   // Fetch patients list
   useEffect(() => {
     const fetchPatients = async () => {
@@ -149,11 +154,20 @@ export default function Consultation() {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSaveConsultation = async () => {
+  const handleFinalizeConsultation = async () => {
     if (!selectedPatientId) {
       toast({
         title: 'Paciente não selecionado',
-        description: 'Selecione um paciente antes de salvar a consulta.',
+        description: 'Selecione um paciente antes de finalizar a consulta.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: 'Não autenticado',
+        description: 'Faça login para salvar a consulta.',
         variant: 'destructive'
       });
       return;
@@ -162,25 +176,93 @@ export default function Consultation() {
     setIsSaving(true);
     
     try {
-      // Save consultation data (for now, just show success since we don't have a consultations table yet)
-      // In the future, this would save to a consultations table
+      // 1. Get nutritionist ID
+      const { data: nutri, error: nutriError } = await supabase
+        .from('nutritionists')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
       
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate save
+      if (nutriError || !nutri) throw new Error('Nutricionista não encontrado');
+
+      // 2. Update patient data if weight/height/conditions changed
+      const patientUpdates: Record<string, any> = {};
+      if (structuredData.healthConditions) {
+        patientUpdates.medical_conditions = structuredData.healthConditions;
+      }
+      
+      if (Object.keys(patientUpdates).length > 0) {
+        await supabase
+          .from('patients')
+          .update(patientUpdates)
+          .eq('id', selectedPatientId);
+      }
+
+      // 3. Create anthropometrics record if weight/height provided
+      if (structuredData.weight || structuredData.height) {
+        await supabase
+          .from('anthropometrics')
+          .insert({
+            patient_id: selectedPatientId,
+            weight_kg: structuredData.weight ? parseFloat(structuredData.weight) : null,
+            height_cm: structuredData.height ? parseFloat(structuredData.height) : null,
+            waist_cm: structuredData.waist ? parseFloat(structuredData.waist) : null,
+            hip_cm: structuredData.hip ? parseFloat(structuredData.hip) : null,
+            body_fat_percentage: structuredData.bodyFat ? parseFloat(structuredData.bodyFat) : null,
+            notes: 'Registro via consulta'
+          });
+      }
+
+      // 4. Create appointment record with all consultation data
+      const consultationNotes = JSON.stringify({
+        anamnese: {
+          freeText,
+          structured: structuredData
+        },
+        exames: examesText,
+        orientacoes: orientacoesText,
+        mealPlan: mealPlanData
+      });
+
+      const { error: appointmentError } = await supabase
+        .from('appointments')
+        .insert({
+          patient_id: selectedPatientId,
+          nutritionist_id: nutri.id,
+          date_time: new Date().toISOString(),
+          status: 'completed',
+          notes: consultationNotes
+        });
+
+      if (appointmentError) throw appointmentError;
       
       toast({
-        title: '✅ Consulta salva!',
-        description: `Dados da consulta de ${selectedPatientName} foram salvos com sucesso.`,
+        title: '✅ Consulta finalizada!',
+        description: `Todos os dados de ${selectedPatientName} foram salvos com sucesso.`,
       });
+
+      // 5. Redirect to patient summary
+      navigate(`/patients/${selectedPatientId}`);
+      
     } catch (error: any) {
       console.error('Error saving consultation:', error);
       toast({
-        title: 'Erro ao salvar',
+        title: 'Erro ao salvar consulta',
         description: error.message || 'Tente novamente.',
         variant: 'destructive'
       });
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Callback to receive meal plan data from editor
+  const handleMealPlanSave = (planData: any) => {
+    setMealPlanData(planData);
+    toast({
+      title: 'Plano atualizado',
+      description: 'Dados do plano alimentar foram atualizados.',
+    });
   };
 
   const handleStructuredChange = (field: keyof StructuredData, value: string) => {
@@ -303,9 +385,9 @@ export default function Consultation() {
               </div>
               <Button 
                 size="sm" 
-                className="h-9 rounded-lg px-5 gap-2"
-                onClick={handleSaveConsultation}
-                disabled={isSaving}
+                className="h-10 rounded-lg px-6 gap-2 bg-primary hover:bg-primary/90 font-medium"
+                onClick={handleFinalizeConsultation}
+                disabled={isSaving || !selectedPatientId}
               >
                 {isSaving ? (
                   <>
@@ -313,7 +395,10 @@ export default function Consultation() {
                     Salvando...
                   </>
                 ) : (
-                  'Salvar Consulta'
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    Finalizar e Salvar
+                  </>
                 )}
               </Button>
             </div>
@@ -692,12 +777,35 @@ Exemplo: "Maria, 32 anos, PESA 75kg, altura 1,65m. Tem DIABETES tipo 2. É VEGET
               )}
             </TabsContent>
 
-            {/* Other Tabs - Placeholder */}
+            {/* Exames Tab */}
             <TabsContent value="exames" className="animate-fade-in">
               <Card className="border-border/50">
-                <CardContent className="py-16 text-center">
-                  <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="text-muted-foreground">Área de exames em desenvolvimento</p>
+                <CardHeader>
+                  <CardTitle className="text-base font-medium flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    Resultados de Exames
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Registre os resultados de exames laboratoriais, bioquímicos e outros.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    value={examesText}
+                    onChange={(e) => setExamesText(e.target.value)}
+                    placeholder={`Digite os resultados dos exames do paciente...
+
+Exemplo:
+• Glicemia em jejum: 98 mg/dL (normal)
+• Colesterol Total: 210 mg/dL (limítrofe)
+• HDL: 45 mg/dL
+• LDL: 140 mg/dL
+• Triglicerídeos: 180 mg/dL
+• Hemoglobina Glicada: 5.8%
+• TSH: 2.5 mUI/L
+• Vitamina D: 28 ng/mL`}
+                    className="min-h-[400px] bg-card border-border/50 text-base leading-relaxed resize-none focus:border-primary/30 focus:ring-primary/10 rounded-xl p-6"
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -706,14 +814,43 @@ Exemplo: "Maria, 32 anos, PESA 75kg, altura 1,65m. Tem DIABETES tipo 2. É VEGET
               <ConsultationMealPlanEditor 
                 patientId={selectedPatientId || undefined}
                 patientName={selectedPatientName || 'Paciente'}
+                onSave={handleMealPlanSave}
               />
             </TabsContent>
 
+            {/* Orientações Tab */}
             <TabsContent value="orientacoes" className="animate-fade-in">
               <Card className="border-border/50">
-                <CardContent className="py-16 text-center">
-                  <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="text-muted-foreground">Área de orientações em desenvolvimento</p>
+                <CardHeader>
+                  <CardTitle className="text-base font-medium flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-primary" />
+                    Orientações e Recomendações
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Escreva orientações gerais, suplementação e recomendações para o paciente.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    value={orientacoesText}
+                    onChange={(e) => setOrientacoesText(e.target.value)}
+                    placeholder={`Digite as orientações e recomendações para o paciente...
+
+Exemplo:
+ORIENTAÇÕES GERAIS:
+• Manter hidratação adequada (2L de água/dia)
+• Praticar atividade física 3x por semana
+• Evitar alimentos ultraprocessados
+
+SUPLEMENTAÇÃO:
+• Vitamina D: 2000 UI/dia (manhã)
+• Ômega 3: 1g/dia (almoço)
+
+PRÓXIMOS PASSOS:
+• Retorno em 30 dias para reavaliação
+• Repetir exames de perfil lipídico`}
+                    className="min-h-[400px] bg-card border-border/50 text-base leading-relaxed resize-none focus:border-primary/30 focus:ring-primary/10 rounded-xl p-6"
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
