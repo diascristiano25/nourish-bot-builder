@@ -242,7 +242,7 @@ export default function MealPlanView() {
 
     setSharing(true);
     try {
-      const portalUrl = `https://nutriflow.inf.br/paciente/${id}`;
+      const portalUrl = `${window.location.origin}/paciente/${id}`;
       const shareText = `Seu Plano Alimentar por ${nutritionist?.full_name || 'seu nutricionista'}: ${portalUrl}`;
       
       // Try Web Share API first

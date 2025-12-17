@@ -42,6 +42,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Patient {
   id: string;
@@ -282,11 +288,11 @@ export default function PatientDetail() {
   };
 
   const handleCopyPortalLink = () => {
-    const portalUrl = `https://nutriflow.inf.br/paciente/${patient?.id}`;
+    const portalUrl = `${window.location.origin}/paciente/${patient?.id}`;
     navigator.clipboard.writeText(portalUrl);
     toast({
       title: "Link copiado!",
-      description: "Envie via WhatsApp para o seu paciente.",
+      description: "Link de acesso seguro gerado via infraestrutura NutriFlow.",
     });
   };
 
@@ -385,16 +391,24 @@ export default function PatientDetail() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleCopyPortalLink}
-              title="Copiar Link do Portal"
-              className="gap-2"
-            >
-              <Copy className="w-4 h-4" />
-              Copiar Link
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleCopyPortalLink}
+                    className="gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copiar Link
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs text-center">
+                  <p className="text-xs">Link de acesso seguro gerado via infraestrutura NutriFlow</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button 
               variant="outline" 
               size="sm"
