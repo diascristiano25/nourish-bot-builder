@@ -58,13 +58,13 @@ export default function Index() {
           </div>
           <nav className="flex items-center gap-6">
             <a 
-              href="#sobre" 
+              href="/sobre" 
               className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline"
             >
               Sobre Nós
             </a>
             <a 
-              href="mailto:suportenutriflow@gmail.com" 
+              href="mailto:contato@flowtechgroup.com.br" 
               className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline"
             >
               Contato
@@ -536,22 +536,62 @@ export default function Index() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-border">
+      <footer className="py-10 border-t border-border bg-muted/20">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src={logoImg} alt="NutriFlow" className="w-8 h-8 object-contain" />
-              <span className="font-semibold">NutriFlow</span>
+          <div className="max-w-5xl mx-auto">
+            {/* Top Section */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-8">
+              <div className="flex items-center gap-3">
+                <img src={logoImg} alt="NutriFlow" className="w-10 h-10 object-contain" />
+                <div>
+                  <span className="font-bold text-lg block">NutriFlow</span>
+                  <span className="text-xs text-muted-foreground">by FlowTech Group</span>
+                </div>
+              </div>
+              
+              {/* Links */}
+              <nav className="flex flex-wrap items-center gap-6">
+                <a 
+                  href="/sobre"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Sobre Nós
+                </a>
+                <a 
+                  href="/privacidade"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Privacidade
+                </a>
+                <a 
+                  href="/privacidade"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Termos de Uso
+                </a>
+                <a 
+                  href="mailto:contato@flowtechgroup.com.br"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Contato
+                </a>
+              </nav>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 NutriFlow. Plataforma para nutricionistas.
-            </p>
-            <a 
-              href="mailto:suportenutriflow@gmail.com"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              suportenutriflow@gmail.com
-            </a>
+            
+            {/* Divider */}
+            <div className="border-t border-border pt-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-muted-foreground text-center md:text-left">
+                  © 2025 NutriFlow | FlowTech Group - CNPJ: 46.684.547/0001-54. Todos os direitos reservados.
+                </p>
+                <a 
+                  href="mailto:contato@flowtechgroup.com.br"
+                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  contato@flowtechgroup.com.br
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </footer>

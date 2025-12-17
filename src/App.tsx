@@ -27,6 +27,8 @@ import Agenda from "./pages/Agenda";
 import Financeiro from "./pages/Financeiro";
 import Patients from "./pages/Patients";
 import Biblioteca from "./pages/Biblioteca";
+import Privacidade from "./pages/Privacidade";
+import Sobre from "./pages/Sobre";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,8 @@ function App() {
             <AccountStatusGuard>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/privacidade" element={<Privacidade />} />
+                <Route path="/sobre" element={<Sobre />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/patient-auth" element={<PatientAuth />} />
                 <Route path="/patient-portal" element={<PatientPortal />} />
