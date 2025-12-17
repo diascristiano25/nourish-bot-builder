@@ -282,7 +282,7 @@ export default function PatientDetail() {
   };
 
   const handleCopyPortalLink = () => {
-    const portalUrl = `https://nourish-bot-builder.lovable.app/paciente/${patient?.id}`;
+    const portalUrl = `https://nutriflow.inf.br/paciente/${patient?.id}`;
     navigator.clipboard.writeText(portalUrl);
     toast({
       title: "Link copiado!",
