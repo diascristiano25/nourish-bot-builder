@@ -185,49 +185,67 @@ export default function Consultation() {
       
       if (nutriError || !nutri) throw new Error('Nutricionista não encontrado');
 
-      // 2. Update patient data if conditions changed
-      const patientUpdates: Record<string, any> = {};
-      if (structuredData.healthConditions) {
-        patientUpdates.medical_conditions = structuredData.healthConditions;
-      }
-      
-      if (Object.keys(patientUpdates).length > 0) {
-        await supabase
-          .from('patients')
-          .update(patientUpdates)
-          .eq('id', selectedPatientId);
+      // 2. PRIMEIRO: Salvar peso em weight_logs (para gráfico)
+      if (structuredData.weight) {
+        const weightValue = parseFloat(structuredData.weight.replace(',', '.'));
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Verificar se já existe registro para hoje
+        const { data: existingLog } = await supabase
+          .from('weight_logs')
+          .select('id')
+          .eq('patient_id', selectedPatientId)
+          .eq('recorded_at', today)
+          .maybeSingle();
+        
+        if (existingLog) {
+          // Atualizar registro existente
+          await supabase
+            .from('weight_logs')
+            .update({ weight: weightValue })
+            .eq('id', existingLog.id);
+        } else {
+          // Criar novo registro
+          await supabase
+            .from('weight_logs')
+            .insert({
+              patient_id: selectedPatientId,
+              weight: weightValue,
+              recorded_at: today,
+            });
+        }
+        
+        console.log('Weight saved to weight_logs:', weightValue);
       }
 
-      // 3. Create anthropometrics record ONLY with provided values
+      // 3. Salvar em anthropometrics (para histórico completo)
       const hasAnyMeasurement = structuredData.weight || structuredData.height || 
                                 structuredData.waist || structuredData.hip || structuredData.bodyFat;
       
       if (hasAnyMeasurement) {
-        await supabase
+        const { error: anthropError } = await supabase
           .from('anthropometrics')
           .insert({
             patient_id: selectedPatientId,
             notes: 'Registro via consulta',
-            weight_kg: structuredData.weight ? parseFloat(structuredData.weight) : undefined,
-            height_cm: structuredData.height ? parseFloat(structuredData.height) : undefined,
-            waist_cm: structuredData.waist ? parseFloat(structuredData.waist) : undefined,
-            hip_cm: structuredData.hip ? parseFloat(structuredData.hip) : undefined,
-            body_fat_percentage: structuredData.bodyFat ? parseFloat(structuredData.bodyFat) : undefined,
+            weight_kg: structuredData.weight ? parseFloat(structuredData.weight.replace(',', '.')) : undefined,
+            height_cm: structuredData.height ? parseFloat(structuredData.height.replace(',', '.')) : undefined,
+            waist_cm: structuredData.waist ? parseFloat(structuredData.waist.replace(',', '.')) : undefined,
+            hip_cm: structuredData.hip ? parseFloat(structuredData.hip.replace(',', '.')) : undefined,
+            body_fat_percentage: structuredData.bodyFat ? parseFloat(structuredData.bodyFat.replace(',', '.')) : undefined,
           });
+        
+        if (anthropError) {
+          console.error('Anthropometrics error:', anthropError);
+        }
       }
 
-      // 4. Also add to weight_logs for chart consistency
-      if (structuredData.weight) {
-        const today = new Date().toISOString().split('T')[0];
+      // 4. Atualizar condições de saúde do paciente
+      if (structuredData.healthConditions) {
         await supabase
-          .from('weight_logs')
-          .upsert({
-            patient_id: selectedPatientId,
-            weight: parseFloat(structuredData.weight),
-            recorded_at: today,
-          }, {
-            onConflict: 'patient_id,recorded_at',
-          });
+          .from('patients')
+          .update({ medical_conditions: structuredData.healthConditions })
+          .eq('id', selectedPatientId);
       }
 
       // 4. Create appointment record with all consultation data
