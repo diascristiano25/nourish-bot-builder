@@ -443,6 +443,7 @@ export type Database = {
           id: string
           message: string
           nutritionist_id: string
+          priority: string
           responded_at: string | null
           status: string
           subject: string
@@ -454,6 +455,7 @@ export type Database = {
           id?: string
           message: string
           nutritionist_id: string
+          priority?: string
           responded_at?: string | null
           status?: string
           subject: string
@@ -465,6 +467,7 @@ export type Database = {
           id?: string
           message?: string
           nutritionist_id?: string
+          priority?: string
           responded_at?: string | null
           status?: string
           subject?: string

@@ -9,6 +9,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +24,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Shield, Users, Clock, CheckCircle, XCircle, MessageSquare, Send, Lock } from 'lucide-react';
+import { 
+  Loader2, Shield, Users, Clock, CheckCircle, XCircle, MessageSquare, 
+  Send, Lock, Bell, AlertCircle, Filter, Headphones
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -38,6 +49,7 @@ interface SupportTicket {
   subject: string;
   message: string;
   status: string;
+  priority: string;
   created_at: string;
   nutritionist: {
     full_name: string;
@@ -51,8 +63,20 @@ interface TicketMessage {
   created_at: string;
 }
 
-// Master admin email - only this user can access
 const MASTER_ADMIN_EMAIL = 'admin@flowtechgroup.com.br';
+
+const priorityConfig = {
+  low: { label: 'Baixa', color: 'bg-slate-500', order: 1 },
+  normal: { label: 'Normal', color: 'bg-blue-500', order: 2 },
+  high: { label: 'Alta', color: 'bg-orange-500', order: 3 },
+  urgent: { label: 'Urgente', color: 'bg-red-500', order: 4 },
+};
+
+const statusConfig = {
+  open: { label: 'Pendente', variant: 'secondary' as const },
+  answered: { label: 'Respondido', variant: 'default' as const },
+  closed: { label: 'Resolvido', variant: 'outline' as const },
+};
 
 export default function AdminMaster() {
   const { user, loading: authLoading } = useAuth();
@@ -68,7 +92,11 @@ export default function AdminMaster() {
   const [newMessage, setNewMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
   const [closingTicket, setClosingTicket] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const pendingTicketsCount = tickets.filter(t => t.status === 'open').length;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -140,6 +168,7 @@ export default function AdminMaster() {
           subject,
           message,
           status,
+          priority,
           created_at,
           nutritionist:nutritionists(full_name)
         `)
@@ -151,6 +180,14 @@ export default function AdminMaster() {
         ...ticket,
         nutritionist: Array.isArray(ticket.nutritionist) ? ticket.nutritionist[0] : ticket.nutritionist
       }));
+      
+      // Sort by priority (urgent first) then by date
+      formattedTickets.sort((a, b) => {
+        const priorityA = priorityConfig[a.priority as keyof typeof priorityConfig]?.order || 0;
+        const priorityB = priorityConfig[b.priority as keyof typeof priorityConfig]?.order || 0;
+        if (priorityB !== priorityA) return priorityB - priorityA;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
       
       setTickets(formattedTickets as SupportTicket[]);
     } catch (error) {
@@ -259,7 +296,6 @@ export default function AdminMaster() {
 
       if (error) throw error;
 
-      // Update ticket status to answered
       await supabase
         .from('support_tickets')
         .update({ status: 'answered' })
@@ -269,6 +305,7 @@ export default function AdminMaster() {
       setNewMessage('');
       fetchMessages(selectedTicket.id);
       fetchTickets();
+      toast.success('Resposta enviada!');
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Erro ao enviar mensagem');
@@ -289,7 +326,7 @@ export default function AdminMaster() {
 
       if (error) throw error;
 
-      toast.success('Ticket fechado com sucesso');
+      toast.success('Ticket finalizado com sucesso');
       setSelectedTicket({ ...selectedTicket, status: 'closed' });
       fetchTickets();
     } catch (error) {
@@ -306,17 +343,27 @@ export default function AdminMaster() {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'open':
-        return <Badge variant="secondary">Aberto</Badge>;
-      case 'answered':
-        return <Badge className="bg-blue-500">Respondido</Badge>;
-      case 'closed':
-        return <Badge variant="outline">Fechado</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
+    const config = statusConfig[status as keyof typeof statusConfig];
+    if (!config) return <Badge variant="secondary">{status}</Badge>;
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
+
+  const getPriorityBadge = (priority: string) => {
+    const config = priorityConfig[priority as keyof typeof priorityConfig];
+    if (!config) return null;
+    return (
+      <div className="flex items-center gap-1">
+        <span className={`w-2 h-2 rounded-full ${config.color}`} />
+        <span className="text-xs text-muted-foreground">{config.label}</span>
+      </div>
+    );
+  };
+
+  const filteredTickets = tickets.filter(ticket => {
+    if (statusFilter !== 'all' && ticket.status !== statusFilter) return false;
+    if (priorityFilter !== 'all' && ticket.priority !== priorityFilter) return false;
+    return true;
+  });
 
   if (authLoading || loading) {
     return (
@@ -339,12 +386,11 @@ export default function AdminMaster() {
     const days = differenceInDays(new Date(), new Date(n.created_at));
     return days > 60;
   }).length;
-  const openTicketsCount = tickets.filter(t => t.status === 'open').length;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
+      {/* Header with Notification Badge */}
+      <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logoImg} alt="NutriFlow" className="w-10 h-10 object-contain" />
@@ -356,12 +402,25 @@ export default function AdminMaster() {
               </Badge>
             </div>
           </div>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Voltar ao Dashboard
-          </button>
+          <div className="flex items-center gap-4">
+            {/* Notification Badge */}
+            <div className="relative">
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {pendingTicketsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium animate-pulse">
+                    {pendingTicketsCount}
+                  </span>
+                )}
+              </Button>
+            </div>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Voltar ao Dashboard
+            </button>
+          </div>
         </div>
       </header>
 
@@ -431,186 +490,243 @@ export default function AdminMaster() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className={pendingTicketsCount > 0 ? 'ring-2 ring-red-500 ring-offset-2' : ''}>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-orange-500/10 rounded-lg">
-                  <MessageSquare className="w-6 h-6 text-orange-500" />
+                <div className={`p-3 rounded-lg ${pendingTicketsCount > 0 ? 'bg-red-500/20' : 'bg-orange-500/10'}`}>
+                  <Headphones className={`w-6 h-6 ${pendingTicketsCount > 0 ? 'text-red-500' : 'text-orange-500'}`} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{openTicketsCount}</p>
-                  <p className="text-sm text-muted-foreground">Tickets Abertos</p>
+                  <p className="text-2xl font-bold">{pendingTicketsCount}</p>
+                  <p className="text-sm text-muted-foreground">Tickets Pendentes</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Support Tickets */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-primary" />
-              Tickets de Suporte
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Ticket</TableHead>
-                    <TableHead>Nutricionista</TableHead>
-                    <TableHead>Assunto</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ação</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tickets.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        Nenhum ticket de suporte
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    tickets.map((ticket) => (
-                      <TableRow key={ticket.id}>
-                        <TableCell className="font-mono text-sm">
-                          #{ticket.ticket_number}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {ticket.nutritionist?.full_name || 'N/A'}
-                        </TableCell>
-                        <TableCell>{ticket.subject}</TableCell>
-                        <TableCell>
-                          {format(new Date(ticket.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(ticket.status)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openTicketConversation(ticket)}
-                          >
-                            {ticket.status === 'open' ? 'Responder' : 'Ver'}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tabs for different sections */}
+        <Tabs defaultValue="tickets" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="tickets" className="relative">
+              Central de Chamados
+              {pendingTicketsCount > 0 && (
+                <span className="ml-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  {pendingTicketsCount}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="nutritionists">Gestão de Nutricionistas</TabsTrigger>
+          </TabsList>
 
-        {/* Nutritionists Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Gestão de Nutricionistas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome do Profissional</TableHead>
-                    <TableHead>Data de Cadastro</TableHead>
-                    <TableHead>Status da Licença</TableHead>
-                    <TableHead>Status do Acesso</TableHead>
-                    <TableHead>Admin</TableHead>
-                    <TableHead className="text-right">Ação</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {nutritionists.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        Nenhum nutricionista cadastrado
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    nutritionists.map((nutritionist) => {
-                      const licenseStatus = getLicenseStatus(nutritionist.created_at);
-                      
-                      return (
-                        <TableRow key={nutritionist.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{nutritionist.full_name}</span>
-                              {nutritionist.is_admin && (
-                                <Badge variant="outline" className="text-xs">
-                                  Admin
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {format(new Date(nutritionist.created_at), 'dd/MM/yyyy', { locale: ptBR })}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={licenseStatus.variant}>
-                              {licenseStatus.label}
-                            </Badge>
-                            {licenseStatus.daysLeft > 0 && (
-                              <span className="ml-2 text-xs text-muted-foreground">
-                                ({licenseStatus.daysLeft} dias restantes)
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {nutritionist.is_active ? (
-                              <Badge variant="outline" className="text-green-600 border-green-600">
-                                Ativo
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-destructive border-destructive">
-                                Inativo
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={nutritionist.is_admin}
-                                onCheckedChange={() => toggleAdmin(nutritionist.id, nutritionist.is_admin)}
-                                disabled={updating === nutritionist.id + '-admin'}
-                              />
-                              <span className="text-xs text-muted-foreground">
-                                {nutritionist.is_admin ? 'Sim' : 'Não'}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <span className="text-sm text-muted-foreground">
-                                {nutritionist.is_active ? 'Ativo' : 'Inativo'}
-                              </span>
-                              <Switch
-                                checked={nutritionist.is_active}
-                                onCheckedChange={() => toggleActive(nutritionist.id, nutritionist.is_active)}
-                                disabled={updating === nutritionist.id}
-                              />
-                            </div>
+          {/* Tickets Tab */}
+          <TabsContent value="tickets">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Headphones className="w-5 h-5 text-primary" />
+                    Central de Chamados
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[140px]">
+                        <Filter className="w-4 h-4 mr-2" />
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="open">Pendentes</SelectItem>
+                        <SelectItem value="answered">Respondidos</SelectItem>
+                        <SelectItem value="closed">Resolvidos</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                      <SelectTrigger className="w-[140px]">
+                        <AlertCircle className="w-4 h-4 mr-2" />
+                        <SelectValue placeholder="Prioridade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas</SelectItem>
+                        <SelectItem value="urgent">Urgente</SelectItem>
+                        <SelectItem value="high">Alta</SelectItem>
+                        <SelectItem value="normal">Normal</SelectItem>
+                        <SelectItem value="low">Baixa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[80px]">Ticket</TableHead>
+                        <TableHead>Nutricionista</TableHead>
+                        <TableHead>Assunto</TableHead>
+                        <TableHead>Prioridade</TableHead>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ação</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredTickets.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                            Nenhum ticket encontrado
                           </TableCell>
                         </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                      ) : (
+                        filteredTickets.map((ticket) => (
+                          <TableRow 
+                            key={ticket.id} 
+                            className={ticket.status === 'open' && ticket.priority === 'urgent' ? 'bg-red-50' : ''}
+                          >
+                            <TableCell className="font-mono text-sm">
+                              #{ticket.ticket_number}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {ticket.nutritionist?.full_name || 'N/A'}
+                            </TableCell>
+                            <TableCell className="max-w-[200px] truncate">
+                              {ticket.subject}
+                            </TableCell>
+                            <TableCell>
+                              {getPriorityBadge(ticket.priority)}
+                            </TableCell>
+                            <TableCell>
+                              {format(new Date(ticket.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                            </TableCell>
+                            <TableCell>
+                              {getStatusBadge(ticket.status)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant={ticket.status === 'open' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => openTicketConversation(ticket)}
+                              >
+                                {ticket.status === 'open' ? 'Responder' : 'Ver'}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Nutritionists Tab */}
+          <TabsContent value="nutritionists">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gestão de Nutricionistas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nome do Profissional</TableHead>
+                        <TableHead>Data de Cadastro</TableHead>
+                        <TableHead>Status da Licença</TableHead>
+                        <TableHead>Status do Acesso</TableHead>
+                        <TableHead>Admin</TableHead>
+                        <TableHead className="text-right">Ação</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {nutritionists.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                            Nenhum nutricionista cadastrado
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        nutritionists.map((nutritionist) => {
+                          const licenseStatus = getLicenseStatus(nutritionist.created_at);
+                          
+                          return (
+                            <TableRow key={nutritionist.id}>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{nutritionist.full_name}</span>
+                                  {nutritionist.is_admin && (
+                                    <Badge variant="outline" className="text-xs">
+                                      Admin
+                                    </Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {format(new Date(nutritionist.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={licenseStatus.variant}>
+                                  {licenseStatus.label}
+                                </Badge>
+                                {licenseStatus.daysLeft > 0 && (
+                                  <span className="ml-2 text-xs text-muted-foreground">
+                                    ({licenseStatus.daysLeft} dias restantes)
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {nutritionist.is_active ? (
+                                  <Badge variant="outline" className="text-green-600 border-green-600">
+                                    Ativo
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-destructive border-destructive">
+                                    Inativo
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Switch
+                                    checked={nutritionist.is_admin}
+                                    onCheckedChange={() => toggleAdmin(nutritionist.id, nutritionist.is_admin)}
+                                    disabled={updating === nutritionist.id + '-admin'}
+                                  />
+                                  <span className="text-xs text-muted-foreground">
+                                    {nutritionist.is_admin ? 'Sim' : 'Não'}
+                                  </span>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <span className="text-sm text-muted-foreground">
+                                    {nutritionist.is_active ? 'Ativo' : 'Inativo'}
+                                  </span>
+                                  <Switch
+                                    checked={nutritionist.is_active}
+                                    onCheckedChange={() => toggleActive(nutritionist.id, nutritionist.is_active)}
+                                    disabled={updating === nutritionist.id}
+                                  />
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>FlowTech Group - CNPJ: 46.684.547/0001-54</p>
-          <p className="mt-1">Painel de Administração Master v1.0</p>
+          <p className="mt-1">Painel de Administração Master v2.0</p>
         </div>
       </main>
 
@@ -621,6 +737,7 @@ export default function AdminMaster() {
             <DialogTitle className="flex items-center gap-2">
               Ticket #{selectedTicket?.ticket_number}
               {selectedTicket && getStatusBadge(selectedTicket.status)}
+              {selectedTicket && getPriorityBadge(selectedTicket.priority)}
             </DialogTitle>
             <DialogDescription>
               {selectedTicket?.nutritionist?.full_name || 'N/A'} - {selectedTicket?.subject}
@@ -649,7 +766,7 @@ export default function AdminMaster() {
                           }`}
                         >
                           <p className="text-xs font-medium mb-1">
-                            {msg.sender_type === 'admin' ? 'Suporte' : 'Nutricionista'}
+                            {msg.sender_type === 'admin' ? 'Você (Suporte)' : 'Nutricionista'}
                           </p>
                           <p className="text-sm">{msg.message}</p>
                           <p className={`text-xs mt-1 ${
@@ -705,12 +822,12 @@ export default function AdminMaster() {
                     ) : (
                       <Lock className="h-4 w-4 mr-2" />
                     )}
-                    Fechar Ticket
+                    Marcar como Resolvido
                   </Button>
                 </div>
               ) : (
                 <p className="text-center text-sm text-muted-foreground mt-4 pt-4 border-t border-border">
-                  Este ticket foi fechado.
+                  Este ticket foi resolvido.
                 </p>
               )}
             </div>

@@ -14,8 +14,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
-import { HelpCircle, Loader2, Send, MessageSquare, ArrowLeft } from 'lucide-react';
+import { HelpCircle, Loader2, Send, MessageSquare, ArrowLeft, AlertCircle, Clock, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -25,6 +32,7 @@ interface SupportTicket {
   subject: string;
   message: string;
   status: string;
+  priority: string;
   created_at: string;
 }
 
@@ -39,10 +47,39 @@ interface SupportDialogProps {
   nutritionistId: string;
 }
 
+const priorityConfig = {
+  low: { label: 'Baixa', color: 'bg-slate-500' },
+  normal: { label: 'Normal', color: 'bg-blue-500' },
+  high: { label: 'Alta', color: 'bg-orange-500' },
+  urgent: { label: 'Urgente', color: 'bg-red-500' },
+};
+
+const statusConfig = {
+  open: { 
+    label: 'Aguardando Análise', 
+    description: 'Seu ticket foi recebido e será analisado em breve.',
+    icon: Clock,
+    color: 'text-yellow-600'
+  },
+  answered: { 
+    label: 'Respondido', 
+    description: 'A equipe FlowTech respondeu seu ticket.',
+    icon: MessageSquare,
+    color: 'text-blue-600'
+  },
+  closed: { 
+    label: 'Resolvido', 
+    description: 'Este ticket foi finalizado.',
+    icon: CheckCircle,
+    color: 'text-green-600'
+  },
+};
+
 export function SupportDialog({ nutritionistId }: SupportDialogProps) {
   const [open, setOpen] = useState(false);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [priority, setPriority] = useState('normal');
   const [loading, setLoading] = useState(false);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
@@ -59,7 +96,7 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
     try {
       const { data, error } = await supabase
         .from('support_tickets')
-        .select('id, ticket_number, subject, message, status, created_at')
+        .select('id, ticket_number, subject, message, status, priority, created_at')
         .eq('nutritionist_id', nutritionistId)
         .order('created_at', { ascending: false });
 
@@ -113,20 +150,19 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
 
     setLoading(true);
     try {
-      // Create ticket
       const { data: ticketData, error: ticketError } = await supabase
         .from('support_tickets')
         .insert({
           nutritionist_id: nutritionistId,
           subject: subject.trim(),
           message: message.trim(),
+          priority,
         })
-        .select('id')
+        .select('id, ticket_number')
         .single();
 
       if (ticketError) throw ticketError;
 
-      // Create first message
       const { error: messageError } = await supabase
         .from('support_ticket_messages')
         .insert({
@@ -137,9 +173,10 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
 
       if (messageError) throw messageError;
 
-      toast.success('Ticket #' + ticketData.id.slice(0, 8) + ' criado com sucesso!');
+      toast.success(`Ticket #${ticketData.ticket_number} criado com sucesso!`);
       setSubject('');
       setMessage('');
+      setPriority('normal');
       setActiveTab('history');
       fetchTickets();
     } catch (error) {
@@ -165,7 +202,6 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
 
       if (error) throw error;
 
-      // Update ticket status to open if it was answered
       if (selectedTicket.status === 'answered') {
         await supabase
           .from('support_tickets')
@@ -191,16 +227,24 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'open':
-        return <Badge variant="secondary">Aguardando</Badge>;
-      case 'answered':
-        return <Badge className="bg-blue-500">Respondido</Badge>;
-      case 'closed':
-        return <Badge variant="outline">Fechado</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
+    const config = statusConfig[status as keyof typeof statusConfig];
+    if (!config) return <Badge variant="secondary">{status}</Badge>;
+    
+    const Icon = config.icon;
+    return (
+      <Badge variant="outline" className={`${config.color} border-current`}>
+        <Icon className="w-3 h-3 mr-1" />
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const getPriorityBadge = (priorityValue: string) => {
+    const config = priorityConfig[priorityValue as keyof typeof priorityConfig];
+    if (!config) return null;
+    return (
+      <span className={`inline-block w-2 h-2 rounded-full ${config.color}`} title={config.label} />
+    );
   };
 
   return (
@@ -214,7 +258,7 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
-            Suporte NutriFlow
+            Suporte FlowTech
           </DialogTitle>
           <DialogDescription>
             {selectedTicket 
@@ -225,7 +269,6 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
         </DialogHeader>
 
         {selectedTicket ? (
-          // Conversation View
           <div className="flex flex-col flex-1 min-h-0">
             <Button
               variant="ghost"
@@ -237,14 +280,22 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
               Voltar
             </Button>
             
-            <div className="flex items-center justify-between mb-2">
-              {getStatusBadge(selectedTicket.status)}
-              <span className="text-xs text-muted-foreground">
-                Aberto em {format(new Date(selectedTicket.created_at), "dd/MM/yyyy", { locale: ptBR })}
-              </span>
+            {/* Status Feedback Card */}
+            <div className={`p-3 rounded-lg border mb-3 ${
+              selectedTicket.status === 'open' ? 'bg-yellow-50 border-yellow-200' :
+              selectedTicket.status === 'answered' ? 'bg-blue-50 border-blue-200' :
+              'bg-green-50 border-green-200'
+            }`}>
+              <div className="flex items-center gap-2 mb-1">
+                {getStatusBadge(selectedTicket.status)}
+                {getPriorityBadge(selectedTicket.priority)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {statusConfig[selectedTicket.status as keyof typeof statusConfig]?.description}
+              </p>
             </div>
 
-            <ScrollArea className="flex-1 pr-4 max-h-[300px]">
+            <ScrollArea className="flex-1 pr-4 max-h-[250px]">
               {loadingMessages ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -263,6 +314,9 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
                             : 'bg-muted'
                         }`}
                       >
+                        <p className="text-xs font-medium mb-1">
+                          {msg.sender_type === 'nutritionist' ? 'Você' : 'Suporte FlowTech'}
+                        </p>
                         <p className="text-sm">{msg.message}</p>
                         <p className={`text-xs mt-1 ${
                           msg.sender_type === 'nutritionist' 
@@ -309,12 +363,11 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
 
             {selectedTicket.status === 'closed' && (
               <p className="text-center text-sm text-muted-foreground mt-4 pt-4 border-t border-border">
-                Este ticket foi fechado pelo suporte.
+                Este ticket foi resolvido pelo suporte.
               </p>
             )}
           </div>
         ) : (
-          // Tabs View
           <>
             <div className="flex gap-2 border-b border-border pb-2">
               <Button
@@ -345,6 +398,42 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
                     disabled={loading}
                   />
                 </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="priority">Prioridade</Label>
+                  <Select value={priority} onValueChange={setPriority} disabled={loading}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-slate-500" />
+                          Baixa
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="normal">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-blue-500" />
+                          Normal
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="high">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-orange-500" />
+                          Alta
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="urgent">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-red-500" />
+                          Urgente
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="message">Mensagem</Label>
                   <Textarea
@@ -353,7 +442,7 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     disabled={loading}
-                    rows={5}
+                    rows={4}
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
@@ -384,7 +473,8 @@ export function SupportDialog({ nutritionistId }: SupportDialogProps) {
                         onClick={() => openTicketConversation(ticket)}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <div>
+                          <div className="flex items-center gap-2">
+                            {getPriorityBadge(ticket.priority)}
                             <span className="text-xs text-muted-foreground">
                               #{ticket.ticket_number}
                             </span>

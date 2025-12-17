@@ -55,6 +55,7 @@ function App() {
                 <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="/subscription-expired" element={<SubscriptionExpired />} />
                 <Route path="/admin-master" element={<AdminMaster />} />
+                <Route path="/admin-flowtech" element={<AdminMaster />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/consulta" element={<Consultation />} />
                 <Route path="/consulta/:patientId" element={<Consultation />} />
