@@ -25,6 +25,7 @@ import Consultation from "./pages/Consultation";
 import Agenda from "./pages/Agenda";
 import Financeiro from "./pages/Financeiro";
 import Patients from "./pages/Patients";
+import Biblioteca from "./pages/Biblioteca";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ function App() {
                 <Route path="/consulta" element={<Consultation />} />
                 <Route path="/agenda" element={<Agenda />} />
                 <Route path="/financeiro" element={<Financeiro />} />
+                <Route path="/biblioteca" element={<Biblioteca />} />
                 <Route path="/patients" element={<Patients />} />
                 <Route path="/patients/new" element={<NewPatient />} />
                 <Route path="/patients/:id" element={<PatientDetail />} />

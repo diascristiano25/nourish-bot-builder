@@ -99,6 +99,94 @@ export type Database = {
           },
         ]
       }
+      custom_foods: {
+        Row: {
+          carb: number
+          created_at: string
+          fat: number
+          id: string
+          kcal: number
+          name: string
+          nutritionist_id: string
+          protein: number
+          unit_type: string
+          updated_at: string
+        }
+        Insert: {
+          carb?: number
+          created_at?: string
+          fat?: number
+          id?: string
+          kcal?: number
+          name: string
+          nutritionist_id: string
+          protein?: number
+          unit_type?: string
+          updated_at?: string
+        }
+        Update: {
+          carb?: number
+          created_at?: string
+          fat?: number
+          id?: string
+          kcal?: number
+          name?: string
+          nutritionist_id?: string
+          protein?: number
+          unit_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_foods_nutritionist_id_fkey"
+            columns: ["nutritionist_id"]
+            isOneToOne: false
+            referencedRelation: "nutritionists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_recipes: {
+        Row: {
+          created_at: string
+          estimated_macros: Json | null
+          id: string
+          ingredients: Json | null
+          name: string
+          notes: string | null
+          nutritionist_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_macros?: Json | null
+          id?: string
+          ingredients?: Json | null
+          name: string
+          notes?: string | null
+          nutritionist_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimated_macros?: Json | null
+          id?: string
+          ingredients?: Json | null
+          name?: string
+          notes?: string | null
+          nutritionist_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_recipes_nutritionist_id_fkey"
+            columns: ["nutritionist_id"]
+            isOneToOne: false
+            referencedRelation: "nutritionists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meal_plans: {
         Row: {
           created_at: string
