@@ -294,6 +294,13 @@ export default function PatientDetail() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              onClick={() => navigate(`/consulta/${id}`)}
+              className="gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              Nova Consulta
+            </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 

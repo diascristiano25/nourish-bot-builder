@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppLayout } from '@/components/AppLayout';
 import { ConsultationMealPlanEditor } from '@/components/ConsultationMealPlanEditor';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   ArrowLeft, 
   Sparkles, 
@@ -22,7 +31,9 @@ import {
   Loader2,
   Wand2,
   Heart,
-  CheckCircle2
+  CheckCircle2,
+  Search,
+  UserCheck
 } from 'lucide-react';
 
 interface StructuredData {
@@ -39,14 +50,29 @@ interface StructuredData {
   healthConditions: string;
 }
 
+interface Patient {
+  id: string;
+  full_name: string;
+}
+
 export default function Consultation() {
   const navigate = useNavigate();
+  const { patientId: urlPatientId } = useParams<{ patientId: string }>();
   const { toast } = useToast();
+  const { user } = useAuth();
+  
   const [activePhase, setActivePhase] = useState<string>('anamnese');
   const [viewMode, setViewMode] = useState<'freeflow' | 'structured'>('freeflow');
   const [freeText, setFreeText] = useState('');
   const [isParsing, setIsParsing] = useState(false);
   const [hasParsed, setHasParsed] = useState(false);
+  
+  // Patient selection state
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(urlPatientId || null);
+  const [selectedPatientName, setSelectedPatientName] = useState<string>('');
+  const [loadingPatients, setLoadingPatients] = useState(true);
+  
   const [structuredData, setStructuredData] = useState<StructuredData>({
     name: '',
     age: '',
@@ -60,6 +86,56 @@ export default function Consultation() {
     restrictions: '',
     healthConditions: '',
   });
+
+  // Fetch patients list
+  useEffect(() => {
+    const fetchPatients = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: nutri } = await supabase
+          .from('nutritionists')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (!nutri) return;
+        
+        const { data, error } = await supabase
+          .from('patients')
+          .select('id, full_name')
+          .eq('nutritionist_id', nutri.id)
+          .order('full_name');
+        
+        if (error) throw error;
+        setPatients(data || []);
+        
+        // If we have a URL patient ID, find and set the name
+        if (urlPatientId && data) {
+          const patient = data.find(p => p.id === urlPatientId);
+          if (patient) {
+            setSelectedPatientName(patient.full_name);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      } finally {
+        setLoadingPatients(false);
+      }
+    };
+    
+    fetchPatients();
+  }, [user, urlPatientId]);
+
+  const handlePatientSelect = (patientId: string) => {
+    setSelectedPatientId(patientId);
+    const patient = patients.find(p => p.id === patientId);
+    if (patient) {
+      setSelectedPatientName(patient.full_name);
+      // Optionally update structuredData name
+      setStructuredData(prev => ({ ...prev, name: patient.full_name }));
+    }
+  };
 
   const handleStructuredChange = (field: keyof StructuredData, value: string) => {
     setStructuredData(prev => ({ ...prev, [field]: value }));
@@ -159,24 +235,69 @@ export default function Consultation() {
       <div className="min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border/50">
-          <div className="px-4 md:px-8 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-9 w-9 rounded-lg"
-                onClick={() => navigate('/dashboard')}
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">Nova Consulta</h1>
-                <p className="text-xs text-muted-foreground">Atendimento em andamento</p>
+          <div className="px-4 md:px-8 py-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-9 w-9 rounded-lg"
+                  onClick={() => navigate(selectedPatientId ? `/patients/${selectedPatientId}` : '/dashboard')}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+                <div>
+                  <h1 className="text-lg font-semibold text-foreground">
+                    {selectedPatientName ? 'Consulta de Retorno' : 'Nova Consulta'}
+                  </h1>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedPatientName || 'Selecione um paciente para começar'}
+                  </p>
+                </div>
               </div>
+              <Button size="sm" className="h-9 rounded-lg px-5">
+                Salvar Consulta
+              </Button>
             </div>
-            <Button size="sm" className="h-9 rounded-lg px-5">
-              Salvar Consulta
-            </Button>
+            
+            {/* Patient Selector */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <UserCheck className="w-4 h-4" />
+                <span>Paciente:</span>
+              </div>
+              <Select
+                value={selectedPatientId || ''}
+                onValueChange={handlePatientSelect}
+                disabled={loadingPatients}
+              >
+                <SelectTrigger className="w-[280px] h-9 bg-card">
+                  <SelectValue placeholder={loadingPatients ? "Carregando..." : "Selecione o paciente"} />
+                </SelectTrigger>
+                <SelectContent className="bg-card border shadow-lg z-50">
+                  {patients.map((patient) => (
+                    <SelectItem key={patient.id} value={patient.id}>
+                      {patient.full_name}
+                    </SelectItem>
+                  ))}
+                  {patients.length === 0 && !loadingPatients && (
+                    <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                      Nenhum paciente cadastrado
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+              {selectedPatientId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 text-xs"
+                  onClick={() => navigate(`/patients/${selectedPatientId}`)}
+                >
+                  Ver perfil
+                </Button>
+              )}
+            </div>
           </div>
         </header>
 
@@ -501,7 +622,10 @@ Exemplo: "Maria, 32 anos, PESA 75kg, altura 1,65m. Tem DIABETES tipo 2. É VEGET
             </TabsContent>
 
             <TabsContent value="plano" className="animate-fade-in">
-              <ConsultationMealPlanEditor />
+              <ConsultationMealPlanEditor 
+                patientId={selectedPatientId || undefined}
+                patientName={selectedPatientName || 'Paciente'}
+              />
             </TabsContent>
 
             <TabsContent value="orientacoes" className="animate-fade-in">
