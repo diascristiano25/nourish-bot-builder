@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Save, Upload, User } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, Upload, User, Link2, Image } from 'lucide-react';
 
 interface NutritionistProfile {
   id: string;
@@ -27,6 +28,8 @@ export default function Profile() {
   const [profile, setProfile] = useState<NutritionistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [useLogoUrl, setUseLogoUrl] = useState(true); // true = URL, false = Upload
   
   const [fullName, setFullName] = useState('');
   const [crn, setCrn] = useState('');
@@ -188,38 +191,135 @@ export default function Profile() {
         <Card className="border-0 shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Upload className="w-5 h-5" />
-              Logo/Marca
+              <Image className="w-5 h-5" />
+              Marca e Personalização
             </CardTitle>
             <CardDescription>
-              URL da sua logo para aparecer nos documentos
+              Adicione sua logo para aparecer nos documentos e PDFs
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="logoUrl">URL da Logo</Label>
-              <Input
-                id="logoUrl"
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="https://exemplo.com/minha-logo.png"
+          <CardContent className="space-y-6">
+            {/* Toggle entre URL e Upload */}
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-3">
+                <Link2 className={`w-4 h-4 ${useLogoUrl ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className={`text-sm ${useLogoUrl ? 'font-medium' : 'text-muted-foreground'}`}>
+                  Inserir Link
+                </span>
+              </div>
+              <Switch
+                checked={!useLogoUrl}
+                onCheckedChange={(checked) => setUseLogoUrl(!checked)}
               />
-              <p className="text-xs text-muted-foreground">
-                Cole a URL de uma imagem hospedada online (recomendado: PNG com fundo transparente)
-              </p>
+              <div className="flex items-center gap-3">
+                <span className={`text-sm ${!useLogoUrl ? 'font-medium' : 'text-muted-foreground'}`}>
+                  Upload de Arquivo
+                </span>
+                <Upload className={`w-4 h-4 ${!useLogoUrl ? 'text-primary' : 'text-muted-foreground'}`} />
+              </div>
             </div>
+
+            {/* Campo de URL ou Upload */}
+            {useLogoUrl ? (
+              <div className="space-y-2">
+                <Label htmlFor="logoUrl">URL da Logo</Label>
+                <Input
+                  id="logoUrl"
+                  value={logoUrl}
+                  onChange={(e) => setLogoUrl(e.target.value)}
+                  placeholder="https://exemplo.com/minha-logo.png"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Cole a URL de uma imagem hospedada online (recomendado: PNG com fundo transparente)
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Upload de Logo</Label>
+                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                  <input
+                    type="file"
+                    id="logo-upload"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      
+                      if (file.size > 2 * 1024 * 1024) {
+                        toast({
+                          title: 'Arquivo muito grande',
+                          description: 'O tamanho máximo é 2MB.',
+                          variant: 'destructive'
+                        });
+                        return;
+                      }
+                      
+                      setUploadingLogo(true);
+                      try {
+                        // Convert to base64 for now (until storage is set up)
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const base64 = event.target?.result as string;
+                          setLogoUrl(base64);
+                          toast({
+                            title: 'Logo carregada!',
+                            description: 'Clique em Salvar para confirmar.',
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      } catch (error: any) {
+                        toast({
+                          title: 'Erro ao carregar',
+                          description: error.message,
+                          variant: 'destructive'
+                        });
+                      } finally {
+                        setUploadingLogo(false);
+                      }
+                    }}
+                  />
+                  <label htmlFor="logo-upload" className="cursor-pointer">
+                    {uploadingLogo ? (
+                      <Loader2 className="w-8 h-8 mx-auto text-muted-foreground animate-spin" />
+                    ) : (
+                      <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      {uploadingLogo ? 'Carregando...' : 'Clique para selecionar ou arraste uma imagem'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      PNG, JPG ou WEBP (máx. 2MB)
+                    </p>
+                  </label>
+                </div>
+              </div>
+            )}
             
+            {/* Prévia da Logo */}
             {logoUrl && (
               <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">Prévia:</p>
-                <img 
-                  src={logoUrl} 
-                  alt="Logo preview" 
-                  className="max-h-20 object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm text-muted-foreground">Prévia:</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setLogoUrl('')}
+                    className="text-xs h-7"
+                  >
+                    Remover
+                  </Button>
+                </div>
+                <div className="bg-white rounded p-4 flex justify-center">
+                  <img 
+                    src={logoUrl} 
+                    alt="Logo preview" 
+                    className="max-h-24 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
               </div>
             )}
           </CardContent>
