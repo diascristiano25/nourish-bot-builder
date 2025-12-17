@@ -187,6 +187,50 @@ export type Database = {
           },
         ]
       }
+      financial_records: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          nutritionist_id: string
+          record_date: string
+          record_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          nutritionist_id: string
+          record_date?: string
+          record_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          nutritionist_id?: string
+          record_date?: string
+          record_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_records_nutritionist_id_fkey"
+            columns: ["nutritionist_id"]
+            isOneToOne: false
+            referencedRelation: "nutritionists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meal_plans: {
         Row: {
           created_at: string
