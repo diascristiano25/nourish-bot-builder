@@ -66,7 +66,9 @@ export default function Index() {
               Sobre
             </a>
             <a 
-              href="mailto:contato@flowtechgroup.com.br" 
+              href="https://wa.me/5547992381906?text=Olá! Tenho uma dúvida sobre o NutriFlow antes de me cadastrar."
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-sm text-slate-500 hover:text-slate-700 transition-colors hidden sm:inline font-medium"
             >
               Contato
@@ -349,10 +351,16 @@ export default function Index() {
                 <Button 
                   size="lg" 
                   className="w-full text-base py-6 bg-emerald-500 hover:bg-emerald-600 rounded-2xl shadow-lg shadow-emerald-500/25 font-semibold"
-                  onClick={() => navigate('/auth')}
+                  asChild
                 >
-                  Quero ser Membro Fundador
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                  <a 
+                    href="https://wa.me/5547992381906?text=Olá! Quero garantir minha vaga no Plano Vitalício de R$ 797."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Quero ser Membro Fundador
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </a>
                 </Button>
                 
                 <p className="text-center text-sm text-slate-400 mt-4 flex items-center justify-center gap-2">
@@ -538,11 +546,17 @@ export default function Index() {
             </p>
             <Button 
               size="lg" 
-              onClick={() => navigate('/auth')}
               className="text-base px-8 py-6 bg-white hover:bg-slate-50 text-emerald-600 rounded-2xl shadow-lg font-semibold"
+              asChild
             >
-              Começar Agora
-              <ArrowRight className="ml-2 w-5 h-5" />
+              <a 
+                href="https://wa.me/5547992381906?text=Olá! Quero garantir minha vaga no Plano Vitalício de R$ 797."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Começar Agora
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </a>
             </Button>
           </div>
         </div>
@@ -561,7 +575,14 @@ export default function Index() {
             <div className="flex items-center gap-6 text-sm text-slate-400">
               <a href="/privacidade" className="hover:text-white transition-colors">Privacidade</a>
               <a href="/sobre" className="hover:text-white transition-colors">Sobre</a>
-              <a href="mailto:contato@flowtechgroup.com.br" className="hover:text-white transition-colors">Contato</a>
+              <a 
+                href="https://wa.me/5547992381906?text=Olá! Tenho uma dúvida sobre o NutriFlow antes de me cadastrar."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                Contato
+              </a>
             </div>
             <p className="text-sm text-slate-500">
               © {new Date().getFullYear()} FlowTech Group

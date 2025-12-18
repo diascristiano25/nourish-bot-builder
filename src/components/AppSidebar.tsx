@@ -7,7 +7,8 @@ import {
   Settings,
   ChevronLeft,
   LogOut,
-  BookOpen
+  BookOpen,
+  HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -33,6 +34,8 @@ const navItems: NavItemWithTour[] = [
   { label: 'Financeiro', icon: DollarSign, href: '/financeiro', tourId: 'nav-financeiro' },
   { label: 'Configurações', icon: Settings, href: '/profile', tourId: 'nav-config' },
 ];
+
+const WHATSAPP_HELP_URL = "https://wa.me/5547992381906?text=Olá! Preciso de ajuda com o NutriFlow.";
 
 interface AppSidebarProps {
   isMobile?: boolean;
@@ -118,7 +121,20 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-slate-200/60">
+      <div className="p-3 border-t border-slate-200/60 space-y-1">
+        <Button
+          variant="ghost"
+          asChild
+          className={cn(
+            "w-full justify-start gap-3 h-11 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200",
+            isCollapsed && "justify-center px-0"
+          )}
+        >
+          <a href={WHATSAPP_HELP_URL} target="_blank" rel="noopener noreferrer">
+            <HelpCircle className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
+            {!isCollapsed && <span className="text-sm font-medium">Ajuda</span>}
+          </a>
+        </Button>
         <Button
           variant="ghost"
           onClick={handleSignOut}
