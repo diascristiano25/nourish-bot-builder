@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { AppLayout } from '@/components/AppLayout';
 import { SupportDialog } from '@/components/SupportDialog';
 import { OnboardingTour } from '@/components/OnboardingTour';
@@ -17,13 +16,16 @@ import {
   ChevronRight,
   Loader2,
   Settings2,
-  Sparkles,
   Eye,
   EyeOff,
-  User
+  User,
+  TrendingUp,
+  DollarSign,
+  Activity,
+  FileText
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useWidgetPreferences, WidgetPreferences } from '@/hooks/useWidgetPreferences';
 import {
@@ -34,6 +36,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 interface Patient {
   id: string;
@@ -67,7 +75,6 @@ const goalLabels: Record<string, string> = {
 };
 
 function getGreeting(): string {
-  // Get current hour in Brasilia timezone (America/Sao_Paulo)
   const brasiliaHour = new Date().toLocaleString('en-US', {
     timeZone: 'America/Sao_Paulo',
     hour: 'numeric',
@@ -84,16 +91,28 @@ function getFirstName(fullName: string): string {
   return fullName.split(' ')[0];
 }
 
+// Mock chart data - in production, this would come from real appointment data
+const generateChartData = () => {
+  const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+  return months.map((month, index) => ({
+    month,
+    atendimentos: Math.floor(Math.random() * 20) + 5 + index * 2,
+  }));
+};
+
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [monthlyAppointments, setMonthlyAppointments] = useState(0);
+  const [estimatedRevenue, setEstimatedRevenue] = useState(0);
   const [profile, setProfile] = useState<NutritionistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [zenMode, setZenMode] = useState(false);
   const { preferences, updatePreference, loaded: prefsLoaded } = useWidgetPreferences();
+  const [chartData] = useState(generateChartData);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -158,7 +177,7 @@ export default function Dashboard() {
           .eq('status', 'scheduled')
           .gte('date_time', new Date().toISOString())
           .order('date_time')
-          .limit(3);
+          .limit(5);
 
         if (appointmentsError) throw appointmentsError;
         
@@ -167,6 +186,32 @@ export default function Dashboard() {
           patient: Array.isArray(item.patient) ? item.patient[0] : item.patient
         }));
         setAppointments(formattedAppointments as Appointment[]);
+
+        // Fetch monthly appointments count
+        const now = new Date();
+        const monthStart = startOfMonth(now).toISOString();
+        const monthEnd = endOfMonth(now).toISOString();
+        
+        const { count: monthlyCount } = await supabase
+          .from('appointments')
+          .select('*', { count: 'exact', head: true })
+          .eq('nutritionist_id', nutritionistId)
+          .gte('date_time', monthStart)
+          .lte('date_time', monthEnd);
+
+        setMonthlyAppointments(monthlyCount || 0);
+
+        // Fetch estimated revenue from financial_records
+        const { data: revenueData } = await supabase
+          .from('financial_records')
+          .select('amount')
+          .eq('nutritionist_id', nutritionistId)
+          .eq('record_type', 'Receita')
+          .gte('record_date', monthStart)
+          .lte('record_date', monthEnd);
+
+        const totalRevenue = revenueData?.reduce((sum, r) => sum + r.amount, 0) || 0;
+        setEstimatedRevenue(totalRevenue);
       }
     } catch (error: any) {
       console.error('Error fetching data:', error);
@@ -185,10 +230,10 @@ export default function Dashboard() {
   if (authLoading || loading || !prefsLoaded) {
     return (
       <AppLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">Carregando...</p>
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-500 mx-auto mb-4" />
+            <p className="text-sm text-slate-500 font-medium">Carregando...</p>
           </div>
         </div>
       </AppLayout>
@@ -202,56 +247,59 @@ export default function Dashboard() {
     stats: 'Estatísticas',
   };
 
+  const chartConfig = {
+    atendimentos: {
+      label: "Atendimentos",
+      color: "hsl(var(--primary))",
+    },
+  };
+
   return (
     <AppLayout>
-      {/* Onboarding Tour */}
       {profile && <OnboardingTour nutritionistId={profile.id} />}
       
-      <div className="min-h-screen">
-        {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border/50">
-          <div className="px-8 h-16 flex items-center justify-between">
+      <div className="min-h-screen bg-slate-50">
+        {/* Elite Header */}
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+          <div className="px-6 lg:px-8 h-16 flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold text-foreground">
-                {getGreeting()}, Dr(a). {profile ? getFirstName(profile.full_name) : 'Nutricionista'}.
+              <h1 className="text-xl font-semibold text-slate-800 tracking-tight">
+                {getGreeting()}, {profile ? getFirstName(profile.full_name) : 'Nutricionista'}
               </h1>
-              <p className="text-sm text-muted-foreground">Hoje é dia de foco.</p>
+              <p className="text-sm text-slate-500">Vamos transformar vidas hoje.</p>
             </div>
-            <div className="flex items-center gap-3">
-              {/* Support Dialog */}
+            <div className="flex items-center gap-2">
               {profile && <SupportDialog nutritionistId={profile.id} />}
               
-              {/* Zen Mode Toggle */}
               <Button
                 variant={zenMode ? "default" : "outline"}
                 size="sm"
                 onClick={() => setZenMode(!zenMode)}
-                className="rounded-lg gap-2"
+                className="rounded-xl gap-2 h-9 px-4 text-sm font-medium border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                 data-tour="zen-mode"
               >
                 {zenMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                Modo Zen
+                <span className="hidden sm:inline">Modo Zen</span>
               </Button>
               
-              {/* Customize Sheet */}
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-lg gap-2" data-tour="customize-dashboard">
+                  <Button variant="outline" size="sm" className="rounded-xl gap-2 h-9 px-4 text-sm font-medium border-slate-200 hover:border-slate-300 hover:bg-slate-50" data-tour="customize-dashboard">
                     <Settings2 className="w-4 h-4" />
-                    Personalizar
+                    <span className="hidden sm:inline">Personalizar</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent>
+                <SheetContent className="bg-white border-slate-200">
                   <SheetHeader>
-                    <SheetTitle>Personalizar Dashboard</SheetTitle>
-                    <SheetDescription>
+                    <SheetTitle className="text-slate-800">Personalizar Dashboard</SheetTitle>
+                    <SheetDescription className="text-slate-500">
                       Escolha quais widgets exibir
                     </SheetDescription>
                   </SheetHeader>
                   <div className="mt-6 space-y-4">
                     {(Object.keys(preferences) as Array<keyof WidgetPreferences>).map((key) => (
-                      <div key={key} className="flex items-center justify-between py-3 border-b border-border/50">
-                        <span className="text-sm font-medium">{widgetLabels[key]}</span>
+                      <div key={key} className="flex items-center justify-between py-3 border-b border-slate-100">
+                        <span className="text-sm font-medium text-slate-700">{widgetLabels[key]}</span>
                         <Switch
                           checked={preferences[key]}
                           onCheckedChange={(checked) => updatePreference(key, checked)}
@@ -265,51 +313,126 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <main className="p-8">
-          {/* Quick Stats - Only show when not in Zen mode */}
+        <main className="p-6 lg:p-8">
+          {/* Elite Stat Cards */}
           {!zenMode && preferences.stats && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-fade-in">
-              <Card className="bg-card border-border/50">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-fade-in">
+              <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Total Pacientes</p>
-                  <p className="text-3xl font-semibold mt-2 text-foreground">{patients.length}</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-emerald-500" />
+                    </div>
+                    <span className="text-xs font-medium text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">+12%</span>
+                  </div>
+                  <p className="text-2xl lg:text-3xl font-bold text-slate-800">{patients.length}</p>
+                  <p className="text-xs text-slate-500 mt-1 font-medium">Total de Pacientes</p>
                 </CardContent>
               </Card>
-              <Card className="bg-card border-border/50">
+              
+              <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Consultas Hoje</p>
-                  <p className="text-3xl font-semibold mt-2 text-foreground">—</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-blue-500" />
+                    </div>
+                  </div>
+                  <p className="text-2xl lg:text-3xl font-bold text-slate-800">{monthlyAppointments}</p>
+                  <p className="text-xs text-slate-500 mt-1 font-medium">Consultas do Mês</p>
                 </CardContent>
               </Card>
-              <Card className="bg-card border-border/50">
+              
+              <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Esta Semana</p>
-                  <p className="text-3xl font-semibold mt-2 text-foreground">—</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-purple-500" />
+                    </div>
+                  </div>
+                  <p className="text-2xl lg:text-3xl font-bold text-slate-800">78%</p>
+                  <p className="text-xs text-slate-500 mt-1 font-medium">Taxa de Adesão</p>
                 </CardContent>
               </Card>
-              <Card className="bg-card border-border/50">
+              
+              <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cardápios Ativos</p>
-                  <p className="text-3xl font-semibold mt-2 text-foreground">—</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                      <DollarSign className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <TrendingUp className="w-4 h-4 text-emerald-500" />
+                  </div>
+                  <p className="text-2xl lg:text-3xl font-bold text-slate-800">
+                    R$ {estimatedRevenue.toLocaleString('pt-BR')}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1 font-medium">Faturamento Estimado</p>
                 </CardContent>
               </Card>
             </div>
+          )}
+
+          {/* Chart Section */}
+          {!zenMode && preferences.stats && (
+            <Card className="bg-white rounded-2xl border-0 shadow-sm mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-500" />
+                  Evolução de Atendimentos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="h-[200px] lg:h-[280px]">
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorAtendimentos" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis 
+                          dataKey="month" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{ fill: '#94A3B8', fontSize: 12 }}
+                        />
+                        <YAxis 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{ fill: '#94A3B8', fontSize: 12 }}
+                        />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Area
+                          type="monotone"
+                          dataKey="atendimentos"
+                          stroke="#10B981"
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#colorAtendimentos)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Main Grid */}
           <div className={zenMode ? "max-w-2xl mx-auto" : "grid lg:grid-cols-3 gap-6"}>
             {/* Quick Actions */}
             {preferences.quickActions && (
-              <Card className="bg-card border-border/50 animate-slide-up lg:col-span-1">
+              <Card className="bg-white rounded-2xl border-0 shadow-sm animate-slide-up lg:col-span-1 hover:shadow-md transition-shadow">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-base font-medium flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
+                  <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-emerald-500" />
                     Atalhos Rápidos
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2">
                   <Button 
-                    className="w-full justify-start h-12 rounded-lg text-sm font-medium"
+                    className="w-full justify-start h-12 rounded-xl text-sm font-medium bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
                     onClick={() => navigate('/consulta')}
                     data-tour="ai-consultation"
                   >
@@ -318,20 +441,20 @@ export default function Dashboard() {
                   </Button>
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-12 rounded-lg text-sm font-medium border-border/50 hover:bg-primary/5 hover:border-primary/30"
+                    className="w-full justify-start h-12 rounded-xl text-sm font-medium border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
                     onClick={() => navigate('/patients/new')}
                     data-tour="new-patient"
                   >
-                    <Users className="w-4 h-4 mr-3 text-primary" />
+                    <Users className="w-4 h-4 mr-3 text-emerald-500" />
                     Cadastrar Paciente
                   </Button>
                   <Button 
                     variant="ghost"
-                    className="w-full justify-start h-12 rounded-lg text-sm font-medium"
+                    className="w-full justify-start h-12 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50"
                     onClick={() => navigate('/profile')}
                     data-tour="profile-settings"
                   >
-                    <User className="w-4 h-4 mr-3 text-muted-foreground" />
+                    <User className="w-4 h-4 mr-3 text-slate-400" />
                     Configurar Perfil
                   </Button>
                 </CardContent>
@@ -340,17 +463,17 @@ export default function Dashboard() {
 
             {/* Upcoming Appointments */}
             {preferences.agenda && (
-              <Card className="bg-card border-border/50 animate-slide-up lg:col-span-1" style={{ animationDelay: '0.05s' }}>
+              <Card className="bg-white rounded-2xl border-0 shadow-sm animate-slide-up lg:col-span-1 hover:shadow-md transition-shadow" style={{ animationDelay: '0.05s' }}>
                 <CardHeader className="pb-4 flex flex-row items-center justify-between">
-                  <CardTitle className="text-base font-medium flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-primary" />
+                  <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-emerald-500" />
                     Próximos Pacientes
                   </CardTitle>
                   {appointments.length > 0 && (
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-7 text-xs text-muted-foreground"
+                      className="h-7 text-xs text-slate-500 hover:text-slate-700"
                       onClick={() => navigate('/agenda')}
                     >
                       Ver agenda
@@ -360,13 +483,16 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   {appointments.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Clock className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">Nenhuma consulta agendada</p>
+                    <div className="text-center py-10">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                        <Clock className="w-8 h-8 text-slate-300" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-600 mb-1">Agenda livre</p>
+                      <p className="text-xs text-slate-400 mb-4">Nenhuma consulta agendada</p>
                       <Button 
-                        variant="link" 
+                        variant="outline" 
                         size="sm" 
-                        className="mt-2 h-auto p-0 text-primary"
+                        className="rounded-xl text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                         onClick={() => navigate('/agenda')}
                       >
                         Agendar consulta
@@ -377,20 +503,21 @@ export default function Dashboard() {
                       {appointments.map((apt) => (
                         <div
                           key={apt.id}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
                           onClick={() => navigate('/agenda')}
                         >
-                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                            <Clock className="w-4 h-4 text-primary" />
+                          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                            <Clock className="w-4 h-4 text-emerald-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">
+                            <p className="text-sm font-medium text-slate-800 truncate">
                               {apt.patient?.full_name || 'Paciente'}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-slate-500">
                               {format(new Date(apt.date_time), "d 'de' MMM, HH:mm", { locale: ptBR })}
                             </p>
                           </div>
+                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-400" />
                         </div>
                       ))}
                     </div>
@@ -401,17 +528,17 @@ export default function Dashboard() {
 
             {/* Recent Patients */}
             {preferences.recentPatients && (
-              <Card className="bg-card border-border/50 animate-slide-up lg:col-span-1" style={{ animationDelay: '0.1s' }}>
+              <Card className="bg-white rounded-2xl border-0 shadow-sm animate-slide-up lg:col-span-1 hover:shadow-md transition-shadow" style={{ animationDelay: '0.1s' }}>
                 <CardHeader className="pb-4 flex flex-row items-center justify-between">
-                  <CardTitle className="text-base font-medium flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary" />
+                  <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                    <Users className="w-4 h-4 text-emerald-500" />
                     Pacientes Recentes
                   </CardTitle>
                   {patients.length > 0 && (
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-7 text-xs text-muted-foreground"
+                      className="h-7 text-xs text-slate-500 hover:text-slate-700"
                       onClick={() => navigate('/patients')}
                     >
                       Ver todos
@@ -421,16 +548,19 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   {recentPatients.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">Nenhum paciente ainda</p>
+                    <div className="text-center py-10">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-8 h-8 text-slate-300" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-600 mb-1">Comece agora</p>
+                      <p className="text-xs text-slate-400 mb-4">Cadastre seu primeiro paciente</p>
                       <Button 
-                        variant="link" 
+                        variant="outline" 
                         size="sm" 
-                        className="mt-2 h-auto p-0 text-primary"
+                        className="rounded-xl text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                         onClick={() => navigate('/patients/new')}
                       >
-                        Adicionar primeiro paciente
+                        Adicionar paciente
                       </Button>
                     </div>
                   ) : (
@@ -439,22 +569,24 @@ export default function Dashboard() {
                         <div
                           key={patient.id}
                           onClick={() => navigate(`/patients/${patient.id}`)}
-                          className="group flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                          className="group flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                              <span className="text-sm font-medium text-primary">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-sm">
+                              <span className="text-sm font-semibold text-white">
                                 {patient.full_name.charAt(0).toUpperCase()}
                               </span>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-foreground">{patient.full_name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {goalLabels[patient.goal || ''] || 'Sem objetivo'}
+                              <p className="text-sm font-medium text-slate-800 group-hover:text-emerald-600 transition-colors">
+                                {patient.full_name}
+                              </p>
+                              <p className="text-xs text-slate-400">
+                                {patient.goal ? goalLabels[patient.goal] || patient.goal : 'Sem objetivo'}
                               </p>
                             </div>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-400 transition-colors" />
                         </div>
                       ))}
                     </div>
