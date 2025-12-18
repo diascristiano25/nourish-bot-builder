@@ -373,15 +373,15 @@ export default function Dashboard() {
 
           {/* Chart Section */}
           {!zenMode && preferences.stats && (
-            <Card className="bg-white rounded-2xl border-0 shadow-sm mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <Card className="bg-white rounded-2xl border-0 shadow-sm mb-8 animate-fade-in overflow-hidden" style={{ animationDelay: '0.1s' }}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-emerald-500" />
                   Evolução de Atendimentos
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-4">
-                <div className="h-[200px] lg:h-[280px]">
+              <CardContent className="pt-4 overflow-hidden">
+                <div className="h-[200px] lg:h-[280px] w-full overflow-hidden">
                   <ChartContainer config={chartConfig}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
