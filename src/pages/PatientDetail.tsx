@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { PatientMonitoringTab } from '@/components/monitoring';
+import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
 import { 
   ArrowLeft, 
   Loader2, 
@@ -63,6 +64,7 @@ interface Patient {
   medical_conditions: string | null;
   notes: string | null;
   created_at: string;
+  critical_tags: string[] | null;
 }
 
 interface Anthropometric {
@@ -488,6 +490,15 @@ export default function PatientDetail() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Critical Tags Alert */}
+        {patient.critical_tags && patient.critical_tags.length > 0 && (
+          <Card className="border-0 shadow-md border-l-4 border-l-warning bg-warning/5">
+            <CardContent className="pt-4 pb-4">
+              <CriticalTagsBadges tags={patient.critical_tags} size="lg" />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Generate Meal Plan CTA */}
         <Card className="border-0 shadow-md gradient-card overflow-hidden">

@@ -10,7 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Plus, X, User, Activity, Heart, Scale, Save } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, X, User, Activity, Heart, Scale, Save, AlertTriangle } from 'lucide-react';
+import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
 
 const commonAllergies = ['Glúten', 'Lactose', 'Amendoim', 'Nozes', 'Soja', 'Ovos', 'Frutos do mar', 'Mariscos'];
 const commonRestrictions = ['Vegetariano', 'Vegano', 'Sem carne vermelha', 'Kosher', 'Halal', 'Low carb', 'Cetogênica'];
@@ -35,6 +36,7 @@ export default function EditPatient() {
   const [restrictions, setRestrictions] = useState<string[]>([]);
   const [medicalConditions, setMedicalConditions] = useState('');
   const [notes, setNotes] = useState('');
+  const [criticalTags, setCriticalTags] = useState<string[]>([]);
 
   const [customAllergy, setCustomAllergy] = useState('');
   const [customRestriction, setCustomRestriction] = useState('');
@@ -72,6 +74,7 @@ export default function EditPatient() {
       setRestrictions(data.dietary_restrictions || []);
       setMedicalConditions(data.medical_conditions || '');
       setNotes(data.notes || '');
+      setCriticalTags(data.critical_tags || []);
     } catch (error: any) {
       toast({
         title: "Erro ao carregar dados",
@@ -143,6 +146,7 @@ export default function EditPatient() {
           dietary_restrictions: restrictions.length > 0 ? restrictions : null,
           medical_conditions: medicalConditions.trim() || null,
           notes: notes.trim() || null,
+          critical_tags: criticalTags.length > 0 ? criticalTags : [],
         })
         .eq('id', id);
 
@@ -310,6 +314,29 @@ export default function EditPatient() {
                   </SelectContent>
                 </Select>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Critical Tags */}
+          <Card className="border-0 shadow-md border-l-4 border-l-warning">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-warning" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Tags Críticas</CardTitle>
+                  <CardDescription>Alertas importantes que aparecem no cardápio</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <CriticalTagsBadges 
+                tags={criticalTags} 
+                onChange={setCriticalTags} 
+                editable={true}
+                showLabel={false}
+              />
             </CardContent>
           </Card>
 
