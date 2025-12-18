@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Joyride, { CallBackProps, STATUS, Step, ACTIONS, EVENTS } from 'react-joyride';
 
 interface OnboardingTourProps {
@@ -12,6 +12,7 @@ const TOUR_COMPLETED_KEY = 'nutriflow_tour_completed';
 export function OnboardingTour({ nutritionistId, onComplete, forceStart = false }: OnboardingTourProps) {
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const hasChecked = useRef(false);
 
   const steps: Step[] = [
     // BOAS-VINDAS
@@ -244,16 +245,28 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
   ];
 
   useEffect(() => {
-    const tourCompleted = localStorage.getItem(`${TOUR_COMPLETED_KEY}_${nutritionistId}`);
+    // Prevent multiple checks on re-renders/navigation
+    if (hasChecked.current && !forceStart) return;
+    
+    const tourCompletedKey = `${TOUR_COMPLETED_KEY}_${nutritionistId}`;
+    const tourCompleted = localStorage.getItem(tourCompletedKey);
     
     if (forceStart) {
+      hasChecked.current = false;
       setStepIndex(0);
       setRun(true);
-    } else if (!tourCompleted) {
+    } else if (!tourCompleted && !hasChecked.current) {
+      hasChecked.current = true;
       const timer = setTimeout(() => {
-        setRun(true);
+        // Double-check before starting
+        const stillNotCompleted = localStorage.getItem(tourCompletedKey) !== 'true';
+        if (stillNotCompleted) {
+          setRun(true);
+        }
       }, 1000);
       return () => clearTimeout(timer);
+    } else {
+      hasChecked.current = true;
     }
   }, [nutritionistId, forceStart]);
 
