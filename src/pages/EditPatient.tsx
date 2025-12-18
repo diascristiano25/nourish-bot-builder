@@ -326,7 +326,7 @@ export default function EditPatient() {
                 </div>
                 <div className="space-y-2">
                   <Label>Sexo</Label>
-                  <Select value={gender} onValueChange={setGender}>
+                  <Select value={gender || undefined} onValueChange={setGender}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
@@ -433,7 +433,7 @@ export default function EditPatient() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Objetivo</Label>
-                <Select value={goal} onValueChange={setGoal}>
+                <Select value={goal || undefined} onValueChange={setGoal}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o objetivo" />
                   </SelectTrigger>
@@ -449,7 +449,7 @@ export default function EditPatient() {
 
               <div className="space-y-2">
                 <Label>Nível de Atividade Física</Label>
-                <Select value={activityLevel} onValueChange={setActivityLevel}>
+                <Select value={activityLevel || undefined} onValueChange={setActivityLevel}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o nível" />
                   </SelectTrigger>
