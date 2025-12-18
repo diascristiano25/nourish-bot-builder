@@ -72,8 +72,8 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
         "h-16 flex items-center border-b border-slate-200/60 px-4",
         isCollapsed ? "justify-center" : "gap-3"
       )}>
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-sm flex-shrink-0">
-          <img src={logoImg} alt="NutriFlow" className="w-6 h-6 object-contain" />
+        <div className="w-11 h-11 flex items-center justify-center flex-shrink-0">
+          <img src={logoImg} alt="NutriFlow" className="w-10 h-10 object-contain" />
         </div>
         {!isCollapsed && (
           <span className="font-bold text-slate-800 text-lg tracking-tight">NutriFlow</span>
