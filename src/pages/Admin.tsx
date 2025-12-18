@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { 
   Loader2, Shield, Users, Clock, CheckCircle, XCircle, MessageSquare, 
-  Send, Bell, Search, DollarSign, TrendingUp
+  Send, Bell, Search, DollarSign, TrendingUp, Paperclip
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays, subDays, startOfDay } from 'date-fns';
@@ -47,6 +47,7 @@ interface SupportTicket {
   status: string;
   priority: string;
   created_at: string;
+  attachment_url?: string;
   nutritionist: {
     full_name: string;
   };
@@ -167,7 +168,7 @@ export default function Admin() {
       const { data, error } = await supabase
         .from('support_tickets')
         .select(`
-          id, ticket_number, subject, message, status, priority, created_at,
+          id, ticket_number, subject, message, status, priority, created_at, attachment_url,
           nutritionist:nutritionists(full_name)
         `)
         .order('created_at', { ascending: false });
@@ -603,6 +604,17 @@ export default function Admin() {
                             <p className="text-xs text-muted-foreground">
                               #{selectedTicket.ticket_number} • {selectedTicket.nutritionist?.full_name}
                             </p>
+                            {selectedTicket.attachment_url && (
+                              <a 
+                                href={selectedTicket.attachment_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+                              >
+                                <Paperclip className="w-3 h-3" />
+                                Ver anexo
+                              </a>
+                            )}
                           </div>
                           {selectedTicket.status !== 'closed' && (
                             <Button variant="outline" size="sm" onClick={handleCloseTicket}>
