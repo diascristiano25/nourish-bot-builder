@@ -25,7 +25,7 @@ import {
   FileText
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useWidgetPreferences, WidgetPreferences } from '@/hooks/useWidgetPreferences';
 import {
@@ -91,14 +91,10 @@ function getFirstName(fullName: string): string {
   return fullName.split(' ')[0];
 }
 
-// Mock chart data - in production, this would come from real appointment data
-const generateChartData = () => {
-  const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-  return months.map((month, index) => ({
-    month,
-    atendimentos: Math.floor(Math.random() * 20) + 5 + index * 2,
-  }));
-};
+interface ChartDataPoint {
+  month: string;
+  atendimentos: number;
+}
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -112,7 +108,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [zenMode, setZenMode] = useState(false);
   const { preferences, updatePreference, loaded: prefsLoaded } = useWidgetPreferences();
-  const [chartData] = useState(generateChartData);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -212,6 +208,30 @@ export default function Dashboard() {
 
         const totalRevenue = revenueData?.reduce((sum, r) => sum + r.amount, 0) || 0;
         setEstimatedRevenue(totalRevenue);
+
+        // Fetch real chart data - appointments for last 6 months
+        const chartMonths: ChartDataPoint[] = [];
+        const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        
+        for (let i = 5; i >= 0; i--) {
+          const targetMonth = subMonths(now, i);
+          const mStart = startOfMonth(targetMonth).toISOString();
+          const mEnd = endOfMonth(targetMonth).toISOString();
+          
+          const { count } = await supabase
+            .from('appointments')
+            .select('*', { count: 'exact', head: true })
+            .eq('nutritionist_id', nutritionistId)
+            .gte('date_time', mStart)
+            .lte('date_time', mEnd);
+          
+          chartMonths.push({
+            month: monthNames[targetMonth.getMonth()],
+            atendimentos: count || 0,
+          });
+        }
+        
+        setChartData(chartMonths);
       }
     } catch (error: any) {
       console.error('Error fetching data:', error);
