@@ -93,17 +93,17 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
               onClick={() => handleNavigation(item.href)}
               data-tour={item.tourId}
               className={cn(
-                "w-full justify-start gap-3 h-11 rounded-xl transition-all duration-200",
+                "w-full justify-start gap-3 h-11 rounded-xl transition-all duration-200 touch-manipulation",
                 isCollapsed && "justify-center px-0",
                 isActive 
-                  ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 shadow-sm" 
+                  ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/15 shadow-sm border border-emerald-200/50" 
                   : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
               )}
             >
               <item.icon className={cn(
                 "w-[18px] h-[18px] flex-shrink-0 transition-colors",
                 isActive ? "text-emerald-500" : "text-slate-400"
-              )} strokeWidth={isActive ? 2 : 1.5} />
+              )} strokeWidth={isActive ? 2.5 : 1.5} />
               {!isCollapsed && (
                 <span className={cn(
                   "text-sm transition-colors",
