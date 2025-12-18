@@ -12,6 +12,37 @@ serve(async (req) => {
   }
 
   try {
+    // === AUTH GUARD ===
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('Missing or invalid Authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Missing authentication token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+    // Create client with user's token for RLS enforcement
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('Auth verification failed:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Invalid or expired token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Authenticated user:', user.id);
+    // === END AUTH GUARD ===
+
     const { patientId } = await req.json();
 
     if (!patientId) {
@@ -32,29 +63,37 @@ serve(async (req) => {
 
     console.log('Fetching portal data for patient:', patientId);
 
-    // Use service role to bypass RLS
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Fetch patient - only return non-sensitive fields
+    // Fetch patient - verify the authenticated user owns this patient record
+    // RLS will enforce this, but we also explicitly check user_id
     const { data: patient, error: patientError } = await supabase
       .from('patients')
-      .select('id, full_name, nutritionist_id, goal')
+      .select('id, full_name, nutritionist_id, goal, user_id')
       .eq('id', patientId)
       .single();
 
     if (patientError || !patient) {
-      console.error('Patient not found:', patientError?.message);
+      console.error('Patient not found or access denied:', patientError?.message);
       return new Response(
-        JSON.stringify({ error: 'Patient not found' }),
+        JSON.stringify({ error: 'Patient not found or access denied' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Fetch nutritionist branding info (non-sensitive)
-    const { data: nutritionist, error: nutritionistError } = await supabase
+    // Double-check that the authenticated user is the patient owner
+    if (patient.user_id !== user.id) {
+      console.error('User does not own this patient record');
+      return new Response(
+        JSON.stringify({ error: 'Access denied: You can only view your own data' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Use service role only to fetch nutritionist public branding info (non-sensitive)
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Fetch nutritionist branding info (non-sensitive public info)
+    const { data: nutritionist, error: nutritionistError } = await adminClient
       .from('nutritionists')
       .select('full_name, crn, phone, logo_url, primary_color, secondary_color, email_signature')
       .eq('id', patient.nutritionist_id)
@@ -64,7 +103,7 @@ serve(async (req) => {
       console.error('Nutritionist fetch error:', nutritionistError.message);
     }
 
-    // Fetch active meal plan
+    // Fetch active meal plan - RLS enforced via user's token
     const { data: mealPlan, error: mealPlanError } = await supabase
       .from('meal_plans')
       .select('id, title, description, total_calories, plan_data, created_at')
@@ -78,7 +117,7 @@ serve(async (req) => {
       console.error('Meal plan fetch error:', mealPlanError.message);
     }
 
-    // Fetch weight logs for chart
+    // Fetch weight logs for chart - RLS enforced via user's token
     const { data: weightLogs, error: weightLogsError } = await supabase
       .from('weight_logs')
       .select('id, weight, recorded_at')
