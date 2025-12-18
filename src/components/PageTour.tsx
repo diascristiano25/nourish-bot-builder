@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Joyride, { CallBackProps, STATUS, Step, ACTIONS, EVENTS } from 'react-joyride';
 
 interface PageTourProps {
@@ -11,14 +11,25 @@ interface PageTourProps {
 export function PageTour({ tourKey, steps, run = false, onComplete }: PageTourProps) {
   const [shouldRun, setShouldRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    const tourCompleted = localStorage.getItem(`tour_${tourKey}`);
+    // Only check once per mount
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+    
+    const storageKey = `tour_${tourKey}`;
+    const tourCompleted = localStorage.getItem(storageKey) === 'true';
+    
+    // Only start tour if run is true AND tour was never completed
     if (run && !tourCompleted) {
-      const timer = setTimeout(() => setShouldRun(true), 500);
+      const timer = setTimeout(() => {
+        // Double check before starting
+        if (localStorage.getItem(storageKey) !== 'true') {
+          setShouldRun(true);
+        }
+      }, 500);
       return () => clearTimeout(timer);
-    } else if (run) {
-      setShouldRun(true);
     }
   }, [tourKey, run]);
 
