@@ -112,6 +112,20 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
     newData.totalCalories = newData.meals.reduce(
       (sum, meal) => sum + (meal.totalCalories || 0), 0
     );
+
+    // Recalculate total macros
+    const totalMacros = newData.meals.reduce(
+      (acc, meal) => {
+        meal.items.forEach(item => {
+          acc.protein += item.protein || 0;
+          acc.carbs += item.carbs || 0;
+          acc.fat += item.fat || 0;
+        });
+        return acc;
+      },
+      { protein: 0, carbs: 0, fat: 0 }
+    );
+    newData.macros = totalMacros;
     
     setEditedData(newData);
   };
@@ -150,6 +164,20 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
     newData.totalCalories = newData.meals.reduce(
       (sum, meal) => sum + (meal.totalCalories || 0), 0
     );
+
+    // Recalculate total macros
+    const totalMacros = newData.meals.reduce(
+      (acc, meal) => {
+        meal.items.forEach(item => {
+          acc.protein += item.protein || 0;
+          acc.carbs += item.carbs || 0;
+          acc.fat += item.fat || 0;
+        });
+        return acc;
+      },
+      { protein: 0, carbs: 0, fat: 0 }
+    );
+    newData.macros = totalMacros;
     
     setEditedData(newData);
     setSearchingMealIndex(null);
@@ -166,6 +194,20 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
     newData.totalCalories = newData.meals.reduce(
       (sum, meal) => sum + (meal.totalCalories || 0), 0
     );
+
+    // Recalculate total macros
+    const totalMacros = newData.meals.reduce(
+      (acc, meal) => {
+        meal.items.forEach(item => {
+          acc.protein += item.protein || 0;
+          acc.carbs += item.carbs || 0;
+          acc.fat += item.fat || 0;
+        });
+        return acc;
+      },
+      { protein: 0, carbs: 0, fat: 0 }
+    );
+    newData.macros = totalMacros;
     
     setEditedData(newData);
   };
@@ -214,12 +256,26 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
         </div>
       </div>
 
-      {/* Total Calories Summary */}
-      <Card className="border-warning/50 bg-warning/5">
+      {/* Nutritional Summary */}
+      <Card className="border-primary/30 bg-primary/5">
         <CardContent className="pt-4">
-          <div className="flex justify-between items-center">
-            <span className="font-medium">Total de Calorias</span>
-            <span className="text-2xl font-bold text-primary">{editedData.totalCalories || 0} kcal</span>
+          <div className="grid grid-cols-4 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-bold text-primary">{editedData.totalCalories || 0}</p>
+              <p className="text-xs text-muted-foreground">kcal</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-blue-600">{Math.round(editedData.macros?.protein || 0)}g</p>
+              <p className="text-xs text-muted-foreground">Proteína</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-orange-500">{Math.round(editedData.macros?.carbs || 0)}g</p>
+              <p className="text-xs text-muted-foreground">Carboidrato</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-yellow-600">{Math.round(editedData.macros?.fat || 0)}g</p>
+              <p className="text-xs text-muted-foreground">Gordura</p>
+            </div>
           </div>
         </CardContent>
       </Card>
