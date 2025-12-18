@@ -351,16 +351,10 @@ export default function Index() {
                 <Button 
                   size="lg" 
                   className="w-full text-base py-6 bg-emerald-500 hover:bg-emerald-600 rounded-2xl shadow-lg shadow-emerald-500/25 font-semibold"
-                  asChild
+                  onClick={() => navigate('/auth')}
                 >
-                  <a 
-                    href="https://wa.me/5547992381906?text=Olá! Quero garantir minha vaga no Plano Vitalício de R$ 797."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Quero ser Membro Fundador
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </a>
+                  Quero ser Membro Fundador
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
                 
                 <p className="text-center text-sm text-slate-400 mt-4 flex items-center justify-center gap-2">
@@ -547,16 +541,10 @@ export default function Index() {
             <Button 
               size="lg" 
               className="text-base px-8 py-6 bg-white hover:bg-slate-50 text-emerald-600 rounded-2xl shadow-lg font-semibold"
-              asChild
+              onClick={() => navigate('/auth')}
             >
-              <a 
-                href="https://wa.me/5547992381906?text=Olá! Quero garantir minha vaga no Plano Vitalício de R$ 797."
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Começar Agora
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </a>
+              Começar Agora
+              <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </div>
         </div>
