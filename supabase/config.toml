@@ -1,10 +1,10 @@
 project_id = "fqeruutxahrrxjusxndl"
 
 [functions.generate-meal-plan]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-grocery-list]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-patient-magic-link]
 verify_jwt = true
