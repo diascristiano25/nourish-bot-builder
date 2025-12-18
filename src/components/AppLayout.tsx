@@ -3,7 +3,7 @@ import { AppSidebar } from './AppSidebar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
-import logoImg from '@/assets/logo.png';
+
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -45,10 +45,7 @@ export const AppLayout = memo(function AppLayout({ children, showSidebar = true 
             <AppSidebar isMobile onNavigate={() => setMobileMenuOpen(false)} />
           </SheetContent>
         </Sheet>
-        <div className="ml-3 flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-sm">
-            <img src={logoImg} alt="NutriFlow" className="w-4 h-4 object-contain" />
-          </div>
+        <div className="ml-3 flex items-center">
           <span className="font-bold text-slate-800 text-base tracking-tight">NutriFlow</span>
         </div>
       </div>
