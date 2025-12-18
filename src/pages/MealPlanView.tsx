@@ -16,11 +16,11 @@ import {
   UtensilsCrossed,
   Download,
   Share2,
-  Edit,
   Calendar,
   Settings,
-  ShoppingCart,
-  Pencil
+  Pencil,
+  Apple,
+  Soup
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -80,20 +80,20 @@ interface NutritionistProfile {
 
 const mealIcons: Record<string, React.ReactNode> = {
   'Café da Manhã': <Coffee className="w-5 h-5" />,
-  'Lanche da Manhã': <Cookie className="w-5 h-5" />,
+  'Lanche da Manhã': <Apple className="w-5 h-5" />,
   'Almoço': <Sun className="w-5 h-5" />,
   'Lanche da Tarde': <Cookie className="w-5 h-5" />,
   'Jantar': <Moon className="w-5 h-5" />,
-  'Ceia': <UtensilsCrossed className="w-5 h-5" />,
+  'Ceia': <Soup className="w-5 h-5" />,
 };
 
-const mealColors: Record<string, string> = {
-  'Café da Manhã': 'bg-warning/10 text-warning',
-  'Lanche da Manhã': 'bg-info/10 text-info',
-  'Almoço': 'bg-success/10 text-success',
-  'Lanche da Tarde': 'bg-info/10 text-info',
-  'Jantar': 'bg-primary/10 text-primary',
-  'Ceia': 'bg-muted text-muted-foreground',
+const mealColors: Record<string, { bg: string; icon: string; border: string }> = {
+  'Café da Manhã': { bg: 'bg-amber-50', icon: 'text-amber-500', border: 'border-amber-200' },
+  'Lanche da Manhã': { bg: 'bg-orange-50', icon: 'text-orange-500', border: 'border-orange-200' },
+  'Almoço': { bg: 'bg-emerald-50', icon: 'text-emerald-500', border: 'border-emerald-200' },
+  'Lanche da Tarde': { bg: 'bg-blue-50', icon: 'text-blue-500', border: 'border-blue-200' },
+  'Jantar': { bg: 'bg-purple-50', icon: 'text-purple-500', border: 'border-purple-200' },
+  'Ceia': { bg: 'bg-slate-50', icon: 'text-slate-500', border: 'border-slate-200' },
 };
 
 export default function MealPlanView() {
@@ -126,7 +126,6 @@ export default function MealPlanView() {
 
   const fetchData = async () => {
     try {
-      // Fetch meal plan
       const { data: planData, error: planError } = await supabase
         .from('meal_plans')
         .select('*')
@@ -141,7 +140,6 @@ export default function MealPlanView() {
       };
       setMealPlan(transformedPlan);
 
-      // Fetch patient
       const { data: patientData, error: patientError } = await supabase
         .from('patients')
         .select('full_name')
@@ -151,7 +149,6 @@ export default function MealPlanView() {
       if (patientError) throw patientError;
       setPatient(patientData);
 
-      // Fetch nutritionist profile
       const { data: nutritionistData, error: nutritionistError } = await supabase
         .from('nutritionists')
         .select('full_name, crn, phone, logo_url, primary_color, secondary_color')
@@ -245,7 +242,6 @@ export default function MealPlanView() {
       const portalUrl = `https://nutriflow.inf.br/paciente/${id}`;
       const shareText = `Seu Plano Alimentar por ${nutritionist?.full_name || 'seu nutricionista'}: ${portalUrl}`;
       
-      // Try Web Share API first
       if (navigator.share && navigator.canShare && navigator.canShare({ text: shareText, url: portalUrl })) {
         try {
           await navigator.share({
@@ -261,11 +257,10 @@ export default function MealPlanView() {
         }
       }
       
-      // Fallback: copy link to clipboard
       await navigator.clipboard.writeText(portalUrl);
       toast({
         title: "Link copiado!",
-        description: "Link do portal do paciente copiado. Envie via WhatsApp.",
+        description: "Link do portal do paciente copiado.",
       });
     } catch (error: any) {
       toast({
@@ -303,7 +298,7 @@ export default function MealPlanView() {
       
       toast({
         title: "Cardápio salvo",
-        description: "As alterações foram salvas com sucesso.",
+        description: "As alterações foram salvas.",
       });
     } catch (error: any) {
       toast({
@@ -318,8 +313,8 @@ export default function MealPlanView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen gradient-subtle flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
       </div>
     );
   }
@@ -332,17 +327,22 @@ export default function MealPlanView() {
   const hasNutritionistProfile = nutritionist && nutritionist.full_name;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(`/patients/${id}`)}>
+    <div className="min-h-screen bg-slate-50">
+      {/* Elite Header */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+        <div className="px-4 lg:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate(`/patients/${id}`)}
+              className="rounded-xl"
+            >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="font-bold text-lg">{mealPlan.title}</h1>
-              <p className="text-xs text-muted-foreground">{patient.full_name}</p>
+              <h1 className="font-bold text-slate-800">{mealPlan.title}</h1>
+              <p className="text-xs text-slate-500">{patient.full_name}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -350,7 +350,7 @@ export default function MealPlanView() {
               variant={isEditing ? "secondary" : "outline"}
               size="icon"
               onClick={() => setIsEditing(!isEditing)}
-              title="Editar cardápio"
+              className="rounded-xl border-slate-200"
             >
               <Pencil className="w-4 h-4" />
             </Button>
@@ -359,6 +359,7 @@ export default function MealPlanView() {
               size="icon"
               onClick={handleShare}
               disabled={sharing || isEditing}
+              className="rounded-xl border-slate-200"
             >
               {sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
             </Button>
@@ -367,7 +368,7 @@ export default function MealPlanView() {
               size="icon"
               onClick={handleDownloadPDF}
               disabled={downloading || !hasNutritionistProfile || isEditing}
-              title={!hasNutritionistProfile ? "Configure seu perfil primeiro" : "Baixar PDF"}
+              className="rounded-xl border-slate-200"
             >
               {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             </Button>
@@ -375,20 +376,24 @@ export default function MealPlanView() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-3xl space-y-6">
-        {/* Aviso de perfil incompleto */}
+      <main className="px-4 lg:px-6 py-6 max-w-3xl mx-auto space-y-6">
+        {/* Profile Warning */}
         {!hasNutritionistProfile && (
-          <Card className="border-warning bg-warning/10">
-            <CardContent className="pt-6">
+          <Card className="bg-amber-50 border-amber-200 rounded-2xl">
+            <CardContent className="py-4">
               <div className="flex items-center gap-4">
-                <Settings className="w-8 h-8 text-warning" />
+                <Settings className="w-6 h-6 text-amber-600" />
                 <div className="flex-1">
-                  <p className="font-medium">Configure seu perfil</p>
-                  <p className="text-sm text-muted-foreground">
-                    Adicione seu nome, CRN e logo para que apareçam nos documentos exportados.
+                  <p className="font-medium text-amber-800">Configure seu perfil</p>
+                  <p className="text-sm text-amber-600">
+                    Adicione nome, CRN e logo para exportar documentos.
                   </p>
                 </div>
-                <Button onClick={() => navigate('/profile')} variant="outline">
+                <Button 
+                  onClick={() => navigate('/profile')} 
+                  variant="outline"
+                  className="rounded-xl border-amber-300 text-amber-700 hover:bg-amber-100"
+                >
                   Configurar
                 </Button>
               </div>
@@ -396,7 +401,6 @@ export default function MealPlanView() {
           </Card>
         )}
 
-        {/* Edit Mode */}
         {isEditing ? (
           <MealPlanEditor 
             planData={planData} 
@@ -406,158 +410,139 @@ export default function MealPlanView() {
           />
         ) : (
           <>
-        {/* Summary Card */}
-        <Card className="border-0 shadow-md gradient-card">
-          <CardContent className="pt-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {format(new Date(mealPlan.created_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                  </span>
-                </div>
-                {mealPlan.is_active && (
-                  <Badge variant="default">Cardápio Ativo</Badge>
-                )}
-              </div>
-              <div className="text-right">
-                <p className="text-3xl font-bold text-primary">
-                  {mealPlan.total_calories || planData.totalCalories || '-'}
-                </p>
-                <p className="text-sm text-muted-foreground">kcal/dia</p>
-              </div>
-            </div>
-
-            {planData.macros && (
-              <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
-                <div className="text-center">
-                  <p className="text-xl font-semibold text-info">{planData.macros.protein}g</p>
-                  <p className="text-xs text-muted-foreground">Proteínas</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xl font-semibold text-warning">{planData.macros.carbs}g</p>
-                  <p className="text-xs text-muted-foreground">Carboidratos</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xl font-semibold text-success">{planData.macros.fat}g</p>
-                  <p className="text-xs text-muted-foreground">Gorduras</p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Meals */}
-        <div className="space-y-4">
-          {planData.meals?.map((meal, index) => (
-            <Card key={index} className="border-0 shadow-md overflow-hidden">
-              <CardHeader className={`${mealColors[meal.name] || 'bg-muted'} py-4`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-background/50 flex items-center justify-center">
-                      {mealIcons[meal.name] || <UtensilsCrossed className="w-5 h-5" />}
+            {/* Summary Card */}
+            <Card className="bg-white rounded-2xl border-0 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm text-slate-500">
+                        {format(new Date(mealPlan.created_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      </span>
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{meal.name}</CardTitle>
-                      {meal.time && (
-                        <CardDescription className="text-current/70">{meal.time}</CardDescription>
-                      )}
+                    {mealPlan.is_active && (
+                      <Badge className="bg-emerald-100 text-emerald-700 border-0 rounded-lg">
+                        Cardápio Ativo
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-emerald-500">
+                      {mealPlan.total_calories || planData.totalCalories || '-'}
+                    </p>
+                    <p className="text-sm text-slate-500">kcal/dia</p>
+                  </div>
+                </div>
+
+                {planData.macros && (
+                  <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100">
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-blue-500">{planData.macros.protein}g</p>
+                      <p className="text-xs text-slate-500">Proteínas</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-amber-500">{planData.macros.carbs}g</p>
+                      <p className="text-xs text-slate-500">Carboidratos</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-emerald-500">{planData.macros.fat}g</p>
+                      <p className="text-xs text-slate-500">Gorduras</p>
                     </div>
                   </div>
-                  {meal.totalCalories && (
-                    <Badge variant="secondary" className="bg-background/50">
-                      {meal.totalCalories} kcal
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="space-y-3">
-                  {meal.items?.map((item, itemIndex) => (
-                    <div 
-                      key={itemIndex} 
-                      className="flex items-center justify-between py-2 border-b last:border-0"
-                    >
-                      <div className="flex-1">
-                        <p className="font-medium">{item.food}</p>
-                        <p className="text-sm text-muted-foreground">{item.portion}</p>
-                      </div>
-                      {item.calories && (
-                        <div className="text-right">
-                          <p className="font-semibold">{item.calories} kcal</p>
-                          {(item.protein || item.carbs || item.fat) && (
-                            <p className="text-xs text-muted-foreground">
-                              {item.protein && `P:${item.protein}g `}
-                              {item.carbs && `C:${item.carbs}g `}
-                              {item.fat && `G:${item.fat}g`}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                )}
               </CardContent>
             </Card>
-          ))}
-        </div>
 
-        {/* Notes */}
-        {planData.notes && (
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg">Observações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{planData.notes}</p>
-            </CardContent>
-          </Card>
-        )}
+            {/* Meals */}
+            <div className="space-y-4">
+              {planData.meals?.map((meal, index) => {
+                const colors = mealColors[meal.name] || { bg: 'bg-slate-50', icon: 'text-slate-500', border: 'border-slate-200' };
+                
+                return (
+                  <Card 
+                    key={index} 
+                    className={`bg-white rounded-2xl border-0 shadow-sm overflow-hidden`}
+                  >
+                    <CardHeader className={`${colors.bg} py-4 px-6 border-b ${colors.border}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center ${colors.icon}`}>
+                            {mealIcons[meal.name] || <UtensilsCrossed className="w-5 h-5" />}
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg text-slate-800">{meal.name}</CardTitle>
+                            {meal.time && (
+                              <CardDescription className="text-slate-500">{meal.time}</CardDescription>
+                            )}
+                          </div>
+                        </div>
+                        {meal.totalCalories && (
+                          <Badge variant="secondary" className="bg-white/80 text-slate-600 border-0 rounded-lg">
+                            {meal.totalCalories} kcal
+                          </Badge>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="space-y-3">
+                        {meal.items?.map((item, itemIndex) => (
+                          <div 
+                            key={itemIndex} 
+                            className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0"
+                          >
+                            <div className="flex-1">
+                              <p className="font-medium text-slate-800">{item.food}</p>
+                              <p className="text-sm text-slate-500">{item.portion}</p>
+                            </div>
+                            {item.calories && (
+                              <div className="text-right">
+                                <p className="font-semibold text-slate-700">{item.calories} kcal</p>
+                                {(item.protein || item.carbs || item.fat) && (
+                                  <p className="text-xs text-slate-400">
+                                    {item.protein && `P:${item.protein}g `}
+                                    {item.carbs && `C:${item.carbs}g `}
+                                    {item.fat && `G:${item.fat}g`}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
 
-        {/* Actions */}
-        <div className="flex flex-col gap-3 pt-4">
-          <Button 
-            variant="default"
-            className="w-full"
-            onClick={() => navigate(`/patients/${id}/meal-plan/${planId}/grocery-list`)}
-          >
-            <ShoppingCart className="mr-2 w-4 h-4" />
-            Gerar Lista de Compras
-          </Button>
-          <div className="flex gap-4">
-            <Button 
-              variant="outline" 
-              className="flex-1"
-              onClick={() => navigate(`/patients/${id}`)}
-            >
-              Voltar ao Paciente
-            </Button>
-            <Button 
-              variant="secondary"
-              className="flex-1"
-              onClick={() => navigate(`/patients/${id}/meal-plan/generate`)}
-            >
-              <Edit className="mr-2 w-4 h-4" />
-              Gerar Novo
-            </Button>
-          </div>
-        </div>
+            {/* Notes */}
+            {planData.notes && (
+              <Card className="bg-white rounded-2xl border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-base text-slate-800">Observações</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-slate-600 whitespace-pre-line">{planData.notes}</p>
+                </CardContent>
+              </Card>
+            )}
           </>
         )}
-      </main>
 
-      {/* Hidden document for PDF generation */}
-      {nutritionist && (
-        <div className="fixed left-[-9999px] top-0">
-          <MealPlanDocument
-            ref={documentRef}
-            mealPlan={mealPlan}
-            patientName={patient.full_name}
-            nutritionist={nutritionist}
-          />
+        {/* Hidden PDF Document */}
+        <div className="fixed -left-[9999px] top-0">
+          <div ref={documentRef}>
+            {mealPlan && patient && nutritionist && (
+              <MealPlanDocument
+                mealPlan={mealPlan}
+                patientName={patient.full_name}
+                nutritionist={nutritionist}
+              />
+            )}
+          </div>
         </div>
-      )}
+      </main>
     </div>
   );
 }

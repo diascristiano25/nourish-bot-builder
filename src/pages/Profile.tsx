@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Save, Upload, User, Link2, Image } from 'lucide-react';
-import { PageTour, profileTourSteps } from '@/components/PageTour';
+import { ArrowLeft, Loader2, Save, Upload, User, Link2, Image, Palette } from 'lucide-react';
+import { AppLayout } from '@/components/AppLayout';
 
 interface NutritionistProfile {
   id: string;
@@ -32,13 +32,13 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [useLogoUrl, setUseLogoUrl] = useState(true); // true = URL, false = Upload
+  const [useLogoUrl, setUseLogoUrl] = useState(true);
   
   const [fullName, setFullName] = useState('');
   const [crn, setCrn] = useState('');
   const [phone, setPhone] = useState('');
-  const [primaryColor, setPrimaryColor] = useState('#4a7c59');
-  const [secondaryColor, setSecondaryColor] = useState('#2d5a3d');
+  const [primaryColor, setPrimaryColor] = useState('#10B981');
+  const [secondaryColor, setSecondaryColor] = useState('#059669');
   const [logoUrl, setLogoUrl] = useState('');
   const [emailSignature, setEmailSignature] = useState('');
 
@@ -68,8 +68,8 @@ export default function Profile() {
       setFullName(data.full_name || '');
       setCrn(data.crn || '');
       setPhone(data.phone || '');
-      setPrimaryColor(data.primary_color || '#4a7c59');
-      setSecondaryColor(data.secondary_color || '#2d5a3d');
+      setPrimaryColor(data.primary_color || '#10B981');
+      setSecondaryColor(data.secondary_color || '#059669');
       setLogoUrl(data.logo_url || '');
       setEmailSignature(data.email_signature || '');
     } catch (error: any) {
@@ -120,130 +120,146 @@ export default function Profile() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <AppLayout>
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <PageTour tourKey="profile" steps={profileTourSteps} run />
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h1 className="font-bold text-lg">Meu Perfil</h1>
-              <p className="text-xs text-muted-foreground">Configure suas informações profissionais</p>
+    <AppLayout>
+      <div className="min-h-screen bg-slate-50">
+        {/* Elite Header */}
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+          <div className="px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => navigate('/dashboard')}
+                  className="rounded-xl"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <div>
+                  <h1 className="text-xl lg:text-2xl font-bold text-slate-800 tracking-tight">
+                    Configurações
+                  </h1>
+                  <p className="text-sm text-slate-500">Personalize seu perfil profissional</p>
+                </div>
+              </div>
+              <Button 
+                onClick={handleSave} 
+                disabled={saving} 
+                className="gap-2 bg-emerald-500 hover:bg-emerald-600 rounded-xl h-10 px-5"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Salvar
+              </Button>
             </div>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Salvar
-          </Button>
-        </div>
-      </header>
+        </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-2xl space-y-6">
-        {/* Informações Pessoais */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Informações Pessoais
-            </CardTitle>
-            <CardDescription>
-              Dados que aparecerão nos cardápios exportados
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Nome Completo</Label>
-              <Input
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Dr(a). Nome Sobrenome"
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <main className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
+          {/* Personal Info */}
+          <Card className="bg-white rounded-2xl border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-slate-800">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                  <User className="w-4 h-4 text-emerald-500" />
+                </div>
+                Informações Pessoais
+              </CardTitle>
+              <CardDescription className="text-slate-500">
+                Dados que aparecerão nos documentos exportados
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="crn">CRN (Registro Profissional)</Label>
+                <Label htmlFor="fullName" className="text-slate-700">Nome Completo</Label>
                 <Input
-                  id="crn"
-                  value={crn}
-                  onChange={(e) => setCrn(e.target.value)}
-                  placeholder="CRN-X 12345"
+                  id="fullName"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Dr(a). Nome Sobrenome"
+                  className="rounded-xl border-slate-200 focus:border-emerald-300"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input
-                  id="phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="(11) 99999-9999"
-                />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="crn" className="text-slate-700">CRN</Label>
+                  <Input
+                    id="crn"
+                    value={crn}
+                    onChange={(e) => setCrn(e.target.value)}
+                    placeholder="CRN-X 12345"
+                    className="rounded-xl border-slate-200 focus:border-emerald-300"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-slate-700">Telefone</Label>
+                  <Input
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="(11) 99999-9999"
+                    className="rounded-xl border-slate-200 focus:border-emerald-300"
+                  />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Logo */}
-        <Card className="border-0 shadow-md" data-tour="profile-logo">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Image className="w-5 h-5" />
-              Marca e Personalização
-            </CardTitle>
-            <CardDescription>
-              Adicione sua logo para aparecer nos documentos e PDFs
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Toggle entre URL e Upload */}
-            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-              <div className="flex items-center gap-3">
-                <Link2 className={`w-4 h-4 ${useLogoUrl ? 'text-primary' : 'text-muted-foreground'}`} />
-                <span className={`text-sm ${useLogoUrl ? 'font-medium' : 'text-muted-foreground'}`}>
-                  Inserir Link
-                </span>
-              </div>
-              <Switch
-                checked={!useLogoUrl}
-                onCheckedChange={(checked) => setUseLogoUrl(!checked)}
-              />
-              <div className="flex items-center gap-3">
-                <span className={`text-sm ${!useLogoUrl ? 'font-medium' : 'text-muted-foreground'}`}>
-                  Upload de Arquivo
-                </span>
-                <Upload className={`w-4 h-4 ${!useLogoUrl ? 'text-primary' : 'text-muted-foreground'}`} />
-              </div>
-            </div>
-
-            {/* Campo de URL ou Upload */}
-            {useLogoUrl ? (
-              <div className="space-y-2">
-                <Label htmlFor="logoUrl">URL da Logo</Label>
-                <Input
-                  id="logoUrl"
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  placeholder="https://exemplo.com/minha-logo.png"
+          {/* Logo */}
+          <Card className="bg-white rounded-2xl border-0 shadow-sm" data-tour="profile-logo">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-slate-800">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                  <Image className="w-4 h-4 text-blue-500" />
+                </div>
+                Logo
+              </CardTitle>
+              <CardDescription className="text-slate-500">
+                Adicione sua logo para aparecer nos PDFs e Portal do Paciente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50">
+                <div className="flex items-center gap-2">
+                  <Link2 className={`w-4 h-4 ${useLogoUrl ? 'text-emerald-500' : 'text-slate-400'}`} />
+                  <span className={`text-sm ${useLogoUrl ? 'font-medium text-slate-700' : 'text-slate-400'}`}>
+                    Link
+                  </span>
+                </div>
+                <Switch
+                  checked={!useLogoUrl}
+                  onCheckedChange={(checked) => setUseLogoUrl(!checked)}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Cole a URL de uma imagem hospedada online (recomendado: PNG com fundo transparente)
-                </p>
+                <div className="flex items-center gap-2">
+                  <Upload className={`w-4 h-4 ${!useLogoUrl ? 'text-emerald-500' : 'text-slate-400'}`} />
+                  <span className={`text-sm ${!useLogoUrl ? 'font-medium text-slate-700' : 'text-slate-400'}`}>
+                    Upload
+                  </span>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <Label>Upload de Logo</Label>
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+
+              {useLogoUrl ? (
+                <div className="space-y-2">
+                  <Label htmlFor="logoUrl" className="text-slate-700">URL da Logo</Label>
+                  <Input
+                    id="logoUrl"
+                    value={logoUrl}
+                    onChange={(e) => setLogoUrl(e.target.value)}
+                    placeholder="https://exemplo.com/logo.png"
+                    className="rounded-xl border-slate-200 focus:border-emerald-300"
+                  />
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-emerald-300 transition-colors cursor-pointer">
                   <input
                     type="file"
                     id="logo-upload"
@@ -264,7 +280,6 @@ export default function Profile() {
                       
                       setUploadingLogo(true);
                       try {
-                        // Convert to base64 for now (until storage is set up)
                         const reader = new FileReader();
                         reader.onload = (event) => {
                           const base64 = event.target?.result as string;
@@ -288,153 +303,150 @@ export default function Profile() {
                   />
                   <label htmlFor="logo-upload" className="cursor-pointer">
                     {uploadingLogo ? (
-                      <Loader2 className="w-8 h-8 mx-auto text-muted-foreground animate-spin" />
+                      <Loader2 className="w-8 h-8 mx-auto text-slate-400 animate-spin" />
                     ) : (
-                      <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                      <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
                     )}
-                    <p className="text-sm text-muted-foreground">
-                      {uploadingLogo ? 'Carregando...' : 'Clique para selecionar ou arraste uma imagem'}
+                    <p className="text-sm text-slate-500">
+                      Clique para selecionar
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG ou WEBP (máx. 2MB)
+                    <p className="text-xs text-slate-400 mt-1">
+                      PNG, JPG (máx. 2MB)
                     </p>
                   </label>
                 </div>
-              </div>
-            )}
-            
-            {/* Prévia da Logo */}
-            {logoUrl && (
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm text-muted-foreground">Prévia:</p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setLogoUrl('')}
-                    className="text-xs h-7"
-                  >
-                    Remover
-                  </Button>
+              )}
+              
+              {logoUrl && (
+                <div className="p-4 bg-slate-50 rounded-xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium text-slate-600">Prévia</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setLogoUrl('')}
+                      className="text-xs h-7 text-slate-500"
+                    >
+                      Remover
+                    </Button>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 flex justify-center">
+                    <img 
+                      src={logoUrl} 
+                      alt="Logo preview" 
+                      className="max-h-20 object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="bg-white rounded p-4 flex justify-center">
-                  <img 
-                    src={logoUrl} 
-                    alt="Logo preview" 
-                    className="max-h-24 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Cores do Tema */}
-        <Card className="border-0 shadow-md" data-tour="profile-colors">
-          <CardHeader>
-            <CardTitle>Cores da Marca</CardTitle>
-            <CardDescription>
-              Personalize as cores dos documentos exportados
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="primaryColor">Cor Principal</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="color"
-                    id="primaryColor"
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="w-12 h-10 p-1 cursor-pointer"
-                  />
-                  <Input
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    placeholder="#4a7c59"
-                    className="flex-1"
-                  />
+          {/* Colors */}
+          <Card className="bg-white rounded-2xl border-0 shadow-sm" data-tour="profile-colors">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-slate-800">
+                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+                  <Palette className="w-4 h-4 text-purple-500" />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="secondaryColor">Cor Secundária</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="color"
-                    id="secondaryColor"
-                    value={secondaryColor}
-                    onChange={(e) => setSecondaryColor(e.target.value)}
-                    className="w-12 h-10 p-1 cursor-pointer"
-                  />
-                  <Input
-                    value={secondaryColor}
-                    onChange={(e) => setSecondaryColor(e.target.value)}
-                    placeholder="#2d5a3d"
-                    className="flex-1"
-                  />
+                Cores da Marca
+              </CardTitle>
+              <CardDescription className="text-slate-500">
+                Personalize as cores dos documentos
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="primaryColor" className="text-slate-700">Cor Principal</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      id="primaryColor"
+                      value={primaryColor}
+                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      className="w-12 h-10 p-1 cursor-pointer rounded-lg"
+                    />
+                    <Input
+                      value={primaryColor}
+                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      className="flex-1 rounded-xl border-slate-200"
+                    />
+                  </div>
                 </div>
-              </div>
-            </div>
-            
-            {/* Prévia das cores */}
-            <div className="p-4 rounded-lg border">
-              <p className="text-sm text-muted-foreground mb-3">Prévia do Cabeçalho:</p>
-              <div 
-                className="p-4 rounded-lg text-white"
-                style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
-              >
-                <div className="flex items-center gap-3">
-                  {logoUrl && (
-                    <img src={logoUrl} alt="Logo" className="h-8 object-contain" />
-                  )}
-                  <div>
-                    <p className="font-bold">{fullName || 'Seu Nome'}</p>
-                    <p className="text-sm opacity-90">{crn || 'CRN-X 00000'}</p>
+                <div className="space-y-2">
+                  <Label htmlFor="secondaryColor" className="text-slate-700">Cor Secundária</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      id="secondaryColor"
+                      value={secondaryColor}
+                      onChange={(e) => setSecondaryColor(e.target.value)}
+                      className="w-12 h-10 p-1 cursor-pointer rounded-lg"
+                    />
+                    <Input
+                      value={secondaryColor}
+                      onChange={(e) => setSecondaryColor(e.target.value)}
+                      className="flex-1 rounded-xl border-slate-200"
+                    />
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              
+              {/* Preview */}
+              <div className="p-4 rounded-xl border border-slate-200">
+                <p className="text-sm font-medium text-slate-600 mb-3">Prévia do Cabeçalho</p>
+                <div 
+                  className="p-4 rounded-xl text-white"
+                  style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
+                >
+                  <div className="flex items-center gap-3">
+                    {logoUrl && (
+                      <img src={logoUrl} alt="Logo" className="h-8 object-contain" />
+                    )}
+                    <div>
+                      <p className="font-bold">{fullName || 'Seu Nome'}</p>
+                      <p className="text-sm opacity-90">{crn || 'CRN-X 00000'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Assinatura de Email */}
-        <Card className="border-0 shadow-md" data-tour="profile-signature">
-          <CardHeader>
-            <CardTitle>Assinatura de E-mail</CardTitle>
-            <CardDescription>
-              Esta assinatura aparecerá no rodapé do Portal do Paciente
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="emailSignature">Texto da Assinatura</Label>
+          {/* Email Signature */}
+          <Card className="bg-white rounded-2xl border-0 shadow-sm" data-tour="profile-signature">
+            <CardHeader>
+              <CardTitle className="text-slate-800">Assinatura</CardTitle>
+              <CardDescription className="text-slate-500">
+                Texto que aparece no rodapé do Portal do Paciente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <Textarea
                 id="emailSignature"
                 value={emailSignature}
                 onChange={(e) => setEmailSignature(e.target.value)}
                 placeholder="Ex: Atenciosamente, Dra. Maria Silva - Nutricionista Clínica"
                 rows={3}
+                className="rounded-xl border-slate-200 focus:border-emerald-300"
               />
-              <p className="text-xs text-muted-foreground">
-                Inclua sua despedida, nome e especialidade
-              </p>
-            </div>
-            
-            {emailSignature && (
-              <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">Prévia:</p>
-                <div className="text-sm whitespace-pre-line border-t pt-3 mt-2">
-                  {emailSignature}
+              
+              {emailSignature && (
+                <div className="p-4 bg-slate-50 rounded-xl">
+                  <p className="text-sm font-medium text-slate-600 mb-2">Prévia</p>
+                  <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-200 pt-3">
+                    {emailSignature}
+                  </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+              )}
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    </AppLayout>
   );
 }
