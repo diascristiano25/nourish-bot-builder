@@ -37,6 +37,13 @@ export default function EditPatient() {
   const [medicalConditions, setMedicalConditions] = useState('');
   const [notes, setNotes] = useState('');
   const [criticalTags, setCriticalTags] = useState<string[]>([]);
+  
+  // Anthropometric measurements
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [waist, setWaist] = useState('');
+  const [hip, setHip] = useState('');
+  const [bodyFat, setBodyFat] = useState('');
 
   const [customAllergy, setCustomAllergy] = useState('');
   const [customRestriction, setCustomRestriction] = useState('');
@@ -55,6 +62,7 @@ export default function EditPatient() {
 
   const fetchPatientData = async () => {
     try {
+      // Fetch patient data
       const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -75,6 +83,23 @@ export default function EditPatient() {
       setMedicalConditions(data.medical_conditions || '');
       setNotes(data.notes || '');
       setCriticalTags(data.critical_tags || []);
+
+      // Fetch latest anthropometric data
+      const { data: anthroData } = await supabase
+        .from('anthropometrics')
+        .select('*')
+        .eq('patient_id', id)
+        .order('measured_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (anthroData) {
+        setWeight(anthroData.weight_kg?.toString() || '');
+        setHeight(anthroData.height_cm?.toString() || '');
+        setWaist(anthroData.waist_cm?.toString() || '');
+        setHip(anthroData.hip_cm?.toString() || '');
+        setBodyFat(anthroData.body_fat_percentage?.toString() || '');
+      }
     } catch (error: any) {
       toast({
         title: "Erro ao carregar dados",
@@ -132,6 +157,7 @@ export default function EditPatient() {
     setSaving(true);
 
     try {
+      // Update patient data
       const { error } = await supabase
         .from('patients')
         .update({
@@ -151,6 +177,52 @@ export default function EditPatient() {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Save anthropometric data if any measurements provided
+      const hasAnyMeasurement = weight || height || waist || hip || bodyFat;
+      if (hasAnyMeasurement) {
+        // Create new anthropometric record
+        await supabase
+          .from('anthropometrics')
+          .insert({
+            patient_id: id,
+            weight_kg: weight ? parseFloat(weight) : null,
+            height_cm: height ? parseFloat(height) : null,
+            waist_cm: waist ? parseFloat(waist) : null,
+            hip_cm: hip ? parseFloat(hip) : null,
+            body_fat_percentage: bodyFat ? parseFloat(bodyFat) : null,
+            notes: 'Atualizado via edição de perfil',
+          });
+
+        // Also update weight_logs for chart tracking
+        if (weight) {
+          const today = new Date().toISOString().split('T')[0];
+          const weightValue = parseFloat(weight);
+          
+          // Check if log exists for today
+          const { data: existingLog } = await supabase
+            .from('weight_logs')
+            .select('id')
+            .eq('patient_id', id)
+            .eq('recorded_at', today)
+            .maybeSingle();
+          
+          if (existingLog) {
+            await supabase
+              .from('weight_logs')
+              .update({ weight: weightValue })
+              .eq('id', existingLog.id);
+          } else {
+            await supabase
+              .from('weight_logs')
+              .insert({
+                patient_id: id,
+                weight: weightValue,
+                recorded_at: today,
+              });
+          }
+        }
+      }
 
       toast({
         title: "Paciente atualizado!",
@@ -264,6 +336,82 @@ export default function EditPatient() {
                       <SelectItem value="other">Outro</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Anthropometric Measurements */}
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                  <Scale className="w-5 h-5 text-success" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Medidas Atuais</CardTitle>
+                  <CardDescription>Dados antropométricos (atualiza o histórico automaticamente)</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="weight">Peso (kg)</Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    step="0.1"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    placeholder="70.5"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="height">Altura (cm)</Label>
+                  <Input
+                    id="height"
+                    type="number"
+                    step="0.1"
+                    value={height}
+                    onChange={(e) => setHeight(e.target.value)}
+                    placeholder="170"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="waist">Cintura (cm)</Label>
+                  <Input
+                    id="waist"
+                    type="number"
+                    step="0.1"
+                    value={waist}
+                    onChange={(e) => setWaist(e.target.value)}
+                    placeholder="80"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hip">Quadril (cm)</Label>
+                  <Input
+                    id="hip"
+                    type="number"
+                    step="0.1"
+                    value={hip}
+                    onChange={(e) => setHip(e.target.value)}
+                    placeholder="95"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bodyFat">Gordura Corporal (%)</Label>
+                  <Input
+                    id="bodyFat"
+                    type="number"
+                    step="0.1"
+                    value={bodyFat}
+                    onChange={(e) => setBodyFat(e.target.value)}
+                    placeholder="20"
+                  />
                 </div>
               </div>
             </CardContent>
