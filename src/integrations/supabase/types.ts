@@ -231,6 +231,63 @@ export type Database = {
           },
         ]
       }
+      food_database: {
+        Row: {
+          brand: string | null
+          calories: number
+          carbs: number
+          category: string
+          created_at: string
+          fat: number
+          fiber: number | null
+          id: string
+          is_supplement: boolean
+          name: string
+          portion_description: string
+          portion_grams: number
+          protein: number
+          sodium: number | null
+          source: string | null
+          supplement_type: string | null
+        }
+        Insert: {
+          brand?: string | null
+          calories?: number
+          carbs?: number
+          category: string
+          created_at?: string
+          fat?: number
+          fiber?: number | null
+          id?: string
+          is_supplement?: boolean
+          name: string
+          portion_description?: string
+          portion_grams?: number
+          protein?: number
+          sodium?: number | null
+          source?: string | null
+          supplement_type?: string | null
+        }
+        Update: {
+          brand?: string | null
+          calories?: number
+          carbs?: number
+          category?: string
+          created_at?: string
+          fat?: number
+          fiber?: number | null
+          id?: string
+          is_supplement?: boolean
+          name?: string
+          portion_description?: string
+          portion_grams?: number
+          protein?: number
+          sodium?: number | null
+          source?: string | null
+          supplement_type?: string | null
+        }
+        Relationships: []
+      }
       meal_plans: {
         Row: {
           created_at: string
@@ -351,6 +408,7 @@ export type Database = {
           allergies: string[] | null
           birth_date: string | null
           created_at: string
+          critical_tags: string[] | null
           dietary_restrictions: string[] | null
           email: string | null
           full_name: string
@@ -369,6 +427,7 @@ export type Database = {
           allergies?: string[] | null
           birth_date?: string | null
           created_at?: string
+          critical_tags?: string[] | null
           dietary_restrictions?: string[] | null
           email?: string | null
           full_name: string
@@ -387,6 +446,7 @@ export type Database = {
           allergies?: string[] | null
           birth_date?: string | null
           created_at?: string
+          critical_tags?: string[] | null
           dietary_restrictions?: string[] | null
           email?: string | null
           full_name?: string
