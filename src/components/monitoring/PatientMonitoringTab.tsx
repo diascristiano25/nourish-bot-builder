@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { WeightChart } from './WeightChart';
+import { BodyFatChart } from './BodyFatChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,12 +38,19 @@ interface WaterLog {
   date: string;
 }
 
+interface BodyFatRecord {
+  id: string;
+  body_fat_percentage: number | null;
+  measured_at: string;
+}
+
 type PeriodFilter = '7d' | '30d' | 'all';
 
 export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
   const { toast } = useToast();
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
   const [waterLogs, setWaterLogs] = useState<WaterLog[]>([]);
+  const [bodyFatRecords, setBodyFatRecords] = useState<BodyFatRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [addingWeight, setAddingWeight] = useState(false);
   const [newWeight, setNewWeight] = useState('');
@@ -79,6 +87,17 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
 
       if (waterError) throw waterError;
       setWaterLogs(water || []);
+
+      // Fetch body fat records from anthropometrics
+      const { data: bodyFat, error: bodyFatError } = await supabase
+        .from('anthropometrics')
+        .select('id, body_fat_percentage, measured_at')
+        .eq('patient_id', patientId)
+        .not('body_fat_percentage', 'is', null)
+        .order('measured_at', { ascending: false });
+
+      if (bodyFatError) throw bodyFatError;
+      setBodyFatRecords(bodyFat || []);
     } catch (error: any) {
       console.error('Error fetching monitoring data:', error);
       toast({
@@ -293,6 +312,11 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
           <WeightChart data={filteredWeightLogs} showHeader={false} />
         </CardContent>
       </Card>
+
+      {/* Body Fat Chart */}
+      {bodyFatRecords.length > 0 && (
+        <BodyFatChart data={bodyFatRecords} />
+      )}
 
       {/* Water History */}
       {waterLogs.length > 0 && (

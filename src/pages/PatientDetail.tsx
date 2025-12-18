@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { PatientMonitoringTab } from '@/components/monitoring';
+import { PatientMonitoringTab, PatientEvolutionCard } from '@/components/monitoring';
 import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
 import { 
   ArrowLeft, 
@@ -127,6 +127,7 @@ export default function PatientDetail() {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [latestWeight, setLatestWeight] = useState<number | null>(null);
+  const [initialWeight, setInitialWeight] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [sendingMagicLink, setSendingMagicLink] = useState(false);
@@ -198,6 +199,19 @@ export default function PatientDetail() {
       
       if (weightData) {
         setLatestWeight(Number(weightData.weight));
+      }
+
+      // Fetch initial (first) weight
+      const { data: initialWeightData } = await supabase
+        .from('weight_logs')
+        .select('weight')
+        .eq('patient_id', id)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      
+      if (initialWeightData) {
+        setInitialWeight(Number(initialWeightData.weight));
       }
 
       // Fetch consultations (completed appointments)
@@ -662,7 +676,18 @@ export default function PatientDetail() {
           </TabsContent>
 
           {/* Monitoring Tab */}
-          <TabsContent value="monitoring" className="mt-4">
+          <TabsContent value="monitoring" className="mt-4 space-y-4">
+            {/* Evolution Card */}
+            <PatientEvolutionCard
+              initialWeight={initialWeight}
+              currentWeight={displayWeight}
+              height={latestHeight}
+              initialBodyFat={anthropometrics[anthropometrics.length - 1]?.body_fat_percentage}
+              currentBodyFat={latestAnthropometric?.body_fat_percentage}
+              goal={patient.goal}
+            />
+            
+            {/* Monitoring Tab Content */}
             <PatientMonitoringTab patientId={patient.id} />
           </TabsContent>
 
