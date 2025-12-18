@@ -55,9 +55,7 @@ export default function Index() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-sm">
-              <img src={logoImg} alt="NutriFlow" className="w-6 h-6 object-contain" />
-            </div>
+            <img src={logoImg} alt="NutriFlow" className="w-9 h-9 object-contain" />
             <span className="font-bold text-xl text-slate-800 tracking-tight">NutriFlow</span>
           </div>
           <nav className="flex items-center gap-4">
