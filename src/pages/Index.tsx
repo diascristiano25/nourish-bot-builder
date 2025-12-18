@@ -120,10 +120,13 @@ export default function Index() {
               <Button 
                 size="lg" 
                 variant="outline"
+                onClick={() => {
+                  document.getElementById('solucao')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className="w-full sm:w-auto text-base px-8 py-6 rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
               >
-                <Play className="mr-2 w-4 h-4" />
-                Ver Demo
+                <ArrowRight className="mr-2 w-4 h-4" />
+                Saiba Mais
               </Button>
             </div>
 
@@ -227,7 +230,7 @@ export default function Index() {
       </section>
 
       {/* Solution Section */}
-      <section className="py-20 md:py-28 bg-white">
+      <section id="solucao" className="py-20 md:py-28 bg-white scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <Badge className="mb-4 bg-emerald-50 text-emerald-500 border-0 rounded-full font-medium">
