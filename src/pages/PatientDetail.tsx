@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { PatientMonitoringTab, PatientEvolutionCard } from '@/components/monitoring';
 import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
+import PatientReportDocument from '@/components/PatientReportDocument';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { 
   ArrowLeft, 
   Loader2, 
@@ -28,7 +31,9 @@ import {
   Send,
   Copy,
   Link,
-  LineChart
+  LineChart,
+  Download,
+  MessageCircle
 } from 'lucide-react';
 import { format, differenceInYears, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -132,7 +137,12 @@ export default function PatientDetail() {
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [sendingMagicLink, setSendingMagicLink] = useState(false);
   const [nutritionistName, setNutritionistName] = useState<string>('');
-
+  const [nutritionist, setNutritionist] = useState<any>(null);
+  const [weightLogs, setWeightLogs] = useState<any[]>([]);
+  const [bodyFatLogs, setBodyFatLogs] = useState<any[]>([]);
+  const [latestMealPlan, setLatestMealPlan] = useState<any>(null);
+  const [exportingPDF, setExportingPDF] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -147,15 +157,16 @@ export default function PatientDetail() {
 
   const fetchPatientData = async () => {
     try {
-      // Fetch nutritionist name first
+      // Fetch nutritionist profile
       const { data: nutriData } = await supabase
         .from('nutritionists')
-        .select('full_name')
+        .select('*')
         .eq('user_id', user!.id)
         .single();
       
       if (nutriData) {
         setNutritionistName(nutriData.full_name);
+        setNutritionist(nutriData);
       }
 
       // Fetch patient
@@ -181,37 +192,43 @@ export default function PatientDetail() {
       // Fetch meal plans
       const { data: mealData, error: mealError } = await supabase
         .from('meal_plans')
-        .select('id, title, description, total_calories, is_active, created_at')
+        .select('id, title, description, total_calories, is_active, created_at, plan_data')
         .eq('patient_id', id)
         .order('created_at', { ascending: false });
 
       if (mealError) throw mealError;
       setMealPlans(mealData || []);
-
-      // Fetch latest weight from weight_logs (ordered by creation time, not date)
-      const { data: weightData } = await supabase
-        .from('weight_logs')
-        .select('weight')
-        .eq('patient_id', id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      if (weightData) {
-        setLatestWeight(Number(weightData.weight));
+      if (mealData && mealData.length > 0) {
+        setLatestMealPlan(mealData[0]);
       }
 
-      // Fetch initial (first) weight
-      const { data: initialWeightData } = await supabase
+      // Fetch all weight logs for history
+      const { data: allWeightData } = await supabase
         .from('weight_logs')
-        .select('weight')
+        .select('weight, recorded_at')
         .eq('patient_id', id)
-        .order('created_at', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+        .order('recorded_at', { ascending: false });
       
-      if (initialWeightData) {
-        setInitialWeight(Number(initialWeightData.weight));
+      if (allWeightData) {
+        setWeightLogs(allWeightData);
+        if (allWeightData.length > 0) {
+          setLatestWeight(Number(allWeightData[0].weight));
+        }
+        if (allWeightData.length > 1) {
+          setInitialWeight(Number(allWeightData[allWeightData.length - 1].weight));
+        }
+      }
+
+      // Fetch body fat logs from anthropometrics
+      const { data: bodyFatData } = await supabase
+        .from('anthropometrics')
+        .select('body_fat_percentage, measured_at')
+        .eq('patient_id', id)
+        .not('body_fat_percentage', 'is', null)
+        .order('measured_at', { ascending: false });
+      
+      if (bodyFatData) {
+        setBodyFatLogs(bodyFatData);
       }
 
       // Fetch consultations (completed appointments)
@@ -310,6 +327,89 @@ export default function PatientDetail() {
       title: "Link copiado!",
       description: "Link de acesso seguro gerado via infraestrutura NutriFlow.",
     });
+  };
+
+  const handleExportPDF = async () => {
+    if (!reportRef.current || !patient) return;
+    
+    setExportingPDF(true);
+    try {
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= 297;
+      
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= 297;
+      }
+      
+      pdf.save(`Relatorio_${patient.full_name.replace(/\s+/g, '_')}_${format(new Date(), 'dd-MM-yyyy')}.pdf`);
+      
+      toast({
+        title: "PDF exportado!",
+        description: "O relatório foi salvo com sucesso.",
+      });
+    } catch (error: any) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: "Erro ao exportar",
+        description: "Não foi possível gerar o PDF.",
+        variant: "destructive",
+      });
+    } finally {
+      setExportingPDF(false);
+    }
+  };
+
+  const handleShareWhatsApp = () => {
+    if (!patient) return;
+    
+    const weightDiff = latestWeight && initialWeight ? latestWeight - initialWeight : null;
+    const portalUrl = `https://nutriflow.inf.br/paciente/${patient.id}`;
+    
+    let message = `🌿 *${nutritionistName || 'Seu Nutricionista'}*\n\n`;
+    message += `Olá, ${patient.full_name.split(' ')[0]}! 👋\n\n`;
+    message += `📊 *Resumo da sua Evolução:*\n`;
+    
+    if (latestWeight) {
+      message += `• Peso atual: *${latestWeight} kg*\n`;
+    }
+    
+    if (weightDiff !== null) {
+      if (weightDiff < 0) {
+        message += `🎉 Parabéns! Você eliminou *${Math.abs(weightDiff).toFixed(1)}kg*!\n`;
+      } else if (weightDiff > 0) {
+        message += `• Ganho de peso: *+${weightDiff.toFixed(1)}kg*\n`;
+      } else {
+        message += `• Peso mantido! ✨\n`;
+      }
+    }
+    
+    if (latestMealPlan) {
+      message += `\n📋 Seu cardápio "${latestMealPlan.title}" está disponível no portal.\n`;
+    }
+    
+    message += `\n🔗 Acesse seu portal:\n${portalUrl}\n`;
+    message += `\n_Continue firme! Estou aqui para te ajudar._`;
+    
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const latestAnthropometric = anthropometrics[0];
@@ -425,6 +525,29 @@ export default function PatientDetail() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleExportPDF}
+              disabled={exportingPDF}
+              className="gap-2"
+            >
+              {exportingPDF ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              Exportar PDF
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleShareWhatsApp}
+              className="gap-2 text-success hover:text-success"
+            >
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
+            </Button>
             <Button 
               variant="outline" 
               size="sm"
@@ -846,6 +969,25 @@ export default function PatientDetail() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Hidden PDF Report Component */}
+      <div className="absolute -left-[9999px] top-0">
+        {nutritionist && (
+          <PatientReportDocument
+            ref={reportRef}
+            patient={patient}
+            nutritionist={nutritionist}
+            weightRecords={weightLogs}
+            bodyFatRecords={bodyFatLogs}
+            latestMealPlan={latestMealPlan}
+            currentWeight={displayWeight}
+            initialWeight={initialWeight}
+            currentBodyFat={latestAnthropometric?.body_fat_percentage}
+            initialBodyFat={anthropometrics[anthropometrics.length - 1]?.body_fat_percentage}
+            height={latestHeight}
+          />
+        )}
+      </div>
     </div>
   );
 }
