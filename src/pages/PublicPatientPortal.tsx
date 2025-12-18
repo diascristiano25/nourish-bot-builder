@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Utensils, Apple, Clock, FileText, Flame, Beef, Wheat, Droplet } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, Utensils, Apple, Clock, FileText, Flame, Beef, Wheat, Droplet, LogIn } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -70,27 +71,65 @@ const mealIcons: Record<string, React.ReactNode> = {
 
 export default function PublicPatientPortal() {
   const { patientId } = useParams<{ patientId: string }>();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [patient, setPatient] = useState<Patient | null>(null);
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [nutritionist, setNutritionist] = useState<NutritionistProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (patientId) {
-      fetchData();
-    }
+    checkAuthAndFetch();
   }, [patientId]);
+
+  const checkAuthAndFetch = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+      
+      setIsAuthenticated(true);
+      
+      if (patientId) {
+        await fetchData();
+      }
+    } catch (err) {
+      console.error('Auth check error:', err);
+      setIsAuthenticated(false);
+      setLoading(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
-      // Use secure edge function to fetch portal data
+      // Use secure edge function to fetch portal data (requires auth)
       const { data, error: fnError } = await supabase.functions.invoke('public-patient-portal', {
         body: { patientId }
       });
 
-      if (fnError) throw new Error('Erro ao carregar dados');
-      if (data.error) throw new Error(data.error);
+      if (fnError) {
+        console.error('Function error:', fnError);
+        if (fnError.message?.includes('401') || fnError.message?.includes('Unauthorized')) {
+          setIsAuthenticated(false);
+          setLoading(false);
+          return;
+        }
+        throw new Error('Erro ao carregar dados');
+      }
+      if (data.error) {
+        if (data.error.includes('Unauthorized') || data.error.includes('Access denied')) {
+          setError('Você não tem permissão para visualizar este portal.');
+        } else {
+          throw new Error(data.error);
+        }
+        setLoading(false);
+        return;
+      }
 
       setPatient(data.patient);
       setNutritionist(data.nutritionist);
@@ -112,6 +151,30 @@ export default function PublicPatientPortal() {
 
   const primaryColor = nutritionist?.primary_color || '#4a7c59';
   const secondaryColor = nutritionist?.secondary_color || '#2d5a3d';
+
+  // Show login prompt if not authenticated
+  if (isAuthenticated === false) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
+        <Card className="max-w-md w-full text-center">
+          <CardContent className="pt-6">
+            <LogIn className="w-12 h-12 mx-auto text-primary mb-4" />
+            <h2 className="text-xl font-bold mb-2">Acesso Restrito</h2>
+            <p className="text-muted-foreground mb-6">
+              Você precisa estar logado para acessar seu portal de paciente.
+            </p>
+            <Button 
+              onClick={() => navigate('/patient-auth', { state: { returnTo: `/portal/${patientId}` } })}
+              className="w-full"
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Fazer Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

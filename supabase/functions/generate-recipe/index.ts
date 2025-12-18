@@ -1,10 +1,42 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const RecipeInputSchema = z.object({
+  ingredients: z.string().max(1000, 'Ingredientes muito longos').nullable().optional()
+    .transform(val => val ? sanitizeText(val) : null),
+  servings: z.union([z.string(), z.number()]).nullable().optional()
+    .transform(val => {
+      if (val === null || val === undefined) return null;
+      const num = typeof val === 'string' ? parseInt(val, 10) : val;
+      if (isNaN(num) || num < 1 || num > 50) return null;
+      return num;
+    }),
+  dietary_restrictions: z.string().max(500, 'Restrições muito longas').nullable().optional()
+    .transform(val => val ? sanitizeText(val) : null),
+  goal: z.string().max(200, 'Objetivo muito longo').nullable().optional()
+    .transform(val => val ? sanitizeText(val) : null),
+  notes: z.string().max(1000, 'Notas muito longas').nullable().optional()
+    .transform(val => val ? sanitizeText(val) : null),
+});
+
+// Sanitize text to prevent prompt injection
+function sanitizeText(text: string): string {
+  if (!text) return "";
+  return text
+    // Remove potential prompt injection patterns
+    .replace(/\b(ignore|forget|disregard|override|system|assistant|user|prompt)\s+(all|previous|above|instructions|everything)/gi, "")
+    .replace(/```/g, "") // Remove code blocks
+    .replace(/\n{3,}/g, "\n\n") // Limit consecutive newlines
+    .trim()
+    .slice(0, 1000); // Hard limit
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -43,14 +75,35 @@ serve(async (req) => {
     console.log('Authenticated user:', user.id);
     // === END AUTH GUARD ===
 
-    const { ingredients, servings, dietary_restrictions, goal, notes } = await req.json();
+    // Parse and validate input
+    const rawBody = await req.json();
+    const validationResult = RecipeInputSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Dados inválidos', 
+          details: validationResult.error.errors.map(e => e.message).join(', ')
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { ingredients, servings, dietary_restrictions, goal, notes } = validationResult.data;
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Generating recipe with params:', { ingredients, servings, dietary_restrictions, goal, notes });
+    console.log('Generating recipe with validated params:', { 
+      ingredients: ingredients?.slice(0, 50), // Log truncated for safety
+      servings, 
+      dietary_restrictions: dietary_restrictions?.slice(0, 50), 
+      goal: goal?.slice(0, 50), 
+      notes: notes?.slice(0, 50) 
+    });
 
     const systemPrompt = `Você é um nutricionista especialista em criar receitas saudáveis e nutritivas.
 Você deve criar receitas detalhadas com base nas informações fornecidas pelo usuário.
@@ -121,7 +174,7 @@ Crie uma receita nutritiva, saborosa e prática. Os valores de macros devem ser 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
     
-    console.log('AI Response:', content);
+    console.log('AI Response received, parsing...');
 
     // Parse the JSON response
     let recipe;
