@@ -9,9 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Save, Upload, User, Link2, Image, Palette } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, Upload, User, Link2, Image, Palette, GraduationCap, RotateCcw } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
-
+import { restartOnboardingTour, isTourCompleted } from '@/components/OnboardingTour';
 interface NutritionistProfile {
   id: string;
   full_name: string;
@@ -443,6 +443,49 @@ export default function Profile() {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Tour Training Section */}
+          <Card className="bg-white rounded-2xl border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-slate-800">
+                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                  <GraduationCap className="w-4 h-4 text-amber-500" />
+                </div>
+                Treinamento
+              </CardTitle>
+              <CardDescription className="text-slate-500">
+                Reinicie o tour de treinamento para rever as funcionalidades
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                <div>
+                  <p className="font-medium text-slate-700">Tour de Onboarding</p>
+                  <p className="text-sm text-slate-500">
+                    {profile && isTourCompleted(profile.id) 
+                      ? 'Concluído' 
+                      : 'Pendente'}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (profile) {
+                      restartOnboardingTour(profile.id);
+                      toast({
+                        title: "Tour reiniciado",
+                        description: "O tour começará na próxima vez que você acessar o Dashboard.",
+                      });
+                    }
+                  }}
+                  className="gap-2 rounded-xl"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reiniciar Tour
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </main>
