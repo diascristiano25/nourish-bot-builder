@@ -57,25 +57,26 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
     }
   };
 
-  // On mobile, always show expanded sidebar
   const isCollapsed = isMobile ? false : collapsed;
 
   return (
     <aside 
       className={cn(
-        "h-screen bg-card border-r border-border/50 transition-all duration-300 flex flex-col",
+        "h-screen bg-white border-r border-slate-200/60 transition-all duration-300 flex flex-col",
         isMobile ? "w-full" : "fixed left-0 top-0 z-40",
-        isMobile ? "" : (isCollapsed ? "w-16" : "w-56")
+        isMobile ? "" : (isCollapsed ? "w-[68px]" : "w-52")
       )}
     >
       {/* Logo */}
       <div className={cn(
-        "h-16 flex items-center border-b border-border/50 px-4",
+        "h-16 flex items-center border-b border-slate-200/60 px-4",
         isCollapsed ? "justify-center" : "gap-3"
       )}>
-        <img src={logoImg} alt="NutriFlow" className="w-9 h-9 object-contain flex-shrink-0" />
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-sm flex-shrink-0">
+          <img src={logoImg} alt="NutriFlow" className="w-6 h-6 object-contain" />
+        </div>
         {!isCollapsed && (
-          <span className="font-semibold text-foreground text-lg">NutriFlow</span>
+          <span className="font-bold text-slate-800 text-lg tracking-tight">NutriFlow</span>
         )}
       </div>
 
@@ -92,45 +93,55 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
               onClick={() => handleNavigation(item.href)}
               data-tour={item.tourId}
               className={cn(
-                "w-full justify-start gap-3 h-11 rounded-lg transition-colors",
+                "w-full justify-start gap-3 h-11 rounded-xl transition-all duration-200",
                 isCollapsed && "justify-center px-0",
                 isActive 
-                  ? "bg-primary/10 text-primary hover:bg-primary/15" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 shadow-sm" 
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
               )}
             >
-              <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-primary")} />
-              {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+              <item.icon className={cn(
+                "w-[18px] h-[18px] flex-shrink-0 transition-colors",
+                isActive ? "text-emerald-500" : "text-slate-400"
+              )} strokeWidth={isActive ? 2 : 1.5} />
+              {!isCollapsed && (
+                <span className={cn(
+                  "text-sm transition-colors",
+                  isActive ? "font-semibold" : "font-medium"
+                )}>
+                  {item.label}
+                </span>
+              )}
             </Button>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-border/50 space-y-1">
+      <div className="p-3 border-t border-slate-200/60">
         <Button
           variant="ghost"
           onClick={handleSignOut}
           className={cn(
-            "w-full justify-start gap-3 h-11 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50",
+            "w-full justify-start gap-3 h-11 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200",
             isCollapsed && "justify-center px-0"
           )}
         >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
+          <LogOut className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
           {!isCollapsed && <span className="text-sm font-medium">Sair</span>}
         </Button>
       </div>
 
-      {/* Collapse Toggle - Only show on desktop */}
+      {/* Collapse Toggle - Desktop only */}
       {!isMobile && (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-card border border-border/50 shadow-sm hover:bg-muted"
+          className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 hover:shadow transition-all duration-200"
         >
           <ChevronLeft className={cn(
-            "w-3 h-3 transition-transform",
+            "w-3 h-3 text-slate-400 transition-transform duration-200",
             isCollapsed && "rotate-180"
           )} />
         </Button>
