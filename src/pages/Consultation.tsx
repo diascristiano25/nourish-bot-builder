@@ -41,7 +41,8 @@ import {
   Search,
   UserCheck,
   ChevronsUpDown,
-  Check
+  Check,
+  UserPlus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -486,7 +487,21 @@ export default function Consultation() {
                   <Command>
                     <CommandInput placeholder="Buscar paciente..." />
                     <CommandList>
-                      <CommandEmpty>Nenhum paciente encontrado.</CommandEmpty>
+                      <CommandEmpty className="py-4 text-center">
+                        <p className="text-sm text-muted-foreground mb-3">Nenhum paciente encontrado.</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => {
+                            setPatientSelectorOpen(false);
+                            navigate('/patients/new');
+                          }}
+                        >
+                          <UserPlus className="w-4 h-4" />
+                          Cadastrar Novo Paciente
+                        </Button>
+                      </CommandEmpty>
                       <CommandGroup>
                         {patients.map((patient) => (
                           <CommandItem
@@ -507,6 +522,20 @@ export default function Consultation() {
                           </CommandItem>
                         ))}
                       </CommandGroup>
+                      <div className="border-t p-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start gap-2 text-primary hover:text-primary"
+                          onClick={() => {
+                            setPatientSelectorOpen(false);
+                            navigate('/patients/new');
+                          }}
+                        >
+                          <UserPlus className="w-4 h-4" />
+                          + Adicionar Novo Paciente
+                        </Button>
+                      </div>
                     </CommandList>
                   </Command>
                 </PopoverContent>

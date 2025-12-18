@@ -105,10 +105,18 @@ export default function NewPatient() {
       return;
     }
 
-    if (!fullName.trim()) {
+    // Validate required fields
+    const missingFields: string[] = [];
+    if (!fullName.trim()) missingFields.push('Nome completo');
+    if (!email.trim()) missingFields.push('E-mail');
+    if (!birthDate) missingFields.push('Data de Nascimento');
+    if (!weight) missingFields.push('Peso (kg)');
+    if (!height) missingFields.push('Altura (cm)');
+
+    if (missingFields.length > 0) {
       toast({
-        title: "Campo obrigatório",
-        description: "Por favor, insira o nome do paciente",
+        title: "Campos obrigatórios",
+        description: `Preencha: ${missingFields.join(', ')}`,
         variant: "destructive",
       });
       return;
@@ -218,13 +226,14 @@ export default function NewPatient() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email *</Label>
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="paciente@email.com"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -240,12 +249,13 @@ export default function NewPatient() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="birthDate">Data de Nascimento</Label>
+                  <Label htmlFor="birthDate">Data de Nascimento *</Label>
                   <Input
                     id="birthDate"
                     type="date"
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -281,7 +291,7 @@ export default function NewPatient() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="weight">Peso (kg)</Label>
+                  <Label htmlFor="weight">Peso (kg) *</Label>
                   <Input
                     id="weight"
                     type="number"
@@ -289,10 +299,11 @@ export default function NewPatient() {
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                     placeholder="70.5"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="height">Altura (cm)</Label>
+                  <Label htmlFor="height">Altura (cm) *</Label>
                   <Input
                     id="height"
                     type="number"
@@ -300,6 +311,7 @@ export default function NewPatient() {
                     value={height}
                     onChange={(e) => setHeight(e.target.value)}
                     placeholder="170"
+                    required
                   />
                 </div>
               </div>
