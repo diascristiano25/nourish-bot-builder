@@ -251,122 +251,187 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Problem Section */}
-      <section className="py-20 md:py-28 bg-slate-50">
+      {/* Problem Section - Bento Grid */}
+      <section className="py-24 md:py-32 bg-[#fafafa]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <Badge className="mb-4 bg-red-50 text-red-500 border-0 rounded-full font-medium">
+            <Badge className="mb-6 px-5 py-2 bg-red-500/10 text-red-500 border-0 rounded-full font-semibold text-sm">
               O Problema
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-800 tracking-tight">
-              Ainda perde horas montando cardápios?
+            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-slate-900 tracking-tight leading-tight">
+              Ainda perde horas
+              <br />
+              montando cardápios?
             </h2>
-            <p className="text-lg text-slate-500">
+            <p className="text-lg text-slate-500 max-w-xl mx-auto">
               Sabemos como é frustrante gastar tempo com tarefas repetitivas.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
-                  <Clock className="w-7 h-7 text-red-400" />
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+            {/* Large Card */}
+            <Card className="md:col-span-2 bg-gradient-to-br from-red-50 to-orange-50 rounded-3xl border-0 shadow-sm overflow-hidden group hover:shadow-lg transition-all">
+              <CardContent className="p-8 md:p-10 h-full flex flex-col">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-400 to-orange-400 flex items-center justify-center mb-6 shadow-lg shadow-red-200/50">
+                  <Clock className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-slate-800">Horas perdidas</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  1-2 horas por paciente para montar um cardápio manualmente.
+                <h3 className="font-bold text-2xl mb-3 text-slate-900">Horas perdidas toda semana</h3>
+                <p className="text-slate-600 text-base leading-relaxed flex-1">
+                  Nutricionistas gastam em média 1-2 horas por paciente para montar um cardápio manualmente. 
+                  Tempo precioso que poderia ser investido em atendimentos.
+                </p>
+                <div className="mt-6 flex items-center gap-3 text-red-500 font-semibold">
+                  <span className="text-3xl">~8h</span>
+                  <span className="text-sm text-slate-500">perdidas por semana</span>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Small Card 1 */}
+            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl border-0 shadow-sm overflow-hidden group hover:shadow-lg transition-all">
+              <CardContent className="p-8 h-full flex flex-col">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center mb-5 shadow-lg shadow-purple-200/50">
+                  <FileText className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="font-bold text-xl mb-2 text-slate-900">Cálculos complexos</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Tabela TACO, macros, calorias... muito trabalho manual e alto risco de erros.
                 </p>
               </CardContent>
             </Card>
             
-            <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
-                  <FileText className="w-7 h-7 text-red-400" />
+            {/* Small Card 2 */}
+            <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl border-0 shadow-sm overflow-hidden group hover:shadow-lg transition-all">
+              <CardContent className="p-8 h-full flex flex-col">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center mb-5 shadow-lg shadow-blue-200/50">
+                  <Users className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-slate-800">Cálculos complexos</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  Tabela TACO, macros, calorias... muito trabalho manual e risco de erros.
+                <h3 className="font-bold text-xl mb-2 text-slate-900">Menos pacientes</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Tempo gasto com burocracia é tempo que você não está atendendo e faturando.
                 </p>
               </CardContent>
             </Card>
             
-            <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
-                  <Users className="w-7 h-7 text-red-400" />
+            {/* Wide Card */}
+            <Card className="md:col-span-2 bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl border-0 shadow-sm overflow-hidden">
+              <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center gap-6">
+                <div className="flex-1">
+                  <h3 className="font-bold text-xl mb-2 text-white">Resultado?</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Burnout, menos clientes, menos receita. É hora de mudar isso.
+                  </p>
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-slate-800">Menos pacientes</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  Tempo gasto com burocracia é tempo que você não está atendendo.
-                </p>
+                <div className="text-6xl">😩</div>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Solution Section */}
-      <section id="solucao" className="py-20 md:py-28 bg-white scroll-mt-20">
-        <div className="container mx-auto px-4">
+      {/* Solution Section - Bento Grid */}
+      <section id="solucao" className="py-24 md:py-32 bg-white scroll-mt-20 relative overflow-hidden">
+        {/* Subtle background elements */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-50 rounded-full blur-3xl opacity-50" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-50 rounded-full blur-3xl opacity-50" />
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <Badge className="mb-4 bg-emerald-50 text-emerald-500 border-0 rounded-full font-medium">
+            <Badge className="mb-6 px-5 py-2 bg-emerald-500/10 text-emerald-600 border-0 rounded-full font-semibold text-sm">
               A Solução
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-800 tracking-tight">
-              NutriFlow: Seu assistente com IA
+            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-slate-900 tracking-tight leading-tight">
+              NutriFlow: Seu assistente
+              <br />
+              <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+                com Inteligência Artificial
+              </span>
             </h2>
-            <p className="text-lg text-slate-500">
+            <p className="text-lg text-slate-500 max-w-xl mx-auto">
               Automatize cardápios e foque no que importa: seus pacientes.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            <Card className="bg-white rounded-2xl border border-slate-200/60 hover:border-emerald-200 hover:shadow-lg transition-all group">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:bg-emerald-100 transition-colors">
-                  <Brain className="w-7 h-7 text-emerald-500" />
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {/* Hero Feature Card */}
+            <Card className="md:col-span-2 md:row-span-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-3xl border-0 shadow-xl overflow-hidden group">
+              <CardContent className="p-8 md:p-10 h-full flex flex-col">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mb-6">
+                  <Brain className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-slate-800">IA com Tabela TACO</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  Cardápios com dados nutricionais brasileiros oficiais.
+                <h3 className="font-bold text-2xl md:text-3xl mb-4 text-white">IA com Tabela TACO</h3>
+                <p className="text-emerald-100 text-base leading-relaxed flex-1">
+                  Nossa inteligência artificial foi treinada com a Tabela Brasileira de Composição de Alimentos (TACO), 
+                  garantindo precisão nutricional em cada cardápio gerado.
                 </p>
+                <div className="mt-6 flex items-center gap-4">
+                  <div className="flex -space-x-2">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="w-8 h-8 rounded-full bg-white/30 border-2 border-emerald-500 flex items-center justify-center text-xs text-white font-bold">
+                        {['🥗', '🍎', '🥩', '🥦'][i]}
+                      </div>
+                    ))}
+                  </div>
+                  <span className="text-emerald-100 text-sm">+1000 alimentos</span>
+                </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-white rounded-2xl border border-slate-200/60 hover:border-emerald-200 hover:shadow-lg transition-all group">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:bg-emerald-100 transition-colors">
-                  <Zap className="w-7 h-7 text-emerald-500" />
+            {/* Speed Card */}
+            <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-3xl border-0 shadow-sm overflow-hidden group hover:shadow-lg transition-all">
+              <CardContent className="p-6 md:p-8 h-full flex flex-col">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-400 flex items-center justify-center mb-4 shadow-lg shadow-amber-200/50">
+                  <Zap className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-slate-800">30 Segundos</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  De 2 horas para 30 segundos. Mais tempo para atender.
+                <h3 className="font-bold text-lg mb-2 text-slate-900">30 Segundos</h3>
+                <p className="text-slate-600 text-sm leading-relaxed flex-1">
+                  De 2 horas para meio minuto.
                 </p>
+                <div className="mt-4 text-3xl font-extrabold text-amber-500">⚡</div>
               </CardContent>
             </Card>
             
-            <Card className="bg-white rounded-2xl border border-slate-200/60 hover:border-emerald-200 hover:shadow-lg transition-all group">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:bg-emerald-100 transition-colors">
-                  <FileText className="w-7 h-7 text-emerald-500" />
+            {/* PDF Card */}
+            <Card className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-3xl border-0 shadow-sm overflow-hidden group hover:shadow-lg transition-all">
+              <CardContent className="p-6 md:p-8 h-full flex flex-col">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-400 to-pink-400 flex items-center justify-center mb-4 shadow-lg shadow-rose-200/50">
+                  <FileText className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-slate-800">PDF Personalizado</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  Exporte com seu logo, cores e CRN. Profissionalismo total.
+                <h3 className="font-bold text-lg mb-2 text-slate-900">PDF Personalizado</h3>
+                <p className="text-slate-600 text-sm leading-relaxed flex-1">
+                  Seu logo, cores e CRN.
                 </p>
+                <div className="mt-4 text-3xl">📄</div>
               </CardContent>
             </Card>
             
-            <Card className="bg-white rounded-2xl border border-slate-200/60 hover:border-emerald-200 hover:shadow-lg transition-all group">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:bg-emerald-100 transition-colors">
-                  <Users className="w-7 h-7 text-emerald-500" />
+            {/* Portal Card */}
+            <Card className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-3xl border-0 shadow-sm overflow-hidden group hover:shadow-lg transition-all">
+              <CardContent className="p-6 md:p-8 h-full flex flex-col">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400 to-purple-400 flex items-center justify-center mb-4 shadow-lg shadow-violet-200/50">
+                  <Users className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-slate-800">Portal do Paciente</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  Pacientes acessam dieta e lista de compras pelo celular.
+                <h3 className="font-bold text-lg mb-2 text-slate-900">Portal do Paciente</h3>
+                <p className="text-slate-600 text-sm leading-relaxed flex-1">
+                  Dieta e lista de compras no celular.
                 </p>
+                <div className="mt-4 text-3xl">📱</div>
+              </CardContent>
+            </Card>
+            
+            {/* Security Card */}
+            <Card className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-3xl border-0 shadow-sm overflow-hidden group hover:shadow-lg transition-all">
+              <CardContent className="p-6 md:p-8 h-full flex flex-col">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400 to-blue-400 flex items-center justify-center mb-4 shadow-lg shadow-sky-200/50">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-bold text-lg mb-2 text-slate-900">100% Seguro</h3>
+                <p className="text-slate-600 text-sm leading-relaxed flex-1">
+                  Dados criptografados e protegidos.
+                </p>
+                <div className="mt-4 text-3xl">🔒</div>
               </CardContent>
             </Card>
           </div>
