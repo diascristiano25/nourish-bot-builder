@@ -50,18 +50,18 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50/60 via-white to-white">
       {/* Elite Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-2xl border-b border-slate-200/40">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logoImg} alt="NutriFlow" className="w-9 h-9 object-contain" />
-            <span className="font-bold text-xl text-slate-800 tracking-tight">NutriFlow</span>
+            <span className="font-extrabold text-xl text-slate-900 tracking-tight">NutriFlow</span>
           </div>
           <nav className="flex items-center gap-4">
             <a 
               href="/sobre" 
-              className="text-sm text-slate-500 hover:text-slate-700 transition-colors hidden sm:inline font-medium"
+              className="text-sm text-slate-600 hover:text-slate-900 transition-colors hidden sm:inline font-medium"
             >
               Sobre
             </a>
@@ -69,7 +69,7 @@ export default function Index() {
               href="https://wa.me/5547992381906?text=Olá! Tenho uma dúvida sobre o NutriFlow antes de me cadastrar."
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-slate-500 hover:text-slate-700 transition-colors hidden sm:inline font-medium"
+              className="text-sm text-slate-600 hover:text-slate-900 transition-colors hidden sm:inline font-medium"
             >
               Contato
             </a>
@@ -77,7 +77,7 @@ export default function Index() {
               onClick={() => navigate('/auth')} 
               variant="outline" 
               size="sm"
-              className="rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+              className="rounded-full border-slate-300 text-slate-700 hover:bg-slate-100 font-medium px-5"
             >
               Entrar
             </Button>
@@ -85,64 +85,141 @@ export default function Index() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-transparent to-slate-50" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-100 rounded-full blur-3xl opacity-30" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-20" />
+      {/* Hero Section - Apple Style */}
+      <section className="relative overflow-hidden min-h-[90vh] flex items-center">
+        {/* Gradient Orbs Background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] orb-mint rounded-full blur-3xl opacity-60" />
+          <div className="absolute top-1/3 right-0 w-[500px] h-[500px] orb-blue rounded-full blur-3xl opacity-40" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] orb-purple rounded-full blur-3xl opacity-30" />
+        </div>
+
+        {/* Glassmorphism shapes */}
+        <div className="absolute top-20 right-10 w-32 h-32 glass rounded-3xl rotate-12 hidden lg:block" />
+        <div className="absolute bottom-32 left-10 w-24 h-24 glass rounded-2xl -rotate-12 hidden lg:block" />
+        <div className="absolute top-1/2 right-1/4 w-16 h-16 glass rounded-xl rotate-45 hidden lg:block" />
         
-        <div className="container mx-auto px-4 py-20 md:py-32 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 px-4 py-2 text-sm font-medium bg-emerald-50 text-emerald-600 border-0 rounded-full">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Oferta de Lançamento
-            </Badge>
-            
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-slate-800 tracking-tight">
-              Crie cardápios com{' '}
-              <span className="text-emerald-500">IA</span> em segundos
-            </h1>
-            
-            <p className="text-lg md:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-              A plataforma mais moderna para nutricionistas que querem 
-              economizar tempo e impressionar pacientes.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-              <Button 
-                size="lg" 
-                onClick={() => navigate('/auth')}
-                className="w-full sm:w-auto text-base px-8 py-6 bg-emerald-500 hover:bg-emerald-600 rounded-2xl shadow-lg shadow-emerald-500/25 font-semibold"
-              >
-                Começar Gratuitamente
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => {
-                  document.getElementById('solucao')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="w-full sm:w-auto text-base px-8 py-6 rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
-              >
-                <ArrowRight className="mr-2 w-4 h-4" />
-                Saiba Mais
-              </Button>
+        <div className="container mx-auto px-4 py-12 md:py-20 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="text-center lg:text-left">
+              <Badge className="mb-6 px-5 py-2.5 text-sm font-semibold bg-white/80 backdrop-blur text-emerald-600 border border-emerald-200/50 rounded-full shadow-sm">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Software Premium para Nutricionistas
+              </Badge>
+              
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] text-slate-900 tracking-tight">
+                Cardápios com{' '}
+                <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+                  Inteligência
+                </span>
+                <br />
+                Artificial
+              </h1>
+              
+              <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                A plataforma mais avançada do mercado para criar 
+                cardápios personalizados em segundos. Economize tempo. Impressione pacientes.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-10">
+                <Button 
+                  size="lg" 
+                  onClick={() => navigate('/auth')}
+                  className="w-full sm:w-auto text-base px-10 py-7 bg-emerald-500 hover:bg-emerald-600 rounded-full font-bold btn-glow animate-glow-pulse"
+                >
+                  Começar Gratuitamente
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="ghost"
+                  onClick={() => {
+                    document.getElementById('solucao')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="w-full sm:w-auto text-base px-8 py-7 rounded-full text-slate-700 hover:bg-white/50 font-medium"
+                >
+                  <Play className="mr-2 w-5 h-5 fill-slate-700" />
+                  Ver Como Funciona
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-center lg:justify-start gap-8 text-sm text-slate-500">
+                <span className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                  </div>
+                  60 dias grátis
+                </span>
+                <span className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                  </div>
+                  Sem cartão
+                </span>
+              </div>
             </div>
 
-            <div className="flex items-center justify-center gap-6 text-sm text-slate-500">
-              <span className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-500" />
-                60 dias grátis
-              </span>
-              <span className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-500" />
-                Sem cartão
-              </span>
-              <span className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-500" />
-                Cancele quando quiser
-              </span>
+            {/* Right - MacBook Mockup */}
+            <div className="perspective-1000 flex justify-center lg:justify-end">
+              <div className="preserve-3d animate-float">
+                <div className="macbook-frame w-[500px] md:w-[600px] max-w-full">
+                  <div className="macbook-screen aspect-[16/10] relative">
+                    {/* Fake Dashboard UI */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 p-4">
+                      {/* Top bar */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500" />
+                          <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                          <div className="w-3 h-3 rounded-full bg-green-500" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                            <img src={logoImg} alt="" className="w-4 h-4 opacity-80" />
+                          </div>
+                          <span className="text-[10px] text-white/60 font-medium">NutriFlow</span>
+                        </div>
+                      </div>
+                      {/* Dashboard content */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="col-span-2 bg-white/5 rounded-lg p-3">
+                          <div className="text-[8px] text-white/40 mb-2">Cardápio do Dia</div>
+                          <div className="space-y-1.5">
+                            <div className="h-2 bg-emerald-500/30 rounded-full w-4/5" />
+                            <div className="h-2 bg-white/10 rounded-full w-3/5" />
+                            <div className="h-2 bg-white/10 rounded-full w-4/5" />
+                            <div className="h-2 bg-white/10 rounded-full w-2/5" />
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="bg-emerald-500/20 rounded-lg p-2">
+                            <div className="text-[8px] text-emerald-400 mb-1">Pacientes</div>
+                            <div className="text-sm text-white font-bold">128</div>
+                          </div>
+                          <div className="bg-white/5 rounded-lg p-2">
+                            <div className="text-[8px] text-white/40 mb-1">Cardápios</div>
+                            <div className="text-sm text-white font-bold">342</div>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Chart area */}
+                      <div className="mt-3 bg-white/5 rounded-lg p-3">
+                        <div className="flex items-end gap-1 h-12">
+                          {[40, 65, 45, 80, 55, 70, 90, 60, 75, 85, 50, 95].map((h, i) => (
+                            <div 
+                              key={i} 
+                              className="flex-1 bg-gradient-to-t from-emerald-500/60 to-emerald-400/40 rounded-t"
+                              style={{ height: `${h}%` }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="macbook-notch" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -350,7 +427,7 @@ export default function Index() {
                 
                 <Button 
                   size="lg" 
-                  className="w-full text-base py-6 bg-emerald-500 hover:bg-emerald-600 rounded-2xl shadow-lg shadow-emerald-500/25 font-semibold"
+                  className="w-full text-base py-6 bg-emerald-500 hover:bg-emerald-600 rounded-full font-bold btn-glow"
                   onClick={() => navigate('/auth')}
                 >
                   Quero ser Membro Fundador
@@ -540,7 +617,7 @@ export default function Index() {
             </p>
             <Button 
               size="lg" 
-              className="text-base px-8 py-6 bg-white hover:bg-slate-50 text-emerald-600 rounded-2xl shadow-lg font-semibold"
+              className="text-base px-10 py-7 bg-white hover:bg-slate-50 text-emerald-600 rounded-full shadow-xl font-bold transition-all hover:scale-105"
               onClick={() => navigate('/auth')}
             >
               Começar Agora
