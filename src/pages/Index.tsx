@@ -86,12 +86,12 @@ export default function Index() {
       </header>
 
       {/* Hero Section - Apple Style */}
-      <section className="relative overflow-hidden min-h-[90vh] flex items-center">
-        {/* Gradient Orbs Background */}
+      <section className="relative overflow-hidden min-h-[80vh] md:min-h-[90vh] flex items-center">
+        {/* Gradient Orbs Background - smaller on mobile */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] orb-mint rounded-full blur-3xl opacity-60" />
-          <div className="absolute top-1/3 right-0 w-[500px] h-[500px] orb-blue rounded-full blur-3xl opacity-40" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] orb-purple rounded-full blur-3xl opacity-30" />
+          <div className="absolute top-0 left-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[600px] orb-mint rounded-full blur-3xl opacity-60" />
+          <div className="absolute top-1/3 right-0 w-[250px] md:w-[500px] h-[250px] md:h-[500px] orb-blue rounded-full blur-3xl opacity-40" />
+          <div className="absolute bottom-0 left-0 w-[200px] md:w-[400px] h-[200px] md:h-[400px] orb-purple rounded-full blur-3xl opacity-30" />
         </div>
 
         {/* Glassmorphism shapes */}
@@ -99,7 +99,7 @@ export default function Index() {
         <div className="absolute bottom-32 left-10 w-24 h-24 glass rounded-2xl -rotate-12 hidden lg:block" />
         <div className="absolute top-1/2 right-1/4 w-16 h-16 glass rounded-xl rotate-45 hidden lg:block" />
         
-        <div className="container mx-auto px-4 py-12 md:py-20 relative z-10">
+        <div className="container mx-auto px-4 py-8 md:py-20 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="text-center lg:text-left">
@@ -108,16 +108,15 @@ export default function Index() {
                 Software Premium para Nutricionistas
               </Badge>
               
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] text-slate-900 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold mb-4 md:mb-6 leading-[1.15] text-slate-900 tracking-tight">
                 Cardápios com{' '}
                 <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
                   Inteligência
                 </span>
-                <br />
-                Artificial
+                {' '}Artificial
               </h1>
               
-              <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-base md:text-lg lg:text-xl text-slate-600 mb-6 md:mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed px-2 md:px-0">
                 A plataforma mais avançada do mercado para criar 
                 cardápios personalizados em segundos. Economize tempo. Impressione pacientes.
               </p>
@@ -160,10 +159,10 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Right - MacBook Mockup */}
-            <div className="perspective-1000 flex justify-center lg:justify-end">
+            {/* Right - MacBook Mockup - hidden on small screens */}
+            <div className="perspective-1000 hidden sm:flex justify-center lg:justify-end">
               <div className="preserve-3d animate-float">
-                <div className="macbook-frame w-[500px] md:w-[600px] max-w-full">
+                <div className="macbook-frame w-[320px] sm:w-[400px] md:w-[500px] lg:w-[600px] max-w-full">
                   <div className="macbook-screen aspect-[16/10] relative">
                     {/* Fake Dashboard UI */}
                     <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 p-4">
@@ -226,9 +225,9 @@ export default function Index() {
       </section>
 
       {/* Trust Bar */}
-      <section className="py-8 border-y border-slate-200/60 bg-white">
+      <section className="py-6 md:py-8 border-y border-slate-200/60 bg-white">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-16">
             <div className="flex items-center gap-3 text-slate-500">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-emerald-500" />
@@ -252,13 +251,13 @@ export default function Index() {
       </section>
 
       {/* Problem Section - Bento Grid */}
-      <section className="py-24 md:py-32 bg-[#fafafa]">
+      <section className="py-16 md:py-32 bg-[#fafafa]">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <Badge className="mb-6 px-5 py-2 bg-red-500/10 text-red-500 border-0 rounded-full font-semibold text-sm">
+          <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+            <Badge className="mb-4 md:mb-6 px-4 md:px-5 py-2 bg-red-500/10 text-red-500 border-0 rounded-full font-semibold text-sm">
               O Problema
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-extrabold mb-4 md:mb-6 text-slate-900 tracking-tight leading-tight">
               Ainda perde horas
               <br />
               montando cardápios?
@@ -331,17 +330,17 @@ export default function Index() {
       </section>
 
       {/* Solution Section - Bento Grid */}
-      <section id="solucao" className="py-24 md:py-32 bg-white scroll-mt-20 relative overflow-hidden">
+      <section id="solucao" className="py-16 md:py-32 bg-white scroll-mt-20 relative overflow-hidden">
         {/* Subtle background elements */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-50 rounded-full blur-3xl opacity-50" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-50 rounded-full blur-3xl opacity-50" />
+        <div className="absolute top-0 right-0 w-[250px] md:w-[500px] h-[250px] md:h-[500px] bg-emerald-50 rounded-full blur-3xl opacity-50" />
+        <div className="absolute bottom-0 left-0 w-[200px] md:w-[400px] h-[200px] md:h-[400px] bg-teal-50 rounded-full blur-3xl opacity-50" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <Badge className="mb-6 px-5 py-2 bg-emerald-500/10 text-emerald-600 border-0 rounded-full font-semibold text-sm">
+          <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+            <Badge className="mb-4 md:mb-6 px-4 md:px-5 py-2 bg-emerald-500/10 text-emerald-600 border-0 rounded-full font-semibold text-sm">
               A Solução
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-extrabold mb-4 md:mb-6 text-slate-900 tracking-tight leading-tight">
               NutriFlow: Seu assistente
               <br />
               <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
@@ -439,13 +438,13 @@ export default function Index() {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-20 md:py-28 bg-slate-50">
+      <section className="py-16 md:py-28 bg-slate-50">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <Badge className="mb-4 bg-amber-50 text-amber-600 border-0 rounded-full font-medium">
+          <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+            <Badge className="mb-3 md:mb-4 bg-amber-50 text-amber-600 border-0 rounded-full font-medium">
               🔥 Membro Fundador
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-800 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-slate-800 tracking-tight">
               Preço especial de lançamento
             </h2>
             <p className="text-lg text-slate-500">
@@ -534,19 +533,19 @@ export default function Index() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 md:py-28 bg-slate-50">
+      <section className="py-16 md:py-28 bg-slate-50">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <Badge className="mb-4 bg-emerald-50 text-emerald-500 border-0 rounded-full font-medium">
+          <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+            <Badge className="mb-3 md:mb-4 bg-emerald-50 text-emerald-500 border-0 rounded-full font-medium">
               <Star className="w-4 h-4 mr-1 fill-emerald-500" />
               Depoimentos
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-800 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-slate-800 tracking-tight">
               O que dizem sobre o NutriFlow
             </h2>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid gap-4 md:grid-cols-3 md:gap-6 max-w-5xl mx-auto">
             <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-8">
                 <div className="flex gap-1 mb-4">
@@ -620,10 +619,10 @@ export default function Index() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 md:py-28 bg-white">
+      <section className="py-16 md:py-28 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-800 tracking-tight">
+          <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-slate-800 tracking-tight">
               Perguntas Frequentes
             </h2>
           </div>
@@ -671,18 +670,18 @@ export default function Index() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 md:py-28 bg-gradient-to-br from-emerald-500 to-emerald-600">
+      <section className="py-16 md:py-28 bg-gradient-to-br from-emerald-500 to-emerald-600">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white tracking-tight">
+          <div className="max-w-3xl mx-auto text-center px-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-white tracking-tight">
               Pronto para transformar seu consultório?
             </h2>
-            <p className="text-lg text-emerald-100 mb-8">
+            <p className="text-base md:text-lg text-emerald-100 mb-6 md:mb-8">
               Junte-se a centenas de nutricionistas que já economizam horas por semana.
             </p>
             <Button 
               size="lg" 
-              className="text-base px-10 py-7 bg-white hover:bg-slate-50 text-emerald-600 rounded-full shadow-xl font-bold transition-all hover:scale-105"
+              className="text-base px-8 md:px-10 py-6 md:py-7 bg-white hover:bg-slate-50 text-emerald-600 rounded-full shadow-xl font-bold transition-all hover:scale-105"
               onClick={() => navigate('/auth')}
             >
               Começar Agora
