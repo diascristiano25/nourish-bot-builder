@@ -53,7 +53,7 @@ export default function Agenda() {
 
   const fetchNutritionistId = async () => {
     const { data } = await supabase
-      .from('nutritionists')
+      .from('profiles')
       .select('id')
       .eq('user_id', user!.id)
       .single();

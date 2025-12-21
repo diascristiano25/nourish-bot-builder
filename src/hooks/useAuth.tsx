@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Create nutritionist profile
     if (data.user) {
       const { error: profileError } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .insert({
           user_id: data.user.id,
           full_name: fullName,

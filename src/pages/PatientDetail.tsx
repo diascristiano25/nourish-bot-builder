@@ -159,7 +159,7 @@ export default function PatientDetail() {
     try {
       // Fetch nutritionist profile
       const { data: nutriData } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('*')
         .eq('user_id', user!.id)
         .single();

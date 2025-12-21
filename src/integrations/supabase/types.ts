@@ -141,7 +141,7 @@ export type Database = {
             foreignKeyName: "custom_foods_nutritionist_id_fkey"
             columns: ["nutritionist_id"]
             isOneToOne: false
-            referencedRelation: "nutritionists"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -182,7 +182,7 @@ export type Database = {
             foreignKeyName: "custom_recipes_nutritionist_id_fkey"
             columns: ["nutritionist_id"]
             isOneToOne: false
-            referencedRelation: "nutritionists"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -226,7 +226,7 @@ export type Database = {
             foreignKeyName: "financial_records_nutritionist_id_fkey"
             columns: ["nutritionist_id"]
             isOneToOne: false
-            referencedRelation: "nutritionists"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -336,7 +336,7 @@ export type Database = {
             foreignKeyName: "meal_plans_nutritionist_id_fkey"
             columns: ["nutritionist_id"]
             isOneToOne: false
-            referencedRelation: "nutritionists"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -347,60 +347,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      nutritionists: {
-        Row: {
-          account_status: string
-          created_at: string
-          crn: string | null
-          email_signature: string | null
-          full_name: string
-          id: string
-          is_active: boolean
-          is_admin: boolean
-          is_master_admin: boolean
-          logo_url: string | null
-          phone: string | null
-          primary_color: string | null
-          secondary_color: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          account_status?: string
-          created_at?: string
-          crn?: string | null
-          email_signature?: string | null
-          full_name: string
-          id?: string
-          is_active?: boolean
-          is_admin?: boolean
-          is_master_admin?: boolean
-          logo_url?: string | null
-          phone?: string | null
-          primary_color?: string | null
-          secondary_color?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          account_status?: string
-          created_at?: string
-          crn?: string | null
-          email_signature?: string | null
-          full_name?: string
-          id?: string
-          is_active?: boolean
-          is_admin?: boolean
-          is_master_admin?: boolean
-          logo_url?: string | null
-          phone?: string | null
-          primary_color?: string | null
-          secondary_color?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       patients: {
         Row: {
@@ -465,10 +411,67 @@ export type Database = {
             foreignKeyName: "patients_nutritionist_id_fkey"
             columns: ["nutritionist_id"]
             isOneToOne: false
-            referencedRelation: "nutritionists"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          account_status: string
+          created_at: string
+          crn: string | null
+          email_signature: string | null
+          full_name: string
+          has_seen_onboarding: boolean
+          id: string
+          is_active: boolean
+          is_admin: boolean
+          is_master_admin: boolean
+          logo_url: string | null
+          phone: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_status?: string
+          created_at?: string
+          crn?: string | null
+          email_signature?: string | null
+          full_name: string
+          has_seen_onboarding?: boolean
+          id?: string
+          is_active?: boolean
+          is_admin?: boolean
+          is_master_admin?: boolean
+          logo_url?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_status?: string
+          created_at?: string
+          crn?: string | null
+          email_signature?: string | null
+          full_name?: string
+          has_seen_onboarding?: boolean
+          id?: string
+          is_active?: boolean
+          is_admin?: boolean
+          is_master_admin?: boolean
+          logo_url?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       support_ticket_messages: {
         Row: {
@@ -547,7 +550,7 @@ export type Database = {
             foreignKeyName: "support_tickets_nutritionist_id_fkey"
             columns: ["nutritionist_id"]
             isOneToOne: false
-            referencedRelation: "nutritionists"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

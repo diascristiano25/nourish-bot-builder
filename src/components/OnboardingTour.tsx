@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import Joyride, { CallBackProps, STATUS, Step, ACTIONS, EVENTS } from 'react-joyride';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OnboardingTourProps {
   nutritionistId: string;
   onComplete?: () => void;
   forceStart?: boolean;
 }
-
-const TOUR_COMPLETED_KEY = 'nutriflow_tour_completed';
 
 export function OnboardingTour({ nutritionistId, onComplete, forceStart = false }: OnboardingTourProps) {
   const [run, setRun] = useState(false);
@@ -248,34 +247,46 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
     // Prevent multiple checks on re-renders/navigation
     if (hasChecked.current && !forceStart) return;
     
-    const tourCompletedKey = `${TOUR_COMPLETED_KEY}_${nutritionistId}`;
-    const tourCompleted = localStorage.getItem(tourCompletedKey);
-    
-    if (forceStart) {
-      hasChecked.current = false;
-      setStepIndex(0);
-      setRun(true);
-    } else if (!tourCompleted && !hasChecked.current) {
-      hasChecked.current = true;
-      const timer = setTimeout(() => {
-        // Double-check before starting
-        const stillNotCompleted = localStorage.getItem(tourCompletedKey) !== 'true';
-        if (stillNotCompleted) {
+    const checkOnboardingStatus = async () => {
+      if (forceStart) {
+        hasChecked.current = false;
+        setStepIndex(0);
+        setRun(true);
+        return;
+      }
+
+      // Check database for has_seen_onboarding
+      const { data } = await supabase
+        .from('profiles')
+        .select('has_seen_onboarding')
+        .eq('id', nutritionistId)
+        .single();
+
+      if (!data?.has_seen_onboarding && !hasChecked.current) {
+        hasChecked.current = true;
+        const timer = setTimeout(() => {
           setRun(true);
-        }
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else {
-      hasChecked.current = true;
-    }
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        hasChecked.current = true;
+      }
+    };
+
+    checkOnboardingStatus();
   }, [nutritionistId, forceStart]);
 
-  const handleJoyrideCallback = (data: CallBackProps) => {
+  const handleJoyrideCallback = async (data: CallBackProps) => {
     const { status, action, index, type } = data;
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
     if (finishedStatuses.includes(status)) {
-      localStorage.setItem(`${TOUR_COMPLETED_KEY}_${nutritionistId}`, 'true');
+      // Update database to mark onboarding as completed
+      await supabase
+        .from('profiles')
+        .update({ has_seen_onboarding: true })
+        .eq('id', nutritionistId);
+      
       setRun(false);
       onComplete?.();
     } else if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
@@ -347,10 +358,19 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
   );
 }
 
-export function restartOnboardingTour(nutritionistId: string) {
-  localStorage.removeItem(`${TOUR_COMPLETED_KEY}_${nutritionistId}`);
+export async function restartOnboardingTour(nutritionistId: string) {
+  await supabase
+    .from('profiles')
+    .update({ has_seen_onboarding: false })
+    .eq('id', nutritionistId);
 }
 
-export function isTourCompleted(nutritionistId: string): boolean {
-  return localStorage.getItem(`${TOUR_COMPLETED_KEY}_${nutritionistId}`) === 'true';
+export async function isTourCompleted(nutritionistId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('has_seen_onboarding')
+    .eq('id', nutritionistId)
+    .single();
+  
+  return data?.has_seen_onboarding ?? false;
 }

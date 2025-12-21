@@ -57,7 +57,7 @@ export default function Profile() {
   const fetchProfile = async () => {
     try {
       const { data, error } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('*')
         .eq('user_id', user!.id)
         .single();
@@ -89,7 +89,7 @@ export default function Profile() {
     setSaving(true);
     try {
       const { error } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .update({
           full_name: fullName.trim(),
           crn: crn.trim() || null,
@@ -464,16 +464,14 @@ export default function Profile() {
                 <div>
                   <p className="font-medium text-slate-700">Tour de Onboarding</p>
                   <p className="text-sm text-slate-500">
-                    {profile && isTourCompleted(profile.id) 
-                      ? 'Concluído' 
-                      : 'Pendente'}
+                    Clique para reiniciar o tour
                   </p>
                 </div>
                 <Button
                   variant="outline"
-                  onClick={() => {
+                  onClick={async () => {
                     if (profile) {
-                      restartOnboardingTour(profile.id);
+                      await restartOnboardingTour(profile.id);
                       toast({
                         title: "Tour reiniciado",
                         description: "O tour começará na próxima vez que você acessar o Dashboard.",

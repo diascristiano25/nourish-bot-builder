@@ -59,7 +59,7 @@ const Financeiro = () => {
   const fetchNutritionistAndRecords = async () => {
     try {
       const { data: nutri } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('id')
         .eq('user_id', user?.id)
         .maybeSingle();
