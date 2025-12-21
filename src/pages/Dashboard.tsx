@@ -125,7 +125,7 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       const { data: profileData, error: profileError } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('id, full_name, crn')
         .eq('user_id', user!.id)
         .maybeSingle();
@@ -134,7 +134,7 @@ export default function Dashboard() {
       
       if (!profileData) {
         const { data: newProfile, error: createError } = await supabase
-          .from('nutritionists')
+          .from('profiles')
           .insert({ 
             user_id: user!.id, 
             full_name: user!.user_metadata?.full_name || 'Nutricionista' 

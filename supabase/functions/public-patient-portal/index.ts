@@ -94,7 +94,7 @@ serve(async (req) => {
 
     // Fetch nutritionist branding info (non-sensitive public info)
     const { data: nutritionist, error: nutritionistError } = await adminClient
-      .from('nutritionists')
+      .from('profiles')
       .select('full_name, crn, phone, logo_url, primary_color, secondary_color, email_signature')
       .eq('id', patient.nutritionist_id)
       .single();

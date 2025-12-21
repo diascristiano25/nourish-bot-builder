@@ -48,7 +48,7 @@ const Patients = () => {
     queryKey: ['patients', user?.id],
     queryFn: async () => {
       const { data: nutritionist } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('id')
         .eq('user_id', user?.id)
         .single();

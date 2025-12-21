@@ -127,7 +127,7 @@ export default function Biblioteca() {
     try {
       // Get nutritionist ID
       const { data: nutritionist, error: nutritionistError } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('id')
         .eq('user_id', user.id)
         .maybeSingle();

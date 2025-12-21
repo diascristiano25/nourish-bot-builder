@@ -138,7 +138,7 @@ export function ConsultationMealPlanEditor({ patientId, patientName = 'Paciente'
       
       try {
         const { data: nutri } = await supabase
-          .from('nutritionists')
+          .from('profiles')
           .select('id, full_name, crn, phone, logo_url, primary_color')
           .eq('user_id', user.id)
           .maybeSingle();

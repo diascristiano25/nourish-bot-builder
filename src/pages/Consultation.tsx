@@ -110,7 +110,7 @@ export default function Consultation() {
       
       try {
         const { data: nutri } = await supabase
-          .from('nutritionists')
+          .from('profiles')
           .select('id')
           .eq('user_id', user.id)
           .maybeSingle();
@@ -179,7 +179,7 @@ export default function Consultation() {
     try {
       // 1. Get nutritionist ID
       const { data: nutri, error: nutriError } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('id')
         .eq('user_id', user.id)
         .maybeSingle();

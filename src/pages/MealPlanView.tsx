@@ -150,7 +150,7 @@ export default function MealPlanView() {
       setPatient(patientData);
 
       const { data: nutritionistData, error: nutritionistError } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('full_name, crn, phone, logo_url, primary_color, secondary_color')
         .eq('user_id', user!.id)
         .single();

@@ -151,7 +151,7 @@ export default function Admin() {
   const fetchNutritionists = async () => {
     try {
       const { data, error } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('id, full_name, user_id, crn, phone, created_at, is_active, is_admin, account_status')
         .order('created_at', { ascending: false });
 
@@ -169,7 +169,7 @@ export default function Admin() {
         .from('support_tickets')
         .select(`
           id, ticket_number, subject, message, status, priority, created_at, attachment_url,
-          nutritionist:nutritionists(full_name)
+          nutritionist:profiles(full_name)
         `)
         .order('created_at', { ascending: false });
 
@@ -231,7 +231,7 @@ export default function Admin() {
     setUpdating(nutritionistId);
     try {
       const { error } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .update({ is_active: !currentStatus })
         .eq('id', nutritionistId);
 

@@ -81,7 +81,7 @@ export function NewAppointmentDialog({
     setLoading(true);
     try {
       const { data: nutritionist } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('id')
         .eq('user_id', user!.id)
         .single();
@@ -116,7 +116,7 @@ export function NewAppointmentDialog({
     setSaving(true);
     try {
       const { data: nutritionist } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('id')
         .eq('user_id', user!.id)
         .single();

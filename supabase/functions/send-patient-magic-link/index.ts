@@ -55,7 +55,7 @@ serve(async (req) => {
 
     // 2. Verify user is a nutritionist
     const { data: nutritionist, error: nutriError } = await supabaseAuth
-      .from('nutritionists')
+      .from('profiles')
       .select('id')
       .eq('user_id', user.id)
       .single();

@@ -48,7 +48,7 @@ export default function PatientAuth() {
 
       // Check if user is a nutritionist
       const { data: nutritionist } = await supabase
-        .from('nutritionists')
+        .from('profiles')
         .select('id')
         .eq('user_id', user.id)
         .single();
