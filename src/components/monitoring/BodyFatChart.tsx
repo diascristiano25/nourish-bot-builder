@@ -112,28 +112,30 @@ export function BodyFatChart({ data, showHeader = true, className }: BodyFatChar
         <span className="text-xs text-muted-foreground ml-2">gordura corporal</span>
       </div>
 
-      {/* Radar Chart for Bio Metrics */}
-      <div className="h-44 w-full mb-4">
+      {/* Radar Chart for Bio Metrics - INCREASED TO 400px */}
+      <div className="w-full mb-6" style={{ height: '400px' }}>
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={radarData} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
+          <RadarChart data={radarData} margin={{ top: 30, right: 50, bottom: 30, left: 50 }}>
             <PolarGrid 
-              stroke="rgba(255,255,255,0.1)" 
+              stroke="rgba(255,255,255,0.08)" 
               strokeDasharray="3 3"
             />
             <PolarAngleAxis 
               dataKey="metric" 
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 13, fontWeight: 500 }}
+              tickLine={false}
             />
             <Radar
               name="Composição"
               dataKey="value"
               stroke="#8B5CF6"
               fill="url(#radarGradient)"
-              strokeWidth={2}
+              strokeWidth={3}
             />
             <defs>
               <linearGradient id="radarGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.6} />
+                <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.7} />
+                <stop offset="50%" stopColor="#8B5CF6" stopOpacity={0.4} />
                 <stop offset="100%" stopColor="#DFFF00" stopOpacity={0.2} />
               </linearGradient>
             </defs>
