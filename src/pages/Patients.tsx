@@ -76,7 +76,7 @@ const Patients = () => {
     <AppLayout>
       <div className="min-h-screen">
         {/* Glassmorphism Header */}
-        <header className="sticky top-0 z-30 bg-[rgba(15,18,22,0.7)] backdrop-blur-[20px] border-b border-[rgba(255,255,255,0.08)]">
+        <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-[20px] border-b border-border">
           <div className="px-6 lg:px-8 py-6">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
