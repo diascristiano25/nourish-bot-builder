@@ -75,13 +75,18 @@ export default function PatientAuth() {
     try {
       emailSchema.parse(email);
 
+      // Check if patient exists with this email
       const { data: patient, error: patientError } = await supabase
         .from('patients')
         .select('id, full_name')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
-      if (patientError || !patient) {
+      if (patientError) {
+        throw patientError;
+      }
+
+      if (!patient) {
         toast({
           title: "Email não encontrado",
           description: "Este email não está cadastrado como paciente. Entre em contato com seu nutricionista.",
@@ -91,6 +96,7 @@ export default function PatientAuth() {
         return;
       }
 
+      // Send magic link
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {

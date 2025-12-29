@@ -136,43 +136,49 @@ serve(async (req) => {
       }
     }
 
-    // Generate magic link
-    const { data, error: magicLinkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
+    // Use signInWithOtp to actually send the email
+    const { data, error: otpError } = await supabaseAdmin.auth.signInWithOtp({
       email: patientEmail,
       options: {
-        redirectTo: redirectUrl || `${req.headers.get('origin')}/patient-portal`,
+        emailRedirectTo: redirectUrl || `${req.headers.get('origin')}/patient-portal`,
         data: {
           patient_id: patientId,
           full_name: patient.full_name,
           is_patient: true,
         },
+        shouldCreateUser: true,
       },
     });
 
-    if (magicLinkError) {
-      console.error('Error generating magic link:', magicLinkError);
+    if (otpError) {
+      console.error('Error sending magic link:', otpError);
       return new Response(
-        JSON.stringify({ error: 'Failed to generate magic link' }),
+        JSON.stringify({ error: 'Failed to send magic link: ' + otpError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // If this is a new user being created, link them to the patient record
-    if (!patient.user_id && data.user) {
-      await supabaseAdmin
-        .from('patients')
-        .update({ user_id: data.user.id })
-        .eq('id', patientId);
+    // After signInWithOtp, if a new user was created, link them to the patient record
+    if (!patient.user_id) {
+      // Check if user was created by looking them up
+      const { data: users } = await supabaseAdmin.auth.admin.listUsers();
+      const newUser = users?.users.find(u => u.email === patientEmail);
+      
+      if (newUser) {
+        await supabaseAdmin
+          .from('patients')
+          .update({ user_id: newUser.id })
+          .eq('id', patientId);
+        console.log('Linked new user to patient:', patientId);
+      }
     }
 
-    console.log('Magic link generated successfully for patient:', patientId);
+    console.log('Magic link email sent successfully to:', patientEmail);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Magic link generated',
-        magicLink: data.properties?.action_link,
+        message: 'Magic link email sent successfully',
       }),
       { 
         status: 200, 

@@ -807,6 +807,22 @@ export default function PatientDetail() {
         </Tabs>
       </main>
 
+      {/* Hidden PDF Report */}
+      <div className="absolute left-[-9999px] top-0">
+        <PatientReportDocument
+          ref={reportRef}
+          patient={patient}
+          nutritionist={nutritionist || { full_name: nutritionistName }}
+          weightRecords={weightLogs}
+          bodyFatRecords={bodyFatLogs}
+          latestMealPlan={latestMealPlan}
+          currentWeight={latestWeight}
+          initialWeight={initialWeight}
+          currentBodyFat={bodyFatLogs[0]?.body_fat_percentage}
+          initialBodyFat={bodyFatLogs[bodyFatLogs.length - 1]?.body_fat_percentage}
+          height={latestHeight}
+        />
+      </div>
     </div>
   );
 }
