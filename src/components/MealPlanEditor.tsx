@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { FoodSearchAutocomplete } from '@/components/FoodSearchAutocomplete';
 import { PatientNotesDrawer } from '@/components/PatientNotesDrawer';
 import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
+import { GlassCard } from '@/components/ui/GlassCard';
 import { 
   Coffee, 
   Sun, 
@@ -19,7 +20,8 @@ import {
   Trash2,
   GripVertical,
   StickyNote,
-  Search
+  Search,
+  Zap
 } from 'lucide-react';
 
 interface MealItem {
@@ -80,12 +82,12 @@ const mealIcons: Record<string, React.ReactNode> = {
 };
 
 const mealColors: Record<string, string> = {
-  'Café da Manhã': 'bg-warning/10 text-warning',
-  'Lanche da Manhã': 'bg-info/10 text-info',
-  'Almoço': 'bg-success/10 text-success',
-  'Lanche da Tarde': 'bg-info/10 text-info',
-  'Jantar': 'bg-primary/10 text-primary',
-  'Ceia': 'bg-muted text-muted-foreground',
+  'Café da Manhã': 'from-amber-500/20 to-orange-500/20 border-amber-500/30',
+  'Lanche da Manhã': 'from-cyan-500/20 to-blue-500/20 border-cyan-500/30',
+  'Almoço': 'from-emerald-500/20 to-green-500/20 border-emerald-500/30',
+  'Lanche da Tarde': 'from-violet-500/20 to-purple-500/20 border-violet-500/30',
+  'Jantar': 'from-indigo-500/20 to-blue-500/20 border-indigo-500/30',
+  'Ceia': 'from-slate-500/20 to-gray-500/20 border-slate-500/30',
 };
 
 export default function MealPlanEditor({ planData, onSave, onCancel, saving, patient }: MealPlanEditorProps) {
@@ -103,17 +105,14 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
       (item as any)[field] = value;
     }
     
-    // Recalculate meal total calories
     newData.meals[mealIndex].totalCalories = newData.meals[mealIndex].items.reduce(
       (sum, item) => sum + (item.calories || 0), 0
     );
     
-    // Recalculate total calories
     newData.totalCalories = newData.meals.reduce(
       (sum, meal) => sum + (meal.totalCalories || 0), 0
     );
 
-    // Recalculate total macros
     const totalMacros = newData.meals.reduce(
       (acc, meal) => {
         meal.items.forEach(item => {
@@ -157,7 +156,6 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
       fat: food.fat,
     });
     
-    // Recalculate totals
     newData.meals[mealIndex].totalCalories = newData.meals[mealIndex].items.reduce(
       (sum, item) => sum + (item.calories || 0), 0
     );
@@ -165,7 +163,6 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
       (sum, meal) => sum + (meal.totalCalories || 0), 0
     );
 
-    // Recalculate total macros
     const totalMacros = newData.meals.reduce(
       (acc, meal) => {
         meal.items.forEach(item => {
@@ -187,7 +184,6 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
     const newData = { ...editedData };
     newData.meals[mealIndex].items.splice(itemIndex, 1);
     
-    // Recalculate totals
     newData.meals[mealIndex].totalCalories = newData.meals[mealIndex].items.reduce(
       (sum, item) => sum + (item.calories || 0), 0
     );
@@ -195,7 +191,6 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
       (sum, meal) => sum + (meal.totalCalories || 0), 0
     );
 
-    // Recalculate total macros
     const totalMacros = newData.meals.reduce(
       (acc, meal) => {
         meal.items.forEach(item => {
@@ -224,32 +219,33 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
     <div className="space-y-4">
       {/* Critical Tags Alert */}
       {patient?.critical_tags && patient.critical_tags.length > 0 && (
-        <div className="p-4 rounded-xl bg-warning/10 border border-warning/30 animate-pulse-slow">
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 animate-pulse">
           <CriticalTagsBadges tags={patient.critical_tags} size="md" />
         </div>
       )}
 
       {/* Action Bar */}
-      <div className="flex justify-between items-center sticky top-16 z-40 bg-background py-2">
+      <div className="flex justify-between items-center sticky top-16 z-40 bg-background/80 backdrop-blur-xl py-2 border-b border-cyan-500/20">
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="bg-warning/10 text-warning">
+          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+            <Zap className="w-3 h-3 mr-1" />
             Modo Edição
           </Badge>
           {patient && (
             <PatientNotesDrawer patient={patient} open={notesDrawerOpen} onOpenChange={setNotesDrawerOpen}>
-              <Button variant="outline" size="sm" className="gap-2">
-                <StickyNote className="w-4 h-4" />
+              <Button variant="outline" size="sm" className="gap-2 border-cyan-500/30 hover:bg-cyan-500/10">
+                <StickyNote className="w-4 h-4 text-cyan-400" />
                 Lembretes
               </Button>
             </PatientNotesDrawer>
           )}
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onCancel} disabled={saving}>
+          <Button variant="outline" size="sm" onClick={onCancel} disabled={saving} className="border-cyan-500/30">
             <X className="w-4 h-4 mr-1" />
             Cancelar
           </Button>
-          <Button size="sm" onClick={handleSave} disabled={saving}>
+          <Button size="sm" onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-600 hover:to-violet-600 border-0">
             <Save className="w-4 h-4 mr-1" />
             {saving ? 'Salvando...' : 'Salvar'}
           </Button>
@@ -257,60 +253,60 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
       </div>
 
       {/* Nutritional Summary */}
-      <Card className="border-primary/30 bg-primary/5">
+      <GlassCard className="border-cyan-500/30">
         <CardContent className="pt-4">
           <div className="grid grid-cols-4 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-primary">{editedData.totalCalories || 0}</p>
+              <p className="text-2xl font-bold font-mono text-cyan-400">{editedData.totalCalories || 0}</p>
               <p className="text-xs text-muted-foreground">kcal</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-blue-600">{Math.round(editedData.macros?.protein || 0)}g</p>
+              <p className="text-2xl font-bold font-mono text-blue-400">{Math.round(editedData.macros?.protein || 0)}g</p>
               <p className="text-xs text-muted-foreground">Proteína</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-orange-500">{Math.round(editedData.macros?.carbs || 0)}g</p>
+              <p className="text-2xl font-bold font-mono text-orange-400">{Math.round(editedData.macros?.carbs || 0)}g</p>
               <p className="text-xs text-muted-foreground">Carboidrato</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-yellow-600">{Math.round(editedData.macros?.fat || 0)}g</p>
+              <p className="text-2xl font-bold font-mono text-yellow-400">{Math.round(editedData.macros?.fat || 0)}g</p>
               <p className="text-xs text-muted-foreground">Gordura</p>
             </div>
           </div>
         </CardContent>
-      </Card>
+      </GlassCard>
 
       {/* Meals */}
       {editedData.meals?.map((meal, mealIndex) => (
-        <Card key={mealIndex} className="border-0 shadow-md overflow-hidden">
-          <CardHeader className={`${mealColors[meal.name] || 'bg-muted'} py-4`}>
+        <GlassCard key={mealIndex} className={`border bg-gradient-to-br ${mealColors[meal.name] || 'from-slate-500/20 to-gray-500/20 border-slate-500/30'} overflow-hidden`}>
+          <CardHeader className="py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-background/50 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-foreground">
                   {mealIcons[meal.name] || <UtensilsCrossed className="w-5 h-5" />}
                 </div>
                 <div>
-                  <CardTitle className="text-lg">{meal.name}</CardTitle>
+                  <CardTitle className="text-lg text-foreground">{meal.name}</CardTitle>
                   <Input
                     type="text"
                     value={meal.time || ''}
                     onChange={(e) => updateMealTime(mealIndex, e.target.value)}
                     placeholder="ex: 07:00"
-                    className="h-7 w-24 mt-1 bg-background/50 border-0 text-xs"
+                    className="h-7 w-24 mt-1 bg-white/10 border-white/20 text-xs font-mono"
                   />
                 </div>
               </div>
-              <Badge variant="secondary" className="bg-background/50">
+              <Badge className="bg-white/10 text-foreground border-white/20 font-mono">
                 {meal.totalCalories || 0} kcal
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent className="pt-0">
             <div className="space-y-3">
               {meal.items?.map((item, itemIndex) => (
                 <div 
                   key={itemIndex} 
-                  className="grid grid-cols-12 gap-2 items-center py-2 border-b last:border-0"
+                  className="grid grid-cols-12 gap-2 items-center py-2 border-b border-white/10 last:border-0"
                 >
                   <div className="col-span-1 flex items-center justify-center text-muted-foreground">
                     <GripVertical className="w-4 h-4" />
@@ -320,7 +316,7 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                       value={item.food}
                       onChange={(e) => updateMealItem(mealIndex, itemIndex, 'food', e.target.value)}
                       placeholder="Alimento"
-                      className="h-9"
+                      className="h-9 bg-white/5 border-white/20"
                     />
                   </div>
                   <div className="col-span-3">
@@ -328,7 +324,7 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                       value={item.portion}
                       onChange={(e) => updateMealItem(mealIndex, itemIndex, 'portion', e.target.value)}
                       placeholder="Porção"
-                      className="h-9"
+                      className="h-9 bg-white/5 border-white/20"
                     />
                   </div>
                   <div className="col-span-3">
@@ -337,14 +333,14 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                       value={item.calories || ''}
                       onChange={(e) => updateMealItem(mealIndex, itemIndex, 'calories', e.target.value)}
                       placeholder="kcal"
-                      className="h-9"
+                      className="h-9 bg-white/5 border-white/20 font-mono"
                     />
                   </div>
                   <div className="col-span-1">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                       onClick={() => removeMealItem(mealIndex, itemIndex)}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -356,10 +352,10 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
             
             {/* Food Search */}
             {searchingMealIndex === mealIndex ? (
-              <div className="mt-3 p-3 border rounded-lg bg-muted/30 space-y-2">
+              <div className="mt-3 p-3 border border-cyan-500/30 rounded-xl bg-white/5 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Buscar Alimento/Suplemento</span>
-                  <Button variant="ghost" size="sm" onClick={() => setSearchingMealIndex(null)}>
+                  <span className="text-sm font-medium text-foreground">Buscar Alimento/Suplemento</span>
+                  <Button variant="ghost" size="sm" onClick={() => setSearchingMealIndex(null)} className="text-muted-foreground hover:text-foreground">
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
@@ -373,16 +369,16 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex-1 gap-2"
+                  className="flex-1 gap-2 border-cyan-500/30 hover:bg-cyan-500/10"
                   onClick={() => setSearchingMealIndex(mealIndex)}
                 >
-                  <Search className="w-4 h-4" />
+                  <Search className="w-4 h-4 text-cyan-400" />
                   Buscar Alimento
                 </Button>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="border-dashed border"
+                  className="border border-dashed border-white/20 hover:bg-white/5"
                   onClick={() => addMealItem(mealIndex)}
                 >
                   <Plus className="w-4 h-4 mr-1" />
@@ -391,13 +387,13 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
               </div>
             )}
           </CardContent>
-        </Card>
+        </GlassCard>
       ))}
 
       {/* Notes */}
-      <Card className="border-0 shadow-md">
+      <GlassCard className="border-cyan-500/20">
         <CardHeader>
-          <CardTitle className="text-lg">Observações</CardTitle>
+          <CardTitle className="text-lg text-foreground">Observações</CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
@@ -405,9 +401,10 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
             onChange={(e) => updateNotes(e.target.value)}
             placeholder="Adicione observações para o paciente..."
             rows={4}
+            className="bg-white/5 border-cyan-500/20 focus:border-cyan-500/50"
           />
         </CardContent>
-      </Card>
+      </GlassCard>
     </div>
   );
 }

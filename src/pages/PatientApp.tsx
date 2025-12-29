@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { WeightChart } from '@/components/monitoring';
-import { Loader2, User, Utensils, Droplets, Coffee, Sun, Moon, Apple } from 'lucide-react';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { Loader2, User, Utensils, Droplets, Coffee, Sun, Moon, Apple, Zap } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 
 interface Patient {
@@ -45,7 +46,6 @@ const mealIcons: Record<string, React.ElementType> = {
 
 // Safe component to render meal items
 const MealItemsList = ({ items }: { items: any[] }) => {
-  // If no items, show placeholder
   if (!items || items.length === 0) {
     return (
       <div className="ml-11 py-2 text-sm text-muted-foreground">
@@ -57,28 +57,26 @@ const MealItemsList = ({ items }: { items: any[] }) => {
   return (
     <ul className="space-y-2 ml-11">
       {items.map((item, index) => {
-        // Handle string items
         if (typeof item === 'string') {
           return (
-            <li key={index} className="flex justify-between py-2 border-b border-border/30 last:border-0">
+            <li key={index} className="flex justify-between py-2 border-b border-cyan-500/10 last:border-0">
               <span className="text-sm text-foreground">{item}</span>
             </li>
           );
         }
 
-        // Handle object items
         const name = item?.nome || item?.name || item?.descricao || 'Item';
         const portion = item?.porcao || item?.portion || item?.quantidade || '';
         const calories = item?.calorias || item?.calories;
 
         return (
-          <li key={index} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+          <li key={index} className="flex items-center justify-between py-2 border-b border-cyan-500/10 last:border-0">
             <div>
               <p className="text-sm text-foreground">{name}</p>
               {portion && <p className="text-xs text-muted-foreground">{portion}</p>}
             </div>
             {calories && (
-              <span className="text-xs text-muted-foreground">{calories} kcal</span>
+              <span className="text-xs font-mono text-cyan-400">{calories} kcal</span>
             )}
           </li>
         );
@@ -103,7 +101,6 @@ export default function PatientApp() {
 
   const fetchPatientData = async () => {
     try {
-      // Use secure edge function to fetch portal data
       const { data, error: fnError } = await supabase.functions.invoke('public-patient-portal', {
         body: { patientId }
       });
@@ -125,10 +122,13 @@ export default function PatientApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">Carregando sua dieta...</p>
+          <div className="relative">
+            <Loader2 className="w-12 h-12 animate-spin text-cyan-400 mx-auto mb-3" />
+            <div className="absolute inset-0 w-12 h-12 mx-auto rounded-full bg-cyan-400/20 blur-xl animate-pulse" />
+          </div>
+          <p className="text-sm text-cyan-400/70 font-mono">Carregando sua dieta...</p>
         </div>
       </div>
     );
@@ -136,18 +136,18 @@ export default function PatientApp() {
 
   if (error || !patient) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
+        <GlassCard className="max-w-md w-full border-red-500/30">
           <CardContent className="py-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-              <User className="w-8 h-8 text-destructive" />
+            <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
+              <User className="w-8 h-8 text-red-400" />
             </div>
             <h2 className="text-lg font-medium text-foreground mb-2">Link Inválido</h2>
             <p className="text-sm text-muted-foreground">
               {error || 'O link que você acessou não é válido. Solicite um novo link ao seu nutricionista.'}
             </p>
           </CardContent>
-        </Card>
+        </GlassCard>
       </div>
     );
   }
@@ -156,24 +156,34 @@ export default function PatientApp() {
   const meals = planData?.meals || planData?.refeicoes || [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#0a0a0f]">
+      {/* Cyber Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 -left-32 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -right-32 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl" />
+      </div>
+
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/50">
+      <header className="sticky top-0 z-30 bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-cyan-500/20">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoImg} alt="NutriFlow" className="w-8 h-8 object-contain" />
+            <div className="relative">
+              <img src={logoImg} alt="NutriFlow" className="w-8 h-8 object-contain" />
+              <div className="absolute inset-0 bg-cyan-400/20 blur-lg" />
+            </div>
             <span className="font-semibold text-foreground">NutriFlow</span>
           </div>
         </div>
       </header>
 
-      <main className="p-4 pb-8 max-w-lg mx-auto space-y-6">
+      <main className="relative z-10 p-4 pb-8 max-w-lg mx-auto space-y-6">
         {/* Welcome Card */}
-        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardContent className="py-6">
+        <GlassCard className="border-cyan-500/30 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-violet-500/5" />
+          <CardContent className="relative py-6">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-2xl font-semibold text-primary">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 flex items-center justify-center">
+                <span className="text-2xl font-semibold text-cyan-400">
                   {patient.full_name.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -182,27 +192,28 @@ export default function PatientApp() {
                   Olá, {patient.full_name.split(' ')[0]}!
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs">
+                    <Zap className="w-3 h-3 mr-1" />
                     {goalLabels[patient.goal || ''] || 'Saúde'}
                   </Badge>
                 </div>
               </div>
             </div>
           </CardContent>
-        </Card>
+        </GlassCard>
 
         {/* Weight Chart */}
         <WeightChart data={weightLogs} showHeader={true} />
 
         {/* Current Meal Plan */}
-        <Card>
+        <GlassCard className="border-cyan-500/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Utensils className="w-4 h-4 text-primary" />
-              Sua Dieta Atual
+              <Utensils className="w-4 h-4 text-cyan-400" />
+              <span className="text-foreground">Sua Dieta Atual</span>
             </CardTitle>
             {mealPlan?.total_calories && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-cyan-400 font-mono">
                 {mealPlan.total_calories} kcal/dia
               </p>
             )}
@@ -210,7 +221,9 @@ export default function PatientApp() {
           <CardContent>
             {!mealPlan || meals.length === 0 ? (
               <div className="text-center py-8">
-                <Utensils className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/30 border border-cyan-500/20 flex items-center justify-center">
+                  <Utensils className="w-8 h-8 text-muted-foreground/50" />
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Nenhuma dieta cadastrada ainda.
                 </p>
@@ -228,18 +241,18 @@ export default function PatientApp() {
                     <AccordionItem 
                       key={index} 
                       value={`meal-${index}`}
-                      className="border border-border/50 rounded-lg px-4"
+                      className="border border-cyan-500/20 rounded-xl px-4 bg-white/[0.02]"
                     >
                       <AccordionTrigger className="py-3 hover:no-underline">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <MealIcon className="w-4 h-4 text-primary" />
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 flex items-center justify-center">
+                            <MealIcon className="w-4 h-4 text-cyan-400" />
                           </div>
                           <div className="text-left">
                             <p className="text-sm font-medium text-foreground">
                               {meal.nome || meal.name || meal.tipo || 'Refeição'}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground font-mono">
                               {meal.horario || meal.time || ''}
                             </p>
                           </div>
@@ -254,26 +267,26 @@ export default function PatientApp() {
               </Accordion>
             )}
           </CardContent>
-        </Card>
+        </GlassCard>
 
         {/* Water Reminder */}
-        <Card className="border-blue-200/50 bg-blue-50/30 dark:border-blue-900/30 dark:bg-blue-950/20">
+        <GlassCard className="border-blue-500/30 bg-blue-500/5">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <Droplets className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <div className="w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                <Droplets className="w-5 h-5 text-blue-400" />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">Lembre-se de beber água!</p>
-                <p className="text-xs text-muted-foreground">Meta: 2L por dia</p>
+                <p className="text-xs text-blue-400 font-mono">Meta: 2L por dia</p>
               </div>
             </div>
           </CardContent>
-        </Card>
+        </GlassCard>
 
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground pt-4">
-          <p>Desenvolvido com ❤️ por NutriFlow</p>
+          <p className="font-mono">Desenvolvido com ❤️ por NutriFlow</p>
         </div>
       </main>
     </div>
