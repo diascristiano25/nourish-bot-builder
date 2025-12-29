@@ -2,6 +2,54 @@ import { forwardRef } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+// ═══════════════════════════════════════════════════════════════
+// TEXT SANITIZATION FUNCTION - Removes LaTeX, non-UTF8, fixes encoding
+// ═══════════════════════════════════════════════════════════════
+function sanitizeText(text: string | null | undefined): string {
+  if (!text) return '';
+  
+  return text
+    // Remove LaTeX-style formatting
+    .replace(/\\[a-zA-Z]+\{[^}]*\}/g, '')
+    .replace(/\$[^$]*\$/g, '')
+    .replace(/\\[a-zA-Z]+/g, '')
+    // Fix common encoding issues
+    .replace(/â€"/g, '–')
+    .replace(/â€™/g, "'")
+    .replace(/â€œ/g, '"')
+    .replace(/â€/g, '"')
+    .replace(/Ã§/g, 'ç')
+    .replace(/Ã£/g, 'ã')
+    .replace(/Ã¡/g, 'á')
+    .replace(/Ã©/g, 'é')
+    .replace(/Ã­/g, 'í')
+    .replace(/Ã³/g, 'ó')
+    .replace(/Ãº/g, 'ú')
+    .replace(/Ã‚/g, 'Â')
+    .replace(/Ãª/g, 'ê')
+    .replace(/Ã´/g, 'ô')
+    // Remove any remaining non-printable characters except common ones
+    .replace(/[^\x20-\x7E\u00C0-\u00FF\u0100-\u017F]/g, '')
+    // Normalize whitespace
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Fixed column widths - HARDCODED
+const COLUMN_WIDTHS = {
+  food: '55%',      // Alimento: 55%
+  portion: '25%',   // Porção: 25%
+  calories: '20%',  // Calorias: 20%
+};
+
+// Prevent word break styles
+const noWordBreakStyle: React.CSSProperties = {
+  wordBreak: 'keep-all',
+  overflowWrap: 'normal',
+  whiteSpace: 'normal',
+  fontFamily: 'Helvetica, Arial, sans-serif',
+};
+
 interface PatientData {
   full_name: string;
   email?: string | null;
@@ -208,8 +256,9 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
               margin: 0,
               lineHeight: 1.1,
               textShadow: `0 0 60px ${NEON_GREEN}40`,
+              ...noWordBreakStyle,
             }}>
-              {patient.full_name}
+              {sanitizeText(patient.full_name)}
             </h1>
             
             <div style={{ 
@@ -274,7 +323,7 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>Nome</p>
-                <p style={{ color: 'white', fontSize: '16px', fontWeight: '500', margin: 0 }}>{patient.full_name}</p>
+                <p style={{ color: 'white', fontSize: '16px', fontWeight: '500', margin: 0, ...noWordBreakStyle }}>{sanitizeText(patient.full_name)}</p>
               </div>
               {patient.email && (
                 <div>
@@ -486,7 +535,7 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
                         alignItems: 'center',
                       }}
                     >
-                      <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px' }}>{meal.name}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', ...noWordBreakStyle }}>{sanitizeText(meal.name)}</span>
                       <span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: '600', color: NEON_GREEN }}>
                         {meal.totalCalories || 0} kcal
                       </span>

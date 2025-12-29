@@ -3,6 +3,46 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import logo from '@/assets/logo.png';
 
+// ═══════════════════════════════════════════════════════════════
+// TEXT SANITIZATION FUNCTION - Removes LaTeX, non-UTF8, fixes encoding
+// ═══════════════════════════════════════════════════════════════
+function sanitizeText(text: string | null | undefined): string {
+  if (!text) return '';
+  
+  return text
+    // Remove LaTeX-style formatting
+    .replace(/\\[a-zA-Z]+\{[^}]*\}/g, '')
+    .replace(/\$[^$]*\$/g, '')
+    .replace(/\\[a-zA-Z]+/g, '')
+    // Fix common encoding issues
+    .replace(/â€"/g, '–')
+    .replace(/â€™/g, "'")
+    .replace(/â€œ/g, '"')
+    .replace(/â€/g, '"')
+    .replace(/Ã§/g, 'ç')
+    .replace(/Ã£/g, 'ã')
+    .replace(/Ã¡/g, 'á')
+    .replace(/Ã©/g, 'é')
+    .replace(/Ã­/g, 'í')
+    .replace(/Ã³/g, 'ó')
+    .replace(/Ãº/g, 'ú')
+    .replace(/Ã‚/g, 'Â')
+    .replace(/Ãª/g, 'ê')
+    .replace(/Ã´/g, 'ô')
+    // Remove any remaining non-printable characters except common ones
+    .replace(/[^\x20-\x7E\u00C0-\u00FF\u0100-\u017F]/g, '')
+    // Normalize whitespace
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Fixed column widths - HARDCODED
+const COLUMN_WIDTHS = {
+  food: '55%',      // Alimento: 55%
+  portion: '25%',   // Porção: 25%
+  calories: '20%',  // Calorias: 20%
+};
+
 interface MealItem {
   food: string;
   portion: string;
@@ -176,12 +216,13 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                 textShadow: theme === 'dark' ? `0 0 60px ${colors.accent}60, 0 0 120px ${colors.accent}30` : 'none',
                 lineHeight: 1.1,
                 marginBottom: '30px',
-                wordBreak: 'break-word',
-                overflowWrap: 'break-word',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                wordBreak: 'keep-all',
+                overflowWrap: 'normal',
                 hyphens: 'none',
               }}
             >
-              {patientName}
+              {sanitizeText(patientName)}
             </h1>
 
             {/* Plan Title */}
@@ -378,60 +419,70 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                   )}
                 </div>
 
-                {/* Food Items - Wide column layout, prevents word breaking */}
+                {/* Food Items - TABLE LAYOUT with HARDCODED widths */}
                 <div style={{ padding: '16px 24px' }}>
-                  {meal.items?.map((item, itemIndex) => (
-                    <div 
-                      key={itemIndex}
-                      style={{
-                        padding: '12px 0',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        gap: '16px',
-                      }}
-                    >
-                      {/* Food name - 70% width, prevent breaking */}
-                      <div style={{ 
-                        flex: '1 1 70%',
-                        minWidth: 0,
-                      }}>
-                        <p style={{ 
-                          color: colors.text, 
-                          fontSize: '15px', 
-                          margin: 0, 
-                          fontWeight: 500,
-                          wordBreak: 'normal',
-                          overflowWrap: 'normal',
-                          whiteSpace: 'normal',
-                          hyphens: 'none',
-                        }}>
-                          {item.food}
-                        </p>
-                        <p style={{ 
-                          color: colors.textMuted, 
-                          fontSize: '13px', 
-                          margin: '4px 0 0 0',
-                          wordBreak: 'normal',
-                          overflowWrap: 'normal',
-                        }}>
-                          {item.portion}
-                        </p>
-                      </div>
-                      {/* Calories - 30% width */}
-                      {item.calories && (
-                        <span style={{ 
-                          color: colors.textMuted, 
-                          fontSize: '14px',
-                          fontFamily: 'monospace',
-                          whiteSpace: 'nowrap',
-                          flex: '0 0 auto',
-                        }}>
-                          {item.calories} kcal
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                  <table style={{ 
+                    width: '100%', 
+                    borderCollapse: 'collapse',
+                    tableLayout: 'fixed', // CRITICAL: Forces fixed column widths
+                  }}>
+                    <colgroup>
+                      <col style={{ width: COLUMN_WIDTHS.food }} />
+                      <col style={{ width: COLUMN_WIDTHS.portion }} />
+                      <col style={{ width: COLUMN_WIDTHS.calories }} />
+                    </colgroup>
+                    <tbody>
+                      {meal.items?.map((item, itemIndex) => (
+                        <tr key={itemIndex}>
+                          {/* ALIMENTO - 55% - NO WORD BREAK */}
+                          <td style={{ 
+                            padding: '10px 8px 10px 0',
+                            verticalAlign: 'top',
+                            color: colors.text, 
+                            fontSize: '14px', 
+                            fontWeight: 500,
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            // CRITICAL: Prevent word breaking
+                            wordBreak: 'keep-all',
+                            overflowWrap: 'normal',
+                            whiteSpace: 'normal',
+                            hyphens: 'none',
+                            WebkitHyphens: 'none',
+                            MozHyphens: 'none',
+                            msHyphens: 'none',
+                          }}>
+                            {sanitizeText(item.food)}
+                          </td>
+                          {/* PORÇÃO - 25% */}
+                          <td style={{ 
+                            padding: '10px 8px',
+                            verticalAlign: 'top',
+                            color: colors.textMuted, 
+                            fontSize: '13px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            wordBreak: 'keep-all',
+                            overflowWrap: 'normal',
+                            whiteSpace: 'normal',
+                            hyphens: 'none',
+                          }}>
+                            {sanitizeText(item.portion)}
+                          </td>
+                          {/* CALORIAS - 20% */}
+                          <td style={{ 
+                            padding: '10px 0 10px 8px',
+                            verticalAlign: 'top',
+                            color: colors.textMuted, 
+                            fontSize: '13px',
+                            fontFamily: 'Helvetica, Arial, monospace',
+                            textAlign: 'right',
+                            whiteSpace: 'nowrap',
+                          }}>
+                            {item.calories ? `${item.calories} kcal` : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             ))}
@@ -463,10 +514,12 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                 lineHeight: 1.7,
                 whiteSpace: 'pre-line',
                 margin: 0,
-                wordBreak: 'normal',
-                overflowWrap: 'break-word',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                wordBreak: 'keep-all',
+                overflowWrap: 'normal',
+                hyphens: 'none',
               }}>
-                {planData.notes}
+                {sanitizeText(planData.notes)}
               </p>
             </div>
           )}
