@@ -3,9 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { NeonText } from '@/components/ui/NeonText';
+import MealPlanDocument from '@/components/MealPlanDocument';
+import MealPlanEditor from '@/components/MealPlanEditor';
 import { 
   ArrowLeft, 
   Loader2, 
@@ -24,8 +27,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import MealPlanDocument from '@/components/MealPlanDocument';
-import MealPlanEditor from '@/components/MealPlanEditor';
 
 interface MealItem {
   food: string;
@@ -85,15 +86,6 @@ const mealIcons: Record<string, React.ReactNode> = {
   'Lanche da Tarde': <Cookie className="w-5 h-5" />,
   'Jantar': <Moon className="w-5 h-5" />,
   'Ceia': <Soup className="w-5 h-5" />,
-};
-
-const mealColors: Record<string, { bg: string; icon: string; border: string }> = {
-  'Café da Manhã': { bg: 'bg-amber-50', icon: 'text-amber-500', border: 'border-amber-200' },
-  'Lanche da Manhã': { bg: 'bg-orange-50', icon: 'text-orange-500', border: 'border-orange-200' },
-  'Almoço': { bg: 'bg-emerald-50', icon: 'text-emerald-500', border: 'border-emerald-200' },
-  'Lanche da Tarde': { bg: 'bg-blue-50', icon: 'text-blue-500', border: 'border-blue-200' },
-  'Jantar': { bg: 'bg-purple-50', icon: 'text-purple-500', border: 'border-purple-200' },
-  'Ceia': { bg: 'bg-slate-50', icon: 'text-slate-500', border: 'border-slate-200' },
 };
 
 export default function MealPlanView() {
@@ -313,8 +305,11 @@ export default function MealPlanView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-muted-foreground animate-pulse">Carregando cardápio...</p>
+        </div>
       </div>
     );
   }
@@ -327,22 +322,24 @@ export default function MealPlanView() {
   const hasNutritionistProfile = nutritionist && nutritionist.full_name;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Elite Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+    <div className="min-h-screen bg-background">
+      {/* Cyber Header */}
+      <header className="sticky top-0 z-50 glass border-b border-border/50">
         <div className="px-4 lg:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => navigate(`/patients/${id}`)}
-              className="rounded-xl"
+              className="hover:bg-primary/10"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="font-bold text-slate-800">{mealPlan.title}</h1>
-              <p className="text-xs text-slate-500">{patient.full_name}</p>
+              <NeonText as="h1" color="primary" className="font-bold">
+                {mealPlan.title}
+              </NeonText>
+              <p className="text-xs text-muted-foreground">{patient.full_name}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -350,7 +347,7 @@ export default function MealPlanView() {
               variant={isEditing ? "secondary" : "outline"}
               size="icon"
               onClick={() => setIsEditing(!isEditing)}
-              className="rounded-xl border-slate-200"
+              className="border-border/50 hover:border-primary/50"
             >
               <Pencil className="w-4 h-4" />
             </Button>
@@ -359,7 +356,7 @@ export default function MealPlanView() {
               size="icon"
               onClick={handleShare}
               disabled={sharing || isEditing}
-              className="rounded-xl border-slate-200"
+              className="border-border/50 hover:border-primary/50"
             >
               {sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
             </Button>
@@ -368,7 +365,7 @@ export default function MealPlanView() {
               size="icon"
               onClick={handleDownloadPDF}
               disabled={downloading || !hasNutritionistProfile || isEditing}
-              className="rounded-xl border-slate-200"
+              className="border-border/50 hover:border-primary/50"
             >
               {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             </Button>
@@ -379,26 +376,24 @@ export default function MealPlanView() {
       <main className="px-4 lg:px-6 py-6 max-w-3xl mx-auto space-y-6">
         {/* Profile Warning */}
         {!hasNutritionistProfile && (
-          <Card className="bg-amber-50 border-amber-200 rounded-2xl">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-4">
-                <Settings className="w-6 h-6 text-amber-600" />
-                <div className="flex-1">
-                  <p className="font-medium text-amber-800">Configure seu perfil</p>
-                  <p className="text-sm text-amber-600">
-                    Adicione nome, CRN e logo para exportar documentos.
-                  </p>
-                </div>
-                <Button 
-                  onClick={() => navigate('/profile')} 
-                  variant="outline"
-                  className="rounded-xl border-amber-300 text-amber-700 hover:bg-amber-100"
-                >
-                  Configurar
-                </Button>
+          <GlassCard className="p-4 border-warning/30 bg-warning/5">
+            <div className="flex items-center gap-4">
+              <Settings className="w-6 h-6 text-warning" />
+              <div className="flex-1">
+                <p className="font-medium text-warning">Configure seu perfil</p>
+                <p className="text-sm text-muted-foreground">
+                  Adicione nome, CRN e logo para exportar documentos.
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <Button 
+                onClick={() => navigate('/profile')} 
+                variant="outline"
+                className="border-warning/30 text-warning hover:bg-warning/10"
+              >
+                Configurar
+              </Button>
+            </div>
+          </GlassCard>
         )}
 
         {isEditing ? (
@@ -411,138 +406,113 @@ export default function MealPlanView() {
         ) : (
           <>
             {/* Summary Card */}
-            <Card className="bg-white rounded-2xl border-0 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Calendar className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-500">
-                        {format(new Date(mealPlan.created_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                      </span>
-                    </div>
-                    {mealPlan.is_active && (
-                      <Badge className="bg-emerald-100 text-emerald-700 border-0 rounded-lg">
-                        Cardápio Ativo
-                      </Badge>
-                    )}
+            <GlassCard className="p-6">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="w-4 h-4 text-primary" />
+                    <span className="text-sm text-muted-foreground">
+                      {format(new Date(mealPlan.created_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                    </span>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-emerald-500">
-                      {mealPlan.total_calories || planData.totalCalories || '-'}
-                    </p>
-                    <p className="text-sm text-slate-500">kcal/dia</p>
+                  {mealPlan.is_active && (
+                    <Badge className="bg-success/20 text-success border-success/30">
+                      Cardápio Ativo
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-primary glow-primary">
+                    {mealPlan.total_calories || planData.totalCalories || '-'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">kcal/dia</p>
+                </div>
+              </div>
+
+              {planData.macros && (
+                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border/30">
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-info">{planData.macros.protein}g</p>
+                    <p className="text-xs text-muted-foreground">Proteínas</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-warning">{planData.macros.carbs}g</p>
+                    <p className="text-xs text-muted-foreground">Carboidratos</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-success">{planData.macros.fat}g</p>
+                    <p className="text-xs text-muted-foreground">Gorduras</p>
                   </div>
                 </div>
-
-                {planData.macros && (
-                  <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100">
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-blue-500">{planData.macros.protein}g</p>
-                      <p className="text-xs text-slate-500">Proteínas</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-amber-500">{planData.macros.carbs}g</p>
-                      <p className="text-xs text-slate-500">Carboidratos</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-emerald-500">{planData.macros.fat}g</p>
-                      <p className="text-xs text-slate-500">Gorduras</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              )}
+            </GlassCard>
 
             {/* Meals */}
             <div className="space-y-4">
-              {planData.meals?.map((meal, index) => {
-                const colors = mealColors[meal.name] || { bg: 'bg-slate-50', icon: 'text-slate-500', border: 'border-slate-200' };
-                
-                return (
-                  <Card 
-                    key={index} 
-                    className={`bg-white rounded-2xl border-0 shadow-sm overflow-hidden`}
-                  >
-                    <CardHeader className={`${colors.bg} py-4 px-6 border-b ${colors.border}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center ${colors.icon}`}>
-                            {mealIcons[meal.name] || <UtensilsCrossed className="w-5 h-5" />}
-                          </div>
-                          <div>
-                            <CardTitle className="text-lg text-slate-800">{meal.name}</CardTitle>
-                            {meal.time && (
-                              <CardDescription className="text-slate-500">{meal.time}</CardDescription>
-                            )}
-                          </div>
+              {planData.meals?.map((meal, index) => (
+                <GlassCard key={index} className="overflow-hidden">
+                  <div className="p-4 bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border/30">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                          {mealIcons[meal.name] || <UtensilsCrossed className="w-5 h-5" />}
                         </div>
-                        {meal.totalCalories && (
-                          <Badge variant="secondary" className="bg-white/80 text-slate-600 border-0 rounded-lg">
-                            {meal.totalCalories} kcal
-                          </Badge>
-                        )}
+                        <div>
+                          <h3 className="font-semibold text-foreground">{meal.name}</h3>
+                          {meal.time && (
+                            <p className="text-sm text-muted-foreground">{meal.time}</p>
+                          )}
+                        </div>
                       </div>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <div className="space-y-3">
-                        {meal.items?.map((item, itemIndex) => (
-                          <div 
-                            key={itemIndex} 
-                            className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0"
-                          >
-                            <div className="flex-1">
-                              <p className="font-medium text-slate-800">{item.food}</p>
-                              <p className="text-sm text-slate-500">{item.portion}</p>
-                            </div>
-                            {item.calories && (
-                              <div className="text-right">
-                                <p className="font-semibold text-slate-700">{item.calories} kcal</p>
-                                {(item.protein || item.carbs || item.fat) && (
-                                  <p className="text-xs text-slate-400">
-                                    {item.protein && `P:${item.protein}g `}
-                                    {item.carbs && `C:${item.carbs}g `}
-                                    {item.fat && `G:${item.fat}g`}
-                                  </p>
-                                )}
-                              </div>
-                            )}
+                      {meal.totalCalories && (
+                        <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
+                          {meal.totalCalories} kcal
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="space-y-3">
+                      {meal.items?.map((item, itemIndex) => (
+                        <div 
+                          key={itemIndex} 
+                          className="flex items-center justify-between py-3 border-b border-border/30 last:border-0"
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium text-foreground">{item.food}</p>
+                            <p className="text-sm text-muted-foreground">{item.portion}</p>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                          {item.calories && (
+                            <div className="text-right">
+                              <p className="font-semibold text-primary">{item.calories} kcal</p>
+                              {(item.protein || item.carbs || item.fat) && (
+                                <p className="text-xs text-muted-foreground">
+                                  P:{item.protein || 0}g • C:{item.carbs || 0}g • G:{item.fat || 0}g
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
             </div>
 
             {/* Notes */}
             {planData.notes && (
-              <Card className="bg-white rounded-2xl border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-base text-slate-800">Observações</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600 whitespace-pre-line">{planData.notes}</p>
-                </CardContent>
-              </Card>
+              <GlassCard className="p-6">
+                <NeonText as="h3" color="primary" className="font-semibold mb-3">
+                  Observações
+                </NeonText>
+                <p className="text-muted-foreground whitespace-pre-wrap">{planData.notes}</p>
+              </GlassCard>
             )}
           </>
         )}
-
-        {/* Hidden PDF Document */}
-        <div className="fixed -left-[9999px] top-0">
-          <div ref={documentRef}>
-            {mealPlan && patient && nutritionist && (
-              <MealPlanDocument
-                mealPlan={mealPlan}
-                patientName={patient.full_name}
-                nutritionist={nutritionist}
-              />
-            )}
-          </div>
-        </div>
       </main>
+
     </div>
   );
 }

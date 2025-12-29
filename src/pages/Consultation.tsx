@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppLayout } from '@/components/AppLayout';
 import { ConsultationMealPlanEditor } from '@/components/ConsultationMealPlanEditor';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { NeonText } from '@/components/ui/NeonText';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,7 +43,10 @@ import {
   UserCheck,
   ChevronsUpDown,
   Check,
-  UserPlus
+  UserPlus,
+  Stethoscope,
+  ClipboardList,
+  Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -77,7 +81,6 @@ export default function Consultation() {
   const [isParsing, setIsParsing] = useState(false);
   const [hasParsed, setHasParsed] = useState(false);
   
-  // Patient selection state
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(urlPatientId || null);
   const [selectedPatientName, setSelectedPatientName] = useState<string>('');
@@ -98,12 +101,11 @@ export default function Consultation() {
     healthConditions: '',
   });
 
-  // New tabs state
   const [examesText, setExamesText] = useState('');
   const [orientacoesText, setOrientacoesText] = useState('');
   const [mealPlanData, setMealPlanData] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch patients list
   useEffect(() => {
     const fetchPatients = async () => {
       if (!user) return;
@@ -126,7 +128,6 @@ export default function Consultation() {
         if (error) throw error;
         setPatients(data || []);
         
-        // If we have a URL patient ID, find and set the name
         if (urlPatientId && data) {
           const patient = data.find(p => p.id === urlPatientId);
           if (patient) {
@@ -148,12 +149,9 @@ export default function Consultation() {
     const patient = patients.find(p => p.id === patientId);
     if (patient) {
       setSelectedPatientName(patient.full_name);
-      // Optionally update structuredData name
       setStructuredData(prev => ({ ...prev, name: patient.full_name }));
     }
   };
-
-  const [isSaving, setIsSaving] = useState(false);
 
   const handleFinalizeConsultation = async () => {
     if (!selectedPatientId) {
@@ -177,7 +175,6 @@ export default function Consultation() {
     setIsSaving(true);
     
     try {
-      // 1. Get nutritionist ID
       const { data: nutri, error: nutriError } = await supabase
         .from('profiles')
         .select('id')
@@ -186,12 +183,10 @@ export default function Consultation() {
       
       if (nutriError || !nutri) throw new Error('Nutricionista não encontrado');
 
-      // 2. PRIMEIRO: Salvar peso em weight_logs (para gráfico)
       if (structuredData.weight) {
         const weightValue = parseFloat(structuredData.weight.replace(',', '.'));
         const today = new Date().toISOString().split('T')[0];
         
-        // Verificar se já existe registro para hoje
         const { data: existingLog } = await supabase
           .from('weight_logs')
           .select('id')
@@ -200,13 +195,11 @@ export default function Consultation() {
           .maybeSingle();
         
         if (existingLog) {
-          // Atualizar registro existente
           await supabase
             .from('weight_logs')
             .update({ weight: weightValue })
             .eq('id', existingLog.id);
         } else {
-          // Criar novo registro
           await supabase
             .from('weight_logs')
             .insert({
@@ -215,16 +208,13 @@ export default function Consultation() {
               recorded_at: today,
             });
         }
-        
-        console.log('Weight saved to weight_logs:', weightValue);
       }
 
-      // 3. Salvar em anthropometrics (para histórico completo)
       const hasAnyMeasurement = structuredData.weight || structuredData.height || 
                                 structuredData.waist || structuredData.hip || structuredData.bodyFat;
       
       if (hasAnyMeasurement) {
-        const { error: anthropError } = await supabase
+        await supabase
           .from('anthropometrics')
           .insert({
             patient_id: selectedPatientId,
@@ -235,13 +225,8 @@ export default function Consultation() {
             hip_cm: structuredData.hip ? parseFloat(structuredData.hip.replace(',', '.')) : undefined,
             body_fat_percentage: structuredData.bodyFat ? parseFloat(structuredData.bodyFat.replace(',', '.')) : undefined,
           });
-        
-        if (anthropError) {
-          console.error('Anthropometrics error:', anthropError);
-        }
       }
 
-      // 4. Atualizar condições de saúde do paciente
       if (structuredData.healthConditions) {
         await supabase
           .from('patients')
@@ -249,7 +234,6 @@ export default function Consultation() {
           .eq('id', selectedPatientId);
       }
 
-      // 4. Create appointment record with all consultation data
       const consultationNotes = JSON.stringify({
         anamnese: {
           freeText,
@@ -260,7 +244,7 @@ export default function Consultation() {
         mealPlan: mealPlanData
       });
 
-      const { error: appointmentError } = await supabase
+      await supabase
         .from('appointments')
         .insert({
           patient_id: selectedPatientId,
@@ -270,9 +254,6 @@ export default function Consultation() {
           notes: consultationNotes
         });
 
-      if (appointmentError) throw appointmentError;
-
-      // 5. Criar registro financeiro automático (R$ 150,00 por consulta)
       await supabase
         .from('financial_records')
         .insert({
@@ -286,10 +267,9 @@ export default function Consultation() {
       
       toast({
         title: '✅ Consulta finalizada!',
-        description: `Todos os dados de ${selectedPatientName} foram salvos com sucesso.`,
+        description: `Todos os dados de ${selectedPatientName} foram salvos.`,
       });
 
-      // 6. Redirect to patient summary
       navigate(`/patients/${selectedPatientId}`);
       
     } catch (error: any) {
@@ -304,7 +284,6 @@ export default function Consultation() {
     }
   };
 
-  // Callback to receive meal plan data from editor
   const handleMealPlanSave = (planData: any) => {
     setMealPlanData(planData);
     toast({
@@ -317,7 +296,6 @@ export default function Consultation() {
     setStructuredData(prev => ({ ...prev, [field]: value }));
   };
 
-  // AI Parsing function (simulated)
   const parseTextToData = async () => {
     if (!freeText.trim()) {
       toast({
@@ -329,30 +307,23 @@ export default function Consultation() {
     }
 
     setIsParsing(true);
-    
-    // Simulate AI processing time
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     const textUpper = freeText.toUpperCase();
     const newData: Partial<StructuredData> = {};
     
-    // Parse DIABETES
     if (textUpper.includes('DIABETES')) {
       newData.healthConditions = 'Diabetes Tipo 2';
     }
     
-    // Parse VEGETARIANO
     if (textUpper.includes('VEGETARIANO') || textUpper.includes('VEGETARIANA')) {
       newData.habits = 'Dieta Vegetariana';
     }
     
-    // Parse weight patterns: "PESA XX", "XXkg", "XX kg", "com XXkg", "está com XX"
     const weightPatterns = [
       /PESA\s*(\d+(?:[.,]\d+)?)/i,
       /(\d+(?:[.,]\d+)?)\s*KG/i,
       /COM\s*(\d+(?:[.,]\d+)?)\s*(?:KG)?/i,
-      /ESTÁ\s*COM\s*(\d+(?:[.,]\d+)?)/i,
-      /PESO\s*(?:ATUAL|DE)?\s*:?\s*(\d+(?:[.,]\d+)?)/i,
     ];
     
     for (const pattern of weightPatterns) {
@@ -363,38 +334,16 @@ export default function Consultation() {
       }
     }
     
-    // Parse age pattern "XX ANOS"
     const ageMatch = textUpper.match(/(\d+)\s*ANOS/);
     if (ageMatch) {
       newData.age = ageMatch[1];
     }
     
-    // Parse height pattern "1,XX" or "1.XX" meters
     const heightMatch = freeText.match(/1[,.](\d{2})/);
     if (heightMatch) {
       newData.height = `1${heightMatch[1]}`;
     }
     
-    // Parse name (first capitalized word pattern)
-    const nameMatch = freeText.match(/^([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ][a-záàâãéèêíïóôõöúçñ]+)/);
-    if (nameMatch) {
-      newData.name = nameMatch[1];
-    }
-    
-    // Parse allergies/restrictions
-    if (textUpper.includes('ALERGIA') || textUpper.includes('INTOLERÂNCIA') || textUpper.includes('INTOLERANCIA')) {
-      const alergiaMatch = freeText.match(/alergia\s*(?:a|ao|à)?\s*([^,.]+)/i);
-      if (alergiaMatch) {
-        newData.restrictions = alergiaMatch[1].trim();
-      }
-    }
-    
-    // Parse HIPERTENSÃO
-    if (textUpper.includes('HIPERTENSÃO') || textUpper.includes('HIPERTENSAO') || textUpper.includes('PRESSÃO ALTA')) {
-      newData.healthConditions = (newData.healthConditions ? newData.healthConditions + ', ' : '') + 'Hipertensão';
-    }
-    
-    // Update structured data with parsed values
     setStructuredData(prev => ({
       ...prev,
       ...newData
@@ -402,49 +351,44 @@ export default function Consultation() {
     
     setIsParsing(false);
     setHasParsed(true);
-    
-    // Switch to structured view to show results
     setViewMode('structured');
     
     const fieldsFound = Object.keys(newData).length;
     toast({
       title: '✨ Análise concluída!',
       description: fieldsFound > 0 
-        ? `${fieldsFound} campo(s) preenchido(s) automaticamente. Revise e edite se necessário.`
-        : 'Nenhum dado reconhecido. Tente usar palavras-chave como DIABETES, VEGETARIANO, PESA XX.',
+        ? `${fieldsFound} campo(s) preenchido(s) automaticamente.`
+        : 'Nenhum dado reconhecido. Use palavras-chave como DIABETES, PESA XX.',
     });
   };
-
-  const hasAIContent = freeText.length > 50;
 
   return (
     <AppLayout>
       <div className="min-h-screen">
         {/* Header */}
-        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border/50">
+        <header className="sticky top-0 z-30 glass border-b border-border/50">
           <div className="px-4 md:px-8 py-3 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-9 w-9 rounded-lg"
+                  className="hover:bg-primary/10"
                   onClick={() => navigate(selectedPatientId ? `/patients/${selectedPatientId}` : '/dashboard')}
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
                 <div>
-                  <h1 className="text-lg font-semibold text-foreground">
+                  <NeonText as="h1" color="primary" className="text-lg font-semibold">
                     {selectedPatientName ? 'Consulta de Retorno' : 'Nova Consulta'}
-                  </h1>
+                  </NeonText>
                   <p className="text-xs text-muted-foreground">
                     {selectedPatientName || 'Selecione um paciente para começar'}
                   </p>
                 </div>
               </div>
               <Button 
-                size="sm" 
-                className="h-10 rounded-lg px-6 gap-2 bg-primary hover:bg-primary/90 font-medium"
+                className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
                 onClick={handleFinalizeConsultation}
                 disabled={isSaving || !selectedPatientId}
               >
@@ -456,13 +400,13 @@ export default function Consultation() {
                 ) : (
                   <>
                     <CheckCircle2 className="w-4 h-4" />
-                    Finalizar e Salvar
+                    Finalizar
                   </>
                 )}
               </Button>
             </div>
             
-            {/* Patient Selector with Search */}
+            {/* Patient Selector */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <UserCheck className="w-4 h-4" />
@@ -473,17 +417,16 @@ export default function Consultation() {
                   <Button
                     variant="outline"
                     role="combobox"
-                    aria-expanded={patientSelectorOpen}
-                    className="w-[280px] h-9 justify-between bg-card font-normal"
+                    className="w-[280px] justify-between bg-background/50 border-border/50"
                     disabled={loadingPatients}
                   >
                     {loadingPatients 
                       ? "Carregando..." 
                       : selectedPatientName || "Selecione o paciente"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[280px] p-0 bg-card border shadow-lg z-50" align="start">
+                <PopoverContent className="w-[280px] p-0 glass border-border/50" align="start">
                   <Command>
                     <CommandInput placeholder="Buscar paciente..." />
                     <CommandList>
@@ -499,7 +442,7 @@ export default function Consultation() {
                           }}
                         >
                           <UserPlus className="w-4 h-4" />
-                          Cadastrar Novo Paciente
+                          Novo Paciente
                         </Button>
                       </CommandEmpty>
                       <CommandGroup>
@@ -522,424 +465,276 @@ export default function Consultation() {
                           </CommandItem>
                         ))}
                       </CommandGroup>
-                      <div className="border-t p-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start gap-2 text-primary hover:text-primary"
-                          onClick={() => {
-                            setPatientSelectorOpen(false);
-                            navigate('/patients/new');
-                          }}
-                        >
-                          <UserPlus className="w-4 h-4" />
-                          + Adicionar Novo Paciente
-                        </Button>
-                      </div>
                     </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
-              {selectedPatientId && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 text-xs"
-                  onClick={() => navigate(`/patients/${selectedPatientId}`)}
-                >
-                  Ver perfil
-                </Button>
-              )}
             </div>
           </div>
         </header>
 
-        <main className="p-4 md:p-8 max-w-5xl mx-auto">
-          {/* Phase Tabs */}
-          <Tabs value={activePhase} onValueChange={setActivePhase} className="space-y-8">
-            <TabsList className="bg-muted/50 p-1 rounded-xl h-auto flex-wrap">
-              <TabsTrigger 
-                value="anamnese" 
-                className="rounded-lg px-4 md:px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
-              >
+        <main className="p-4 md:p-8">
+          <Tabs value={activePhase} onValueChange={setActivePhase} className="space-y-6">
+            <TabsList className="glass border border-border/50 p-1">
+              <TabsTrigger value="anamnese" className="gap-2 data-[state=active]:bg-primary/20">
+                <Stethoscope className="w-4 h-4" />
                 Anamnese
               </TabsTrigger>
-              <TabsTrigger 
-                value="exames" 
-                className="rounded-lg px-4 md:px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
-              >
+              <TabsTrigger value="exames" className="gap-2 data-[state=active]:bg-primary/20">
+                <ClipboardList className="w-4 h-4" />
                 Exames
               </TabsTrigger>
-              <TabsTrigger 
-                value="plano" 
-                className="rounded-lg px-4 md:px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
-              >
-                Plano Alimentar
+              <TabsTrigger value="cardapio" className="gap-2 data-[state=active]:bg-primary/20">
+                <Utensils className="w-4 h-4" />
+                Cardápio
               </TabsTrigger>
-              <TabsTrigger 
-                value="orientacoes" 
-                className="rounded-lg px-4 md:px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
-              >
+              <TabsTrigger value="orientacoes" className="gap-2 data-[state=active]:bg-primary/20">
+                <FileText className="w-4 h-4" />
                 Orientações
               </TabsTrigger>
             </TabsList>
 
-            {/* Anamnese Tab */}
-            <TabsContent value="anamnese" className="space-y-6 animate-fade-in">
-              {/* View Mode Toggle */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-medium text-foreground">Coleta de Dados</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {viewMode === 'freeflow' 
-                      ? 'Digite livremente. A IA organizará depois.' 
-                      : 'Preencha os campos estruturados.'}
-                  </p>
+            {/* Anamnese */}
+            <TabsContent value="anamnese" className="space-y-6">
+              <div className="flex items-center justify-between">
+                <NeonText as="h2" color="primary" className="text-xl font-semibold">
+                  Anamnese Nutricional
+                </NeonText>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={viewMode === 'freeflow' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('freeflow')}
+                    className="gap-2"
+                  >
+                    <ToggleLeft className="w-4 h-4" />
+                    Livre
+                  </Button>
+                  <Button
+                    variant={viewMode === 'structured' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('structured')}
+                    className="gap-2"
+                  >
+                    <ToggleRight className="w-4 h-4" />
+                    Estruturado
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode(viewMode === 'freeflow' ? 'structured' : 'freeflow')}
-                  className="rounded-lg gap-2 h-9"
-                >
-                  {viewMode === 'freeflow' ? (
-                    <>
-                      <ToggleLeft className="w-4 h-4" />
-                      Visualização Estruturada
-                    </>
-                  ) : (
-                    <>
-                      <ToggleRight className="w-4 h-4" />
-                      Modo Free-Flow
-                    </>
-                  )}
-                </Button>
               </div>
 
-              {/* Free-Flow Mode */}
-              {viewMode === 'freeflow' && (
-                <div className="space-y-4">
-                  <div className="relative">
+              {viewMode === 'freeflow' ? (
+                <GlassCard className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <FileText className="w-4 h-4" />
+                      <span className="text-sm">Anamnese livre - digite naturalmente</span>
+                    </div>
                     <Textarea
                       value={freeText}
                       onChange={(e) => setFreeText(e.target.value)}
-                      placeholder={`Digite livremente as queixas, rotina e histórico do paciente...
-
-Dica: Use palavras-chave para extração automática:
-• DIABETES → preenche Condições de Saúde
-• VEGETARIANO → preenche Hábitos Alimentares  
-• PESA 75 → preenche Peso Atual
-• 32 ANOS → preenche Idade
-• 1,65 → preenche Altura
-
-Exemplo: "Maria, 32 anos, PESA 75kg, altura 1,65m. Tem DIABETES tipo 2. É VEGETARIANA há 3 anos..."`}
-                      className="min-h-[400px] bg-card border-border/50 text-base leading-relaxed resize-none focus:border-primary/30 focus:ring-primary/10 rounded-xl p-6"
+                      placeholder="Ex: Maria, 35 anos, pesa 72kg, altura 1,65m. Diabética tipo 2, vegetariana há 3 anos..."
+                      className="min-h-[300px] bg-background/50 border-border/50 focus:border-primary"
                     />
-                    
-                    {/* AI Status */}
-                    {freeText.length > 0 && (
-                      <div className="absolute bottom-4 right-4 flex items-center gap-2 text-xs text-muted-foreground bg-background/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-border/50">
-                        <Sparkles className={`w-3.5 h-3.5 ${hasAIContent ? 'text-primary' : 'text-muted-foreground/50'}`} />
-                        {hasAIContent ? 'Pronto para analisar' : 'Continue escrevendo...'}
-                      </div>
-                    )}
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        {freeText.length} caracteres
+                      </p>
+                      <Button
+                        onClick={parseTextToData}
+                        disabled={isParsing || freeText.length < 20}
+                        className="gap-2 bg-gradient-to-r from-primary to-accent"
+                      >
+                        {isParsing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Analisando...
+                          </>
+                        ) : (
+                          <>
+                            <Brain className="w-4 h-4" />
+                            Analisar com IA
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-
-                  {/* AI Parse Button */}
-                  <Button
-                    onClick={parseTextToData}
-                    disabled={isParsing || !freeText.trim()}
-                    className="w-full gap-2 h-12 text-base"
-                    size="lg"
-                  >
-                    {isParsing ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Analisando texto...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="w-5 h-5" />
-                        Analisar Texto e Preencher Estruturado
-                      </>
-                    )}
-                  </Button>
-
-                  {/* AI Hint */}
-                  {hasAIContent && !hasParsed && (
-                    <Card className="border-primary/20 bg-primary/5 animate-scale-in">
-                      <CardContent className="py-4 px-5">
-                        <div className="flex items-start gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <Sparkles className="w-4 h-4 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">Texto pronto para análise</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              Clique no botão acima para extrair os dados automaticamente.
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              )}
-
-              {/* Structured Mode */}
-              {viewMode === 'structured' && (
-                <div className="space-y-6">
-                  {/* AI Notice */}
-                  {hasParsed && (
-                    <Card className="border-primary/20 bg-primary/5">
-                      <CardContent className="py-3 px-4">
-                        <p className="text-xs text-muted-foreground flex items-center gap-2">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                          Campos preenchidos pela IA. Todos são editáveis - corrija se necessário.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Patient Data */}
-                  <Card className="border-border/50">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="text-base font-medium flex items-center gap-2">
-                        <User className="w-4 h-4 text-primary" />
+                </GlassCard>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  <GlassCard className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <User className="w-5 h-5 text-primary" />
+                      </div>
+                      <NeonText as="h3" color="primary" className="font-semibold">
                         Dados do Paciente
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="name" className="text-sm text-muted-foreground">Nome</Label>
-                        <Input
-                          id="name"
-                          value={structuredData.name}
-                          onChange={(e) => handleStructuredChange('name', e.target.value)}
-                          placeholder="Nome completo"
-                          className="rounded-lg h-10"
-                        />
+                      </NeonText>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Nome</Label>
+                          <Input
+                            value={structuredData.name}
+                            onChange={(e) => handleStructuredChange('name', e.target.value)}
+                            className="bg-background/50 border-border/50"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Idade</Label>
+                          <Input
+                            value={structuredData.age}
+                            onChange={(e) => handleStructuredChange('age', e.target.value)}
+                            className="bg-background/50 border-border/50"
+                          />
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="age" className="text-sm text-muted-foreground">Idade</Label>
-                        <Input
-                          id="age"
-                          value={structuredData.age}
-                          onChange={(e) => handleStructuredChange('age', e.target.value)}
-                          placeholder="Ex: 32"
-                          className="rounded-lg h-10"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </GlassCard>
 
-                  {/* Anthropometry */}
-                  <Card className="border-border/50">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="text-base font-medium flex items-center gap-2">
-                        <Ruler className="w-4 h-4 text-primary" />
-                        Antropometria
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid gap-4 md:grid-cols-3">
+                  <GlassCard className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+                        <Ruler className="w-5 h-5 text-success" />
+                      </div>
+                      <NeonText as="h3" color="primary" className="font-semibold">
+                        Medidas Antropométricas
+                      </NeonText>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="weight" className="text-sm text-muted-foreground">Peso (kg)</Label>
+                        <Label>Peso (kg)</Label>
                         <Input
-                          id="weight"
                           value={structuredData.weight}
                           onChange={(e) => handleStructuredChange('weight', e.target.value)}
-                          placeholder="Ex: 72"
-                          className="rounded-lg h-10"
+                          className="bg-background/50 border-border/50"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="height" className="text-sm text-muted-foreground">Altura (cm)</Label>
+                        <Label>Altura (cm)</Label>
                         <Input
-                          id="height"
                           value={structuredData.height}
                           onChange={(e) => handleStructuredChange('height', e.target.value)}
-                          placeholder="Ex: 165"
-                          className="rounded-lg h-10"
+                          className="bg-background/50 border-border/50"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="bodyFat" className="text-sm text-muted-foreground">% Gordura</Label>
+                        <Label>Cintura (cm)</Label>
                         <Input
-                          id="bodyFat"
-                          value={structuredData.bodyFat}
-                          onChange={(e) => handleStructuredChange('bodyFat', e.target.value)}
-                          placeholder="Ex: 28"
-                          className="rounded-lg h-10"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="waist" className="text-sm text-muted-foreground">Cintura (cm)</Label>
-                        <Input
-                          id="waist"
                           value={structuredData.waist}
                           onChange={(e) => handleStructuredChange('waist', e.target.value)}
-                          placeholder="Ex: 80"
-                          className="rounded-lg h-10"
+                          className="bg-background/50 border-border/50"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="hip" className="text-sm text-muted-foreground">Quadril (cm)</Label>
+                        <Label>Quadril (cm)</Label>
                         <Input
-                          id="hip"
                           value={structuredData.hip}
                           onChange={(e) => handleStructuredChange('hip', e.target.value)}
-                          placeholder="Ex: 98"
-                          className="rounded-lg h-10"
+                          className="bg-background/50 border-border/50"
                         />
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="space-y-2 col-span-2">
+                        <Label>% Gordura</Label>
+                        <Input
+                          value={structuredData.bodyFat}
+                          onChange={(e) => handleStructuredChange('bodyFat', e.target.value)}
+                          className="bg-background/50 border-border/50"
+                        />
+                      </div>
+                    </div>
+                  </GlassCard>
 
-                  {/* Health Conditions */}
-                  <Card className="border-border/50">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="text-base font-medium flex items-center gap-2">
-                        <Heart className="w-4 h-4 text-primary" />
+                  <GlassCard className="p-6 md:col-span-2">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+                        <Heart className="w-5 h-5 text-destructive" />
+                      </div>
+                      <NeonText as="h3" color="primary" className="font-semibold">
                         Condições de Saúde
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        value={structuredData.healthConditions}
-                        onChange={(e) => handleStructuredChange('healthConditions', e.target.value)}
-                        placeholder="Diabetes, hipertensão, colesterol alto, etc."
-                        className="min-h-[80px] rounded-lg"
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Habits */}
-                  <Card className="border-border/50">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="text-base font-medium flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-primary" />
-                        Hábitos e Rotina
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        value={structuredData.habits}
-                        onChange={(e) => handleStructuredChange('habits', e.target.value)}
-                        placeholder="Descreva a rotina do paciente, nível de atividade física, horários, etc."
-                        className="min-h-[100px] rounded-lg"
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Preferences */}
-                  <Card className="border-border/50">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="text-base font-medium flex items-center gap-2">
-                        <Utensils className="w-4 h-4 text-primary" />
-                        Preferências Alimentares
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                      </NeonText>
+                    </div>
+                    <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground">Preferências</Label>
+                        <Label>Condições Médicas</Label>
                         <Textarea
-                          value={structuredData.preferences}
-                          onChange={(e) => handleStructuredChange('preferences', e.target.value)}
-                          placeholder="Alimentos que o paciente gosta, preferências culinárias..."
-                          className="min-h-[80px] rounded-lg"
+                          value={structuredData.healthConditions}
+                          onChange={(e) => handleStructuredChange('healthConditions', e.target.value)}
+                          placeholder="Diabetes, hipertensão, etc..."
+                          className="bg-background/50 border-border/50 min-h-[80px]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground">Restrições e Alergias</Label>
+                        <Label>Hábitos Alimentares</Label>
+                        <Textarea
+                          value={structuredData.habits}
+                          onChange={(e) => handleStructuredChange('habits', e.target.value)}
+                          placeholder="Vegetariano, come fora frequentemente, etc..."
+                          className="bg-background/50 border-border/50 min-h-[80px]"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Restrições</Label>
                         <Textarea
                           value={structuredData.restrictions}
                           onChange={(e) => handleStructuredChange('restrictions', e.target.value)}
-                          placeholder="Alergias, intolerâncias, alimentos que evita..."
-                          className="min-h-[80px] rounded-lg"
+                          placeholder="Alergias, intolerâncias..."
+                          className="bg-background/50 border-border/50 min-h-[80px]"
                         />
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </GlassCard>
                 </div>
               )}
             </TabsContent>
 
-            {/* Exames Tab */}
-            <TabsContent value="exames" className="animate-fade-in">
-              <Card className="border-border/50">
-                <CardHeader>
-                  <CardTitle className="text-base font-medium flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-primary" />
-                    Resultados de Exames
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Registre os resultados de exames laboratoriais, bioquímicos e outros.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    value={examesText}
-                    onChange={(e) => setExamesText(e.target.value)}
-                    placeholder={`Digite os resultados dos exames do paciente...
-
-Exemplo:
-• Glicemia em jejum: 98 mg/dL (normal)
-• Colesterol Total: 210 mg/dL (limítrofe)
-• HDL: 45 mg/dL
-• LDL: 140 mg/dL
-• Triglicerídeos: 180 mg/dL
-• Hemoglobina Glicada: 5.8%
-• TSH: 2.5 mUI/L
-• Vitamina D: 28 ng/mL`}
-                    className="min-h-[400px] bg-card border-border/50 text-base leading-relaxed resize-none focus:border-primary/30 focus:ring-primary/10 rounded-xl p-6"
-                  />
-                </CardContent>
-              </Card>
+            {/* Exames */}
+            <TabsContent value="exames">
+              <GlassCard className="p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center">
+                    <ClipboardList className="w-5 h-5 text-info" />
+                  </div>
+                  <NeonText as="h3" color="primary" className="font-semibold">
+                    Exames e Resultados
+                  </NeonText>
+                </div>
+                <Textarea
+                  value={examesText}
+                  onChange={(e) => setExamesText(e.target.value)}
+                  placeholder="Registre os resultados de exames laboratoriais, bioquímicos, etc..."
+                  className="min-h-[300px] bg-background/50 border-border/50 focus:border-primary"
+                />
+              </GlassCard>
             </TabsContent>
 
-            <TabsContent value="plano" className="animate-fade-in">
+            {/* Cardápio */}
+            <TabsContent value="cardapio">
               <ConsultationMealPlanEditor 
                 patientId={selectedPatientId || undefined}
-                patientName={selectedPatientName || 'Paciente'}
+                patientName={selectedPatientName}
                 onSave={handleMealPlanSave}
               />
             </TabsContent>
 
-            {/* Orientações Tab */}
-            <TabsContent value="orientacoes" className="animate-fade-in">
-              <Card className="border-border/50">
-                <CardHeader>
-                  <CardTitle className="text-base font-medium flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-primary" />
-                    Orientações e Recomendações
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Escreva orientações gerais, suplementação e recomendações para o paciente.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    value={orientacoesText}
-                    onChange={(e) => setOrientacoesText(e.target.value)}
-                    placeholder={`Digite as orientações e recomendações para o paciente...
-
-Exemplo:
-ORIENTAÇÕES GERAIS:
-• Manter hidratação adequada (2L de água/dia)
-• Praticar atividade física 3x por semana
-• Evitar alimentos ultraprocessados
-
-SUPLEMENTAÇÃO:
-• Vitamina D: 2000 UI/dia (manhã)
-• Ômega 3: 1g/dia (almoço)
-
-PRÓXIMOS PASSOS:
-• Retorno em 30 dias para reavaliação
-• Repetir exames de perfil lipídico`}
-                    className="min-h-[400px] bg-card border-border/50 text-base leading-relaxed resize-none focus:border-primary/30 focus:ring-primary/10 rounded-xl p-6"
-                  />
-                </CardContent>
-              </Card>
+            {/* Orientações */}
+            <TabsContent value="orientacoes">
+              <GlassCard className="p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-accent" />
+                  </div>
+                  <NeonText as="h3" color="primary" className="font-semibold">
+                    Orientações ao Paciente
+                  </NeonText>
+                </div>
+                <Textarea
+                  value={orientacoesText}
+                  onChange={(e) => setOrientacoesText(e.target.value)}
+                  placeholder="Dicas de alimentação, lembretes, metas semanais, etc..."
+                  className="min-h-[300px] bg-background/50 border-border/50 focus:border-primary"
+                />
+              </GlassCard>
             </TabsContent>
           </Tabs>
         </main>

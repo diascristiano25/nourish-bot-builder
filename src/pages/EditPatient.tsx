@@ -6,15 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Plus, X, User, Activity, Heart, Scale, Save, AlertTriangle } from 'lucide-react';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { NeonText } from '@/components/ui/NeonText';
 import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
+import { ArrowLeft, Loader2, Plus, X, User, Activity, Heart, Scale, Save, AlertTriangle } from 'lucide-react';
 
 const commonAllergies = ['Glúten', 'Lactose', 'Amendoim', 'Nozes', 'Soja', 'Ovos', 'Frutos do mar', 'Mariscos'];
 const commonRestrictions = ['Vegetariano', 'Vegano', 'Sem carne vermelha', 'Kosher', 'Halal', 'Low carb', 'Cetogênica'];
+const criticalTagOptions = ['Gestante', 'Diabético', 'Cardiopata', 'Renal Crônico', 'Oncológico', 'Alérgico Grave', 'Idoso +80', 'Transtorno Alimentar'];
 
 export default function EditPatient() {
   const { id } = useParams<{ id: string }>();
@@ -24,7 +26,6 @@ export default function EditPatient() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Form state
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -38,7 +39,6 @@ export default function EditPatient() {
   const [notes, setNotes] = useState('');
   const [criticalTags, setCriticalTags] = useState<string[]>([]);
   
-  // Anthropometric measurements
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
   const [waist, setWaist] = useState('');
@@ -62,7 +62,6 @@ export default function EditPatient() {
 
   const fetchPatientData = async () => {
     try {
-      // Fetch patient data
       const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -84,7 +83,6 @@ export default function EditPatient() {
       setNotes(data.notes || '');
       setCriticalTags(data.critical_tags || []);
 
-      // Fetch latest anthropometric data
       const { data: anthroData } = await supabase
         .from('anthropometrics')
         .select('*')
@@ -128,6 +126,14 @@ export default function EditPatient() {
     );
   };
 
+  const toggleCriticalTag = (tag: string) => {
+    setCriticalTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  };
+
   const addCustomAllergy = () => {
     if (customAllergy.trim() && !allergies.includes(customAllergy.trim())) {
       setAllergies(prev => [...prev, customAllergy.trim()]);
@@ -157,7 +163,6 @@ export default function EditPatient() {
     setSaving(true);
 
     try {
-      // Update patient data
       const { error } = await supabase
         .from('patients')
         .update({
@@ -178,10 +183,8 @@ export default function EditPatient() {
 
       if (error) throw error;
 
-      // Save anthropometric data if any measurements provided
       const hasAnyMeasurement = weight || height || waist || hip || bodyFat;
       if (hasAnyMeasurement) {
-        // Create new anthropometric record
         await supabase
           .from('anthropometrics')
           .insert({
@@ -194,12 +197,10 @@ export default function EditPatient() {
             notes: 'Atualizado via edição de perfil',
           });
 
-        // Also update weight_logs for chart tracking
         if (weight) {
           const today = new Date().toISOString().split('T')[0];
           const weightValue = parseFloat(weight);
           
-          // Check if log exists for today
           const { data: existingLog } = await supabase
             .from('weight_logs')
             .select('id')
@@ -245,21 +246,31 @@ export default function EditPatient() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-muted-foreground animate-pulse">Carregando dados...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b">
+      {/* Cyber Header */}
+      <header className="sticky top-0 z-50 glass border-b border-border/50">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(`/patients/${id}`)}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate(`/patients/${id}`)}
+            className="hover:bg-primary/10"
+          >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="font-bold text-lg">Editar Paciente</h1>
+            <NeonText as="h1" color="primary" className="font-bold text-lg">
+              Editar Paciente
+            </NeonText>
             <p className="text-xs text-muted-foreground">Atualizar dados da anamnese</p>
           </div>
         </div>
@@ -268,19 +279,19 @@ export default function EditPatient() {
       <main className="container mx-auto px-4 py-6 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Dados Pessoais</CardTitle>
-                  <CardDescription>Informações básicas do paciente</CardDescription>
-                </div>
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <User className="w-5 h-5 text-primary" />
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              <div>
+                <NeonText as="h2" color="primary" className="font-semibold">
+                  Dados Pessoais
+                </NeonText>
+                <p className="text-xs text-muted-foreground">Informações básicas do paciente</p>
+              </div>
+            </div>
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="fullName">Nome completo *</Label>
                 <Input
@@ -288,6 +299,7 @@ export default function EditPatient() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Maria da Silva"
+                  className="bg-background/50 border-border/50 focus:border-primary"
                   required
                 />
               </div>
@@ -301,6 +313,7 @@ export default function EditPatient() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="paciente@email.com"
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
                 </div>
                 <div className="space-y-2">
@@ -310,6 +323,7 @@ export default function EditPatient() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(11) 99999-9999"
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
                 </div>
               </div>
@@ -322,15 +336,16 @@ export default function EditPatient() {
                     type="date"
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Sexo</Label>
                   <Select value={gender || undefined} onValueChange={setGender}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-background/50 border-border/50">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="glass border-border/50">
                       <SelectItem value="female">Feminino</SelectItem>
                       <SelectItem value="male">Masculino</SelectItem>
                       <SelectItem value="other">Outro</SelectItem>
@@ -338,23 +353,23 @@ export default function EditPatient() {
                   </Select>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
           {/* Anthropometric Measurements */}
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                  <Scale className="w-5 h-5 text-success" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Medidas Atuais</CardTitle>
-                  <CardDescription>Dados antropométricos (atualiza o histórico automaticamente)</CardDescription>
-                </div>
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+                <Scale className="w-5 h-5 text-success" />
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              <div>
+                <NeonText as="h2" color="primary" className="font-semibold">
+                  Medidas Atuais
+                </NeonText>
+                <p className="text-xs text-muted-foreground">Atualiza o histórico automaticamente</p>
+              </div>
+            </div>
+            <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="weight">Peso (kg)</Label>
@@ -365,6 +380,7 @@ export default function EditPatient() {
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                     placeholder="70.5"
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
                 </div>
                 <div className="space-y-2">
@@ -376,6 +392,7 @@ export default function EditPatient() {
                     value={height}
                     onChange={(e) => setHeight(e.target.value)}
                     placeholder="170"
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
                 </div>
               </div>
@@ -389,6 +406,7 @@ export default function EditPatient() {
                     value={waist}
                     onChange={(e) => setWaist(e.target.value)}
                     placeholder="80"
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
                 </div>
                 <div className="space-y-2">
@@ -400,6 +418,7 @@ export default function EditPatient() {
                     value={hip}
                     onChange={(e) => setHip(e.target.value)}
                     placeholder="95"
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
                 </div>
                 <div className="space-y-2">
@@ -411,33 +430,34 @@ export default function EditPatient() {
                     value={bodyFat}
                     onChange={(e) => setBodyFat(e.target.value)}
                     placeholder="20"
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
           {/* Goals & Activity */}
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-info" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Objetivo & Atividade</CardTitle>
-                  <CardDescription>Metas e nível de atividade física</CardDescription>
-                </div>
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center">
+                <Activity className="w-5 h-5 text-info" />
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              <div>
+                <NeonText as="h2" color="primary" className="font-semibold">
+                  Objetivo & Atividade
+                </NeonText>
+                <p className="text-xs text-muted-foreground">Metas e nível de atividade física</p>
+              </div>
+            </div>
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Objetivo</Label>
                 <Select value={goal || undefined} onValueChange={setGoal}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background/50 border-border/50">
                     <SelectValue placeholder="Selecione o objetivo" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="glass border-border/50">
                     <SelectItem value="hypertrophy">Hipertrofia</SelectItem>
                     <SelectItem value="weight_loss">Emagrecimento</SelectItem>
                     <SelectItem value="maintenance">Manutenção</SelectItem>
@@ -450,10 +470,10 @@ export default function EditPatient() {
               <div className="space-y-2">
                 <Label>Nível de Atividade Física</Label>
                 <Select value={activityLevel || undefined} onValueChange={setActivityLevel}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background/50 border-border/50">
                     <SelectValue placeholder="Selecione o nível" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="glass border-border/50">
                     <SelectItem value="sedentary">Sedentário</SelectItem>
                     <SelectItem value="light">Leve (1-2x/semana)</SelectItem>
                     <SelectItem value="moderate">Moderado (3-4x/semana)</SelectItem>
@@ -462,46 +482,55 @@ export default function EditPatient() {
                   </SelectContent>
                 </Select>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
           {/* Critical Tags */}
-          <Card className="border-0 shadow-md border-l-4 border-l-warning">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-warning" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Tags Críticas</CardTitle>
-                  <CardDescription>Alertas importantes que aparecem no cardápio</CardDescription>
-                </div>
+          <GlassCard className="p-6 border-destructive/30">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <CriticalTagsBadges 
-                tags={criticalTags} 
-                onChange={setCriticalTags} 
-                editable={true}
-                showLabel={false}
-              />
-            </CardContent>
-          </Card>
+              <div>
+                <NeonText as="h2" color="primary" className="font-semibold">
+                  Tags Críticas
+                </NeonText>
+                <p className="text-xs text-muted-foreground">Condições que requerem atenção especial</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {criticalTagOptions.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant={criticalTags.includes(tag) ? "destructive" : "outline"}
+                  className={`cursor-pointer transition-all ${
+                    criticalTags.includes(tag) 
+                      ? 'bg-destructive text-destructive-foreground' 
+                      : 'hover:border-destructive/50'
+                  }`}
+                  onClick={() => toggleCriticalTag(tag)}
+                >
+                  {tag}
+                  {criticalTags.includes(tag) && <X className="w-3 h-3 ml-1" />}
+                </Badge>
+              ))}
+            </div>
+          </GlassCard>
 
           {/* Health Info */}
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
-                  <Heart className="w-5 h-5 text-destructive" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Informações de Saúde</CardTitle>
-                  <CardDescription>Alergias, restrições e condições médicas</CardDescription>
-                </div>
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+                <Heart className="w-5 h-5 text-destructive" />
               </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
+              <div>
+                <NeonText as="h2" color="primary" className="font-semibold">
+                  Informações de Saúde
+                </NeonText>
+                <p className="text-xs text-muted-foreground">Alergias, restrições e condições médicas</p>
+              </div>
+            </div>
+            <div className="space-y-6">
               {/* Allergies */}
               <div className="space-y-3">
                 <Label>Alergias Alimentares</Label>
@@ -510,7 +539,11 @@ export default function EditPatient() {
                     <Badge
                       key={allergy}
                       variant={allergies.includes(allergy) ? "default" : "outline"}
-                      className="cursor-pointer transition-all"
+                      className={`cursor-pointer transition-all ${
+                        allergies.includes(allergy) 
+                          ? 'bg-destructive/20 text-destructive border-destructive/30' 
+                          : 'hover:border-primary/50'
+                      }`}
                       onClick={() => toggleAllergy(allergy)}
                     >
                       {allergy}
@@ -524,26 +557,12 @@ export default function EditPatient() {
                     value={customAllergy}
                     onChange={(e) => setCustomAllergy(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomAllergy())}
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
-                  <Button type="button" variant="outline" size="icon" onClick={addCustomAllergy}>
+                  <Button type="button" variant="outline" size="icon" onClick={addCustomAllergy} className="border-border/50">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
-                {allergies.filter(a => !commonAllergies.includes(a)).length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {allergies.filter(a => !commonAllergies.includes(a)).map((allergy) => (
-                      <Badge
-                        key={allergy}
-                        variant="default"
-                        className="cursor-pointer"
-                        onClick={() => toggleAllergy(allergy)}
-                      >
-                        {allergy}
-                        <X className="w-3 h-3 ml-1" />
-                      </Badge>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Dietary Restrictions */}
@@ -554,7 +573,11 @@ export default function EditPatient() {
                     <Badge
                       key={restriction}
                       variant={restrictions.includes(restriction) ? "secondary" : "outline"}
-                      className="cursor-pointer transition-all"
+                      className={`cursor-pointer transition-all ${
+                        restrictions.includes(restriction) 
+                          ? 'bg-secondary/50 text-secondary-foreground' 
+                          : 'hover:border-primary/50'
+                      }`}
                       onClick={() => toggleRestriction(restriction)}
                     >
                       {restriction}
@@ -568,8 +591,9 @@ export default function EditPatient() {
                     value={customRestriction}
                     onChange={(e) => setCustomRestriction(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomRestriction())}
+                    className="bg-background/50 border-border/50 focus:border-primary"
                   />
-                  <Button type="button" variant="outline" size="icon" onClick={addCustomRestriction}>
+                  <Button type="button" variant="outline" size="icon" onClick={addCustomRestriction} className="border-border/50">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
@@ -582,44 +606,39 @@ export default function EditPatient() {
                   id="medicalConditions"
                   value={medicalConditions}
                   onChange={(e) => setMedicalConditions(e.target.value)}
-                  placeholder="Diabetes, hipertensão, etc."
-                  rows={2}
+                  placeholder="Diabetes, hipertensão, hipotireoidismo..."
+                  className="bg-background/50 border-border/50 focus:border-primary min-h-[80px]"
                 />
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Notes */}
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg">Observações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Anotações gerais sobre o paciente..."
-                rows={3}
-              />
-            </CardContent>
-          </Card>
+              {/* Notes */}
+              <div className="space-y-2">
+                <Label htmlFor="notes">Observações Gerais</Label>
+                <Textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Preferências alimentares, rotina, observações..."
+                  className="bg-background/50 border-border/50 focus:border-primary min-h-[80px]"
+                />
+              </div>
+            </div>
+          </GlassCard>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <Button 
             type="submit" 
-            variant="hero" 
-            size="xl" 
-            className="w-full"
+            className="w-full gap-2 h-12 bg-gradient-to-r from-primary to-accent hover:opacity-90" 
             disabled={saving}
           >
             {saving ? (
               <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
                 Salvando...
               </>
             ) : (
               <>
-                <Save className="mr-2 h-5 w-5" />
+                <Save className="w-5 h-5" />
                 Salvar Alterações
               </>
             )}
