@@ -67,7 +67,7 @@ export function BodyFatChart({ data, showHeader = true, className }: BodyFatChar
           </div>
         )}
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+          <div className="w-12 h-12 rounded-xl bg-muted/50 border border-border flex items-center justify-center mb-3">
             <Percent className="w-6 h-6 text-muted-foreground/50" />
           </div>
           <p className="text-muted-foreground text-sm">Nenhum registro de gordura corporal</p>
@@ -172,7 +172,7 @@ export function BodyFatChart({ data, showHeader = true, className }: BodyFatChar
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="glass-strong rounded-xl px-4 py-3 border border-white/10 shadow-lg shadow-electric-violet/10">
+                    <div className="glass-strong rounded-xl px-4 py-3 border border-border shadow-lg shadow-electric-violet/10">
                       <p className="text-xs text-muted-foreground font-mono">{payload[0].payload.fullDate}</p>
                       <p className="text-lg font-bold text-electric-violet">{payload[0].value}%</p>
                     </div>

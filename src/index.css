@@ -706,13 +706,49 @@
     -webkit-user-select: none;
     user-select: none;
   }
+
+  /* ========================================
+     THEME-AWARE UTILITY CLASSES
+     ======================================== */
+  
+  /* Subtle background - dark mode: white/5, light mode: black/5 */
+  .bg-subtle {
+    @apply bg-black/5 dark:bg-white/5;
+  }
+
+  /* Subtle border - dark mode: white/10, light mode: black/10 */
+  .border-subtle {
+    @apply border-black/10 dark:border-white/10;
+  }
+
+  .border-subtle-20 {
+    @apply border-black/20 dark:border-white/20;
+  }
+
+  /* Input backgrounds */
+  .bg-input-subtle {
+    @apply bg-black/5 dark:bg-white/5;
+  }
+
+  /* Empty state containers */
+  .empty-state-icon {
+    @apply bg-muted/50 border border-border;
+  }
 }
 
 /* Global Styles */
 html, body {
   margin: 0;
   padding: 0;
+  background: hsl(var(--background));
+}
+
+.dark html, .dark body {
   background: hsl(220 20% 7%);
+}
+
+.light html, .light body {
+  background: hsl(210 20% 98%);
 }
 
 #root {

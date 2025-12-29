@@ -53,7 +53,7 @@ export function WeightChart({ data, showHeader = true, className }: WeightChartP
           </div>
         )}
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mb-4">
             <Scale className="w-8 h-8 text-muted-foreground/50" />
           </div>
           <p className="text-muted-foreground font-medium">Nenhum peso registrado ainda</p>

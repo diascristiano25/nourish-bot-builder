@@ -121,10 +121,10 @@ const Patients = () => {
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <BentoCard key={i} className="animate-pulse" interactive={false}>
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-white/5" />
+                    <div className="w-16 h-16 rounded-2xl bg-muted/50" />
                     <div className="flex-1 space-y-3">
-                      <div className="h-5 bg-white/5 rounded-lg w-3/4" />
-                      <div className="h-4 bg-white/5 rounded-lg w-1/2" />
+                      <div className="h-5 bg-muted/50 rounded-lg w-3/4" />
+                      <div className="h-4 bg-muted/50 rounded-lg w-1/2" />
                     </div>
                   </div>
                 </BentoCard>
@@ -132,7 +132,7 @@ const Patients = () => {
             </BentoGrid>
           ) : !filteredPatients || filteredPatients.length === 0 ? (
             <BentoCard className="py-20 text-center max-w-lg mx-auto" interactive={false}>
-              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-cyber-lime/10 to-electric-violet/10 border border-white/10 flex items-center justify-center mx-auto mb-8">
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-cyber-lime/10 to-electric-violet/10 border border-border flex items-center justify-center mx-auto mb-8">
                 <Users className="w-12 h-12 text-muted-foreground/50" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">

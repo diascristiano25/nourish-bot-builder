@@ -139,7 +139,7 @@ export default function Auth() {
         {/* Logo Section */}
         <div className="text-center mb-8">
           <div className="relative inline-block">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyber-lime/20 to-electric-violet/20 flex items-center justify-center mx-auto mb-4 border border-white/10 backdrop-blur-sm">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyber-lime/20 to-electric-violet/20 flex items-center justify-center mx-auto mb-4 border border-border backdrop-blur-sm">
               <img src={logoImg} alt="NutriFlow" className="w-12 h-12 object-contain" />
             </div>
             <div className="absolute -inset-2 bg-gradient-to-r from-cyber-lime/20 to-electric-violet/20 rounded-3xl blur-xl -z-10" />
