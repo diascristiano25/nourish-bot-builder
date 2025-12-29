@@ -34,7 +34,9 @@ import {
   Link,
   LineChart,
   Download,
-  MessageCircle
+  MessageCircle,
+  KeyRound,
+  UserCheck
 } from 'lucide-react';
 import { format, differenceInYears, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -275,6 +277,56 @@ export default function PatientDetail() {
 
   const handleGenerateMealPlan = () => {
     navigate(`/patients/${id}/meal-plan/generate`);
+  };
+
+  const handleGenerateAccess = async () => {
+    if (!patient?.email) {
+      toast({
+        title: "Email não cadastrado",
+        description: "Cadastre o email do paciente para liberar o acesso.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingMagicLink(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-patient-magic-link', {
+        body: {
+          patientEmail: patient.email,
+          patientId: patient.id,
+          redirectUrl: `${window.location.origin}/patient-portal`,
+        },
+      });
+
+      if (error) throw error;
+
+      const responseData = data as { success?: boolean; message?: string; userCreated?: boolean; emailSent?: boolean };
+
+      if (responseData?.userCreated) {
+        toast({
+          title: "Acesso liberado! ✨",
+          description: `Conta criada para ${patient.email}. ${responseData.emailSent ? 'Um link de acesso foi enviado por email.' : 'O paciente pode fazer login na página de pacientes.'}`,
+        });
+      } else {
+        toast({
+          title: "Link enviado!",
+          description: `Um email foi enviado para ${patient.email} com o link de acesso.`,
+        });
+      }
+      
+      // Refresh patient data to see the updated user_id
+      fetchPatientData();
+    } catch (error: any) {
+      console.error('Error generating access:', error);
+      toast({
+        title: "Erro ao gerar acesso",
+        description: error.message || "Não foi possível liberar o acesso. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingMagicLink(false);
+    }
   };
 
   const handleSendMagicLink = async () => {
@@ -571,6 +623,20 @@ export default function PatientDetail() {
         {/* Quick Actions */}
         <GlassCard className="p-4">
           <div className="flex flex-wrap items-center gap-3">
+            {/* Botão principal de gerar acesso - destacado */}
+            <Button 
+              onClick={handleGenerateAccess}
+              disabled={sendingMagicLink || !patient.email}
+              className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg"
+            >
+              {sendingMagicLink ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <KeyRound className="w-4 h-4" />
+              )}
+              Gerar Acesso ao Portal
+            </Button>
+            
             <Button 
               onClick={handleGenerateMealPlan}
               className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"

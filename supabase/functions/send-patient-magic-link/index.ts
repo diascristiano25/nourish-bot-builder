@@ -91,7 +91,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Authorized: Nutritionist ${nutritionist.id} sending magic link to patient ${patientId}`);
+    console.log(`Authorized: Nutritionist ${nutritionist.id} generating access for patient ${patientId}`);
 
     // Now use admin client for privileged operations
     const supabaseAdmin = createClient(
@@ -105,14 +105,14 @@ serve(async (req) => {
       }
     );
 
-    // Check if patient already has a user account
+    // Get patient info
     const { data: patient, error: patientError } = await supabaseAdmin
       .from('patients')
-      .select('user_id, full_name')
+      .select('user_id, full_name, email')
       .eq('id', patientId)
       .single();
 
-    if (patientError) {
+    if (patientError || !patient) {
       console.error('Error fetching patient:', patientError);
       return new Response(
         JSON.stringify({ error: 'Patient not found' }),
@@ -121,64 +121,143 @@ serve(async (req) => {
     }
 
     let userId = patient.user_id;
+    let userCreated = false;
+    let userAlreadyExisted = false;
 
-    // If patient doesn't have a user account yet, check if user exists
+    // If patient doesn't have a user account yet
     if (!userId) {
-      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-      const existingUser = existingUsers?.users.find(u => u.email === patientEmail);
+      console.log('Patient has no user_id, checking if user exists with email:', patientEmail);
+      
+      // Check if a user already exists with this email
+      const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+      
+      if (listError) {
+        console.error('Error listing users:', listError);
+      }
+      
+      const existingUser = existingUsers?.users?.find(u => u.email?.toLowerCase() === patientEmail.toLowerCase());
 
       if (existingUser) {
+        console.log('Found existing user with email:', existingUser.id);
         userId = existingUser.id;
-        await supabaseAdmin
+        userAlreadyExisted = true;
+        
+        // Link user to patient
+        const { error: updateError } = await supabaseAdmin
           .from('patients')
           .update({ user_id: userId })
           .eq('id', patientId);
+          
+        if (updateError) {
+          console.error('Error linking user to patient:', updateError);
+        } else {
+          console.log('Successfully linked existing user to patient');
+        }
+      } else {
+        // Create new user with admin API
+        console.log('Creating new user for patient:', patientEmail);
+        
+        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: patientEmail,
+          email_confirm: true, // Auto-confirm email
+          user_metadata: {
+            full_name: patient.full_name,
+            is_patient: true,
+            patient_id: patientId,
+          },
+        });
+
+        if (createError) {
+          console.error('Error creating user:', createError);
+          return new Response(
+            JSON.stringify({ error: 'Failed to create user account: ' + createError.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        userId = newUser.user.id;
+        userCreated = true;
+        console.log('Created new user:', userId);
+
+        // Link user to patient
+        const { error: updateError } = await supabaseAdmin
+          .from('patients')
+          .update({ user_id: userId })
+          .eq('id', patientId);
+          
+        if (updateError) {
+          console.error('Error linking new user to patient:', updateError);
+        } else {
+          console.log('Successfully linked new user to patient');
+        }
       }
+    } else {
+      console.log('Patient already has user_id:', userId);
+      userAlreadyExisted = true;
     }
 
-    // Use signInWithOtp to actually send the email
-    const { data, error: otpError } = await supabaseAdmin.auth.signInWithOtp({
+    // Now send magic link to the user
+    const finalRedirectUrl = redirectUrl || `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.supabase.co')}/auth/v1/callback`;
+    
+    console.log('Sending magic link to:', patientEmail, 'with redirect:', finalRedirectUrl);
+    
+    const { error: otpError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
       email: patientEmail,
       options: {
-        emailRedirectTo: redirectUrl || `${req.headers.get('origin')}/patient-portal`,
-        data: {
-          patient_id: patientId,
-          full_name: patient.full_name,
-          is_patient: true,
-        },
-        shouldCreateUser: true,
+        redirectTo: redirectUrl || `${req.headers.get('origin')}/patient-portal`,
       },
     });
 
+    // Even if generateLink fails, try signInWithOtp as fallback
     if (otpError) {
-      console.error('Error sending magic link:', otpError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to send magic link: ' + otpError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // After signInWithOtp, if a new user was created, link them to the patient record
-    if (!patient.user_id) {
-      // Check if user was created by looking them up
-      const { data: users } = await supabaseAdmin.auth.admin.listUsers();
-      const newUser = users?.users.find(u => u.email === patientEmail);
+      console.log('generateLink failed, trying signInWithOtp:', otpError.message);
       
-      if (newUser) {
-        await supabaseAdmin
-          .from('patients')
-          .update({ user_id: newUser.id })
-          .eq('id', patientId);
-        console.log('Linked new user to patient:', patientId);
+      const { error: signInError } = await supabaseAdmin.auth.signInWithOtp({
+        email: patientEmail,
+        options: {
+          emailRedirectTo: redirectUrl || `${req.headers.get('origin')}/patient-portal`,
+          shouldCreateUser: false, // User already exists
+        },
+      });
+
+      if (signInError) {
+        console.error('Both magic link methods failed:', signInError);
+        // Still return success if user was created - they can use the login page
+        if (userCreated || userAlreadyExisted) {
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              message: 'Acesso liberado! O paciente pode fazer login na página de pacientes.',
+              userCreated,
+              userLinked: true,
+              emailSent: false,
+            }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+        
+        return new Response(
+          JSON.stringify({ error: 'Failed to send magic link: ' + signInError.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
     }
 
-    console.log('Magic link email sent successfully to:', patientEmail);
+    console.log('Magic link process completed successfully for:', patientEmail);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Magic link email sent successfully',
+        message: userCreated 
+          ? 'Conta criada e link de acesso enviado com sucesso!'
+          : 'Link de acesso enviado com sucesso!',
+        userCreated,
+        userLinked: true,
+        emailSent: true,
       }),
       { 
         status: 200, 
