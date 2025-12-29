@@ -64,10 +64,15 @@ const genderLabels: Record<string, string> = {
   other: 'Outro',
 };
 
+// Magazine Style Colors
+const NEON_GREEN = '#DFFF00';
+const DEEP_ANTHRACITE = '#1a1a1f';
+const CARD_GRAY = '#2a2a32';
+const CARD_GRAY_LIGHT = '#32323c';
+const VIOLET = '#8b5cf6';
+
 const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentProps>(
   ({ patient, nutritionist, weightRecords, bodyFatRecords, latestMealPlan, currentWeight, initialWeight, currentBodyFat, initialBodyFat, height }, ref) => {
-    const primaryColor = nutritionist.primary_color || '#a3e635';
-    const secondaryColor = '#8b5cf6';
     
     const calculateBMI = () => {
       if (currentWeight && height) {
@@ -79,7 +84,7 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
 
     const getBMIClassification = (bmi: number) => {
       if (bmi < 18.5) return { label: 'Abaixo do peso', color: '#3B82F6' };
-      if (bmi < 25) return { label: 'Peso normal', color: '#a3e635' };
+      if (bmi < 25) return { label: 'Peso normal', color: NEON_GREEN };
       if (bmi < 30) return { label: 'Sobrepeso', color: '#F59E0B' };
       return { label: 'Obesidade', color: '#EF4444' };
     };
@@ -91,378 +96,416 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
     return (
       <div 
         ref={ref}
-        className="bg-[#0a0a0f] text-white p-8 min-w-[800px] max-w-[800px]"
-        style={{ fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif" }}
+        style={{ 
+          fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+          minWidth: '800px',
+          maxWidth: '800px',
+        }}
       >
-        {/* Premium Header */}
-        <div className="relative overflow-hidden rounded-2xl mb-8">
+        {/* ===== COVER PAGE - FULL PAGE ===== */}
+        <div 
+          style={{ 
+            background: DEEP_ANTHRACITE,
+            height: '1000px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            position: 'relative',
+            overflow: 'hidden',
+            pageBreakAfter: 'always',
+          }}
+        >
+          {/* Background Pattern */}
           <div 
-            className="absolute inset-0"
-            style={{ 
-              background: `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}20)`,
-            }}
-          />
-          <div 
-            className="absolute inset-0 opacity-5"
             style={{
-              backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)'
+              position: 'absolute',
+              inset: 0,
+              background: `
+                radial-gradient(circle at 20% 30%, ${NEON_GREEN}15 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, ${VIOLET}15 0%, transparent 50%)
+              `,
             }}
           />
           
-          <div className="relative p-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-5">
-                {nutritionist.logo_url && (
-                  <div 
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center p-2"
-                    style={{ background: `linear-gradient(135deg, ${primaryColor}30, ${secondaryColor}30)` }}
-                  >
-                    <img 
-                      src={nutritionist.logo_url} 
-                      alt="Logo" 
-                      className="max-h-16 object-contain"
-                    />
-                  </div>
-                )}
-                <div>
-                  <h1 
-                    className="text-3xl font-bold tracking-tight"
-                    style={{ color: primaryColor }}
-                  >
-                    {nutritionist.full_name}
-                  </h1>
-                  {nutritionist.crn && (
-                    <p className="text-white/60 mt-1 font-medium">{nutritionist.crn}</p>
-                  )}
-                  {nutritionist.phone && (
-                    <p className="text-white/40 text-sm">{nutritionist.phone}</p>
-                  )}
-                </div>
-              </div>
-              <div className="text-right">
+          {/* Geometric Lines */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, transparent, ${NEON_GREEN}, transparent)` }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, transparent, ${VIOLET}, transparent)` }} />
+
+          {/* Header with Logo */}
+          <div style={{ position: 'relative', zIndex: 10, padding: '48px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+              {nutritionist.logo_url ? (
                 <div 
-                  className="inline-block px-4 py-2 rounded-xl text-sm font-medium"
-                  style={{ background: `${secondaryColor}20`, color: secondaryColor }}
+                  style={{ 
+                    width: '80px', 
+                    height: '80px', 
+                    borderRadius: '20px',
+                    background: `linear-gradient(135deg, ${NEON_GREEN}30, ${VIOLET}30)`,
+                    border: `1px solid ${NEON_GREEN}40`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '12px',
+                  }}
                 >
-                  RELATÓRIO BIOLÓGICO
+                  <img 
+                    src={nutritionist.logo_url} 
+                    alt="Logo" 
+                    style={{ maxHeight: '60px', objectFit: 'contain' }}
+                  />
                 </div>
-                <p className="text-white/40 text-sm mt-2">
-                  {format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                </p>
+              ) : (
+                <div 
+                  style={{ 
+                    width: '80px', 
+                    height: '80px', 
+                    borderRadius: '20px',
+                    background: `linear-gradient(135deg, ${NEON_GREEN}30, ${VIOLET}30)`,
+                    border: `1px solid ${NEON_GREEN}40`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: NEON_GREEN,
+                  }}
+                >
+                  NF
+                </div>
+              )}
+              <div>
+                <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: NEON_GREEN, margin: 0 }}>
+                  {nutritionist.full_name}
+                </h2>
+                {nutritionist.crn && (
+                  <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', margin: '4px 0 0 0' }}>{nutritionist.crn}</p>
+                )}
+                {nutritionist.phone && (
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', margin: '4px 0 0 0' }}>{nutritionist.phone}</p>
+                )}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Patient Info */}
-        <div 
-          className="mb-8 pb-6"
-          style={{ borderBottom: `2px solid ${primaryColor}30` }}
-        >
-          <h2 
-            className="text-sm font-semibold uppercase tracking-wider mb-4"
-            style={{ color: primaryColor }}
-          >
-            ◆ Dados do Paciente
-          </h2>
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Nome</p>
-              <p className="text-xl font-semibold text-white">{patient.full_name}</p>
-            </div>
-            {patient.email && (
-              <div>
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">E-mail</p>
-                <p className="text-white/80">{patient.email}</p>
-              </div>
-            )}
-            {patient.birth_date && (
-              <div>
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Data de Nascimento</p>
-                <p className="text-white/80">{format(new Date(patient.birth_date), "d/MM/yyyy", { locale: ptBR })}</p>
-              </div>
-            )}
-            {patient.gender && (
-              <div>
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Sexo</p>
-                <p className="text-white/80">{genderLabels[patient.gender] || patient.gender}</p>
-              </div>
-            )}
+          {/* Main Title - GIANT NEON */}
+          <div style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 48px' }}>
+            <p style={{ 
+              color: NEON_GREEN, 
+              fontSize: '14px', 
+              fontWeight: '600', 
+              letterSpacing: '0.3em', 
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+            }}>
+              Relatório de Evolução
+            </p>
+            
+            <h1 style={{ 
+              fontSize: '72px', 
+              fontWeight: 'bold', 
+              color: 'white', 
+              textAlign: 'center',
+              margin: 0,
+              lineHeight: 1.1,
+              textShadow: `0 0 60px ${NEON_GREEN}40`,
+            }}>
+              {patient.full_name}
+            </h1>
+            
+            <div style={{ 
+              width: '120px', 
+              height: '4px', 
+              background: `linear-gradient(90deg, ${NEON_GREEN}, ${VIOLET})`,
+              borderRadius: '2px',
+              marginTop: '32px',
+            }} />
+            
             {patient.goal && (
-              <div>
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Objetivo</p>
-                <p style={{ color: primaryColor }} className="font-medium">
-                  {goalLabels[patient.goal] || patient.goal}
-                </p>
-              </div>
+              <p style={{ 
+                color: VIOLET, 
+                fontSize: '24px', 
+                fontWeight: '300',
+                marginTop: '24px',
+              }}>
+                {goalLabels[patient.goal] || patient.goal}
+              </p>
             )}
           </div>
-        </div>
 
-        {/* Evolution Summary - Bio-Metrics */}
-        <div 
-          className="rounded-2xl p-6 mb-8"
-          style={{ 
-            background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.05), rgba(139, 92, 246, 0.05))',
-            border: `1px solid ${primaryColor}20`
-          }}
-        >
-          <h3 
-            className="text-sm font-semibold uppercase tracking-wider mb-6"
-            style={{ color: primaryColor }}
-          >
-            ◆ Métricas Biológicas
-          </h3>
-          <div className="grid grid-cols-4 gap-4">
-            <div 
-              className="text-center p-4 rounded-xl"
-              style={{ background: `${primaryColor}10`, border: `1px solid ${primaryColor}20` }}
-            >
-              <div 
-                className="text-3xl font-bold font-mono"
-                style={{ color: primaryColor }}
-              >
-                {currentWeight || '—'}
-              </div>
-              <p className="text-white/50 text-xs mt-1 uppercase tracking-wider">Peso (kg)</p>
-            </div>
-            <div 
-              className="text-center p-4 rounded-xl"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
-            >
-              <div className="text-3xl font-bold font-mono text-white/80">{height || '—'}</div>
-              <p className="text-white/50 text-xs mt-1 uppercase tracking-wider">Altura (cm)</p>
-            </div>
-            <div 
-              className="text-center p-4 rounded-xl"
-              style={{ 
-                background: bmiInfo ? `${bmiInfo.color}10` : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${bmiInfo?.color || 'rgba(255,255,255,0.05)'}20`
-              }}
-            >
-              <div 
-                className="text-3xl font-bold font-mono"
-                style={{ color: bmiInfo?.color || 'rgba(255,255,255,0.8)' }}
-              >
-                {bmi || '—'}
-              </div>
-              <p className="text-white/50 text-xs mt-1 uppercase tracking-wider">
-                IMC {bmiInfo?.label && <span className="normal-case">({bmiInfo.label})</span>}
+          {/* Footer */}
+          <div style={{ position: 'relative', zIndex: 10, padding: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <div>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Data do Relatório</p>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', margin: 0 }}>
+                {format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </p>
             </div>
-            <div 
-              className="text-center p-4 rounded-xl"
-              style={{ 
-                background: weightDiff && weightDiff < 0 ? 'rgba(163, 230, 53, 0.1)' : weightDiff && weightDiff > 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${weightDiff && weightDiff < 0 ? 'rgba(163, 230, 53, 0.2)' : weightDiff && weightDiff > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.05)'}`
-              }}
-            >
-              <div 
-                className="text-3xl font-bold font-mono"
-                style={{ color: weightDiff && weightDiff < 0 ? '#a3e635' : weightDiff && weightDiff > 0 ? '#EF4444' : 'rgba(255,255,255,0.6)' }}
-              >
-                {weightDiff !== null ? (weightDiff > 0 ? '+' : '') + weightDiff.toFixed(1) : '—'}
-              </div>
-              <p className="text-white/50 text-xs mt-1 uppercase tracking-wider">Variação (kg)</p>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Peso Atual</p>
+              <p style={{ 
+                fontSize: '36px', 
+                fontWeight: 'bold', 
+                fontFamily: 'monospace',
+                color: NEON_GREEN,
+                margin: 0,
+              }}>
+                {currentWeight || '—'}
+                <span style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)', marginLeft: '8px' }}>kg</span>
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Before/After Comparison */}
-        {initialWeight && currentWeight && (
+        {/* ===== CONTENT PAGE ===== */}
+        <div style={{ background: DEEP_ANTHRACITE, padding: '48px', color: 'white' }}>
+          
+          {/* Patient Info Card */}
           <div 
-            className="mb-8 p-6 rounded-xl"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+            style={{ 
+              background: CARD_GRAY, 
+              borderRadius: '20px', 
+              padding: '24px',
+              marginBottom: '24px',
+            }}
           >
-            <h3 
-              className="text-sm font-semibold uppercase tracking-wider mb-6"
-              style={{ color: secondaryColor }}
-            >
-              ◆ Evolução de Peso
+            <h3 style={{ color: NEON_GREEN, fontSize: '12px', fontWeight: '600', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 0, marginBottom: '20px' }}>
+              ◆ Dados do Paciente
             </h3>
-            <div className="flex items-center justify-around">
-              <div className="text-center">
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Peso Inicial</p>
-                <p className="text-4xl font-bold font-mono text-white/60">{initialWeight} kg</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>Nome</p>
+                <p style={{ color: 'white', fontSize: '16px', fontWeight: '500', margin: 0 }}>{patient.full_name}</p>
               </div>
-              <div 
-                className="text-4xl px-6"
-                style={{ color: primaryColor }}
-              >
-                →
-              </div>
-              <div className="text-center">
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Peso Atual</p>
-                <p 
-                  className="text-4xl font-bold font-mono"
-                  style={{ color: primaryColor }}
-                >
-                  {currentWeight} kg
-                </p>
-              </div>
-              <div 
-                className="text-center p-5 rounded-xl"
-                style={{ 
-                  background: weightDiff && weightDiff < 0 ? 'rgba(163, 230, 53, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                }}
-              >
-                <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Resultado</p>
-                <p 
-                  className="text-3xl font-bold font-mono"
-                  style={{ color: weightDiff && weightDiff < 0 ? '#a3e635' : '#EF4444' }}
-                >
-                  {weightDiff && weightDiff < 0 ? '' : '+'}{weightDiff?.toFixed(1)} kg
-                </p>
-              </div>
+              {patient.email && (
+                <div>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>E-mail</p>
+                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0 }}>{patient.email}</p>
+                </div>
+              )}
+              {patient.birth_date && (
+                <div>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>Nascimento</p>
+                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0 }}>{format(new Date(patient.birth_date), "d/MM/yyyy", { locale: ptBR })}</p>
+                </div>
+              )}
+              {patient.gender && (
+                <div>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>Sexo</p>
+                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0 }}>{genderLabels[patient.gender] || patient.gender}</p>
+                </div>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Body Fat Evolution */}
-        {initialBodyFat !== undefined && currentBodyFat !== undefined && (
-          <div 
-            className="mb-8 p-6 rounded-xl"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
-          >
-            <h3 
-              className="text-sm font-semibold uppercase tracking-wider mb-6"
-              style={{ color: secondaryColor }}
-            >
-              ◆ Evolução do Percentual de Gordura
-            </h3>
-            <div className="flex items-center justify-around">
-              <div className="text-center">
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">% Inicial</p>
-                <p className="text-3xl font-bold font-mono text-white/60">{initialBodyFat}%</p>
-              </div>
-              <div 
-                className="text-3xl px-6"
-                style={{ color: primaryColor }}
-              >
-                →
-              </div>
-              <div className="text-center">
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">% Atual</p>
-                <p 
-                  className="text-3xl font-bold font-mono"
-                  style={{ color: primaryColor }}
-                >
-                  {currentBodyFat}%
-                </p>
-              </div>
-              <div 
-                className="text-center p-4 rounded-xl"
-                style={{ 
-                  background: (currentBodyFat - initialBodyFat) < 0 ? 'rgba(163, 230, 53, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                }}
-              >
-                <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Diferença</p>
-                <p 
-                  className="text-2xl font-bold font-mono"
-                  style={{ color: (currentBodyFat - initialBodyFat) < 0 ? '#a3e635' : '#EF4444' }}
-                >
-                  {(currentBodyFat - initialBodyFat) < 0 ? '' : '+'}
-                  {(currentBodyFat - initialBodyFat).toFixed(1)}%
-                </p>
-              </div>
+          {/* Bio-Metrics Cards Grid */}
+          <h3 style={{ color: NEON_GREEN, fontSize: '12px', fontWeight: '600', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>
+            ◆ Métricas Biológicas
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ background: CARD_GRAY, borderRadius: '16px', padding: '20px', textAlign: 'center', border: `1px solid ${NEON_GREEN}30` }}>
+              <p style={{ fontSize: '32px', fontWeight: 'bold', fontFamily: 'monospace', color: NEON_GREEN, margin: 0 }}>{currentWeight || '—'}</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginTop: '8px', marginBottom: 0 }}>Peso (kg)</p>
+            </div>
+            <div style={{ background: CARD_GRAY, borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+              <p style={{ fontSize: '32px', fontWeight: 'bold', fontFamily: 'monospace', color: 'rgba(255,255,255,0.7)', margin: 0 }}>{height || '—'}</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginTop: '8px', marginBottom: 0 }}>Altura (cm)</p>
+            </div>
+            <div style={{ background: CARD_GRAY, borderRadius: '16px', padding: '20px', textAlign: 'center', border: bmiInfo ? `1px solid ${bmiInfo.color}30` : undefined }}>
+              <p style={{ fontSize: '32px', fontWeight: 'bold', fontFamily: 'monospace', color: bmiInfo?.color || 'rgba(255,255,255,0.7)', margin: 0 }}>{bmi || '—'}</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginTop: '8px', marginBottom: 0 }}>
+                IMC {bmiInfo && <span style={{ textTransform: 'none' }}>({bmiInfo.label})</span>}
+              </p>
+            </div>
+            <div style={{ 
+              background: weightDiff && weightDiff < 0 ? `${NEON_GREEN}15` : weightDiff && weightDiff > 0 ? 'rgba(239,68,68,0.15)' : CARD_GRAY, 
+              borderRadius: '16px', 
+              padding: '20px', 
+              textAlign: 'center',
+              border: weightDiff ? `1px solid ${weightDiff < 0 ? NEON_GREEN : '#EF4444'}30` : undefined,
+            }}>
+              <p style={{ 
+                fontSize: '32px', 
+                fontWeight: 'bold', 
+                fontFamily: 'monospace', 
+                color: weightDiff && weightDiff < 0 ? NEON_GREEN : weightDiff && weightDiff > 0 ? '#EF4444' : 'rgba(255,255,255,0.5)', 
+                margin: 0 
+              }}>
+                {weightDiff !== null ? (weightDiff > 0 ? '+' : '') + weightDiff.toFixed(1) : '—'}
+              </p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginTop: '8px', marginBottom: 0 }}>Variação (kg)</p>
             </div>
           </div>
-        )}
 
-        {/* Weight History Table */}
-        {weightRecords.length > 0 && (
-          <div className="mb-8">
-            <h3 
-              className="text-sm font-semibold uppercase tracking-wider mb-4"
-              style={{ color: primaryColor }}
-            >
-              ◆ Histórico de Pesagens
-            </h3>
-            <table className="w-full">
-              <thead>
-                <tr 
-                  className="text-xs uppercase tracking-wider"
-                  style={{ background: `${primaryColor}10` }}
-                >
-                  <th className="p-3 text-left text-white/60 font-medium rounded-tl-xl">Data</th>
-                  <th className="p-3 text-right text-white/60 font-medium">Peso (kg)</th>
-                  <th className="p-3 text-right text-white/60 font-medium rounded-tr-xl">Variação</th>
-                </tr>
-              </thead>
-              <tbody>
-                {weightRecords.slice(0, 10).map((record, index) => {
+          {/* Weight Evolution Card */}
+          {initialWeight && currentWeight && (
+            <div style={{ background: CARD_GRAY, borderRadius: '20px', padding: '24px', marginBottom: '24px' }}>
+              <h3 style={{ color: VIOLET, fontSize: '12px', fontWeight: '600', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 0, marginBottom: '24px' }}>
+                ◆ Evolução de Peso
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '8px' }}>Peso Inicial</p>
+                  <p style={{ fontSize: '36px', fontWeight: 'bold', fontFamily: 'monospace', color: 'rgba(255,255,255,0.5)', margin: 0 }}>{initialWeight} kg</p>
+                </div>
+                <div style={{ fontSize: '36px', color: NEON_GREEN, padding: '0 24px' }}>→</div>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '8px' }}>Peso Atual</p>
+                  <p style={{ fontSize: '36px', fontWeight: 'bold', fontFamily: 'monospace', color: NEON_GREEN, margin: 0 }}>{currentWeight} kg</p>
+                </div>
+                <div style={{ 
+                  background: weightDiff && weightDiff < 0 ? `${NEON_GREEN}20` : 'rgba(239,68,68,0.2)',
+                  borderRadius: '16px',
+                  padding: '16px 24px',
+                  textAlign: 'center',
+                }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>Resultado</p>
+                  <p style={{ 
+                    fontSize: '28px', 
+                    fontWeight: 'bold', 
+                    fontFamily: 'monospace', 
+                    color: weightDiff && weightDiff < 0 ? NEON_GREEN : '#EF4444',
+                    margin: 0,
+                  }}>
+                    {weightDiff && weightDiff < 0 ? '' : '+'}{weightDiff?.toFixed(1)} kg
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Body Fat Evolution Card */}
+          {initialBodyFat !== undefined && currentBodyFat !== undefined && (
+            <div style={{ background: CARD_GRAY, borderRadius: '20px', padding: '24px', marginBottom: '24px' }}>
+              <h3 style={{ color: VIOLET, fontSize: '12px', fontWeight: '600', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 0, marginBottom: '24px' }}>
+                ◆ Evolução do Percentual de Gordura
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '8px' }}>% Inicial</p>
+                  <p style={{ fontSize: '28px', fontWeight: 'bold', fontFamily: 'monospace', color: 'rgba(255,255,255,0.5)', margin: 0 }}>{initialBodyFat}%</p>
+                </div>
+                <div style={{ fontSize: '28px', color: NEON_GREEN, padding: '0 24px' }}>→</div>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '8px' }}>% Atual</p>
+                  <p style={{ fontSize: '28px', fontWeight: 'bold', fontFamily: 'monospace', color: NEON_GREEN, margin: 0 }}>{currentBodyFat}%</p>
+                </div>
+                <div style={{ 
+                  background: (currentBodyFat - initialBodyFat) < 0 ? `${NEON_GREEN}20` : 'rgba(239,68,68,0.2)',
+                  borderRadius: '16px',
+                  padding: '12px 20px',
+                  textAlign: 'center',
+                }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>Diferença</p>
+                  <p style={{ 
+                    fontSize: '24px', 
+                    fontWeight: 'bold', 
+                    fontFamily: 'monospace', 
+                    color: (currentBodyFat - initialBodyFat) < 0 ? NEON_GREEN : '#EF4444',
+                    margin: 0,
+                  }}>
+                    {(currentBodyFat - initialBodyFat) < 0 ? '' : '+'}
+                    {(currentBodyFat - initialBodyFat).toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Weight History - Card Style (no black borders) */}
+          {weightRecords.length > 0 && (
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ color: NEON_GREEN, fontSize: '12px', fontWeight: '600', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>
+                ◆ Histórico de Pesagens
+              </h3>
+              <div style={{ background: CARD_GRAY, borderRadius: '20px', overflow: 'hidden' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: CARD_GRAY_LIGHT, padding: '12px 20px' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Data</span>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'right' }}>Peso</span>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'right' }}>Variação</span>
+                </div>
+                {weightRecords.slice(0, 8).map((record, index) => {
                   const prevWeight = weightRecords[index + 1]?.weight;
                   const variation = prevWeight ? record.weight - prevWeight : null;
                   return (
-                    <tr 
+                    <div 
                       key={index} 
-                      style={{ borderBottom: `1px solid ${primaryColor}10` }}
+                      style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: '1fr 1fr 1fr', 
+                        padding: '12px 20px',
+                        background: index % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)',
+                      }}
                     >
-                      <td className="p-3 text-white/80">
+                      <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
                         {format(new Date(record.recorded_at), "d/MM/yyyy", { locale: ptBR })}
-                      </td>
-                      <td className="p-3 text-right font-mono font-medium text-white">{record.weight}</td>
-                      <td 
-                        className="p-3 text-right font-mono font-medium"
-                        style={{ color: variation && variation < 0 ? '#a3e635' : variation && variation > 0 ? '#EF4444' : 'rgba(255,255,255,0.4)' }}
-                      >
+                      </span>
+                      <span style={{ color: 'white', fontSize: '14px', fontFamily: 'monospace', fontWeight: '500', textAlign: 'right' }}>
+                        {record.weight} kg
+                      </span>
+                      <span style={{ 
+                        fontSize: '14px', 
+                        fontFamily: 'monospace', 
+                        fontWeight: '500', 
+                        textAlign: 'right',
+                        color: variation && variation < 0 ? NEON_GREEN : variation && variation > 0 ? '#EF4444' : 'rgba(255,255,255,0.3)',
+                      }}>
                         {variation !== null ? (variation > 0 ? '+' : '') + variation.toFixed(1) : '—'}
-                      </td>
-                    </tr>
+                      </span>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Latest Meal Plan Summary */}
-        {latestMealPlan && (
-          <div 
-            className="mb-8 p-6 rounded-xl"
-            style={{ border: `1px solid ${secondaryColor}30`, background: `${secondaryColor}05` }}
-          >
-            <h3 
-              className="text-sm font-semibold uppercase tracking-wider mb-4"
-              style={{ color: secondaryColor }}
-            >
-              ◆ Último Plano: {latestMealPlan.title}
-            </h3>
-            {latestMealPlan.total_calories && (
-              <p className="text-white/70 mb-3">
-                <span className="text-white/40">Meta calórica:</span>{' '}
-                <span className="font-mono font-bold" style={{ color: primaryColor }}>
-                  {latestMealPlan.total_calories} kcal/dia
-                </span>
-              </p>
-            )}
-            {latestMealPlan.plan_data?.meals && (
-              <div className="space-y-2">
-                {latestMealPlan.plan_data.meals.map((meal: any, index: number) => (
-                  <div 
-                    key={index} 
-                    className="flex justify-between items-center py-2"
-                    style={{ borderBottom: `1px solid ${secondaryColor}10` }}
-                  >
-                    <span className="text-white/80">{meal.name}</span>
-                    <span className="font-mono text-sm" style={{ color: primaryColor }}>
-                      {meal.totalCalories || 0} kcal
-                    </span>
-                  </div>
-                ))}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Footer */}
-        <div className="mt-10 pt-6 text-center" style={{ borderTop: `1px solid ${primaryColor}10` }}>
-          <p className="text-white/30 text-xs">
-            Relatório gerado automaticamente por <span style={{ color: primaryColor }}>NutriFlow</span>
-          </p>
-          <p className="text-white/20 text-xs mt-1">
-            Este documento é de uso profissional e não substitui avaliação presencial.
-          </p>
+          {/* Latest Meal Plan Card */}
+          {latestMealPlan && (
+            <div style={{ background: CARD_GRAY, borderRadius: '20px', padding: '24px', border: `1px solid ${VIOLET}30` }}>
+              <h3 style={{ color: VIOLET, fontSize: '12px', fontWeight: '600', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 0, marginBottom: '16px' }}>
+                ◆ Plano Atual: {latestMealPlan.title}
+              </h3>
+              {latestMealPlan.total_calories && (
+                <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '16px' }}>
+                  Meta calórica:{' '}
+                  <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: NEON_GREEN, fontSize: '18px' }}>
+                    {latestMealPlan.total_calories} kcal/dia
+                  </span>
+                </p>
+              )}
+              {latestMealPlan.plan_data?.meals && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  {latestMealPlan.plan_data.meals.map((meal: any, index: number) => (
+                    <div 
+                      key={index}
+                      style={{
+                        background: CARD_GRAY_LIGHT,
+                        borderRadius: '12px',
+                        padding: '12px 16px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px' }}>{meal.name}</span>
+                      <span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: '600', color: NEON_GREEN }}>
+                        {meal.totalCalories || 0} kcal
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: `1px solid ${NEON_GREEN}20`, textAlign: 'center' }}>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>
+              Relatório gerado por <span style={{ color: NEON_GREEN }}>NutriFlow</span>
+            </p>
+            <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px', marginTop: '4px' }}>
+              Documento de uso profissional • Não substitui avaliação presencial
+            </p>
+          </div>
         </div>
       </div>
     );
