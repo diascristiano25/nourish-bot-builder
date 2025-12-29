@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { AppLayout } from '@/components/AppLayout';
 import { SupportDialog } from '@/components/SupportDialog';
 import { OnboardingTour } from '@/components/OnboardingTour';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { NeonText } from '@/components/ui/NeonText';
 import { 
   Plus, 
   Users, 
@@ -22,7 +23,9 @@ import {
   TrendingUp,
   DollarSign,
   Activity,
-  FileText
+  FileText,
+  Sparkles,
+  Zap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
@@ -151,7 +154,6 @@ export default function Dashboard() {
       if (profileData || profile) {
         const nutritionistId = profileData?.id || profile?.id;
         
-        // Fetch patients
         const { data: patientsData, error: patientsError } = await supabase
           .from('patients')
           .select('id, full_name, email, goal, created_at')
@@ -161,7 +163,6 @@ export default function Dashboard() {
         if (patientsError) throw patientsError;
         setPatients(patientsData || []);
 
-        // Fetch upcoming appointments
         const { data: appointmentsData, error: appointmentsError } = await supabase
           .from('appointments')
           .select(`
@@ -183,7 +184,6 @@ export default function Dashboard() {
         }));
         setAppointments(formattedAppointments as Appointment[]);
 
-        // Fetch monthly appointments count
         const now = new Date();
         const monthStart = startOfMonth(now).toISOString();
         const monthEnd = endOfMonth(now).toISOString();
@@ -197,7 +197,6 @@ export default function Dashboard() {
 
         setMonthlyAppointments(monthlyCount || 0);
 
-        // Fetch estimated revenue from financial_records
         const { data: revenueData } = await supabase
           .from('financial_records')
           .select('amount')
@@ -209,7 +208,6 @@ export default function Dashboard() {
         const totalRevenue = revenueData?.reduce((sum, r) => sum + r.amount, 0) || 0;
         setEstimatedRevenue(totalRevenue);
 
-        // Fetch real chart data - appointments for last 6 months
         const chartMonths: ChartDataPoint[] = [];
         const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
         
@@ -250,10 +248,10 @@ export default function Dashboard() {
   if (authLoading || loading || !prefsLoaded) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-500 mx-auto mb-4" />
-            <p className="text-sm text-slate-500 font-medium">Carregando...</p>
+            <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-sm text-muted-foreground font-medium">Carregando...</p>
           </div>
         </div>
       </AppLayout>
@@ -278,15 +276,20 @@ export default function Dashboard() {
     <AppLayout>
       {profile && <OnboardingTour nutritionistId={profile.id} />}
       
-      <div className="min-h-screen bg-slate-50">
-        {/* Elite Header */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+      <div className="min-h-screen bg-background relative">
+        {/* Background Effects */}
+        <div className="absolute inset-0 cyber-grid opacity-5 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] orb-neon opacity-10 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] orb-violet opacity-10 pointer-events-none" />
+
+        {/* Header */}
+        <header className="sticky top-0 z-30 glass-strong border-b border-border/30">
           <div className="px-6 lg:px-8 h-16 flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold text-slate-800 tracking-tight">
-                {getGreeting()}, {profile ? getFirstName(profile.full_name) : 'Nutricionista'}
+              <h1 className="text-xl font-semibold text-foreground tracking-tight">
+                {getGreeting()}, <NeonText variant="lime">{profile ? getFirstName(profile.full_name) : 'Nutricionista'}</NeonText>
               </h1>
-              <p className="text-sm text-slate-500">Vamos transformar vidas hoje.</p>
+              <p className="text-sm text-muted-foreground">Vamos transformar vidas hoje.</p>
             </div>
             <div className="flex items-center gap-2">
               {profile && <SupportDialog nutritionistId={profile.id} />}
@@ -295,7 +298,7 @@ export default function Dashboard() {
                 variant={zenMode ? "default" : "outline"}
                 size="sm"
                 onClick={() => setZenMode(!zenMode)}
-                className="rounded-xl gap-2 h-9 px-4 text-sm font-medium border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                className="rounded-xl gap-2 h-9 px-4 text-sm font-medium border-border/50 hover:border-primary/50 hover:bg-muted"
                 data-tour="zen-mode"
               >
                 {zenMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -304,22 +307,22 @@ export default function Dashboard() {
               
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-xl gap-2 h-9 px-4 text-sm font-medium border-slate-200 hover:border-slate-300 hover:bg-slate-50" data-tour="customize-dashboard">
+                  <Button variant="outline" size="sm" className="rounded-xl gap-2 h-9 px-4 text-sm font-medium border-border/50 hover:border-primary/50 hover:bg-muted" data-tour="customize-dashboard">
                     <Settings2 className="w-4 h-4" />
                     <span className="hidden sm:inline">Personalizar</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="bg-white border-slate-200">
+                <SheetContent className="bg-background border-border">
                   <SheetHeader>
-                    <SheetTitle className="text-slate-800">Personalizar Dashboard</SheetTitle>
-                    <SheetDescription className="text-slate-500">
+                    <SheetTitle className="text-foreground">Personalizar Dashboard</SheetTitle>
+                    <SheetDescription className="text-muted-foreground">
                       Escolha quais widgets exibir
                     </SheetDescription>
                   </SheetHeader>
                   <div className="mt-6 space-y-4">
                     {(Object.keys(preferences) as Array<keyof WidgetPreferences>).map((key) => (
-                      <div key={key} className="flex items-center justify-between py-3 border-b border-slate-100">
-                        <span className="text-sm font-medium text-slate-700">{widgetLabels[key]}</span>
+                      <div key={key} className="flex items-center justify-between py-3 border-b border-border/30">
+                        <span className="text-sm font-medium text-foreground">{widgetLabels[key]}</span>
                         <Switch
                           checked={preferences[key]}
                           onCheckedChange={(checked) => updatePreference(key, checked)}
@@ -333,100 +336,92 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <main className="p-6 lg:p-8">
-          {/* Elite Stat Cards */}
+        <main className="p-6 lg:p-8 relative z-10">
+          {/* Data Tiles - Bento Style */}
           {!zenMode && preferences.stats && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-fade-in">
-              <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-emerald-500" />
-                    </div>
-                    <span className="text-xs font-medium text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">+12%</span>
+              <GlassCard className="p-5 data-tile" glow="lime" hover>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-primary" />
                   </div>
-                  <p className="text-2xl lg:text-3xl font-bold text-slate-800">{patients.length}</p>
-                  <p className="text-xs text-slate-500 mt-1 font-medium">Total de Pacientes</p>
-                </CardContent>
-              </Card>
+                  <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">+12%</span>
+                </div>
+                <p className="text-2xl lg:text-3xl font-bold text-foreground">{patients.length}</p>
+                <p className="text-xs text-muted-foreground mt-1 font-medium">Total de Pacientes</p>
+              </GlassCard>
               
-              <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-blue-500" />
-                    </div>
+              <GlassCard className="p-5 data-tile" glow="violet" hover>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-secondary" />
                   </div>
-                  <p className="text-2xl lg:text-3xl font-bold text-slate-800">{monthlyAppointments}</p>
-                  <p className="text-xs text-slate-500 mt-1 font-medium">Consultas do Mês</p>
-                </CardContent>
-              </Card>
+                </div>
+                <p className="text-2xl lg:text-3xl font-bold text-foreground">{monthlyAppointments}</p>
+                <p className="text-xs text-muted-foreground mt-1 font-medium">Consultas do Mês</p>
+              </GlassCard>
               
-              <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-                      <Activity className="w-5 h-5 text-purple-500" />
-                    </div>
+              <GlassCard className="p-5 data-tile" glow="lime" hover>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-info/20 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-info" />
                   </div>
-                  <p className="text-2xl lg:text-3xl font-bold text-slate-800">78%</p>
-                  <p className="text-xs text-slate-500 mt-1 font-medium">Taxa de Adesão</p>
-                </CardContent>
-              </Card>
+                </div>
+                <p className="text-2xl lg:text-3xl font-bold text-foreground">78%</p>
+                <p className="text-xs text-muted-foreground mt-1 font-medium">Taxa de Adesão</p>
+              </GlassCard>
               
-              <Card className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                      <DollarSign className="w-5 h-5 text-amber-500" />
-                    </div>
-                    <TrendingUp className="w-4 h-4 text-emerald-500" />
+              <GlassCard className="p-5 data-tile" glow="lime" hover>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-warning" />
                   </div>
-                  <p className="text-2xl lg:text-3xl font-bold text-slate-800">
-                    R$ {estimatedRevenue.toLocaleString('pt-BR')}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1 font-medium">Faturamento Estimado</p>
-                </CardContent>
-              </Card>
+                  <TrendingUp className="w-4 h-4 text-success" />
+                </div>
+                <p className="text-2xl lg:text-3xl font-bold text-foreground">
+                  R$ {estimatedRevenue.toLocaleString('pt-BR')}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 font-medium">Faturamento Estimado</p>
+              </GlassCard>
             </div>
           )}
 
           {/* Chart Section */}
           {!zenMode && preferences.stats && (
-            <Card className="bg-white rounded-2xl border-0 shadow-sm mb-8 animate-fade-in overflow-hidden" style={{ animationDelay: '0.1s' }}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-500" />
+            <GlassCard className="mb-8 animate-fade-in overflow-hidden" glow="lime" style={{ animationDelay: '0.1s' }}>
+              <div className="p-6 pb-2">
+                <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-primary" />
                   Evolução de Atendimentos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 overflow-hidden">
+                </h3>
+              </div>
+              <div className="px-6 pb-6 pt-4 overflow-hidden">
                 <div className="h-[200px] lg:h-[280px] w-full overflow-hidden">
                   <ChartContainer config={chartConfig}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorAtendimentos" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="hsl(68, 100%, 50%)" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="hsl(68, 100%, 50%)" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
                         <XAxis 
                           dataKey="month" 
                           axisLine={false} 
                           tickLine={false} 
-                          tick={{ fill: '#94A3B8', fontSize: 12 }}
+                          tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                         />
                         <YAxis 
                           axisLine={false} 
                           tickLine={false} 
-                          tick={{ fill: '#94A3B8', fontSize: 12 }}
+                          tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                         />
                         <ChartTooltip content={<ChartTooltipContent />} />
                         <Area
                           type="monotone"
                           dataKey="atendimentos"
-                          stroke="#10B981"
+                          stroke="hsl(68, 100%, 50%)"
                           strokeWidth={2}
                           fillOpacity={1}
                           fill="url(#colorAtendimentos)"
@@ -435,84 +430,84 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                   </ChartContainer>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </GlassCard>
           )}
 
           {/* Main Grid */}
           <div className={zenMode ? "max-w-2xl mx-auto" : "grid lg:grid-cols-3 gap-6"}>
             {/* Quick Actions */}
             {preferences.quickActions && (
-              <Card className="bg-white rounded-2xl border-0 shadow-sm animate-slide-up lg:col-span-1 hover:shadow-md transition-shadow">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-emerald-500" />
+              <GlassCard className="animate-slide-up lg:col-span-1" glow="lime">
+                <div className="p-6 pb-4">
+                  <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-primary" />
                     Atalhos Rápidos
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
+                  </h3>
+                </div>
+                <div className="px-6 pb-6 space-y-2">
                   <Button 
-                    className="w-full justify-start h-12 rounded-xl text-sm font-medium bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
+                    className="w-full justify-start h-12 rounded-xl text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={() => navigate('/consulta')}
                     data-tour="ai-consultation"
                   >
-                    <Plus className="w-4 h-4 mr-3" />
-                    Nova Consulta
+                    <Sparkles className="w-4 h-4 mr-3" />
+                    Nova Consulta com IA
                   </Button>
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-12 rounded-xl text-sm font-medium border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                    className="w-full justify-start h-12 rounded-xl text-sm font-medium border-border/50 text-foreground hover:bg-muted hover:border-primary/30"
                     onClick={() => navigate('/patients/new')}
                     data-tour="new-patient"
                   >
-                    <Users className="w-4 h-4 mr-3 text-emerald-500" />
+                    <Users className="w-4 h-4 mr-3 text-primary" />
                     Cadastrar Paciente
                   </Button>
                   <Button 
                     variant="ghost"
-                    className="w-full justify-start h-12 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50"
+                    className="w-full justify-start h-12 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted"
                     onClick={() => navigate('/profile')}
                     data-tour="profile-settings"
                   >
-                    <User className="w-4 h-4 mr-3 text-slate-400" />
+                    <User className="w-4 h-4 mr-3" />
                     Configurar Perfil
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </GlassCard>
             )}
 
             {/* Upcoming Appointments */}
             {preferences.agenda && (
-              <Card className="bg-white rounded-2xl border-0 shadow-sm animate-slide-up lg:col-span-1 hover:shadow-md transition-shadow" style={{ animationDelay: '0.05s' }}>
-                <CardHeader className="pb-4 flex flex-row items-center justify-between">
-                  <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-emerald-500" />
+              <GlassCard className="animate-slide-up lg:col-span-1" glow="violet" style={{ animationDelay: '0.05s' }}>
+                <div className="p-6 pb-4 flex items-center justify-between">
+                  <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-secondary" />
                     Próximos Pacientes
-                  </CardTitle>
+                  </h3>
                   {appointments.length > 0 && (
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-7 text-xs text-slate-500 hover:text-slate-700"
+                      className="h-7 text-xs text-muted-foreground hover:text-foreground"
                       onClick={() => navigate('/agenda')}
                     >
                       Ver agenda
                       <ChevronRight className="w-3 h-3 ml-1" />
                     </Button>
                   )}
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div className="px-6 pb-6">
                   {appointments.length === 0 ? (
                     <div className="text-center py-10">
-                      <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                        <Clock className="w-8 h-8 text-slate-300" />
+                      <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                        <Clock className="w-8 h-8 text-muted-foreground/50" />
                       </div>
-                      <p className="text-sm font-medium text-slate-600 mb-1">Agenda livre</p>
-                      <p className="text-xs text-slate-400 mb-4">Nenhuma consulta agendada</p>
+                      <p className="text-sm font-medium text-foreground mb-1">Agenda livre</p>
+                      <p className="text-xs text-muted-foreground mb-4">Nenhuma consulta agendada</p>
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="rounded-xl text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                        className="rounded-xl border-secondary/30 text-secondary hover:bg-secondary/10"
                         onClick={() => navigate('/agenda')}
                       >
                         Agendar consulta
@@ -523,61 +518,61 @@ export default function Dashboard() {
                       {appointments.map((apt) => (
                         <div
                           key={apt.id}
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
+                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer group border border-transparent hover:border-border/30"
                           onClick={() => navigate('/agenda')}
                         >
-                          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                            <Clock className="w-4 h-4 text-emerald-500" />
+                          <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center group-hover:bg-secondary/30 transition-colors">
+                            <Clock className="w-4 h-4 text-secondary" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-800 truncate">
+                            <p className="text-sm font-medium text-foreground truncate">
                               {apt.patient?.full_name || 'Paciente'}
                             </p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-muted-foreground">
                               {format(new Date(apt.date_time), "d 'de' MMM, HH:mm", { locale: ptBR })}
                             </p>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-400" />
+                          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
                         </div>
                       ))}
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </GlassCard>
             )}
 
             {/* Recent Patients */}
             {preferences.recentPatients && (
-              <Card className="bg-white rounded-2xl border-0 shadow-sm animate-slide-up lg:col-span-1 hover:shadow-md transition-shadow" style={{ animationDelay: '0.1s' }}>
-                <CardHeader className="pb-4 flex flex-row items-center justify-between">
-                  <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-                    <Users className="w-4 h-4 text-emerald-500" />
+              <GlassCard className="animate-slide-up lg:col-span-1" glow="lime" style={{ animationDelay: '0.1s' }}>
+                <div className="p-6 pb-4 flex items-center justify-between">
+                  <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
                     Pacientes Recentes
-                  </CardTitle>
+                  </h3>
                   {patients.length > 0 && (
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-7 text-xs text-slate-500 hover:text-slate-700"
+                      className="h-7 text-xs text-muted-foreground hover:text-foreground"
                       onClick={() => navigate('/patients')}
                     >
                       Ver todos
                       <ChevronRight className="w-3 h-3 ml-1" />
                     </Button>
                   )}
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div className="px-6 pb-6">
                   {recentPatients.length === 0 ? (
                     <div className="text-center py-10">
-                      <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                        <Users className="w-8 h-8 text-slate-300" />
+                      <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-8 h-8 text-muted-foreground/50" />
                       </div>
-                      <p className="text-sm font-medium text-slate-600 mb-1">Comece agora</p>
-                      <p className="text-xs text-slate-400 mb-4">Cadastre seu primeiro paciente</p>
+                      <p className="text-sm font-medium text-foreground mb-1">Comece agora</p>
+                      <p className="text-xs text-muted-foreground mb-4">Cadastre seu primeiro paciente</p>
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="rounded-xl text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                        className="rounded-xl border-primary/30 text-primary hover:bg-primary/10"
                         onClick={() => navigate('/patients/new')}
                       >
                         Adicionar paciente
@@ -589,30 +584,30 @@ export default function Dashboard() {
                         <div
                           key={patient.id}
                           onClick={() => navigate(`/patients/${patient.id}`)}
-                          className="group flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+                          className="group flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 cursor-pointer transition-colors border border-transparent hover:border-border/30"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-sm">
-                              <span className="text-sm font-semibold text-white">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/60 to-primary flex items-center justify-center shadow-neon">
+                              <span className="text-sm font-semibold text-primary-foreground">
                                 {patient.full_name.charAt(0).toUpperCase()}
                               </span>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-slate-800 group-hover:text-emerald-600 transition-colors">
+                              <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                                 {patient.full_name}
                               </p>
-                              <p className="text-xs text-slate-400">
+                              <p className="text-xs text-muted-foreground">
                                 {patient.goal ? goalLabels[patient.goal] || patient.goal : 'Sem objetivo'}
                               </p>
                             </div>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-400 transition-colors" />
+                          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                         </div>
                       ))}
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </GlassCard>
             )}
           </div>
         </main>
