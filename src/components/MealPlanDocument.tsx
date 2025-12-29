@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import logo from '@/assets/logo.png';
 
 interface MealItem {
   food: string;
@@ -50,243 +51,379 @@ interface MealPlanDocumentProps {
   nutritionist: NutritionistProfile;
 }
 
+// Neon Green as specified
+const NEON_GREEN = '#DFFF00';
+const DEEP_ANTHRACITE = '#1a1a1f';
+const CARD_GRAY = '#2a2a32';
+const CARD_GRAY_LIGHT = '#3a3a44';
+
 const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
   ({ mealPlan, patientName, nutritionist }, ref) => {
-    const primaryColor = nutritionist.primary_color || '#a3e635';
+    const primaryColor = NEON_GREEN;
     const secondaryColor = nutritionist.secondary_color || '#8b5cf6';
     const planData = mealPlan.plan_data;
 
     return (
       <div 
         ref={ref}
-        className="bg-[#0a0a0f] text-white p-8 min-w-[800px] max-w-[800px]"
+        className="min-w-[800px] max-w-[800px]"
         style={{ fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif" }}
       >
-        {/* Premium Header */}
-        <div className="relative overflow-hidden rounded-2xl mb-8">
-          {/* Background gradient */}
+        {/* ═══════════════════════════════════════════════════════════════
+            CAPA - FULL PAGE MAGAZINE STYLE
+        ═══════════════════════════════════════════════════════════════ */}
+        <div 
+          style={{ 
+            background: DEEP_ANTHRACITE,
+            height: '1100px',
+            position: 'relative',
+            overflow: 'hidden',
+            pageBreakAfter: 'always',
+          }}
+        >
+          {/* Background Pattern - Subtle grid */}
           <div 
-            className="absolute inset-0"
-            style={{ 
-              background: `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}20)`,
-            }}
-          />
-          {/* Scanline effect */}
-          <div 
-            className="absolute inset-0 opacity-5"
             style={{
-              backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)'
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `
+                radial-gradient(circle at 20% 30%, ${primaryColor}08 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, ${secondaryColor}08 0%, transparent 40%),
+                linear-gradient(${DEEP_ANTHRACITE} 1px, transparent 1px),
+                linear-gradient(90deg, ${DEEP_ANTHRACITE} 1px, transparent 1px)
+              `,
+              backgroundSize: '100% 100%, 100% 100%, 60px 60px, 60px 60px',
+              opacity: 0.5,
             }}
           />
           
-          <div className="relative p-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-5">
-                {nutritionist.logo_url && (
-                  <div 
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center p-2"
-                    style={{ background: `linear-gradient(135deg, ${primaryColor}30, ${secondaryColor}30)` }}
-                  >
-                    <img 
-                      src={nutritionist.logo_url} 
-                      alt="Logo" 
-                      className="max-h-16 object-contain"
-                    />
-                  </div>
-                )}
-                <div>
-                  <h1 
-                    className="text-3xl font-bold tracking-tight"
-                    style={{ color: primaryColor }}
-                  >
-                    {nutritionist.full_name}
-                  </h1>
-                  {nutritionist.crn && (
-                    <p className="text-white/60 mt-1 font-medium">{nutritionist.crn}</p>
-                  )}
-                  {nutritionist.phone && (
-                    <p className="text-white/40 text-sm">{nutritionist.phone}</p>
-                  )}
-                </div>
-              </div>
-              <div className="text-right">
-                <div 
-                  className="inline-block px-4 py-2 rounded-xl text-sm font-medium"
-                  style={{ background: `${primaryColor}20`, color: primaryColor }}
-                >
-                  PLANO ALIMENTAR
-                </div>
-                <p className="text-white/40 text-sm mt-2">
-                  {format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* Glowing accent lines */}
+          <div 
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)`,
+            }}
+          />
+          <div 
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: `linear-gradient(90deg, transparent, ${primaryColor}60, transparent)`,
+            }}
+          />
 
-        {/* Patient & Plan Info */}
-        <div 
-          className="flex justify-between items-center mb-8 pb-6"
-          style={{ borderBottom: `2px solid ${primaryColor}30` }}
-        >
-          <div>
-            <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Paciente</p>
-            <h2 className="text-2xl font-bold text-white">{patientName}</h2>
-          </div>
-          <div className="text-right">
-            <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Plano</p>
-            <h2 
-              className="text-xl font-semibold"
-              style={{ color: secondaryColor }}
+          {/* Content Container */}
+          <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '60px' }}>
+            
+            {/* Logo NutriFlow */}
+            <div style={{ marginBottom: '60px' }}>
+              <img 
+                src={nutritionist.logo_url || logo} 
+                alt="NutriFlow" 
+                style={{ 
+                  height: '120px', 
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 0 30px rgba(223, 255, 0, 0.3))'
+                }}
+              />
+            </div>
+
+            {/* Decorative line */}
+            <div style={{ 
+              width: '200px', 
+              height: '2px', 
+              background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)`,
+              marginBottom: '60px'
+            }} />
+
+            {/* Patient Name - GIANT NEON */}
+            <h1 
+              style={{ 
+                fontSize: '72px',
+                fontWeight: 800,
+                color: primaryColor,
+                textAlign: 'center',
+                letterSpacing: '-2px',
+                textShadow: `0 0 60px ${primaryColor}60, 0 0 120px ${primaryColor}30`,
+                lineHeight: 1.1,
+                marginBottom: '30px',
+              }}
             >
-              {mealPlan.title}
-            </h2>
+              {patientName}
+            </h1>
+
+            {/* Plan Title */}
+            <p style={{ 
+              fontSize: '24px',
+              color: 'rgba(255,255,255,0.6)',
+              textAlign: 'center',
+              fontWeight: 300,
+              letterSpacing: '8px',
+              textTransform: 'uppercase',
+              marginBottom: '80px',
+            }}>
+              Plano Alimentar
+            </p>
+
+            {/* Nutritionist Info */}
+            <div style={{ 
+              textAlign: 'center',
+              padding: '30px 50px',
+              background: 'rgba(255,255,255,0.03)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}>
+              <p style={{ color: primaryColor, fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
+                {nutritionist.full_name}
+              </p>
+              {nutritionist.crn && (
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>{nutritionist.crn}</p>
+              )}
+              {nutritionist.phone && (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', marginTop: '4px' }}>{nutritionist.phone}</p>
+              )}
+            </div>
+
+            {/* Date */}
+            <p style={{ 
+              position: 'absolute',
+              bottom: '60px',
+              color: 'rgba(255,255,255,0.3)',
+              fontSize: '14px',
+              letterSpacing: '2px',
+            }}>
+              {format(new Date(mealPlan.created_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+            </p>
           </div>
         </div>
 
-        {/* Nutritional Summary - Bio-Metric Style */}
-        <div 
-          className="rounded-2xl p-6 mb-8"
-          style={{ 
-            background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.05), rgba(139, 92, 246, 0.05))',
-            border: `1px solid ${primaryColor}20`
-          }}
-        >
-          <h3 
-            className="text-sm font-semibold uppercase tracking-wider mb-4"
-            style={{ color: primaryColor }}
-          >
-            ◆ Resumo Nutricional Diário
-          </h3>
-          <div className="grid grid-cols-4 gap-6">
-            <div className="text-center">
-              <div 
-                className="text-4xl font-bold font-mono"
-                style={{ color: primaryColor }}
-              >
+        {/* ═══════════════════════════════════════════════════════════════
+            INTERIOR - MAGAZINE LAYOUT (Sem tabelas, só Cards)
+        ═══════════════════════════════════════════════════════════════ */}
+        <div style={{ background: DEEP_ANTHRACITE, padding: '50px', color: 'white' }}>
+          
+          {/* Section Title */}
+          <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+            <h2 style={{ 
+              color: primaryColor, 
+              fontSize: '14px', 
+              letterSpacing: '6px', 
+              textTransform: 'uppercase',
+              marginBottom: '16px',
+            }}>
+              ◆ {mealPlan.title} ◆
+            </h2>
+            {mealPlan.description && (
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '16px' }}>{mealPlan.description}</p>
+            )}
+          </div>
+
+          {/* Macro Summary - Horizontal Cards */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(4, 1fr)', 
+            gap: '16px',
+            marginBottom: '50px',
+          }}>
+            <div style={{
+              background: CARD_GRAY,
+              borderRadius: '16px',
+              padding: '24px',
+              textAlign: 'center',
+            }}>
+              <p style={{ fontSize: '36px', fontWeight: 700, color: primaryColor, fontFamily: 'monospace' }}>
                 {mealPlan.total_calories || planData.totalCalories || '—'}
-              </div>
-              <p className="text-white/50 text-sm mt-1">kcal / dia</p>
+              </p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Calorias</p>
             </div>
+            
             {planData.macros && (
               <>
-                <div className="text-center">
-                  <div className="text-4xl font-bold font-mono text-blue-400">
+                <div style={{
+                  background: CARD_GRAY,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textAlign: 'center',
+                }}>
+                  <p style={{ fontSize: '36px', fontWeight: 700, color: '#60a5fa', fontFamily: 'monospace' }}>
                     {planData.macros.protein}g
-                  </div>
-                  <p className="text-white/50 text-sm mt-1">Proteínas</p>
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Proteínas</p>
                 </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold font-mono text-amber-400">
+                <div style={{
+                  background: CARD_GRAY,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textAlign: 'center',
+                }}>
+                  <p style={{ fontSize: '36px', fontWeight: 700, color: '#fbbf24', fontFamily: 'monospace' }}>
                     {planData.macros.carbs}g
-                  </div>
-                  <p className="text-white/50 text-sm mt-1">Carboidratos</p>
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Carboidratos</p>
                 </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold font-mono text-rose-400">
+                <div style={{
+                  background: CARD_GRAY,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textAlign: 'center',
+                }}>
+                  <p style={{ fontSize: '36px', fontWeight: 700, color: '#f472b6', fontFamily: 'monospace' }}>
                     {planData.macros.fat}g
-                  </div>
-                  <p className="text-white/50 text-sm mt-1">Gorduras</p>
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Gorduras</p>
                 </div>
               </>
             )}
           </div>
-        </div>
 
-        {/* Meals */}
-        <div className="space-y-4">
-          {planData.meals?.map((meal, index) => (
-            <div 
-              key={index} 
-              className="rounded-xl overflow-hidden"
-              style={{ border: `1px solid ${primaryColor}20` }}
-            >
-              {/* Meal Header */}
+          {/* ═══════════════════════════════════════════════════════════
+              MEALS - CARD LAYOUT (Sem tabelas, sem bordas pretas)
+          ═══════════════════════════════════════════════════════════ */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            {planData.meals?.map((meal, index) => (
               <div 
-                className="px-5 py-4 flex justify-between items-center"
-                style={{ 
-                  background: `linear-gradient(90deg, ${primaryColor}15, transparent)`,
-                  borderBottom: `1px solid ${primaryColor}20`
+                key={index}
+                style={{
+                  background: CARD_GRAY,
+                  borderRadius: '20px',
+                  overflow: 'hidden',
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <span 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
-                    style={{ background: primaryColor, color: '#0a0a0f' }}
-                  >
-                    {index + 1}
-                  </span>
-                  <span className="font-semibold text-white">{meal.name}</span>
-                  {meal.time && (
-                    <span className="text-white/40 text-sm">• {meal.time}</span>
+                {/* Meal Header - Neon Title */}
+                <div style={{
+                  padding: '20px 24px',
+                  background: `linear-gradient(135deg, ${CARD_GRAY_LIGHT}, ${CARD_GRAY})`,
+                  borderBottom: `1px solid rgba(255,255,255,0.05)`,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '10px',
+                      background: primaryColor,
+                      color: DEEP_ANTHRACITE,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 700,
+                      fontSize: '14px',
+                    }}>
+                      {index + 1}
+                    </span>
+                    <div>
+                      <h3 style={{ 
+                        color: primaryColor, 
+                        fontSize: '18px', 
+                        fontWeight: 600,
+                        margin: 0,
+                      }}>
+                        {meal.name}
+                      </h3>
+                      {meal.time && (
+                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0 }}>{meal.time}</p>
+                      )}
+                    </div>
+                  </div>
+                  {meal.totalCalories && (
+                    <span style={{
+                      color: primaryColor,
+                      fontSize: '16px',
+                      fontWeight: 700,
+                      fontFamily: 'monospace',
+                    }}>
+                      {meal.totalCalories} kcal
+                    </span>
                   )}
                 </div>
-                {meal.totalCalories && (
-                  <span 
-                    className="text-sm font-mono px-3 py-1 rounded-lg"
-                    style={{ background: `${primaryColor}20`, color: primaryColor }}
-                  >
-                    {meal.totalCalories} kcal
-                  </span>
-                )}
-              </div>
-              
-              {/* Meal Items */}
-              <table className="w-full">
-                <thead>
-                  <tr className="text-white/40 text-xs uppercase tracking-wider">
-                    <th className="text-left p-4 font-medium">Alimento</th>
-                    <th className="text-left p-4 font-medium">Porção</th>
-                    <th className="text-right p-4 font-medium">Calorias</th>
-                  </tr>
-                </thead>
-                <tbody>
+
+                {/* Food Items - Sem linhas divisórias */}
+                <div style={{ padding: '16px 24px' }}>
                   {meal.items?.map((item, itemIndex) => (
-                    <tr 
-                      key={itemIndex} 
-                      className="border-t"
-                      style={{ borderColor: `${primaryColor}10` }}
+                    <div 
+                      key={itemIndex}
+                      style={{
+                        padding: '12px 0',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
                     >
-                      <td className="p-4 text-white">{item.food}</td>
-                      <td className="p-4 text-white/60">{item.portion}</td>
-                      <td className="p-4 text-right font-mono" style={{ color: primaryColor }}>
-                        {item.calories ? `${item.calories}` : '—'}
-                      </td>
-                    </tr>
+                      <div>
+                        <p style={{ color: 'white', fontSize: '15px', margin: 0, fontWeight: 500 }}>
+                          {item.food}
+                        </p>
+                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: 0 }}>
+                          {item.portion}
+                        </p>
+                      </div>
+                      {item.calories && (
+                        <span style={{ 
+                          color: 'rgba(255,255,255,0.6)', 
+                          fontSize: '14px',
+                          fontFamily: 'monospace',
+                        }}>
+                          {item.calories} kcal
+                        </span>
+                      )}
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
-        </div>
-
-        {/* Notes */}
-        {planData.notes && (
-          <div 
-            className="mt-8 p-6 rounded-xl"
-            style={{ 
-              background: `${secondaryColor}10`,
-              border: `1px solid ${secondaryColor}20`
-            }}
-          >
-            <h3 
-              className="font-semibold mb-3 flex items-center gap-2"
-              style={{ color: secondaryColor }}
-            >
-              <span>◆</span> Observações
-            </h3>
-            <p className="text-white/70 text-sm leading-relaxed whitespace-pre-line">{planData.notes}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
 
-        {/* Footer */}
-        <div className="mt-10 pt-6 text-center" style={{ borderTop: `1px solid ${primaryColor}10` }}>
-          <p className="text-white/30 text-xs">
-            Plano alimentar gerado por <span style={{ color: primaryColor }}>NutriFlow</span>
-          </p>
-          <p className="text-white/20 text-xs mt-1">
-            Este documento é de uso pessoal e não substitui orientação profissional presencial.
-          </p>
+          {/* Notes Section */}
+          {planData.notes && (
+            <div style={{
+              marginTop: '40px',
+              padding: '30px',
+              background: CARD_GRAY,
+              borderRadius: '20px',
+              borderLeft: `4px solid ${secondaryColor}`,
+            }}>
+              <h3 style={{ 
+                color: secondaryColor, 
+                fontSize: '14px', 
+                fontWeight: 600,
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+                marginBottom: '16px',
+              }}>
+                ◆ Observações
+              </h3>
+              <p style={{ 
+                color: 'rgba(255,255,255,0.7)', 
+                fontSize: '15px', 
+                lineHeight: 1.7,
+                whiteSpace: 'pre-line',
+                margin: 0,
+              }}>
+                {planData.notes}
+              </p>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div style={{ 
+            marginTop: '60px', 
+            paddingTop: '30px', 
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            textAlign: 'center',
+          }}>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', margin: 0 }}>
+              Documento gerado por <span style={{ color: primaryColor }}>NutriFlow</span> • Plano exclusivo e personalizado
+            </p>
+          </div>
         </div>
       </div>
     );
