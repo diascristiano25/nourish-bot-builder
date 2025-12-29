@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -91,6 +92,7 @@ const mealIcons: Record<string, React.ReactNode> = {
 export default function MealPlanView() {
   const { id, planId } = useParams<{ id: string; planId: string }>();
   const { user, loading: authLoading } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const { toast } = useToast();
   const documentRef = useRef<HTMLDivElement>(null);
@@ -513,7 +515,7 @@ export default function MealPlanView() {
         )}
       </main>
 
-      {/* Hidden PDF Document - Elite Magazine Layout */}
+      {/* Hidden PDF Document - Elite Magazine Layout (Synced with Theme) */}
       <div className="absolute left-[-9999px] top-0">
         <MealPlanDocument
           ref={documentRef}
@@ -533,6 +535,7 @@ export default function MealPlanView() {
             primary_color: nutritionist?.primary_color || null,
             secondary_color: nutritionist?.secondary_color || null,
           }}
+          theme={theme}
         />
       </div>
     </div>

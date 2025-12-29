@@ -9,12 +9,15 @@ import {
   LogOut,
   BookOpen,
   HelpCircle,
-  Command
+  Command,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import { NeonText } from '@/components/ui/NeonText';
 import logoImg from '@/assets/logo.png';
 
@@ -49,6 +52,7 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
 
   const handleSignOut = async () => {
@@ -147,6 +151,22 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
 
       {/* Footer */}
       <div className="p-3 border-t border-border/30 space-y-1">
+        {/* Theme Toggle */}
+        <Button
+          variant="ghost"
+          onClick={toggleTheme}
+          className={cn(
+            "w-full justify-start gap-3 h-11 rounded-xl text-muted-foreground hover:text-warning hover:bg-warning/10 transition-all duration-200",
+            isCollapsed && "justify-center px-0"
+          )}
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
+          ) : (
+            <Moon className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
+          )}
+          {!isCollapsed && <span className="text-sm font-medium">{theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}</span>}
+        </Button>
         <Button
           variant="ghost"
           asChild
