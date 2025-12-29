@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Users, ChevronRight, Target, Activity, Sparkles } from 'lucide-react';
+import { Plus, Search, Users, ChevronRight, Target, Activity, Sparkles, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { GlassCard } from '@/components/ui/GlassCard';
+import { BentoCard } from '@/components/ui/BentoCard';
+import { BentoGrid } from '@/components/ui/BentoGrid';
 
 const goalLabels: Record<string, string> = {
   hypertrophy: 'Hipertrofia',
@@ -19,18 +20,18 @@ const goalLabels: Record<string, string> = {
   performance: 'Performance',
 };
 
-const goalColors: Record<string, { bg: string; text: string; border: string }> = {
-  hypertrophy: { bg: 'bg-electric-violet/10', text: 'text-electric-violet', border: 'border-electric-violet/30' },
-  weight_loss: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30' },
-  maintenance: { bg: 'bg-slate-500/10', text: 'text-slate-400', border: 'border-slate-500/30' },
-  health: { bg: 'bg-cyber-lime/10', text: 'text-cyber-lime', border: 'border-cyber-lime/30' },
-  performance: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
+const goalColors: Record<string, { bg: string; text: string; border: string; icon: string }> = {
+  hypertrophy: { bg: 'bg-violet-500/15', text: 'text-violet-400', border: 'border-violet-500/30', icon: '💪' },
+  weight_loss: { bg: 'bg-blue-500/15', text: 'text-blue-400', border: 'border-blue-500/30', icon: '⚡' },
+  maintenance: { bg: 'bg-slate-500/15', text: 'text-slate-400', border: 'border-slate-500/30', icon: '⚖️' },
+  health: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', border: 'border-emerald-500/30', icon: '🌿' },
+  performance: { bg: 'bg-amber-500/15', text: 'text-amber-400', border: 'border-amber-500/30', icon: '🏆' },
 };
 
 const adherenceColors: Record<string, { bg: string; text: string; border: string; label: string }> = {
-  high: { bg: 'bg-cyber-lime/10', text: 'text-cyber-lime', border: 'border-cyber-lime/30', label: 'Alta' },
-  medium: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30', label: 'Média' },
-  low: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30', label: 'Baixa' },
+  high: { bg: 'bg-cyber-lime/15', text: 'text-cyber-lime', border: 'border-cyber-lime/30', label: 'Alta' },
+  medium: { bg: 'bg-amber-500/15', text: 'text-amber-400', border: 'border-amber-500/30', label: 'Média' },
+  low: { bg: 'bg-red-500/15', text: 'text-red-400', border: 'border-red-500/30', label: 'Baixa' },
 };
 
 const getRandomAdherence = () => {
@@ -74,36 +75,41 @@ const Patients = () => {
   return (
     <AppLayout>
       <div className="min-h-screen">
-        {/* Cyber Header */}
-        <header className="sticky top-0 z-30 glass-strong border-b border-white/10">
+        {/* Glassmorphism Header */}
+        <header className="sticky top-0 z-30 bg-[rgba(15,18,22,0.7)] backdrop-blur-[20px] border-b border-[rgba(255,255,255,0.08)]">
           <div className="px-6 lg:px-8 py-6">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyber-lime to-electric-violet bg-clip-text text-transparent">
-                  Pacientes
-                </h1>
-                <p className="text-muted-foreground mt-1 font-mono text-sm">
-                  GERENCIANDO :: {patients?.length || 0} REGISTROS
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyber-lime/20 to-electric-violet/20 flex items-center justify-center border border-cyber-lime/20">
+                    <Users className="w-5 h-5 text-cyber-lime" />
+                  </div>
+                  <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyber-lime to-electric-violet bg-clip-text text-transparent">
+                    Pacientes
+                  </h1>
+                </div>
+                <p className="text-muted-foreground font-mono text-sm ml-[52px]">
+                  {patients?.length || 0} registros ativos
                 </p>
               </div>
               <Button 
                 onClick={() => navigate('/patients/new')} 
-                className="gap-2 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl h-11 px-6 font-semibold"
+                className="gap-2 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl h-12 px-6 font-semibold shadow-lg shadow-cyber-lime/20"
                 data-tour="patients-new-btn"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
                 Novo Paciente
               </Button>
             </div>
 
             {/* Search Bar */}
-            <div className="mt-6 relative max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <div className="mt-6 relative max-w-lg">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 placeholder="Buscar por nome ou email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 h-11 rounded-xl glass border-white/10 focus:border-cyber-lime/50"
+                className="pl-12 h-12 rounded-xl bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] focus:border-cyber-lime/50 focus:bg-[rgba(255,255,255,0.05)] transition-all"
               />
             </div>
           </div>
@@ -111,28 +117,28 @@ const Patients = () => {
 
         <main className="p-6 lg:p-8">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <BentoGrid columns={3} gap="md">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <GlassCard key={i} className="animate-pulse">
+                <BentoCard key={i} className="animate-pulse" interactive={false}>
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-white/10" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-white/10 rounded w-3/4" />
-                      <div className="h-3 bg-white/5 rounded w-1/2" />
+                    <div className="w-16 h-16 rounded-2xl bg-white/5" />
+                    <div className="flex-1 space-y-3">
+                      <div className="h-5 bg-white/5 rounded-lg w-3/4" />
+                      <div className="h-4 bg-white/5 rounded-lg w-1/2" />
                     </div>
                   </div>
-                </GlassCard>
+                </BentoCard>
               ))}
-            </div>
+            </BentoGrid>
           ) : !filteredPatients || filteredPatients.length === 0 ? (
-            <GlassCard className="py-16 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
-                <Users className="w-10 h-10 text-muted-foreground/50" />
+            <BentoCard className="py-20 text-center max-w-lg mx-auto" interactive={false}>
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-cyber-lime/10 to-electric-violet/10 border border-white/10 flex items-center justify-center mx-auto mb-8">
+                <Users className="w-12 h-12 text-muted-foreground/50" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-3">
                 {searchQuery ? 'Nenhum paciente encontrado' : 'Comece sua jornada'}
               </h3>
-              <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+              <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
                 {searchQuery 
                   ? 'Tente buscar com outros termos' 
                   : 'Cadastre seu primeiro paciente e comece a transformar vidas'
@@ -141,31 +147,32 @@ const Patients = () => {
               {!searchQuery && (
                 <Button 
                   onClick={() => navigate('/patients/new')} 
-                  className="gap-2 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl"
+                  className="gap-2 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl h-12 px-8"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Sparkles className="w-5 h-5" />
                   Cadastrar Paciente
                 </Button>
               )}
-            </GlassCard>
+            </BentoCard>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <BentoGrid columns={3} gap="md">
               {filteredPatients.map((patient, index) => {
                 const adherence = getRandomAdherence();
                 const adherenceStyle = adherenceColors[adherence];
                 const goalStyle = goalColors[patient.goal || 'health'];
                 
                 return (
-                  <GlassCard 
+                  <BentoCard 
                     key={patient.id} 
-                    className="cursor-pointer group hover:border-cyber-lime/30 transition-all duration-300"
+                    className="group"
                     onClick={() => navigate(`/patients/${patient.id}`)}
+                    glow="lime"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="flex items-start gap-4">
                       {/* Avatar */}
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyber-lime/20 to-electric-violet/20 flex items-center justify-center border border-white/10 flex-shrink-0 group-hover:border-cyber-lime/30 transition-colors">
-                        <span className="text-xl font-bold bg-gradient-to-r from-cyber-lime to-electric-violet bg-clip-text text-transparent">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyber-lime/20 to-electric-violet/20 flex items-center justify-center border border-white/10 flex-shrink-0 group-hover:border-cyber-lime/40 group-hover:shadow-lg group-hover:shadow-cyber-lime/20 transition-all duration-300">
+                        <span className="text-2xl font-bold bg-gradient-to-r from-cyber-lime to-electric-violet bg-clip-text text-transparent">
                           {patient.full_name.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -174,35 +181,35 @@ const Patients = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <h3 className="font-semibold text-foreground truncate group-hover:text-cyber-lime transition-colors">
+                            <h3 className="font-semibold text-foreground truncate text-lg group-hover:text-cyber-lime transition-colors">
                               {patient.full_name}
                             </h3>
-                            <p className="text-xs text-muted-foreground mt-0.5 font-mono">
-                              {format(new Date(patient.created_at), "MMM 'de' yyyy", { locale: ptBR })}
+                            <p className="text-sm text-muted-foreground mt-1 font-mono">
+                              {format(new Date(patient.created_at), "dd MMM yyyy", { locale: ptBR })}
                             </p>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-cyber-lime group-hover:translate-x-1 transition-all flex-shrink-0" />
+                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-cyber-lime group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
                         </div>
 
                         {/* Tags */}
-                        <div className="flex flex-wrap gap-2 mt-3">
+                        <div className="flex flex-wrap gap-2 mt-4">
                           {patient.goal && goalStyle && (
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium ${goalStyle.bg} ${goalStyle.text} border ${goalStyle.border}`}>
-                              <Target className="w-3 h-3" />
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium ${goalStyle.bg} ${goalStyle.text} border ${goalStyle.border}`}>
+                              <span>{goalStyle.icon}</span>
                               {goalLabels[patient.goal] || patient.goal}
                             </span>
                           )}
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium ${adherenceStyle.bg} ${adherenceStyle.text} border ${adherenceStyle.border}`}>
-                            <Activity className="w-3 h-3" />
-                            Adesão {adherenceStyle.label}
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium ${adherenceStyle.bg} ${adherenceStyle.text} border ${adherenceStyle.border}`}>
+                            <TrendingUp className="w-3 h-3" />
+                            {adherenceStyle.label}
                           </span>
                         </div>
                       </div>
                     </div>
-                  </GlassCard>
+                  </BentoCard>
                 );
               })}
-            </div>
+            </BentoGrid>
           )}
         </main>
       </div>

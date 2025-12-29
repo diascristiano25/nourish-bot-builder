@@ -386,7 +386,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Chart Section */}
+          {/* Chart Section - FULL WIDTH with Gradient Fill */}
           {!zenMode && preferences.stats && (
             <GlassCard className="mb-8 animate-fade-in overflow-hidden" glow="lime" style={{ animationDelay: '0.1s' }}>
               <div className="p-6 pb-2">
@@ -395,15 +395,16 @@ export default function Dashboard() {
                   Evolução de Atendimentos
                 </h3>
               </div>
-              <div className="px-6 pb-6 pt-4 overflow-hidden">
-                <div className="h-[200px] lg:h-[280px] w-full overflow-hidden">
+              <div className="px-2 pb-6 pt-4 overflow-hidden">
+                <div className="h-[280px] lg:h-[320px] w-full overflow-hidden">
                   <ChartContainer config={chartConfig}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <AreaChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorAtendimentos" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="hsl(68, 100%, 50%)" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="hsl(68, 100%, 50%)" stopOpacity={0}/>
+                            <stop offset="0%" stopColor="hsl(68, 100%, 50%)" stopOpacity={0.5}/>
+                            <stop offset="50%" stopColor="hsl(68, 100%, 50%)" stopOpacity={0.2}/>
+                            <stop offset="100%" stopColor="hsl(68, 100%, 50%)" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
                         <XAxis 
@@ -422,7 +423,7 @@ export default function Dashboard() {
                           type="monotone"
                           dataKey="atendimentos"
                           stroke="hsl(68, 100%, 50%)"
-                          strokeWidth={2}
+                          strokeWidth={3}
                           fillOpacity={1}
                           fill="url(#colorAtendimentos)"
                         />
