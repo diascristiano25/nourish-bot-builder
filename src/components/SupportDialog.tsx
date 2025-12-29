@@ -507,7 +507,7 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-xs transition-all duration-300 ${
                     activeTab === 'new' 
                       ? 'bg-cyber-lime/20 text-cyber-lime border border-cyber-lime/30' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                   }`}
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -518,7 +518,7 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-xs transition-all duration-300 ${
                     activeTab === 'history' 
                       ? 'bg-electric-violet/20 text-electric-violet border border-electric-violet/30' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                   }`}
                 >
                   <History className="w-3.5 h-3.5" />
@@ -689,14 +689,14 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                       </div>
                     ) : tickets.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 border border-white/10">
+                        <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4 border border-border">
                           <MessageCircle className="w-8 h-8 text-muted-foreground" />
                         </div>
                         <p className="text-sm text-muted-foreground mb-4">Nenhum ticket encontrado</p>
                         <Button 
                           variant="outline" 
                           onClick={() => setActiveTab('new')}
-                          className="glass border-white/10 hover:border-cyber-lime/50 hover:text-cyber-lime"
+                          className="glass border-border hover:border-cyber-lime/50 hover:text-cyber-lime"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Criar primeiro ticket

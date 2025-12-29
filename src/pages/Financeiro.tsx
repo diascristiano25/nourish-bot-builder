@@ -192,7 +192,7 @@ const Financeiro = () => {
     <AppLayout>
       <div className="min-h-screen">
         {/* Cyber Header */}
-        <header className="sticky top-0 z-30 glass-strong border-b border-white/10">
+        <header className="sticky top-0 z-30 glass-strong border-b border-border">
           <div className="px-6 lg:px-8 py-6">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
@@ -213,7 +213,7 @@ const Financeiro = () => {
                     Novo Lançamento
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="glass-strong border-white/10 rounded-2xl">
+                <DialogContent className="glass-strong border-border rounded-2xl">
                   <DialogHeader>
                     <DialogTitle className="text-foreground flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-cyber-lime" />
@@ -224,10 +224,10 @@ const Financeiro = () => {
                     <div className="space-y-2">
                       <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Tipo</Label>
                       <Select value={formType} onValueChange={(v) => setFormType(v as 'Receita' | 'Despesa')}>
-                        <SelectTrigger className="glass border-white/10 focus:border-cyber-lime/50">
+                        <SelectTrigger className="glass border-border focus:border-cyber-lime/50">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="glass-strong border-white/10">
+                        <SelectContent className="glass-strong border-border">
                           <SelectItem value="Receita">Receita</SelectItem>
                           <SelectItem value="Despesa">Despesa</SelectItem>
                         </SelectContent>
@@ -240,7 +240,7 @@ const Financeiro = () => {
                         placeholder="0,00" 
                         value={formAmount}
                         onChange={(e) => setFormAmount(e.target.value)}
-                        className="glass border-white/10 focus:border-cyber-lime/50"
+                        className="glass border-border focus:border-cyber-lime/50"
                       />
                     </div>
                     <div className="space-y-2">
@@ -249,7 +249,7 @@ const Financeiro = () => {
                         placeholder="Ex: Consulta - João Silva" 
                         value={formDescription}
                         onChange={(e) => setFormDescription(e.target.value)}
-                        className="glass border-white/10 focus:border-cyber-lime/50"
+                        className="glass border-border focus:border-cyber-lime/50"
                       />
                     </div>
                     <div className="space-y-2">
@@ -258,16 +258,16 @@ const Financeiro = () => {
                         type="date" 
                         value={formDate}
                         onChange={(e) => setFormDate(e.target.value)}
-                        className="glass border-white/10 focus:border-cyber-lime/50"
+                        className="glass border-border focus:border-cyber-lime/50"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Status</Label>
                       <Select value={formStatus} onValueChange={(v) => setFormStatus(v as 'completed' | 'pending')}>
-                        <SelectTrigger className="glass border-white/10 focus:border-cyber-lime/50">
+                        <SelectTrigger className="glass border-border focus:border-cyber-lime/50">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="glass-strong border-white/10">
+                        <SelectContent className="glass-strong border-border">
                           <SelectItem value="completed">Recebido</SelectItem>
                           <SelectItem value="pending">A Receber</SelectItem>
                         </SelectContent>
@@ -401,7 +401,7 @@ const Financeiro = () => {
             
             {records.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mx-auto mb-4">
                   <DollarSign className="w-8 h-8 text-muted-foreground/50" />
                 </div>
                 <p className="text-foreground font-medium mb-1">Nenhum lançamento</p>
@@ -412,7 +412,7 @@ const Financeiro = () => {
                 {records.slice(0, 10).map((record, index) => (
                   <div 
                     key={record.id} 
-                    className="flex items-center justify-between p-4 rounded-xl glass border border-white/10 hover:border-cyber-lime/30 transition-all group animate-fade-in"
+                    className="flex items-center justify-between p-4 rounded-xl glass border border-border hover:border-cyber-lime/30 transition-all group animate-fade-in"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="flex items-center gap-4">

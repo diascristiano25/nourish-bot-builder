@@ -316,7 +316,7 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                       value={item.food}
                       onChange={(e) => updateMealItem(mealIndex, itemIndex, 'food', e.target.value)}
                       placeholder="Alimento"
-                      className="h-9 bg-white/5 border-white/20"
+                      className="h-9 bg-input border-border"
                     />
                   </div>
                   <div className="col-span-3">
@@ -324,7 +324,7 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                       value={item.portion}
                       onChange={(e) => updateMealItem(mealIndex, itemIndex, 'portion', e.target.value)}
                       placeholder="Porção"
-                      className="h-9 bg-white/5 border-white/20"
+                      className="h-9 bg-input border-border"
                     />
                   </div>
                   <div className="col-span-3">
@@ -333,7 +333,7 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                       value={item.calories || ''}
                       onChange={(e) => updateMealItem(mealIndex, itemIndex, 'calories', e.target.value)}
                       placeholder="kcal"
-                      className="h-9 bg-white/5 border-white/20 font-mono"
+                      className="h-9 bg-input border-border font-mono"
                     />
                   </div>
                   <div className="col-span-1">
@@ -352,7 +352,7 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
             
             {/* Food Search */}
             {searchingMealIndex === mealIndex ? (
-              <div className="mt-3 p-3 border border-cyan-500/30 rounded-xl bg-white/5 space-y-2">
+              <div className="mt-3 p-3 border border-cyan-500/30 rounded-xl bg-muted/50 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-foreground">Buscar Alimento/Suplemento</span>
                   <Button variant="ghost" size="sm" onClick={() => setSearchingMealIndex(null)} className="text-muted-foreground hover:text-foreground">
@@ -378,7 +378,7 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="border border-dashed border-white/20 hover:bg-white/5"
+                  className="border border-dashed border-border hover:bg-muted/50"
                   onClick={() => addMealItem(mealIndex)}
                 >
                   <Plus className="w-4 h-4 mr-1" />

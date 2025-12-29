@@ -185,7 +185,7 @@ export default function Agenda() {
               </div>
             ) : dayAppointments.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mx-auto mb-4">
                   <CalendarIcon className="w-8 h-8 text-muted-foreground/50" />
                 </div>
                 <h3 className="text-lg font-medium text-foreground mb-2">
@@ -197,7 +197,7 @@ export default function Agenda() {
                 <Button 
                   variant="outline" 
                   onClick={() => setDialogOpen(true)}
-                  className="gap-2 glass border-white/10 hover:border-cyber-lime/50 hover:text-cyber-lime"
+                  className="gap-2 glass border-border hover:border-cyber-lime/50 hover:text-cyber-lime"
                 >
                   <Plus className="w-4 h-4" />
                   Agendar Paciente
@@ -210,7 +210,7 @@ export default function Agenda() {
                   return (
                     <div
                       key={appointment.id}
-                      className="flex items-center justify-between p-4 rounded-xl glass border border-white/10 hover:border-cyber-lime/30 transition-all duration-300 animate-fade-in"
+                      className="flex items-center justify-between p-4 rounded-xl glass border border-border hover:border-cyber-lime/30 transition-all duration-300 animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <div className="flex items-center gap-4">
