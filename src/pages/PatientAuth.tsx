@@ -35,28 +35,66 @@ export default function PatientAuth() {
     if (!user) return;
 
     try {
+      // First check if user is a patient (has user_id linked)
       const { data: patient } = await supabase
         .from('patients')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (patient) {
         navigate('/patient-portal');
         return;
       }
 
+      // Check if user is a nutritionist
       const { data: nutritionist } = await supabase
         .from('profiles')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (nutritionist) {
         navigate('/dashboard');
         return;
       }
 
+      // Check if there's a patient with matching email that needs linking
+      const { data: patientByEmail } = await supabase
+        .from('patients')
+        .select('id, user_id')
+        .eq('email', user.email)
+        .maybeSingle();
+
+      if (patientByEmail && !patientByEmail.user_id) {
+        // Link the user to the patient record
+        const { error: updateError } = await supabase
+          .from('patients')
+          .update({ user_id: user.id })
+          .eq('id', patientByEmail.id);
+
+        if (!updateError) {
+          toast({
+            title: "Acesso vinculado!",
+            description: "Seu acesso foi configurado com sucesso.",
+          });
+          navigate('/patient-portal');
+          return;
+        }
+      }
+
+      // If patient exists with email but already has different user_id
+      if (patientByEmail && patientByEmail.user_id && patientByEmail.user_id !== user.id) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Conta já vinculada",
+          description: "Este email já está vinculado a outra conta. Entre em contato com seu nutricionista.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // User exists but is neither patient nor nutritionist
       await supabase.auth.signOut();
       toast({
         title: "Acesso negado",
