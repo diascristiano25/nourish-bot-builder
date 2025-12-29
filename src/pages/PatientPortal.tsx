@@ -111,14 +111,44 @@ export default function PatientPortal() {
 
   const checkUserTypeAndFetchData = async () => {
     try {
-      const { data: patient, error: patientError } = await supabase
+      // First try to find patient by user_id
+      let { data: patient, error: patientError } = await supabase
         .from('patients')
         .select('id, full_name')
         .eq('user_id', user!.id)
-        .single();
+        .maybeSingle();
 
-      if (patientError || !patient) {
-        navigate('/dashboard');
+      // If not found by user_id, try by email
+      if (!patient && user?.email) {
+        const { data: patientByEmail, error: emailError } = await supabase
+          .from('patients')
+          .select('id, full_name')
+          .eq('email', user.email)
+          .maybeSingle();
+
+        if (patientByEmail) {
+          patient = patientByEmail;
+          // Link the patient to this user account
+          await supabase
+            .from('patients')
+            .update({ user_id: user.id })
+            .eq('id', patientByEmail.id);
+        }
+      }
+
+      if (!patient) {
+        // Not a patient, check if nutritionist
+        const { data: nutritionist } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user!.id)
+          .maybeSingle();
+
+        if (nutritionist) {
+          navigate('/dashboard');
+        } else {
+          navigate('/patient-auth');
+        }
         return;
       }
 
