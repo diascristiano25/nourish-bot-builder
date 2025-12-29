@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/hooks/useTheme";
 import { AccountStatusGuard } from "@/components/AccountStatusGuard";
 import { Loader2 } from "lucide-react";
 
@@ -62,46 +63,48 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AccountStatusGuard>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/privacidade" element={<Privacidade />} />
-                  <Route path="/sobre" element={<Sobre />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/patient-auth" element={<PatientAuth />} />
-                  <Route path="/patient-portal" element={<PatientPortal />} />
-                  <Route path="/app/:patientId" element={<PatientApp />} />
-                  <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
-                  <Route path="/access-denied" element={<AccessDenied />} />
-                  <Route path="/subscription-expired" element={<SubscriptionExpired />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/consulta" element={<Consultation />} />
-                  <Route path="/consulta/:patientId" element={<Consultation />} />
-                  <Route path="/agenda" element={<Agenda />} />
-                  <Route path="/financeiro" element={<Financeiro />} />
-                  <Route path="/biblioteca" element={<Biblioteca />} />
-                  <Route path="/patients" element={<Patients />} />
-                  <Route path="/patients/new" element={<NewPatient />} />
-                  <Route path="/patients/:id" element={<PatientDetail />} />
-                  <Route path="/patients/:id/edit" element={<EditPatient />} />
-                  <Route path="/patients/:id/meal-plan/generate" element={<GenerateMealPlan />} />
-                  <Route path="/patients/:id/meal-plan/:planId" element={<MealPlanView />} />
-                  <Route path="/patients/:id/meal-plan/:planId/grocery-list" element={<GroceryList />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </AccountStatusGuard>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AccountStatusGuard>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/privacidade" element={<Privacidade />} />
+                    <Route path="/sobre" element={<Sobre />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/patient-auth" element={<PatientAuth />} />
+                    <Route path="/patient-portal" element={<PatientPortal />} />
+                    <Route path="/app/:patientId" element={<PatientApp />} />
+                    <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
+                    <Route path="/access-denied" element={<AccessDenied />} />
+                    <Route path="/subscription-expired" element={<SubscriptionExpired />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/consulta" element={<Consultation />} />
+                    <Route path="/consulta/:patientId" element={<Consultation />} />
+                    <Route path="/agenda" element={<Agenda />} />
+                    <Route path="/financeiro" element={<Financeiro />} />
+                    <Route path="/biblioteca" element={<Biblioteca />} />
+                    <Route path="/patients" element={<Patients />} />
+                    <Route path="/patients/new" element={<NewPatient />} />
+                    <Route path="/patients/:id" element={<PatientDetail />} />
+                    <Route path="/patients/:id/edit" element={<EditPatient />} />
+                    <Route path="/patients/:id/meal-plan/generate" element={<GenerateMealPlan />} />
+                    <Route path="/patients/:id/meal-plan/:planId" element={<MealPlanView />} />
+                    <Route path="/patients/:id/meal-plan/:planId/grocery-list" element={<GroceryList />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </AccountStatusGuard>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

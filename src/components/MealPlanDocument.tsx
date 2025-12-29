@@ -49,17 +49,38 @@ interface MealPlanDocumentProps {
   };
   patientName: string;
   nutritionist: NutritionistProfile;
+  theme?: 'dark' | 'light';
 }
 
-// Neon Green as specified
-const NEON_GREEN = '#DFFF00';
-const DEEP_ANTHRACITE = '#1a1a1f';
-const CARD_GRAY = '#2a2a32';
-const CARD_GRAY_LIGHT = '#3a3a44';
+// Theme color palettes
+const themes = {
+  dark: {
+    background: '#1a1a1f',
+    cardBg: '#2a2a32',
+    cardBgLight: '#3a3a44',
+    text: '#ffffff',
+    textMuted: 'rgba(255,255,255,0.5)',
+    textSubtle: 'rgba(255,255,255,0.3)',
+    accent: '#DFFF00', // Neon Green
+    accentDark: '#A3E635',
+    border: 'rgba(255,255,255,0.08)',
+  },
+  light: {
+    background: '#F8F9FA',
+    cardBg: '#FFFFFF',
+    cardBgLight: '#F0F0F5',
+    text: '#111827',
+    textMuted: 'rgba(17,24,39,0.6)',
+    textSubtle: 'rgba(17,24,39,0.4)',
+    accent: '#65A30D', // Darker green for readability
+    accentDark: '#4D7C0F',
+    border: 'rgba(0,0,0,0.08)',
+  },
+};
 
 const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
-  ({ mealPlan, patientName, nutritionist }, ref) => {
-    const primaryColor = NEON_GREEN;
+  ({ mealPlan, patientName, nutritionist, theme = 'dark' }, ref) => {
+    const colors = themes[theme];
     const secondaryColor = nutritionist.secondary_color || '#8b5cf6';
     const planData = mealPlan.plan_data;
 
@@ -67,37 +88,38 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
       <div 
         ref={ref}
         className="min-w-[800px] max-w-[800px]"
-        style={{ fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif" }}
+        style={{ 
+          fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+          WebkitFontSmoothing: 'antialiased',
+        }}
       >
         {/* ═══════════════════════════════════════════════════════════════
             CAPA - FULL PAGE MAGAZINE STYLE
         ═══════════════════════════════════════════════════════════════ */}
         <div 
           style={{ 
-            background: DEEP_ANTHRACITE,
+            background: colors.background,
             height: '1100px',
             position: 'relative',
             overflow: 'hidden',
             pageBreakAfter: 'always',
           }}
         >
-          {/* Background Pattern - Subtle grid */}
+          {/* Background Pattern */}
           <div 
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: `
-                radial-gradient(circle at 20% 30%, ${primaryColor}08 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, ${secondaryColor}08 0%, transparent 40%),
-                linear-gradient(${DEEP_ANTHRACITE} 1px, transparent 1px),
-                linear-gradient(90deg, ${DEEP_ANTHRACITE} 1px, transparent 1px)
-              `,
-              backgroundSize: '100% 100%, 100% 100%, 60px 60px, 60px 60px',
+              backgroundImage: theme === 'dark' 
+                ? `radial-gradient(circle at 20% 30%, ${colors.accent}08 0%, transparent 40%),
+                   radial-gradient(circle at 80% 70%, ${secondaryColor}08 0%, transparent 40%)`
+                : `radial-gradient(circle at 20% 30%, ${colors.accent}15 0%, transparent 40%),
+                   radial-gradient(circle at 80% 70%, ${secondaryColor}10 0%, transparent 40%)`,
               opacity: 0.5,
             }}
           />
           
-          {/* Glowing accent lines */}
+          {/* Accent lines */}
           <div 
             style={{
               position: 'absolute',
@@ -105,7 +127,7 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
               left: 0,
               right: 0,
               height: '4px',
-              background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)`,
+              background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)`,
             }}
           />
           <div 
@@ -115,14 +137,14 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
               left: 0,
               right: 0,
               height: '4px',
-              background: `linear-gradient(90deg, transparent, ${primaryColor}60, transparent)`,
+              background: `linear-gradient(90deg, transparent, ${colors.accent}60, transparent)`,
             }}
           />
 
-          {/* Content Container */}
+          {/* Content */}
           <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '60px' }}>
             
-            {/* Logo NutriFlow */}
+            {/* Logo */}
             <div style={{ marginBottom: '60px' }}>
               <img 
                 src={nutritionist.logo_url || logo} 
@@ -130,7 +152,7 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                 style={{ 
                   height: '120px', 
                   objectFit: 'contain',
-                  filter: 'drop-shadow(0 0 30px rgba(223, 255, 0, 0.3))'
+                  filter: theme === 'dark' ? 'drop-shadow(0 0 30px rgba(223, 255, 0, 0.3))' : 'none'
                 }}
               />
             </div>
@@ -139,21 +161,24 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
             <div style={{ 
               width: '200px', 
               height: '2px', 
-              background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)`,
+              background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)`,
               marginBottom: '60px'
             }} />
 
-            {/* Patient Name - GIANT NEON */}
+            {/* Patient Name - GIANT */}
             <h1 
               style={{ 
                 fontSize: '72px',
                 fontWeight: 800,
-                color: primaryColor,
+                color: colors.accent,
                 textAlign: 'center',
                 letterSpacing: '-2px',
-                textShadow: `0 0 60px ${primaryColor}60, 0 0 120px ${primaryColor}30`,
+                textShadow: theme === 'dark' ? `0 0 60px ${colors.accent}60, 0 0 120px ${colors.accent}30` : 'none',
                 lineHeight: 1.1,
                 marginBottom: '30px',
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+                hyphens: 'none',
               }}
             >
               {patientName}
@@ -162,7 +187,7 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
             {/* Plan Title */}
             <p style={{ 
               fontSize: '24px',
-              color: 'rgba(255,255,255,0.6)',
+              color: colors.textMuted,
               textAlign: 'center',
               fontWeight: 300,
               letterSpacing: '8px',
@@ -176,18 +201,18 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
             <div style={{ 
               textAlign: 'center',
               padding: '30px 50px',
-              background: 'rgba(255,255,255,0.03)',
+              background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
               borderRadius: '20px',
-              border: '1px solid rgba(255,255,255,0.08)',
+              border: `1px solid ${colors.border}`,
             }}>
-              <p style={{ color: primaryColor, fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
+              <p style={{ color: colors.accent, fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
                 {nutritionist.full_name}
               </p>
               {nutritionist.crn && (
-                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>{nutritionist.crn}</p>
+                <p style={{ color: colors.textMuted, fontSize: '14px' }}>{nutritionist.crn}</p>
               )}
               {nutritionist.phone && (
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', marginTop: '4px' }}>{nutritionist.phone}</p>
+                <p style={{ color: colors.textSubtle, fontSize: '13px', marginTop: '4px' }}>{nutritionist.phone}</p>
               )}
             </div>
 
@@ -195,7 +220,7 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
             <p style={{ 
               position: 'absolute',
               bottom: '60px',
-              color: 'rgba(255,255,255,0.3)',
+              color: colors.textSubtle,
               fontSize: '14px',
               letterSpacing: '2px',
             }}>
@@ -205,14 +230,14 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            INTERIOR - MAGAZINE LAYOUT (Sem tabelas, só Cards)
+            INTERIOR - MAGAZINE LAYOUT
         ═══════════════════════════════════════════════════════════════ */}
-        <div style={{ background: DEEP_ANTHRACITE, padding: '50px', color: 'white' }}>
+        <div style={{ background: colors.background, padding: '50px', color: colors.text }}>
           
           {/* Section Title */}
           <div style={{ marginBottom: '40px', textAlign: 'center' }}>
             <h2 style={{ 
-              color: primaryColor, 
+              color: colors.accent, 
               fontSize: '14px', 
               letterSpacing: '6px', 
               textTransform: 'uppercase',
@@ -221,11 +246,11 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
               ◆ {mealPlan.title} ◆
             </h2>
             {mealPlan.description && (
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '16px' }}>{mealPlan.description}</p>
+              <p style={{ color: colors.textMuted, fontSize: '16px' }}>{mealPlan.description}</p>
             )}
           </div>
 
-          {/* Macro Summary - Horizontal Cards */}
+          {/* Macro Summary */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(4, 1fr)', 
@@ -233,74 +258,81 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
             marginBottom: '50px',
           }}>
             <div style={{
-              background: CARD_GRAY,
+              background: colors.cardBg,
               borderRadius: '16px',
               padding: '24px',
               textAlign: 'center',
+              boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
             }}>
-              <p style={{ fontSize: '36px', fontWeight: 700, color: primaryColor, fontFamily: 'monospace' }}>
+              <p style={{ fontSize: '36px', fontWeight: 700, color: colors.accent, fontFamily: 'monospace' }}>
                 {mealPlan.total_calories || planData.totalCalories || '—'}
               </p>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Calorias</p>
+              <p style={{ color: colors.textMuted, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Calorias</p>
             </div>
             
             {planData.macros && (
               <>
                 <div style={{
-                  background: CARD_GRAY,
+                  background: colors.cardBg,
                   borderRadius: '16px',
                   padding: '24px',
                   textAlign: 'center',
+                  boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
                 }}>
                   <p style={{ fontSize: '36px', fontWeight: 700, color: '#60a5fa', fontFamily: 'monospace' }}>
                     {planData.macros.protein}g
                   </p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Proteínas</p>
+                  <p style={{ color: colors.textMuted, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Proteínas</p>
                 </div>
                 <div style={{
-                  background: CARD_GRAY,
+                  background: colors.cardBg,
                   borderRadius: '16px',
                   padding: '24px',
                   textAlign: 'center',
+                  boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
                 }}>
                   <p style={{ fontSize: '36px', fontWeight: 700, color: '#fbbf24', fontFamily: 'monospace' }}>
                     {planData.macros.carbs}g
                   </p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Carboidratos</p>
+                  <p style={{ color: colors.textMuted, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Carboidratos</p>
                 </div>
                 <div style={{
-                  background: CARD_GRAY,
+                  background: colors.cardBg,
                   borderRadius: '16px',
                   padding: '24px',
                   textAlign: 'center',
+                  boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
                 }}>
                   <p style={{ fontSize: '36px', fontWeight: 700, color: '#f472b6', fontFamily: 'monospace' }}>
                     {planData.macros.fat}g
                   </p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Gorduras</p>
+                  <p style={{ color: colors.textMuted, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Gorduras</p>
                 </div>
               </>
             )}
           </div>
 
           {/* ═══════════════════════════════════════════════════════════
-              MEALS - CARD LAYOUT (Sem tabelas, sem bordas pretas)
+              MEALS - CARD LAYOUT (Wide food column, no word breaking)
           ═══════════════════════════════════════════════════════════ */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             {planData.meals?.map((meal, index) => (
               <div 
                 key={index}
                 style={{
-                  background: CARD_GRAY,
+                  background: colors.cardBg,
                   borderRadius: '20px',
                   overflow: 'hidden',
+                  boxShadow: theme === 'light' ? '0 4px 12px rgba(0,0,0,0.08)' : 'none',
                 }}
               >
-                {/* Meal Header - Neon Title */}
+                {/* Meal Header */}
                 <div style={{
                   padding: '20px 24px',
-                  background: `linear-gradient(135deg, ${CARD_GRAY_LIGHT}, ${CARD_GRAY})`,
-                  borderBottom: `1px solid rgba(255,255,255,0.05)`,
+                  background: theme === 'dark' 
+                    ? `linear-gradient(135deg, ${colors.cardBgLight}, ${colors.cardBg})`
+                    : colors.cardBgLight,
+                  borderBottom: `1px solid ${colors.border}`,
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -310,8 +342,8 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                       width: '32px',
                       height: '32px',
                       borderRadius: '10px',
-                      background: primaryColor,
-                      color: DEEP_ANTHRACITE,
+                      background: colors.accent,
+                      color: theme === 'dark' ? colors.background : '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -322,7 +354,7 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                     </span>
                     <div>
                       <h3 style={{ 
-                        color: primaryColor, 
+                        color: colors.accent, 
                         fontSize: '18px', 
                         fontWeight: 600,
                         margin: 0,
@@ -330,13 +362,13 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                         {meal.name}
                       </h3>
                       {meal.time && (
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0 }}>{meal.time}</p>
+                        <p style={{ color: colors.textMuted, fontSize: '12px', margin: 0 }}>{meal.time}</p>
                       )}
                     </div>
                   </div>
                   {meal.totalCalories && (
                     <span style={{
-                      color: primaryColor,
+                      color: colors.accent,
                       fontSize: '16px',
                       fontWeight: 700,
                       fontFamily: 'monospace',
@@ -346,7 +378,7 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                   )}
                 </div>
 
-                {/* Food Items - Sem linhas divisórias */}
+                {/* Food Items - Wide column layout, prevents word breaking */}
                 <div style={{ padding: '16px 24px' }}>
                   {meal.items?.map((item, itemIndex) => (
                     <div 
@@ -355,22 +387,45 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                         padding: '12px 0',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center',
+                        alignItems: 'flex-start',
+                        gap: '16px',
                       }}
                     >
-                      <div>
-                        <p style={{ color: 'white', fontSize: '15px', margin: 0, fontWeight: 500 }}>
+                      {/* Food name - 70% width, prevent breaking */}
+                      <div style={{ 
+                        flex: '1 1 70%',
+                        minWidth: 0,
+                      }}>
+                        <p style={{ 
+                          color: colors.text, 
+                          fontSize: '15px', 
+                          margin: 0, 
+                          fontWeight: 500,
+                          wordBreak: 'normal',
+                          overflowWrap: 'normal',
+                          whiteSpace: 'normal',
+                          hyphens: 'none',
+                        }}>
                           {item.food}
                         </p>
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: 0 }}>
+                        <p style={{ 
+                          color: colors.textMuted, 
+                          fontSize: '13px', 
+                          margin: '4px 0 0 0',
+                          wordBreak: 'normal',
+                          overflowWrap: 'normal',
+                        }}>
                           {item.portion}
                         </p>
                       </div>
+                      {/* Calories - 30% width */}
                       {item.calories && (
                         <span style={{ 
-                          color: 'rgba(255,255,255,0.6)', 
+                          color: colors.textMuted, 
                           fontSize: '14px',
                           fontFamily: 'monospace',
+                          whiteSpace: 'nowrap',
+                          flex: '0 0 auto',
                         }}>
                           {item.calories} kcal
                         </span>
@@ -382,14 +437,15 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
             ))}
           </div>
 
-          {/* Notes Section */}
+          {/* Notes */}
           {planData.notes && (
             <div style={{
               marginTop: '40px',
               padding: '30px',
-              background: CARD_GRAY,
+              background: colors.cardBg,
               borderRadius: '20px',
               borderLeft: `4px solid ${secondaryColor}`,
+              boxShadow: theme === 'light' ? '0 4px 12px rgba(0,0,0,0.08)' : 'none',
             }}>
               <h3 style={{ 
                 color: secondaryColor, 
@@ -402,11 +458,13 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                 ◆ Observações
               </h3>
               <p style={{ 
-                color: 'rgba(255,255,255,0.7)', 
+                color: colors.textMuted, 
                 fontSize: '15px', 
                 lineHeight: 1.7,
                 whiteSpace: 'pre-line',
                 margin: 0,
+                wordBreak: 'normal',
+                overflowWrap: 'break-word',
               }}>
                 {planData.notes}
               </p>
@@ -417,11 +475,11 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
           <div style={{ 
             marginTop: '60px', 
             paddingTop: '30px', 
-            borderTop: '1px solid rgba(255,255,255,0.08)',
+            borderTop: `1px solid ${colors.border}`,
             textAlign: 'center',
           }}>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', margin: 0 }}>
-              Documento gerado por <span style={{ color: primaryColor }}>NutriFlow</span> • Plano exclusivo e personalizado
+            <p style={{ color: colors.textSubtle, fontSize: '12px', margin: 0 }}>
+              Documento gerado por <span style={{ color: colors.accent }}>NutriFlow</span> • Plano exclusivo e personalizado
             </p>
           </div>
         </div>
