@@ -109,7 +109,7 @@ export default function PatientPortal() {
     }
   }, [user]);
 
-  const checkUserTypeAndFetchData = async () => {
+  const checkUserTypeAndFetchData = async (retryCount = 0) => {
     try {
       // First try to find patient by user_id
       let { data: patient, error: patientError } = await supabase
@@ -128,15 +128,45 @@ export default function PatientPortal() {
 
         if (patientByEmail) {
           patient = patientByEmail;
-          // Link the patient to this user account
-          await supabase
+          // Link the patient to this user account using RPC or service role
+          // The edge function should have already done this, but try again just in case
+          const { error: updateError } = await supabase
             .from('patients')
             .update({ user_id: user.id })
             .eq('id', patientByEmail.id);
+            
+          if (updateError) {
+            console.log('Could not update patient link (might need service role):', updateError.message);
+          }
         }
       }
 
       if (!patient) {
+        // Check user metadata for patient info (set during magic link creation)
+        const metadata = user?.user_metadata;
+        if (metadata?.is_patient && metadata?.patient_id) {
+          console.log('Found patient info in user metadata, fetching patient data...');
+          // Try to fetch patient by ID from metadata
+          const { data: patientFromMeta } = await supabase
+            .from('patients')
+            .select('id, full_name')
+            .eq('id', metadata.patient_id)
+            .maybeSingle();
+          
+          if (patientFromMeta) {
+            patient = patientFromMeta;
+          }
+        }
+      }
+
+      if (!patient) {
+        // Still no patient found - might be a timing issue, retry a few times
+        if (retryCount < 3) {
+          console.log(`Patient not found, retrying (${retryCount + 1}/3)...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return checkUserTypeAndFetchData(retryCount + 1);
+        }
+
         // Not a patient, check if nutritionist
         const { data: nutritionist } = await supabase
           .from('profiles')
@@ -147,6 +177,12 @@ export default function PatientPortal() {
         if (nutritionist) {
           navigate('/dashboard');
         } else {
+          // User is authenticated but not found in any table
+          // This could be a new user from magic link that hasn't been linked yet
+          toast({
+            title: "Acesso em processamento",
+            description: "Seu acesso está sendo configurado. Tente novamente em alguns segundos.",
+          });
           navigate('/patient-auth');
         }
         return;
