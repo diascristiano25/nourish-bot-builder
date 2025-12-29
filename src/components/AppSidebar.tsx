@@ -8,12 +8,14 @@ import {
   ChevronLeft,
   LogOut,
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  Command
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { NeonText } from '@/components/ui/NeonText';
 import logoImg from '@/assets/logo.png';
 
 interface NavItem {
@@ -27,7 +29,7 @@ interface NavItemWithTour extends NavItem {
 }
 
 const navItems: NavItemWithTour[] = [
-  { label: 'Home', icon: Home, href: '/dashboard', tourId: 'nav-home' },
+  { label: 'Dashboard', icon: Home, href: '/dashboard', tourId: 'nav-home' },
   { label: 'Pacientes', icon: Users, href: '/patients', tourId: 'nav-pacientes' },
   { label: 'Agenda', icon: Calendar, href: '/agenda', tourId: 'nav-agenda' },
   { label: 'Biblioteca', icon: BookOpen, href: '/biblioteca', tourId: 'nav-biblioteca' },
@@ -40,9 +42,10 @@ const WHATSAPP_HELP_URL = "https://wa.me/5547992381906?text=Olá! Preciso de aju
 interface AppSidebarProps {
   isMobile?: boolean;
   onNavigate?: () => void;
+  onCommandBarOpen?: () => void;
 }
 
-export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
+export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -65,26 +68,48 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
   return (
     <aside 
       className={cn(
-        "h-screen bg-white border-r border-slate-200/60 transition-all duration-300 flex flex-col",
-        isMobile ? "w-full" : "fixed left-0 top-0 z-40",
-        isMobile ? "" : (isCollapsed ? "w-[68px]" : "w-52")
+        "h-screen glass-strong border-r border-border/30 transition-all duration-300 flex flex-col",
+        isMobile ? "w-full bg-background" : "fixed left-0 top-0 z-40",
+        isMobile ? "" : (isCollapsed ? "w-[72px]" : "w-56")
       )}
     >
       {/* Logo */}
       <div className={cn(
-        "h-16 flex items-center border-b border-slate-200/60 px-4",
+        "h-16 flex items-center border-b border-border/30 px-4",
         isCollapsed ? "justify-center" : "gap-3"
       )}>
-        <div className="w-11 h-11 flex items-center justify-center flex-shrink-0">
-          <img src={logoImg} alt="NutriFlow" className="w-10 h-10 object-contain" />
+        <div className="relative w-10 h-10 flex items-center justify-center flex-shrink-0">
+          <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full" />
+          <img src={logoImg} alt="NutriFlow" className="w-9 h-9 object-contain relative z-10" />
         </div>
         {!isCollapsed && (
-          <span className="font-bold text-slate-800 text-lg tracking-tight">NutriFlow</span>
+          <span className="font-bold text-foreground text-lg tracking-tight">
+            Nutri<NeonText variant="lime">Flow</NeonText>
+          </span>
         )}
       </div>
 
+      {/* Command Bar Shortcut */}
+      {!isCollapsed && (
+        <div className="px-3 py-3">
+          <Button
+            variant="outline"
+            onClick={onCommandBarOpen}
+            className="w-full justify-between h-10 rounded-xl border-border/50 bg-muted/30 hover:bg-muted/50 hover:border-primary/30 text-muted-foreground text-sm"
+          >
+            <div className="flex items-center gap-2">
+              <Command className="w-4 h-4" />
+              <span>Buscar...</span>
+            </div>
+            <kbd className="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+              ⌘K
+            </kbd>
+          </Button>
+        </div>
+      )}
+
       {/* Navigation */}
-      <nav className="flex-1 py-4 px-3 space-y-1">
+      <nav className="flex-1 py-2 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.href || 
             (item.href === '/dashboard' && location.pathname === '/');
@@ -96,17 +121,17 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
               onClick={() => handleNavigation(item.href)}
               data-tour={item.tourId}
               className={cn(
-                "w-full justify-start gap-3 h-11 rounded-xl transition-all duration-200 touch-manipulation",
+                "w-full justify-start gap-3 h-11 rounded-xl transition-all duration-200 touch-manipulation group",
                 isCollapsed && "justify-center px-0",
                 isActive 
-                  ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/15 shadow-sm border border-emerald-200/50" 
-                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                  ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_20px_hsl(68_100%_50%/0.15)]" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
             >
               <item.icon className={cn(
-                "w-[18px] h-[18px] flex-shrink-0 transition-colors",
-                isActive ? "text-emerald-500" : "text-slate-400"
-              )} strokeWidth={isActive ? 2.5 : 1.5} />
+                "w-[18px] h-[18px] flex-shrink-0 transition-all duration-200",
+                isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+              )} strokeWidth={isActive ? 2 : 1.5} />
               {!isCollapsed && (
                 <span className={cn(
                   "text-sm transition-colors",
@@ -121,12 +146,12 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-slate-200/60 space-y-1">
+      <div className="p-3 border-t border-border/30 space-y-1">
         <Button
           variant="ghost"
           asChild
           className={cn(
-            "w-full justify-start gap-3 h-11 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200",
+            "w-full justify-start gap-3 h-11 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200",
             isCollapsed && "justify-center px-0"
           )}
         >
@@ -139,7 +164,7 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
           variant="ghost"
           onClick={handleSignOut}
           className={cn(
-            "w-full justify-start gap-3 h-11 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200",
+            "w-full justify-start gap-3 h-11 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200",
             isCollapsed && "justify-center px-0"
           )}
         >
@@ -154,10 +179,10 @@ export function AppSidebar({ isMobile = false, onNavigate }: AppSidebarProps) {
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 hover:shadow transition-all duration-200"
+          className="absolute -right-3 top-20 w-6 h-6 rounded-full glass border border-border/50 hover:border-primary/50 hover:bg-muted transition-all duration-200"
         >
           <ChevronLeft className={cn(
-            "w-3 h-3 text-slate-400 transition-transform duration-200",
+            "w-3 h-3 text-muted-foreground transition-transform duration-200",
             isCollapsed && "rotate-180"
           )} />
         </Button>

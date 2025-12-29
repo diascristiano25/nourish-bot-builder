@@ -16,8 +16,10 @@ import {
   Shield,
   Clock,
   Users,
-  FileText,
   Play,
+  Star,
+  Crown,
+  Rocket,
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 
@@ -39,6 +41,61 @@ export default function Index() {
     );
   }
 
+  const pricingPlans = [
+    {
+      name: 'Starter',
+      price: 'Grátis',
+      period: '60 dias',
+      description: 'Perfeito para testar o sistema',
+      icon: Rocket,
+      features: [
+        'Até 10 pacientes',
+        'Gerador de cardápios com IA',
+        'Tabela TACO completa',
+        'Suporte por WhatsApp',
+      ],
+      cta: 'Começar Grátis',
+      popular: false,
+      glowColor: 'lime' as const,
+    },
+    {
+      name: 'Profissional',
+      price: 'R$ 97',
+      period: '/mês',
+      description: 'Para nutricionistas em crescimento',
+      icon: Crown,
+      features: [
+        'Pacientes ilimitados',
+        'IA avançada para cardápios',
+        'Portal do paciente',
+        'Agenda integrada',
+        'Relatórios financeiros',
+        'Suporte prioritário',
+      ],
+      cta: 'Assinar Agora',
+      popular: true,
+      glowColor: 'violet' as const,
+    },
+    {
+      name: 'Clínica',
+      price: 'R$ 197',
+      period: '/mês',
+      description: 'Para clínicas e equipes',
+      icon: Star,
+      features: [
+        'Tudo do Profissional',
+        'Múltiplos nutricionistas',
+        'Dashboard administrativo',
+        'Relatórios consolidados',
+        'API personalizada',
+        'Onboarding dedicado',
+      ],
+      cta: 'Falar com Vendas',
+      popular: false,
+      glowColor: 'lime' as const,
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       {/* Cyber Header */}
@@ -54,6 +111,12 @@ export default function Index() {
             </span>
           </div>
           <nav className="flex items-center gap-4">
+            <a 
+              href="#pricing" 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline font-medium"
+            >
+              Preços
+            </a>
             <a 
               href="/sobre" 
               className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline font-medium"
@@ -235,6 +298,84 @@ export default function Index() {
                 </div>
               </div>
             </GlassCard>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-24 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
+        <div className="absolute inset-0 cyber-grid opacity-10" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 px-4 py-2 glass border-secondary/30 text-secondary rounded-full font-semibold">
+              Planos
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              Escolha seu <NeonText variant="violet">plano</NeonText>
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+              Comece grátis e escale conforme sua necessidade
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {pricingPlans.map((plan, index) => (
+              <GlassCard 
+                key={plan.name}
+                className={`p-8 relative ${plan.popular ? 'md:-mt-4 md:mb-4' : ''}`}
+                glow={plan.glowColor}
+                variant={plan.popular ? 'strong' : 'default'}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-secondary text-secondary-foreground px-4 py-1 rounded-full font-semibold text-xs">
+                      Mais Popular
+                    </Badge>
+                  </div>
+                )}
+                
+                <div className="flex items-center gap-3 mb-6">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${plan.popular ? 'bg-secondary/20' : 'bg-primary/20'}`}>
+                    <plan.icon className={`w-6 h-6 ${plan.popular ? 'text-secondary' : 'text-primary'}`} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">{plan.name}</h3>
+                    <p className="text-xs text-muted-foreground">{plan.description}</p>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <span className={`text-4xl font-bold ${plan.popular ? 'text-secondary' : 'text-primary'}`}>
+                    {plan.price}
+                  </span>
+                  <span className="text-muted-foreground text-sm">{plan.period}</span>
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.popular ? 'bg-secondary/20' : 'bg-primary/20'}`}>
+                        <Check className={`w-3 h-3 ${plan.popular ? 'text-secondary' : 'text-primary'}`} />
+                      </div>
+                      <span className="text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button 
+                  onClick={() => navigate('/auth')}
+                  className={`w-full rounded-xl py-6 font-semibold ${
+                    plan.popular 
+                      ? 'bg-secondary hover:bg-secondary/90 text-secondary-foreground' 
+                      : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                  }`}
+                >
+                  {plan.cta}
+                </Button>
+              </GlassCard>
+            ))}
           </div>
         </div>
       </section>
