@@ -25,7 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Patient {
@@ -144,7 +144,6 @@ export function NewAppointmentDialog({
         description: 'A consulta foi agendada com sucesso.',
       });
 
-      // Reset form
       setPatientId('');
       setTime('');
       setNotes('');
@@ -164,10 +163,13 @@ export function NewAppointmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="glass-strong border-border/50 sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Novo Agendamento</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-primary" />
+            Novo Agendamento
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
             Agende uma consulta com seu paciente.
           </DialogDescription>
         </DialogHeader>
@@ -175,12 +177,12 @@ export function NewAppointmentDialog({
         <div className="space-y-4 py-4">
           {/* Patient Select */}
           <div className="space-y-2">
-            <Label>Paciente *</Label>
+            <Label className="text-muted-foreground text-sm">Paciente *</Label>
             <Select value={patientId} onValueChange={setPatientId}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-background/50 border-border/50">
                 <SelectValue placeholder={loading ? "Carregando..." : "Selecione o paciente"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass-strong border-border/50">
                 {patients.map((patient) => (
                   <SelectItem key={patient.id} value={patient.id}>
                     {patient.full_name}
@@ -192,13 +194,13 @@ export function NewAppointmentDialog({
 
           {/* Date Picker */}
           <div className="space-y-2">
-            <Label>Data *</Label>
+            <Label className="text-muted-foreground text-sm">Data *</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal bg-background/50 border-border/50",
                     !date && "text-muted-foreground"
                   )}
                 >
@@ -206,7 +208,7 @@ export function NewAppointmentDialog({
                   {date ? format(date, "PPP", { locale: ptBR }) : "Selecione a data"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 glass-strong border-border/50" align="start">
                 <Calendar
                   mode="single"
                   selected={date}
@@ -220,12 +222,12 @@ export function NewAppointmentDialog({
 
           {/* Time Select */}
           <div className="space-y-2">
-            <Label>Horário *</Label>
+            <Label className="text-muted-foreground text-sm">Horário *</Label>
             <Select value={time} onValueChange={setTime}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-background/50 border-border/50">
                 <SelectValue placeholder="Selecione o horário" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass-strong border-border/50 max-h-[200px]">
                 {timeSlots.map((slot) => (
                   <SelectItem key={slot} value={slot}>
                     {slot}
@@ -237,21 +239,22 @@ export function NewAppointmentDialog({
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label>Observações</Label>
+            <Label className="text-muted-foreground text-sm">Observações</Label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Adicione notas sobre a consulta..."
               rows={3}
+              className="bg-background/50 border-border/50"
             />
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border/50">
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={saving}>
+          <Button onClick={handleSubmit} disabled={saving} className="bg-primary hover:bg-primary/90">
             {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Agendar
           </Button>
