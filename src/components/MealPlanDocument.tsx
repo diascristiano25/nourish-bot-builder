@@ -36,11 +36,20 @@ function sanitizeText(text: string | null | undefined): string {
     .trim();
 }
 
-// Fixed column widths - HARDCODED
+// Fixed column widths - HARDCODED (60% food, 25% portion, 15% calories)
 const COLUMN_WIDTHS = {
-  food: '55%',      // Alimento: 55%
+  food: '60%',      // Alimento: 60% - MAXIMUM space for text
   portion: '25%',   // Porção: 25%
-  calories: '20%',  // Calorias: 20%
+  calories: '15%',  // Calorias: 15% - numbers take less space
+};
+
+// PDF Font sizes - REDUCED to prevent line breaking
+const PDF_FONT_SIZES = {
+  foodItem: '9px',     // Was 14px - now 9px
+  portion: '9px',      // Was 13px - now 9px
+  calories: '9px',     // Was 13px - now 9px
+  mealTitle: '14px',   // Reduced from 18px
+  mealTime: '10px',    // Reduced from 12px
 };
 
 interface MealItem {
@@ -396,14 +405,14 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                     <div>
                       <h3 style={{ 
                         color: colors.accent, 
-                        fontSize: '18px', 
+                        fontSize: PDF_FONT_SIZES.mealTitle, 
                         fontWeight: 600,
                         margin: 0,
                       }}>
                         {meal.name}
                       </h3>
                       {meal.time && (
-                        <p style={{ color: colors.textMuted, fontSize: '12px', margin: 0 }}>{meal.time}</p>
+                        <p style={{ color: colors.textMuted, fontSize: PDF_FONT_SIZES.mealTime, margin: 0 }}>{meal.time}</p>
                       )}
                     </div>
                   </div>
@@ -434,50 +443,50 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
                     <tbody>
                       {meal.items?.map((item, itemIndex) => (
                         <tr key={itemIndex}>
-                          {/* ALIMENTO - 55% - NO WORD BREAK */}
+                          {/* ALIMENTO - 60% - SMALL FONT 9px, NO WORD BREAK */}
                           <td style={{ 
-                            padding: '10px 8px 10px 0',
+                            padding: '5px 5px 5px 0',
                             verticalAlign: 'top',
                             color: colors.text, 
-                            fontSize: '14px', 
+                            fontSize: PDF_FONT_SIZES.foodItem,
                             fontWeight: 500,
                             fontFamily: 'Helvetica, Arial, sans-serif',
-                            // CRITICAL: Prevent word breaking
                             wordBreak: 'keep-all',
                             overflowWrap: 'normal',
                             whiteSpace: 'normal',
                             hyphens: 'none',
-                            WebkitHyphens: 'none',
-                            MozHyphens: 'none',
-                            msHyphens: 'none',
+                            lineHeight: 1.3,
                           }}>
                             {sanitizeText(item.food)}
                           </td>
                           {/* PORÇÃO - 25% */}
                           <td style={{ 
-                            padding: '10px 8px',
+                            padding: '5px 5px',
                             verticalAlign: 'top',
                             color: colors.textMuted, 
-                            fontSize: '13px',
+                            fontSize: PDF_FONT_SIZES.portion,
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             wordBreak: 'keep-all',
                             overflowWrap: 'normal',
                             whiteSpace: 'normal',
                             hyphens: 'none',
+                            lineHeight: 1.3,
                           }}>
                             {sanitizeText(item.portion)}
                           </td>
-                          {/* CALORIAS - 20% */}
+                          {/* CALORIAS - 15% */}
                           <td style={{ 
-                            padding: '10px 0 10px 8px',
+                            padding: '5px 0 5px 5px',
                             verticalAlign: 'top',
-                            color: colors.textMuted, 
-                            fontSize: '13px',
-                            fontFamily: 'Helvetica, Arial, monospace',
+                            color: colors.accent, 
+                            fontSize: PDF_FONT_SIZES.calories,
+                            fontFamily: 'monospace',
                             textAlign: 'right',
                             whiteSpace: 'nowrap',
+                            fontWeight: 600,
+                            lineHeight: 1.3,
                           }}>
-                            {item.calories ? `${item.calories} kcal` : '—'}
+                            {item.calories ? `${item.calories}` : '—'}
                           </td>
                         </tr>
                       ))}
