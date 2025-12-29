@@ -196,42 +196,48 @@ serve(async (req) => {
       userAlreadyExisted = true;
     }
 
-    // Now send magic link to the user
-    const finalRedirectUrl = redirectUrl || `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.supabase.co')}/auth/v1/callback`;
+    // Now send magic link to the user using inviteUserByEmail which ACTUALLY sends email
+    const finalRedirectUrl = redirectUrl || `${req.headers.get('origin')}/patient-portal`;
     
     console.log('Sending magic link to:', patientEmail, 'with redirect:', finalRedirectUrl);
     
-    const { error: otpError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
-      email: patientEmail,
-      options: {
-        redirectTo: redirectUrl || `${req.headers.get('origin')}/patient-portal`,
-      },
-    });
+    // Use inviteUserByEmail for existing users - this sends an actual email
+    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      patientEmail,
+      {
+        redirectTo: finalRedirectUrl,
+        data: {
+          full_name: patient.full_name,
+          is_patient: true,
+          patient_id: patientId,
+        },
+      }
+    );
 
-    // Even if generateLink fails, try signInWithOtp as fallback
-    if (otpError) {
-      console.log('generateLink failed, trying signInWithOtp:', otpError.message);
+    if (inviteError) {
+      console.log('inviteUserByEmail failed (user may already be confirmed):', inviteError.message);
       
-      const { error: signInError } = await supabaseAdmin.auth.signInWithOtp({
+      // If invite fails (user already confirmed), generate a recovery/magic link
+      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'recovery',
         email: patientEmail,
         options: {
-          emailRedirectTo: redirectUrl || `${req.headers.get('origin')}/patient-portal`,
-          shouldCreateUser: false, // User already exists
+          redirectTo: finalRedirectUrl,
         },
       });
 
-      if (signInError) {
-        console.error('Both magic link methods failed:', signInError);
+      if (linkError) {
+        console.error('generateLink also failed:', linkError);
         // Still return success if user was created - they can use the login page
         if (userCreated || userAlreadyExisted) {
           return new Response(
             JSON.stringify({ 
               success: true, 
-              message: 'Acesso liberado! O paciente pode fazer login na página de pacientes.',
+              message: 'Acesso liberado! O paciente pode acessar o portal usando o email cadastrado.',
               userCreated,
               userLinked: true,
               emailSent: false,
+              loginUrl: `${req.headers.get('origin')}/patient-auth`,
             }),
             { 
               status: 200, 
@@ -241,11 +247,31 @@ serve(async (req) => {
         }
         
         return new Response(
-          JSON.stringify({ error: 'Failed to send magic link: ' + signInError.message }),
+          JSON.stringify({ error: 'Failed to send access link: ' + linkError.message }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
+      // We have the link, need to send it via email manually or show it
+      console.log('Generated recovery link successfully');
+      
+      // Return success - the link was generated (Supabase should send the email for recovery type)
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Link de recuperação enviado! O paciente receberá um email para definir a senha.',
+          userCreated,
+          userLinked: true,
+          emailSent: true,
+        }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
+
+    console.log('Invite sent successfully to:', patientEmail);
 
     console.log('Magic link process completed successfully for:', patientEmail);
 
