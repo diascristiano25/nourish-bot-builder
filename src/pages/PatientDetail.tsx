@@ -3,13 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { PatientMonitoringTab, PatientEvolutionCard } from '@/components/monitoring';
 import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
 import PatientReportDocument from '@/components/PatientReportDocument';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { NeonText } from '@/components/ui/NeonText';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { 
@@ -143,6 +144,7 @@ export default function PatientDetail() {
   const [latestMealPlan, setLatestMealPlan] = useState<any>(null);
   const [exportingPDF, setExportingPDF] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -157,7 +159,6 @@ export default function PatientDetail() {
 
   const fetchPatientData = async () => {
     try {
-      // Fetch nutritionist profile
       const { data: nutriData } = await supabase
         .from('profiles')
         .select('*')
@@ -169,7 +170,6 @@ export default function PatientDetail() {
         setNutritionist(nutriData);
       }
 
-      // Fetch patient
       const { data: patientData, error: patientError } = await supabase
         .from('patients')
         .select('*')
@@ -179,7 +179,6 @@ export default function PatientDetail() {
       if (patientError) throw patientError;
       setPatient(patientData);
 
-      // Fetch anthropometrics
       const { data: anthropData, error: anthropError } = await supabase
         .from('anthropometrics')
         .select('*')
@@ -189,7 +188,6 @@ export default function PatientDetail() {
       if (anthropError) throw anthropError;
       setAnthropometrics(anthropData || []);
 
-      // Fetch meal plans
       const { data: mealData, error: mealError } = await supabase
         .from('meal_plans')
         .select('id, title, description, total_calories, is_active, created_at, plan_data')
@@ -202,7 +200,6 @@ export default function PatientDetail() {
         setLatestMealPlan(mealData[0]);
       }
 
-      // Fetch all weight logs for history
       const { data: allWeightData } = await supabase
         .from('weight_logs')
         .select('weight, recorded_at')
@@ -219,7 +216,6 @@ export default function PatientDetail() {
         }
       }
 
-      // Fetch body fat logs from anthropometrics
       const { data: bodyFatData } = await supabase
         .from('anthropometrics')
         .select('body_fat_percentage, measured_at')
@@ -231,7 +227,6 @@ export default function PatientDetail() {
         setBodyFatLogs(bodyFatData);
       }
 
-      // Fetch consultations (completed appointments)
       const { data: consultData, error: consultError } = await supabase
         .from('appointments')
         .select('id, date_time, status, notes')
@@ -413,11 +408,7 @@ export default function PatientDetail() {
   };
 
   const latestAnthropometric = anthropometrics[0];
-  
-  // Get the latest non-null height from anthropometrics
   const latestHeight = anthropometrics.find(a => a.height_cm !== null)?.height_cm || null;
-  
-  // Use weight_logs weight (same as chart) or fall back to anthropometrics
   const displayWeight = latestWeight ?? latestAnthropometric?.weight_kg ?? null;
   
   const age = patient?.birth_date 
@@ -434,8 +425,11 @@ export default function PatientDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen gradient-subtle flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-muted-foreground animate-pulse">Carregando paciente...</p>
+        </div>
       </div>
     );
   }
@@ -446,91 +440,168 @@ export default function PatientDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b">
+      {/* Cyber Header */}
+      <header className="sticky top-0 z-50 glass border-b border-border/50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate('/dashboard')}
+              className="hover:bg-primary/10"
+            >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="font-semibold text-primary text-lg">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center glow-primary">
+                <span className="font-bold text-primary text-xl">
                   {patient.full_name.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div>
-                <h1 className="font-bold text-lg">{patient.full_name}</h1>
+                <NeonText as="h1" color="primary" className="text-lg font-bold">
+                  {patient.full_name}
+                </NeonText>
                 <p className="text-xs text-muted-foreground">
-                  {age ? `${age} anos` : 'Idade não informada'}
+                  {age ? `${age} anos` : 'Idade não informada'} • {patient.goal ? goalLabels[patient.goal] : 'Objetivo não definido'}
                 </p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              onClick={() => navigate(`/consulta/${id}`)}
-              className="gap-2"
-            >
-              <FileText className="w-4 h-4" />
-              Nova Consulta
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  disabled={sendingMagicLink || !patient.email}
-                >
-                  {sendingMagicLink ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="mr-2 h-4 w-4" />
-                  )}
-                  Enviar Acesso
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Enviar link de acesso?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Um email será enviado para <strong>{patient.email}</strong> com um link mágico. 
-                    Ao clicar, o paciente será autenticado e terá acesso ao portal.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSendMagicLink}>
-                    <Send className="mr-2 h-4 w-4" />
-                    Enviar Email
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleCopyPortalLink}
-                    className="gap-2"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => navigate(`/patients/${id}/edit`)}
+                    className="border-border/50 hover:border-primary/50"
                   >
-                    <Copy className="w-4 h-4" />
-                    Copiar Link
+                    <Edit className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-xs text-center">
-                  <p className="text-xs">Link de acesso seguro gerado via infraestrutura NutriFlow</p>
-                </TooltipContent>
+                <TooltipContent>Editar paciente</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             <Button 
-              variant="outline" 
-              size="sm"
+              onClick={() => navigate(`/consulta/${id}`)}
+              className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+            >
+              <FileText className="w-4 h-4" />
+              Nova Consulta
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* Critical Tags */}
+        {patient.critical_tags && patient.critical_tags.length > 0 && (
+          <GlassCard className="p-4 border-destructive/30 bg-destructive/5">
+            <div className="flex items-center gap-3">
+              <Heart className="w-5 h-5 text-destructive" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-destructive mb-2">Tags Críticas</p>
+                <CriticalTagsBadges tags={patient.critical_tags} />
+              </div>
+            </div>
+          </GlassCard>
+        )}
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Scale className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">
+                  {displayWeight ? `${displayWeight}kg` : '-'}
+                </p>
+                <p className="text-xs text-muted-foreground">Peso Atual</p>
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Activity className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">
+                  {latestHeight ? `${latestHeight}cm` : '-'}
+                </p>
+                <p className="text-xs text-muted-foreground">Altura</p>
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-info" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">
+                  {calculateBMI() || '-'}
+                </p>
+                <p className="text-xs text-muted-foreground">IMC</p>
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+                <Target className="w-5 h-5 text-success" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">
+                  {latestAnthropometric?.body_fat_percentage ? `${latestAnthropometric.body_fat_percentage}%` : '-'}
+                </p>
+                <p className="text-xs text-muted-foreground">% Gordura</p>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+
+        {/* Quick Actions */}
+        <GlassCard className="p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button 
+              onClick={handleGenerateMealPlan}
+              className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+            >
+              <Sparkles className="w-4 h-4" />
+              Gerar Cardápio IA
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={handleCopyPortalLink}
+              className="gap-2 border-border/50 hover:border-primary/50"
+            >
+              <Link className="w-4 h-4" />
+              Copiar Link Portal
+            </Button>
+
+            <Button 
+              variant="outline"
+              onClick={handleShareWhatsApp}
+              className="gap-2 border-border/50 hover:border-success/50 hover:text-success"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Compartilhar WhatsApp
+            </Button>
+
+            <Button 
+              variant="outline"
               onClick={handleExportPDF}
               disabled={exportingPDF}
-              className="gap-2"
+              className="gap-2 border-border/50 hover:border-primary/50"
             >
               {exportingPDF ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -539,455 +610,203 @@ export default function PatientDetail() {
               )}
               Exportar PDF
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleShareWhatsApp}
-              className="gap-2 text-success hover:text-success"
-            >
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.open(`/paciente/${patient?.id}`, '_blank')}
-              title="Visualizar Portal do Paciente"
-              className="gap-2"
-              data-tour="patient-portal"
-            >
-              <Link className="w-4 h-4" />
-              Ver Portal
-            </Button>
-            <Button variant="outline" size="icon" onClick={() => navigate(`/patients/${id}/edit`)}>
-              <Edit className="w-4 h-4" />
-            </Button>
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="icon" className="text-destructive hover:text-destructive">
+                <Button 
+                  variant="outline"
+                  size="icon"
+                  className="border-border/50 hover:border-destructive/50 hover:text-destructive ml-auto"
+                >
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent className="glass border-border/50">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Remover paciente?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta ação não pode ser desfeita. Todos os dados do paciente serão removidos permanentemente.
+                    Esta ação não pode ser desfeita. Todos os dados do paciente serão permanentemente removidos.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  <AlertDialogCancel className="border-border/50">Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
                     Remover
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="pt-4 text-center">
-              <Scale className="w-5 h-5 text-primary mx-auto mb-2" />
-              <p className="text-2xl font-bold">
-                {displayWeight || '-'}
-                <span className="text-sm font-normal text-muted-foreground"> kg</span>
-              </p>
-              <p className="text-xs text-muted-foreground">Peso</p>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-sm">
-            <CardContent className="pt-4 text-center">
-              <TrendingUp className="w-5 h-5 text-success mx-auto mb-2" />
-              <p className="text-2xl font-bold">
-                {latestHeight || '-'}
-                <span className="text-sm font-normal text-muted-foreground"> cm</span>
-              </p>
-              <p className="text-xs text-muted-foreground">Altura</p>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-sm">
-            <CardContent className="pt-4 text-center">
-              <Activity className="w-5 h-5 text-info mx-auto mb-2" />
-              <p className="text-2xl font-bold">{calculateBMI() || '-'}</p>
-              <p className="text-xs text-muted-foreground">IMC</p>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-sm">
-            <CardContent className="pt-4 text-center">
-              <Target className="w-5 h-5 text-warning mx-auto mb-2" />
-              <p className="text-sm font-semibold">
-                {patient.goal ? goalLabels[patient.goal] : '-'}
-              </p>
-              <p className="text-xs text-muted-foreground">Objetivo</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Critical Tags Alert */}
-        {patient.critical_tags && patient.critical_tags.length > 0 && (
-          <Card className="border-0 shadow-md border-l-4 border-l-warning bg-warning/5">
-            <CardContent className="pt-4 pb-4">
-              <CriticalTagsBadges tags={patient.critical_tags} size="lg" />
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Generate Meal Plan CTA */}
-        <Card className="border-0 shadow-md gradient-card overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
-                  <Sparkles className="w-7 h-7 text-primary-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg">Gerar Cardápio com IA</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Baseado na Tabela TACO e dados do paciente
-                  </p>
-                </div>
-              </div>
-              <Button 
-                variant="hero" 
-                size="lg"
-                onClick={handleGenerateMealPlan}
-                disabled={generatingPlan}
-              >
-                {generatingPlan ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Gerando...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Gerar Cardápio
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        </GlassCard>
 
         {/* Tabs */}
-        <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="info">Informações</TabsTrigger>
-            <TabsTrigger value="monitoring">
-              <LineChart className="w-4 h-4 mr-1.5" />
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="glass border border-border/50 p-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-primary/20">
+              Visão Geral
+            </TabsTrigger>
+            <TabsTrigger value="monitoring" className="data-[state=active]:bg-primary/20">
               Monitoramento
             </TabsTrigger>
-            <TabsTrigger value="history">Histórico</TabsTrigger>
-            <TabsTrigger value="plans">Cardápios</TabsTrigger>
+            <TabsTrigger value="mealplans" className="data-[state=active]:bg-primary/20">
+              Cardápios
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-primary/20">
+              Histórico
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="info" className="space-y-4 mt-4">
-            {/* Contact Info */}
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <User className="w-5 h-5 text-primary" />
-                  Contato
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {patient.email && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-4 h-4 text-muted-foreground" />
-                    <span>{patient.email}</span>
+          <TabsContent value="overview" className="space-y-6">
+            {/* Patient Info */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <GlassCard className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
                   </div>
-                )}
-                {patient.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <span>{patient.phone}</span>
+                  <NeonText as="h3" color="primary" className="font-semibold">
+                    Dados Pessoais
+                  </NeonText>
+                </div>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between py-2 border-b border-border/30">
+                    <span className="text-muted-foreground">Email</span>
+                    <span className="text-foreground">{patient.email || '-'}</span>
                   </div>
-                )}
-                {patient.birth_date && (
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span>
-                      {format(parseISO(patient.birth_date), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                    </span>
+                  <div className="flex justify-between py-2 border-b border-border/30">
+                    <span className="text-muted-foreground">Telefone</span>
+                    <span className="text-foreground">{patient.phone || '-'}</span>
                   </div>
-                )}
-                {patient.gender && (
-                  <div className="flex items-center gap-3">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                    <span>{genderLabels[patient.gender] || patient.gender}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              </GlassCard>
 
-            {/* Activity & Goals */}
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Target className="w-5 h-5 text-info" />
-                  Objetivos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {patient.goal && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Objetivo</p>
-                    <Badge variant="secondary">{goalLabels[patient.goal]}</Badge>
+              <GlassCard className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-destructive" />
                   </div>
-                )}
-                {patient.activity_level && (
+                  <NeonText as="h3" color="primary" className="font-semibold">
+                    Saúde & Restrições
+                  </NeonText>
+                </div>
+                <div className="space-y-4 text-sm">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Nível de Atividade</p>
-                    <Badge variant="outline">{activityLabels[patient.activity_level]}</Badge>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Health Info */}
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-destructive" />
-                  Saúde
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {patient.allergies && patient.allergies.length > 0 && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">Alergias</p>
+                    <p className="text-muted-foreground mb-2">Alergias</p>
                     <div className="flex flex-wrap gap-2">
-                      {patient.allergies.map((allergy, index) => (
-                        <Badge key={index} variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20">
-                          {allergy}
-                        </Badge>
-                      ))}
+                      {patient.allergies && patient.allergies.length > 0 ? (
+                        patient.allergies.map((allergy, i) => (
+                          <Badge key={i} variant="destructive" className="text-xs">
+                            {allergy}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-muted-foreground">Nenhuma</span>
+                      )}
                     </div>
                   </div>
-                )}
-                {patient.dietary_restrictions && patient.dietary_restrictions.length > 0 && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">Restrições Alimentares</p>
-                    <div className="flex flex-wrap gap-2">
-                      {patient.dietary_restrictions.map((restriction, index) => (
-                        <Badge key={index} variant="secondary">
-                          {restriction}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {patient.medical_conditions && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Condições Médicas</p>
-                    <p className="text-sm">{patient.medical_conditions}</p>
-                  </div>
-                )}
-                {patient.notes && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Observações</p>
-                    <p className="text-sm">{patient.notes}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              </GlassCard>
+            </div>
           </TabsContent>
 
-          {/* Monitoring Tab */}
-          <TabsContent value="monitoring" className="mt-4 space-y-4">
-            {/* Evolution Card */}
-            <PatientEvolutionCard
-              initialWeight={initialWeight}
-              currentWeight={displayWeight}
-              height={latestHeight}
-              initialBodyFat={anthropometrics[anthropometrics.length - 1]?.body_fat_percentage}
-              currentBodyFat={latestAnthropometric?.body_fat_percentage}
-              goal={patient.goal}
-            />
-            
-            {/* Monitoring Tab Content */}
-            <PatientMonitoringTab patientId={patient.id} />
+          <TabsContent value="monitoring">
+            <PatientMonitoringTab patientId={id!} />
           </TabsContent>
 
-          <TabsContent value="history" className="mt-4 space-y-4">
-            {/* Consultation History */}
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-primary" />
-                  Histórico de Consultas
-                </CardTitle>
-                <CardDescription>
-                  Consultas realizadas com este paciente
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {consultations.length === 0 ? (
-                  <div className="text-center py-8">
-                    <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                    <p className="text-muted-foreground mb-4">Nenhuma consulta registrada</p>
-                    <Button onClick={() => navigate(`/consulta/${id}`)}>
-                      Iniciar Primeira Consulta
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {consultations.map((consultation) => {
-                      let parsedNotes = null;
-                      try {
-                        parsedNotes = consultation.notes ? JSON.parse(consultation.notes) : null;
-                      } catch {}
-                      
-                      return (
-                        <div key={consultation.id} className="p-4 rounded-xl bg-muted/50 border border-border/30">
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="text-sm font-medium">
-                              {format(new Date(consultation.date_time), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: ptBR })}
-                            </p>
-                            <Badge variant="secondary" className="text-xs">Concluída</Badge>
-                          </div>
-                          {parsedNotes && (
-                            <div className="text-sm text-muted-foreground space-y-1">
-                              {parsedNotes.anamnese?.freeText && (
-                                <p className="line-clamp-2">
-                                  <strong>Anamnese:</strong> {parsedNotes.anamnese.freeText}
-                                </p>
-                              )}
-                              {parsedNotes.orientacoes && (
-                                <p className="line-clamp-1">
-                                  <strong>Orientações:</strong> {parsedNotes.orientacoes}
-                                </p>
-                              )}
-                            </div>
-                          )}
+          <TabsContent value="mealplans" className="space-y-4">
+            {mealPlans.length === 0 ? (
+              <GlassCard className="p-12 text-center">
+                <Sparkles className="w-12 h-12 text-primary/50 mx-auto mb-4" />
+                <NeonText as="h3" color="primary" className="text-lg font-semibold mb-2">
+                  Nenhum cardápio criado
+                </NeonText>
+                <p className="text-muted-foreground mb-6">
+                  Crie o primeiro cardápio personalizado com IA
+                </p>
+                <Button onClick={handleGenerateMealPlan} className="gap-2 bg-gradient-to-r from-primary to-accent">
+                  <Sparkles className="w-4 h-4" />
+                  Gerar Cardápio IA
+                </Button>
+              </GlassCard>
+            ) : (
+              <div className="grid gap-4">
+                {mealPlans.map((plan) => (
+                  <GlassCard 
+                    key={plan.id} 
+                    className="p-4 cursor-pointer hover:border-primary/50 transition-all"
+                    onClick={() => navigate(`/patients/${id}/meal-plan/${plan.id}`)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                          <FileText className="w-6 h-6 text-primary" />
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Anthropometric History */}
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Scale className="w-5 h-5 text-success" />
-                  Histórico de Medidas
-                </CardTitle>
-                <CardDescription>
-                  Acompanhamento antropométrico
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {anthropometrics.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Scale className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                    <p className="text-muted-foreground">Nenhuma medida registrada</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {anthropometrics.map((record) => (
-                      <div key={record.id} className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
                         <div>
+                          <h4 className="font-semibold text-foreground">{plan.title}</h4>
                           <p className="text-sm text-muted-foreground">
-                            {format(new Date(record.measured_at), "d 'de' MMM, yyyy", { locale: ptBR })}
-                          </p>
-                          <div className="flex items-center gap-4 mt-1">
-                            {record.weight_kg && (
-                              <span className="font-semibold">{record.weight_kg} kg</span>
-                            )}
-                            {record.height_cm && (
-                              <span className="text-muted-foreground">{record.height_cm} cm</span>
-                            )}
-                            {record.body_fat_percentage && (
-                              <span className="text-muted-foreground">{record.body_fat_percentage}% gordura</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="plans" className="mt-4">
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-primary" />
-                  Cardápios
-                </CardTitle>
-                <CardDescription>
-                  Planos alimentares gerados
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {mealPlans.length === 0 ? (
-                  <div className="text-center py-8">
-                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground mb-4">Nenhum cardápio gerado ainda</p>
-                    <Button onClick={handleGenerateMealPlan}>
-                      <Sparkles className="mr-2 w-4 h-4" />
-                      Gerar Primeiro Cardápio
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {mealPlans.map((plan) => (
-                      <div 
-                        key={plan.id} 
-                        className="flex items-center justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
-                        onClick={() => navigate(`/patients/${id}/meal-plan/${plan.id}`)}
-                      >
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{plan.title}</h4>
-                            {plan.is_active && (
-                              <Badge variant="default" className="text-xs">Ativo</Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {format(new Date(plan.created_at), "d 'de' MMM, yyyy", { locale: ptBR })}
+                            {format(new Date(plan.created_at), "d 'de' MMMM", { locale: ptBR })}
                             {plan.total_calories && ` • ${plan.total_calories} kcal`}
                           </p>
                         </div>
-                        <FileText className="w-5 h-5 text-muted-foreground" />
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      {plan.is_active && (
+                        <Badge className="bg-success/20 text-success border-success/30">
+                          Ativo
+                        </Badge>
+                      )}
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-4">
+            {consultations.length === 0 ? (
+              <GlassCard className="p-12 text-center">
+                <Calendar className="w-12 h-12 text-primary/50 mx-auto mb-4" />
+                <NeonText as="h3" color="primary" className="text-lg font-semibold mb-2">
+                  Nenhuma consulta realizada
+                </NeonText>
+                <p className="text-muted-foreground mb-6">
+                  Inicie a primeira consulta do paciente
+                </p>
+                <Button 
+                  onClick={() => navigate(`/consulta/${id}`)} 
+                  className="gap-2 bg-gradient-to-r from-primary to-accent"
+                >
+                  <FileText className="w-4 h-4" />
+                  Nova Consulta
+                </Button>
+              </GlassCard>
+            ) : (
+              <div className="space-y-4">
+                {consultations.map((consultation) => (
+                  <GlassCard key={consultation.id} className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-foreground">
+                          Consulta em {format(new Date(consultation.date_time), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(consultation.date_time), 'HH:mm')}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="bg-success/20 text-success">
+                        Concluída
+                      </Badge>
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </main>
 
-      {/* Hidden PDF Report Component */}
-      <div className="absolute -left-[9999px] top-0">
-        {nutritionist && (
-          <PatientReportDocument
-            ref={reportRef}
-            patient={patient}
-            nutritionist={nutritionist}
-            weightRecords={weightLogs}
-            bodyFatRecords={bodyFatLogs}
-            latestMealPlan={latestMealPlan}
-            currentWeight={displayWeight}
-            initialWeight={initialWeight}
-            currentBodyFat={latestAnthropometric?.body_fat_percentage}
-            initialBodyFat={anthropometrics[anthropometrics.length - 1]?.body_fat_percentage}
-            height={latestHeight}
-          />
-        )}
-      </div>
     </div>
   );
 }
