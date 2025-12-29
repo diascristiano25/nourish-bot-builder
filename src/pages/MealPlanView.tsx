@@ -513,7 +513,7 @@ export default function MealPlanView() {
         )}
       </main>
 
-      {/* Hidden PDF Document */}
+      {/* Hidden PDF Document - Elite Magazine Layout */}
       <div className="absolute left-[-9999px] top-0">
         <MealPlanDocument
           ref={documentRef}
