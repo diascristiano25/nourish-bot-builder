@@ -513,6 +513,28 @@ export default function MealPlanView() {
         )}
       </main>
 
+      {/* Hidden PDF Document */}
+      <div className="absolute left-[-9999px] top-0">
+        <MealPlanDocument
+          ref={documentRef}
+          mealPlan={{
+            title: mealPlan.title,
+            description: mealPlan.description,
+            total_calories: mealPlan.total_calories,
+            plan_data: planData,
+            created_at: mealPlan.created_at,
+          }}
+          patientName={patient?.full_name || ''}
+          nutritionist={{
+            full_name: nutritionist?.full_name || '',
+            crn: nutritionist?.crn || null,
+            phone: nutritionist?.phone || null,
+            logo_url: nutritionist?.logo_url || null,
+            primary_color: nutritionist?.primary_color || null,
+            secondary_color: nutritionist?.secondary_color || null,
+          }}
+        />
+      </div>
     </div>
   );
 }
