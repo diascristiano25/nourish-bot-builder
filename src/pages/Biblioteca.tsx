@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,12 +39,16 @@ import {
   Loader2,
   Search,
   Sparkles,
-  PenLine
+  PenLine,
+  BookOpen,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PageTour, bibliotecaTourSteps } from '@/components/PageTour';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { NeonText } from '@/components/ui/NeonText';
 
 interface CustomFood {
   id: string;
@@ -125,7 +128,6 @@ export default function Biblioteca() {
     if (!user) return;
     
     try {
-      // Get nutritionist ID
       const { data: nutritionist, error: nutritionistError } = await supabase
         .from('profiles')
         .select('id')
@@ -140,7 +142,6 @@ export default function Biblioteca() {
       
       setNutritionistId(nutritionist.id);
       
-      // Fetch foods and recipes in parallel
       const [foodsResult, recipesResult] = await Promise.all([
         supabase
           .from('custom_foods')
@@ -344,7 +345,6 @@ export default function Biblioteca() {
       if (data?.recipe) {
         const recipe = data.recipe;
         
-        // Build notes with full recipe details
         const notesContent = [
           recipe.ingredients?.length ? `**Ingredientes:**\n${recipe.ingredients.join('\n')}` : '',
           recipe.instructions ? `\n**Modo de Preparo:**\n${recipe.instructions}` : '',
@@ -424,58 +424,67 @@ export default function Biblioteca() {
   return (
     <AppLayout>
       <PageTour tourKey="biblioteca" steps={bibliotecaTourSteps} run />
-      <div className="min-h-screen">
-        {/* Header */}
-        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border/50">
-          <div className="px-8 h-16 flex items-center justify-between">
+      <div className="min-h-screen bg-background">
+        {/* Cyber Header */}
+        <header className="sticky top-0 z-30 glass-strong border-b border-border/30">
+          <div className="px-4 md:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-9 w-9 rounded-lg"
+                className="h-9 w-9 rounded-xl glass hover:bg-primary/10"
                 onClick={() => navigate('/dashboard')}
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">Minha Biblioteca</h1>
-                <p className="text-xs text-muted-foreground">Alimentos e receitas personalizados</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-semibold text-foreground">
+                    Minha <NeonText variant="lime">Biblioteca</NeonText>
+                  </h1>
+                  <p className="text-xs text-muted-foreground">Alimentos e receitas personalizados</p>
+                </div>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="p-8 max-w-6xl mx-auto">
+        <main className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
           {/* Search */}
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar alimentos ou receitas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-11 rounded-xl"
-            />
-          </div>
+          <GlassCard variant="subtle" className="p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar alimentos ou receitas..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-11 rounded-xl bg-background/50 border-border/50 focus:border-primary/50"
+              />
+            </div>
+          </GlassCard>
 
           <Tabs defaultValue="foods" className="space-y-6">
-            <TabsList className="bg-muted/50 p-1 rounded-xl h-auto">
+            <TabsList className="glass p-1 rounded-xl h-auto border border-border/30">
               <TabsTrigger 
                 value="foods" 
-                className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"
+                className="rounded-lg px-6 py-2.5 data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-2 font-medium"
                 data-tour="biblioteca-foods-tab"
               >
                 <Apple className="w-4 h-4" />
-                Alimentos Personalizados
-                <Badge variant="secondary" className="ml-1">{foods.length}</Badge>
+                Alimentos
+                <Badge className="ml-1 bg-primary/20 text-primary border-0">{foods.length}</Badge>
               </TabsTrigger>
               <TabsTrigger 
                 value="recipes" 
-                className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"
+                className="rounded-lg px-6 py-2.5 data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary gap-2 font-medium"
                 data-tour="biblioteca-recipes-tab"
               >
                 <ChefHat className="w-4 h-4" />
-                Minhas Receitas
-                <Badge variant="secondary" className="ml-1">{recipes.length}</Badge>
+                Receitas
+                <Badge className="ml-1 bg-secondary/20 text-secondary border-0">{recipes.length}</Badge>
               </TabsTrigger>
             </TabsList>
 
@@ -490,36 +499,38 @@ export default function Biblioteca() {
                   if (!open) resetFoodForm();
                 }}>
                   <DialogTrigger asChild>
-                    <Button className="gap-2" data-tour="biblioteca-new-food">
+                    <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" data-tour="biblioteca-new-food">
                       <Plus className="w-4 h-4" />
                       Novo Alimento
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="glass-strong border-border/50">
                     <DialogHeader>
-                      <DialogTitle>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Apple className="w-5 h-5 text-primary" />
                         {editingFood ? 'Editar Alimento' : 'Novo Alimento'}
                       </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 pt-4">
                       <div className="space-y-2">
-                        <Label>Nome do Alimento</Label>
+                        <Label className="text-muted-foreground text-sm">Nome do Alimento</Label>
                         <Input
                           placeholder="Ex: Pão de queijo fit"
                           value={foodForm.name}
                           onChange={(e) => setFoodForm(prev => ({ ...prev, name: e.target.value }))}
+                          className="bg-background/50 border-border/50"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Unidade de Medida</Label>
+                        <Label className="text-muted-foreground text-sm">Unidade de Medida</Label>
                         <Select 
                           value={foodForm.unit_type}
                           onValueChange={(v) => setFoodForm(prev => ({ ...prev, unit_type: v }))}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background/50 border-border/50">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="glass-strong border-border/50">
                             <SelectItem value="g">Gramas (g)</SelectItem>
                             <SelectItem value="ml">Mililitros (ml)</SelectItem>
                             <SelectItem value="unidade">Unidade</SelectItem>
@@ -530,44 +541,48 @@ export default function Biblioteca() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Calorias (kcal)</Label>
+                          <Label className="text-muted-foreground text-sm">Calorias (kcal)</Label>
                           <Input
                             type="number"
                             placeholder="0"
                             value={foodForm.kcal}
                             onChange={(e) => setFoodForm(prev => ({ ...prev, kcal: e.target.value }))}
+                            className="bg-background/50 border-border/50"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Proteínas (g)</Label>
+                          <Label className="text-muted-foreground text-sm">Proteínas (g)</Label>
                           <Input
                             type="number"
                             placeholder="0"
                             value={foodForm.protein}
                             onChange={(e) => setFoodForm(prev => ({ ...prev, protein: e.target.value }))}
+                            className="bg-background/50 border-border/50"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Carboidratos (g)</Label>
+                          <Label className="text-muted-foreground text-sm">Carboidratos (g)</Label>
                           <Input
                             type="number"
                             placeholder="0"
                             value={foodForm.carb}
                             onChange={(e) => setFoodForm(prev => ({ ...prev, carb: e.target.value }))}
+                            className="bg-background/50 border-border/50"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Gorduras (g)</Label>
+                          <Label className="text-muted-foreground text-sm">Gorduras (g)</Label>
                           <Input
                             type="number"
                             placeholder="0"
                             value={foodForm.fat}
                             onChange={(e) => setFoodForm(prev => ({ ...prev, fat: e.target.value }))}
+                            className="bg-background/50 border-border/50"
                           />
                         </div>
                       </div>
                       <Button 
-                        className="w-full" 
+                        className="w-full bg-primary hover:bg-primary/90" 
                         onClick={handleSaveFood}
                         disabled={savingFood || !foodForm.name.trim()}
                       >
@@ -583,48 +598,52 @@ export default function Biblioteca() {
               </div>
 
               {filteredFoods.length === 0 ? (
-                <Card className="border-dashed">
-                  <CardContent className="py-12 text-center">
-                    <Apple className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      {searchTerm ? 'Nenhum alimento encontrado' : 'Nenhum alimento cadastrado ainda'}
+                <GlassCard className="border-dashed border-border/50 p-12 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <Apple className="w-8 h-8 text-primary/50" />
+                  </div>
+                  <p className="text-muted-foreground">
+                    {searchTerm ? 'Nenhum alimento encontrado' : 'Nenhum alimento cadastrado ainda'}
+                  </p>
+                  {!searchTerm && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Clique em "Novo Alimento" para começar
                     </p>
-                    {!searchTerm && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Clique em "Novo Alimento" para começar
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
+                  )}
+                </GlassCard>
               ) : (
-                <Card>
+                <GlassCard className="overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead className="text-center">Unidade</TableHead>
-                        <TableHead className="text-center">Kcal</TableHead>
-                        <TableHead className="text-center">Prot (g)</TableHead>
-                        <TableHead className="text-center">Carb (g)</TableHead>
-                        <TableHead className="text-center">Gord (g)</TableHead>
+                      <TableRow className="border-border/30 hover:bg-transparent">
+                        <TableHead className="text-muted-foreground">Nome</TableHead>
+                        <TableHead className="text-center text-muted-foreground">Unidade</TableHead>
+                        <TableHead className="text-center text-primary">Kcal</TableHead>
+                        <TableHead className="text-center text-blue-400">Prot (g)</TableHead>
+                        <TableHead className="text-center text-amber-400">Carb (g)</TableHead>
+                        <TableHead className="text-center text-rose-400">Gord (g)</TableHead>
                         <TableHead className="w-20"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredFoods.map((food) => (
-                        <TableRow key={food.id}>
-                          <TableCell className="font-medium">{food.name}</TableCell>
+                      {filteredFoods.map((food, index) => (
+                        <TableRow 
+                          key={food.id} 
+                          className="border-border/30 hover:bg-primary/5 transition-colors"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          <TableCell className="font-medium text-foreground">{food.name}</TableCell>
                           <TableCell className="text-center text-muted-foreground">{food.unit_type}</TableCell>
-                          <TableCell className="text-center">{food.kcal}</TableCell>
-                          <TableCell className="text-center">{food.protein}</TableCell>
-                          <TableCell className="text-center">{food.carb}</TableCell>
-                          <TableCell className="text-center">{food.fat}</TableCell>
+                          <TableCell className="text-center font-mono text-primary">{food.kcal}</TableCell>
+                          <TableCell className="text-center font-mono text-blue-400">{food.protein}</TableCell>
+                          <TableCell className="text-center font-mono text-amber-400">{food.carb}</TableCell>
+                          <TableCell className="text-center font-mono text-rose-400">{food.fat}</TableCell>
                           <TableCell>
                             <div className="flex gap-1">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8"
+                                className="h-8 w-8 hover:bg-primary/10"
                                 onClick={() => openEditFood(food)}
                               >
                                 <Pencil className="w-4 h-4" />
@@ -632,7 +651,7 @@ export default function Biblioteca() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-destructive hover:text-destructive"
+                                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                 onClick={() => handleDeleteFood(food.id)}
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -643,7 +662,7 @@ export default function Biblioteca() {
                       ))}
                     </TableBody>
                   </Table>
-                </Card>
+                </GlassCard>
               )}
             </TabsContent>
 
@@ -658,25 +677,26 @@ export default function Biblioteca() {
                   if (!open) resetRecipeForm();
                 }}>
                   <DialogTrigger asChild>
-                    <Button className="gap-2" data-tour="biblioteca-new-recipe">
+                    <Button className="gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground" data-tour="biblioteca-new-recipe">
                       <Plus className="w-4 h-4" />
                       Nova Receita
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="glass-strong border-border/50 max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle>
+                      <DialogTitle className="flex items-center gap-2">
+                        <ChefHat className="w-5 h-5 text-secondary" />
                         {editingRecipe ? 'Editar Receita' : 'Nova Receita'}
                       </DialogTitle>
                     </DialogHeader>
                     
-                    {/* Mode Toggle - Only show when not editing */}
+                    {/* Mode Toggle */}
                     {!editingRecipe && (
                       <div className="flex gap-2 pt-2">
                         <Button
                           variant={recipeMode === 'manual' ? 'default' : 'outline'}
                           size="sm"
-                          className="flex-1 gap-2"
+                          className={`flex-1 gap-2 ${recipeMode === 'manual' ? 'bg-secondary' : 'border-border/50'}`}
                           onClick={() => setRecipeMode('manual')}
                         >
                           <PenLine className="w-4 h-4" />
@@ -685,7 +705,7 @@ export default function Biblioteca() {
                         <Button
                           variant={recipeMode === 'ai' ? 'default' : 'outline'}
                           size="sm"
-                          className="flex-1 gap-2"
+                          className={`flex-1 gap-2 ${recipeMode === 'ai' ? 'bg-gradient-to-r from-primary to-secondary' : 'border-border/50'}`}
                           onClick={() => setRecipeMode('ai')}
                         >
                           <Sparkles className="w-4 h-4" />
@@ -697,36 +717,34 @@ export default function Biblioteca() {
                     {/* AI Mode */}
                     {recipeMode === 'ai' && !editingRecipe && (
                       <div className="space-y-4 pt-4">
-                        <Card className="border-primary/20 bg-primary/5">
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2 text-sm text-primary">
-                              <Sparkles className="w-4 h-4" />
-                              A IA vai criar uma receita completa com ingredientes, modo de preparo e macros.
-                            </div>
-                          </CardContent>
-                        </Card>
+                        <GlassCard variant="subtle" className="p-4 border-primary/30">
+                          <div className="flex items-center gap-2 text-sm text-primary">
+                            <Zap className="w-4 h-4" />
+                            A IA vai criar uma receita completa com ingredientes, modo de preparo e macros.
+                          </div>
+                        </GlassCard>
                         
                         <div className="space-y-2">
-                          <Label>Ingredientes Principais *</Label>
+                          <Label className="text-muted-foreground text-sm">Ingredientes Principais *</Label>
                           <Textarea
                             placeholder="Ex: frango, batata doce, brócolis, azeite..."
                             value={aiRecipeForm.ingredients}
                             onChange={(e) => setAiRecipeForm(prev => ({ ...prev, ingredients: e.target.value }))}
-                            className="min-h-[80px]"
+                            className="min-h-[80px] bg-background/50 border-border/50"
                           />
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label>Porções</Label>
+                            <Label className="text-muted-foreground text-sm">Porções</Label>
                             <Select 
                               value={aiRecipeForm.servings}
                               onValueChange={(v) => setAiRecipeForm(prev => ({ ...prev, servings: v }))}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="bg-background/50 border-border/50">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="glass-strong border-border/50">
                                 <SelectItem value="1">1 porção</SelectItem>
                                 <SelectItem value="2">2 porções</SelectItem>
                                 <SelectItem value="4">4 porções</SelectItem>
@@ -735,15 +753,15 @@ export default function Biblioteca() {
                             </Select>
                           </div>
                           <div className="space-y-2">
-                            <Label>Objetivo</Label>
+                            <Label className="text-muted-foreground text-sm">Objetivo</Label>
                             <Select 
                               value={aiRecipeForm.goal}
                               onValueChange={(v) => setAiRecipeForm(prev => ({ ...prev, goal: v }))}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="bg-background/50 border-border/50">
                                 <SelectValue placeholder="Selecione..." />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="glass-strong border-border/50">
                                 <SelectItem value="none">Nenhum específico</SelectItem>
                                 <SelectItem value="hipertrofia">Hipertrofia</SelectItem>
                                 <SelectItem value="emagrecimento">Emagrecimento</SelectItem>
@@ -756,25 +774,27 @@ export default function Biblioteca() {
                         </div>
                         
                         <div className="space-y-2">
-                          <Label>Restrições Alimentares</Label>
+                          <Label className="text-muted-foreground text-sm">Restrições Alimentares</Label>
                           <Input
                             placeholder="Ex: sem lactose, sem glúten, sem amendoim..."
                             value={aiRecipeForm.dietary_restrictions}
                             onChange={(e) => setAiRecipeForm(prev => ({ ...prev, dietary_restrictions: e.target.value }))}
+                            className="bg-background/50 border-border/50"
                           />
                         </div>
                         
                         <div className="space-y-2">
-                          <Label>Observações (opcional)</Label>
+                          <Label className="text-muted-foreground text-sm">Observações (opcional)</Label>
                           <Input
                             placeholder="Ex: receita rápida, para pré-treino, sabor suave..."
                             value={aiRecipeForm.notes}
                             onChange={(e) => setAiRecipeForm(prev => ({ ...prev, notes: e.target.value }))}
+                            className="bg-background/50 border-border/50"
                           />
                         </div>
                         
                         <Button 
-                          className="w-full gap-2" 
+                          className="w-full gap-2 bg-gradient-to-r from-primary to-secondary hover:opacity-90" 
                           onClick={generateRecipeWithAI}
                           disabled={generatingRecipe || !aiRecipeForm.ingredients.trim()}
                         >
@@ -791,65 +811,70 @@ export default function Biblioteca() {
                     {(recipeMode === 'manual' || editingRecipe) && (
                       <div className="space-y-4 pt-4">
                         <div className="space-y-2">
-                          <Label>Nome da Receita</Label>
+                          <Label className="text-muted-foreground text-sm">Nome da Receita</Label>
                           <Input
                             placeholder="Ex: Smoothie proteico de banana"
                             value={recipeForm.name}
                             onChange={(e) => setRecipeForm(prev => ({ ...prev, name: e.target.value }))}
+                            className="bg-background/50 border-border/50"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Ingredientes e Modo de Preparo</Label>
+                          <Label className="text-muted-foreground text-sm">Ingredientes e Modo de Preparo</Label>
                           <Textarea
                             placeholder="Descreva os ingredientes e o modo de preparo..."
                             value={recipeForm.notes}
                             onChange={(e) => setRecipeForm(prev => ({ ...prev, notes: e.target.value }))}
-                            className="min-h-[150px]"
+                            className="min-h-[150px] bg-background/50 border-border/50"
                           />
                         </div>
                         <div>
                           <Label className="text-muted-foreground text-xs">Macros Estimados (por porção)</Label>
                           <div className="grid grid-cols-2 gap-4 mt-2">
                             <div className="space-y-2">
-                              <Label>Calorias (kcal)</Label>
+                              <Label className="text-muted-foreground text-sm">Calorias (kcal)</Label>
                               <Input
                                 type="number"
                                 placeholder="0"
                                 value={recipeForm.kcal}
                                 onChange={(e) => setRecipeForm(prev => ({ ...prev, kcal: e.target.value }))}
+                                className="bg-background/50 border-border/50"
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Proteínas (g)</Label>
+                              <Label className="text-muted-foreground text-sm">Proteínas (g)</Label>
                               <Input
                                 type="number"
                                 placeholder="0"
                                 value={recipeForm.protein}
                                 onChange={(e) => setRecipeForm(prev => ({ ...prev, protein: e.target.value }))}
+                                className="bg-background/50 border-border/50"
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Carboidratos (g)</Label>
+                              <Label className="text-muted-foreground text-sm">Carboidratos (g)</Label>
                               <Input
                                 type="number"
                                 placeholder="0"
                                 value={recipeForm.carb}
                                 onChange={(e) => setRecipeForm(prev => ({ ...prev, carb: e.target.value }))}
+                                className="bg-background/50 border-border/50"
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Gorduras (g)</Label>
+                              <Label className="text-muted-foreground text-sm">Gorduras (g)</Label>
                               <Input
                                 type="number"
                                 placeholder="0"
                                 value={recipeForm.fat}
                                 onChange={(e) => setRecipeForm(prev => ({ ...prev, fat: e.target.value }))}
+                                className="bg-background/50 border-border/50"
                               />
                             </div>
                           </div>
                         </div>
                         <Button 
-                          className="w-full" 
+                          className="w-full bg-secondary hover:bg-secondary/90" 
                           onClick={handleSaveRecipe}
                           disabled={savingRecipe || !recipeForm.name.trim()}
                         >
@@ -866,69 +891,79 @@ export default function Biblioteca() {
               </div>
 
               {filteredRecipes.length === 0 ? (
-                <Card className="border-dashed">
-                  <CardContent className="py-12 text-center">
-                    <ChefHat className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      {searchTerm ? 'Nenhuma receita encontrada' : 'Nenhuma receita cadastrada ainda'}
+                <GlassCard className="border-dashed border-border/50 p-12 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto mb-4">
+                    <ChefHat className="w-8 h-8 text-secondary/50" />
+                  </div>
+                  <p className="text-muted-foreground">
+                    {searchTerm ? 'Nenhuma receita encontrada' : 'Nenhuma receita cadastrada ainda'}
+                  </p>
+                  {!searchTerm && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Clique em "Nova Receita" para começar
                     </p>
-                    {!searchTerm && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Clique em "Nova Receita" para começar
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
+                  )}
+                </GlassCard>
               ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredRecipes.map((recipe) => (
-                    <Card key={recipe.id} className="hover:border-primary/30 transition-colors">
-                      <CardContent className="p-5">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <ChefHat className="w-5 h-5 text-primary" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredRecipes.map((recipe, index) => (
+                    <GlassCard 
+                      key={recipe.id} 
+                      glow="violet"
+                      className="p-5 animate-fade-in"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center">
+                            <ChefHat className="w-5 h-5 text-secondary" />
                           </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => openEditRecipe(recipe)}
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive"
-                              onClick={() => handleDeleteRecipe(recipe.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <h3 className="font-semibold text-foreground">{recipe.name}</h3>
                         </div>
-                        <h3 className="font-semibold text-foreground mb-1">{recipe.name}</h3>
-                        {recipe.notes && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                            {recipe.notes}
-                          </p>
-                        )}
-                        <div className="flex flex-wrap gap-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {recipe.estimated_macros.kcal} kcal
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            P: {recipe.estimated_macros.protein}g
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            C: {recipe.estimated_macros.carb}g
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            G: {recipe.estimated_macros.fat}g
-                          </Badge>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-secondary/10"
+                            onClick={() => openEditRecipe(recipe)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDeleteRecipe(recipe.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                      
+                      {/* Macros Grid */}
+                      <div className="grid grid-cols-4 gap-2 p-3 rounded-xl bg-background/50">
+                        <div className="text-center">
+                          <p className="text-lg font-bold font-mono text-primary">{recipe.estimated_macros.kcal}</p>
+                          <p className="text-xs text-muted-foreground">kcal</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold font-mono text-blue-400">{recipe.estimated_macros.protein}g</p>
+                          <p className="text-xs text-muted-foreground">prot</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold font-mono text-amber-400">{recipe.estimated_macros.carb}g</p>
+                          <p className="text-xs text-muted-foreground">carb</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold font-mono text-rose-400">{recipe.estimated_macros.fat}g</p>
+                          <p className="text-xs text-muted-foreground">gord</p>
+                        </div>
+                      </div>
+                      
+                      {recipe.notes && (
+                        <p className="text-sm text-muted-foreground mt-3 line-clamp-2">{recipe.notes}</p>
+                      )}
+                    </GlassCard>
                   ))}
                 </div>
               )}
