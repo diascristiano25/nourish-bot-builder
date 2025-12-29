@@ -3,14 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Sparkles, User, Scale, Target, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Sparkles, User, Scale, Target, AlertCircle, Zap } from 'lucide-react';
 import { differenceInYears } from 'date-fns';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { NeonText } from '@/components/ui/NeonText';
+import { AppLayout } from '@/components/AppLayout';
 
 interface Patient {
   id: string;
@@ -85,7 +87,6 @@ export default function GenerateMealPlan() {
       setPatient(patientData);
       setPlanTitle(`Cardápio - ${patientData.full_name}`);
 
-      // Fetch latest anthropometric
       const { data: anthropData } = await supabase
         .from('anthropometrics')
         .select('weight_kg, height_cm')
@@ -111,17 +112,12 @@ export default function GenerateMealPlan() {
     if (!anthropometric?.weight_kg || !anthropometric?.height_cm || !patient?.birth_date) {
       return null;
     }
-
     const age = differenceInYears(new Date(), new Date(patient.birth_date));
-    // Guard against invalid/future birth dates (can explode the formula)
-    if (!Number.isFinite(age) || age < 0 || age > 150) {
-      return null;
-    }
+    if (!Number.isFinite(age) || age < 0 || age > 150) return null;
 
     const weight = anthropometric.weight_kg;
     const height = anthropometric.height_cm;
 
-    // Mifflin-St Jeor Equation
     if (patient.gender === 'male') {
       return Math.round(10 * weight + 6.25 * height - 5 * age + 5);
     } else {
@@ -151,11 +147,7 @@ export default function GenerateMealPlan() {
     setGenerating(true);
 
     try {
-      const age = patient.birth_date 
-        ? differenceInYears(new Date(), new Date(patient.birth_date))
-        : null;
-
-      // Calculate target calories - ensure it's a valid number or null
+      const age = patient.birth_date ? differenceInYears(new Date(), new Date(patient.birth_date)) : null;
       let calculatedCalories: number | null = null;
       if (targetCalories && targetCalories.trim() !== '') {
         const parsed = parseInt(targetCalories, 10);
@@ -181,14 +173,12 @@ export default function GenerateMealPlan() {
         additionalNotes: additionalNotes || '',
       };
 
-      // Call the edge function
       const { data, error } = await supabase.functions.invoke('generate-meal-plan', {
         body: { patientData }
       });
 
       if (error) throw error;
 
-      // Save the meal plan
       const { data: savedPlan, error: saveError } = await supabase
         .from('meal_plans')
         .insert({
@@ -225,86 +215,85 @@ export default function GenerateMealPlan() {
 
   if (loading) {
     return (
-      <div className="min-h-screen gradient-subtle flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <AppLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
     );
   }
 
-  if (!patient) {
-    return null;
-  }
+  if (!patient) return null;
 
-  const age = patient.birth_date 
-    ? differenceInYears(new Date(), new Date(patient.birth_date))
-    : null;
+  const age = patient.birth_date ? differenceInYears(new Date(), new Date(patient.birth_date)) : null;
   const bmr = calculateBMR();
   const tdee = calculateTDEE();
   const hasBasicData = anthropometric?.weight_kg && anthropometric?.height_cm;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(`/patients/${id}`)}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="font-bold text-lg">Gerar Cardápio</h1>
-            <p className="text-xs text-muted-foreground">{patient.full_name}</p>
+    <AppLayout>
+      <div className="min-h-screen bg-background">
+        {/* Cyber Header */}
+        <header className="sticky top-0 z-30 glass-strong border-b border-border/30">
+          <div className="px-4 md:px-8 h-16 flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(`/patients/${id}`)} className="glass hover:bg-primary/10 rounded-xl">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="font-bold text-lg">Gerar <NeonText variant="lime">Cardápio</NeonText></h1>
+                <p className="text-xs text-muted-foreground">{patient.full_name}</p>
+              </div>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-2xl space-y-6">
-        {/* Warning if missing data */}
-        {!hasBasicData && (
-          <Card className="border-warning/50 bg-warning/5">
-            <CardContent className="pt-6">
+        <main className="p-4 md:p-8 max-w-2xl mx-auto space-y-6">
+          {/* Warning if missing data */}
+          {!hasBasicData && (
+            <GlassCard className="p-4 border-amber-500/30">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-warning mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-amber-400 mt-0.5" />
                 <div>
-                  <p className="font-medium">Dados incompletos</p>
+                  <p className="font-medium text-amber-400">Dados incompletos</p>
                   <p className="text-sm text-muted-foreground">
                     Para um cardápio mais preciso, cadastre peso e altura do paciente.
                   </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </GlassCard>
+          )}
 
-        {/* Patient Summary */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          {/* Patient Summary */}
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
                 <User className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">Resumo do Paciente</CardTitle>
-                <CardDescription>Dados que serão usados pela IA</CardDescription>
+                <h2 className="font-semibold text-foreground">Resumo do Paciente</h2>
+                <p className="text-sm text-muted-foreground">Dados que serão usados pela IA</p>
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-3 rounded-lg bg-muted/50">
+              <div className="text-center p-3 rounded-xl glass">
                 <p className="text-sm text-muted-foreground">Idade</p>
-                <p className="font-semibold">{age || '-'} anos</p>
+                <p className="font-semibold font-mono text-primary">{age || '-'} anos</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
+              <div className="text-center p-3 rounded-xl glass">
                 <p className="text-sm text-muted-foreground">Peso</p>
-                <p className="font-semibold">{anthropometric?.weight_kg || '-'} kg</p>
+                <p className="font-semibold font-mono text-primary">{anthropometric?.weight_kg || '-'} kg</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
+              <div className="text-center p-3 rounded-xl glass">
                 <p className="text-sm text-muted-foreground">Altura</p>
-                <p className="font-semibold">{anthropometric?.height_cm || '-'} cm</p>
+                <p className="font-semibold font-mono text-primary">{anthropometric?.height_cm || '-'} cm</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
+              <div className="text-center p-3 rounded-xl glass">
                 <p className="text-sm text-muted-foreground">TMB</p>
-                <p className="font-semibold">{bmr || '-'} kcal</p>
+                <p className="font-semibold font-mono text-primary">{bmr || '-'} kcal</p>
               </div>
             </div>
 
@@ -313,14 +302,14 @@ export default function GenerateMealPlan() {
                 <div className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm">Objetivo:</span>
-                  <Badge variant="secondary">{goalLabels[patient.goal]}</Badge>
+                  <Badge className="bg-primary/20 text-primary border-0">{goalLabels[patient.goal]}</Badge>
                 </div>
               )}
               {patient.activity_level && (
                 <div className="flex items-center gap-2">
                   <Scale className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm">Atividade:</span>
-                  <Badge variant="outline">{activityLabels[patient.activity_level]}</Badge>
+                  <Badge variant="outline" className="border-border/50">{activityLabels[patient.activity_level]}</Badge>
                 </div>
               )}
               {patient.allergies && patient.allergies.length > 0 && (
@@ -328,9 +317,7 @@ export default function GenerateMealPlan() {
                   <p className="text-sm text-muted-foreground mb-2">Alergias:</p>
                   <div className="flex flex-wrap gap-1">
                     {patient.allergies.map((a, i) => (
-                      <Badge key={i} variant="destructive" className="text-xs bg-destructive/10 text-destructive border-destructive/20">
-                        {a}
-                      </Badge>
+                      <Badge key={i} className="text-xs bg-destructive/20 text-destructive border-0">{a}</Badge>
                     ))}
                   </div>
                 </div>
@@ -340,93 +327,89 @@ export default function GenerateMealPlan() {
                   <p className="text-sm text-muted-foreground mb-2">Restrições:</p>
                   <div className="flex flex-wrap gap-1">
                     {patient.dietary_restrictions.map((r, i) => (
-                      <Badge key={i} variant="secondary" className="text-xs">{r}</Badge>
+                      <Badge key={i} className="text-xs bg-secondary/20 text-secondary border-0">{r}</Badge>
                     ))}
                   </div>
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </GlassCard>
 
-        {/* Configuration */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary-foreground" />
+          {/* Configuration */}
+          <GlassCard glow="lime" className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                <Zap className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <CardTitle className="text-lg">Configurações do Cardápio</CardTitle>
-                <CardDescription>Personalize a geração</CardDescription>
+                <h2 className="font-semibold text-foreground">Configurações do Cardápio</h2>
+                <p className="text-sm text-muted-foreground">Personalize a geração</p>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Título do Cardápio</Label>
-              <Input
-                id="title"
-                value={planTitle}
-                onChange={(e) => setPlanTitle(e.target.value)}
-                placeholder="Ex: Cardápio Semanal - Emagrecimento"
-              />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-sm">Título do Cardápio</Label>
+                <Input
+                  value={planTitle}
+                  onChange={(e) => setPlanTitle(e.target.value)}
+                  placeholder="Ex: Cardápio Semanal - Emagrecimento"
+                  className="bg-background/50 border-border/50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-sm">Meta de Calorias (opcional)</Label>
+                <Input
+                  type="number"
+                  value={targetCalories}
+                  onChange={(e) => setTargetCalories(e.target.value)}
+                  placeholder={tdee ? `Sugestão: ${tdee} kcal (TDEE calculado)` : "Ex: 2000"}
+                  className="bg-background/50 border-border/50"
+                />
+                {tdee && !targetCalories && (
+                  <p className="text-xs text-muted-foreground">
+                    Gasto calórico diário estimado: <span className="text-primary font-mono">{tdee} kcal</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-sm">Instruções Adicionais</Label>
+                <Textarea
+                  value={additionalNotes}
+                  onChange={(e) => setAdditionalNotes(e.target.value)}
+                  placeholder="Ex: Preferência por refeições rápidas, evitar frituras..."
+                  rows={3}
+                  className="bg-background/50 border-border/50"
+                />
+              </div>
             </div>
+          </GlassCard>
 
-            <div className="space-y-2">
-              <Label htmlFor="calories">Meta de Calorias (opcional)</Label>
-              <Input
-                id="calories"
-                type="number"
-                value={targetCalories}
-                onChange={(e) => setTargetCalories(e.target.value)}
-                placeholder={tdee ? `Sugestão: ${tdee} kcal (TDEE calculado)` : "Ex: 2000"}
-              />
-              {tdee && !targetCalories && (
-                <p className="text-xs text-muted-foreground">
-                  Gasto calórico diário estimado: {tdee} kcal
-                </p>
-              )}
-            </div>
+          {/* Generate Button */}
+          <Button 
+            className="w-full h-14 text-lg gap-3 bg-gradient-to-r from-primary to-secondary hover:opacity-90 rounded-xl"
+            onClick={handleGenerate}
+            disabled={generating}
+          >
+            {generating ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Gerando cardápio com IA...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5" />
+                Gerar Cardápio
+              </>
+            )}
+          </Button>
 
-            <div className="space-y-2">
-              <Label htmlFor="notes">Instruções Adicionais</Label>
-              <Textarea
-                id="notes"
-                value={additionalNotes}
-                onChange={(e) => setAdditionalNotes(e.target.value)}
-                placeholder="Ex: Preferência por refeições rápidas, evitar frituras..."
-                rows={3}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Generate Button */}
-        <Button 
-          variant="hero" 
-          size="xl" 
-          className="w-full"
-          onClick={handleGenerate}
-          disabled={generating}
-        >
-          {generating ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Gerando cardápio com IA...
-            </>
-          ) : (
-            <>
-              <Sparkles className="mr-2 h-5 w-5" />
-              Gerar Cardápio
-            </>
-          )}
-        </Button>
-
-        <p className="text-center text-xs text-muted-foreground">
-          O cardápio será gerado usando a Tabela TACO como referência nutricional
-        </p>
-      </main>
-    </div>
+          <p className="text-center text-xs text-muted-foreground">
+            O cardápio será gerado usando a Tabela TACO como referência nutricional
+          </p>
+        </main>
+      </div>
+    </AppLayout>
   );
 }
