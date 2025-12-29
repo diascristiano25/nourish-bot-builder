@@ -35,11 +35,20 @@ function sanitizeText(text: string | null | undefined): string {
     .trim();
 }
 
-// Fixed column widths - HARDCODED
+// Fixed column widths - HARDCODED (60% food, 25% portion, 15% calories)
 const COLUMN_WIDTHS = {
-  food: '55%',      // Alimento: 55%
+  food: '60%',      // Alimento: 60% - MAXIMUM space for text
   portion: '25%',   // Porção: 25%
-  calories: '20%',  // Calorias: 20%
+  calories: '15%',  // Calorias: 15% - numbers take less space
+};
+
+// PDF Font sizes - REDUCED to prevent line breaking
+const PDF_FONT_SIZES = {
+  foodItem: '9px',     // Small font for table items
+  portion: '9px',
+  calories: '9px',
+  mealTitle: '12px',
+  mealTime: '10px',
 };
 
 // Prevent word break styles
@@ -48,6 +57,8 @@ const noWordBreakStyle: React.CSSProperties = {
   overflowWrap: 'normal',
   whiteSpace: 'normal',
   fontFamily: 'Helvetica, Arial, sans-serif',
+  hyphens: 'none',
+  lineHeight: 1.3,
 };
 
 interface PatientData {
@@ -522,25 +533,55 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
                 </p>
               )}
               {latestMealPlan.plan_data?.meals && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  {latestMealPlan.plan_data.meals.map((meal: any, index: number) => (
-                    <div 
-                      key={index}
-                      style={{
-                        background: CARD_GRAY_LIGHT,
-                        borderRadius: '12px',
-                        padding: '12px 16px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', ...noWordBreakStyle }}>{sanitizeText(meal.name)}</span>
-                      <span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: '600', color: NEON_GREEN }}>
-                        {meal.totalCalories || 0} kcal
-                      </span>
-                    </div>
-                  ))}
+                <div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                    <colgroup>
+                      <col style={{ width: COLUMN_WIDTHS.food }} />
+                      <col style={{ width: COLUMN_WIDTHS.portion }} />
+                      <col style={{ width: COLUMN_WIDTHS.calories }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th style={{ padding: '8px 5px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase' }}>Refeição</th>
+                        <th style={{ padding: '8px 5px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase' }}>Horário</th>
+                        <th style={{ padding: '8px 5px', textAlign: 'right', color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase' }}>Calorias</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {latestMealPlan.plan_data.meals.map((meal: any, index: number) => (
+                        <tr 
+                          key={index}
+                          style={{ background: index % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}
+                        >
+                          <td style={{ 
+                            padding: '6px 5px', 
+                            color: 'rgba(255,255,255,0.8)', 
+                            fontSize: PDF_FONT_SIZES.mealTitle,
+                            ...noWordBreakStyle 
+                          }}>
+                            {sanitizeText(meal.name)}
+                          </td>
+                          <td style={{ 
+                            padding: '6px 5px', 
+                            color: 'rgba(255,255,255,0.5)', 
+                            fontSize: PDF_FONT_SIZES.mealTime,
+                          }}>
+                            {meal.time || '—'}
+                          </td>
+                          <td style={{ 
+                            padding: '6px 5px', 
+                            textAlign: 'right',
+                            fontFamily: 'monospace', 
+                            fontSize: PDF_FONT_SIZES.calories, 
+                            fontWeight: '600', 
+                            color: NEON_GREEN 
+                          }}>
+                            {meal.totalCalories || 0}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
