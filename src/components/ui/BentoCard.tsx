@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { forwardRef, HTMLAttributes, CSSProperties } from 'react';
+import { forwardRef, HTMLAttributes } from 'react';
 
 interface BentoCardProps extends HTMLAttributes<HTMLDivElement> {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -8,7 +8,7 @@ interface BentoCardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const BentoCard = forwardRef<HTMLDivElement, BentoCardProps>(
-  ({ className, size = 'md', interactive = true, glow = 'lime', children, style, ...props }, ref) => {
+  ({ className, size = 'md', interactive = true, glow = 'lime', children, ...props }, ref) => {
     const sizeStyles = {
       sm: 'p-4',
       md: 'p-6',
@@ -23,19 +23,13 @@ export const BentoCard = forwardRef<HTMLDivElement, BentoCardProps>(
       cyan: 'hover:shadow-[0_0_40px_rgba(34,211,238,0.25)]',
     };
 
-    const baseStyle: CSSProperties = {
-      backgroundColor: 'rgba(20, 20, 20, 0.6)',
-      backdropFilter: 'blur(24px)',
-      WebkitBackdropFilter: 'blur(24px)',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      ...style,
-    };
-
     return (
       <div
         ref={ref}
         className={cn(
           'relative rounded-2xl overflow-hidden',
+          'bg-card/80 dark:bg-card/60 backdrop-blur-xl',
+          'border border-border',
           'transition-all duration-300 ease-out',
           interactive && [
             'cursor-pointer',
@@ -45,7 +39,6 @@ export const BentoCard = forwardRef<HTMLDivElement, BentoCardProps>(
           sizeStyles[size],
           className
         )}
-        style={baseStyle}
         {...props}
       >
         <div className="relative z-10">
