@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,15 +15,16 @@ import {
   Trash2,
   Wallet,
   PiggyBank,
-  Receipt
+  Receipt,
+  Sparkles
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Badge } from '@/components/ui/badge';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { GlassCard } from '@/components/ui/GlassCard';
 
 interface FinancialRecord {
   id: string;
@@ -190,81 +190,84 @@ const Financeiro = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50">
-        {/* Elite Header */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+      <div className="min-h-screen">
+        {/* Cyber Header */}
+        <header className="sticky top-0 z-30 glass-strong border-b border-white/10">
           <div className="px-6 lg:px-8 py-6">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight">
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyber-lime to-electric-violet bg-clip-text text-transparent">
                   Financeiro
                 </h1>
-                <p className="text-slate-500 mt-1">
-                  Controle de receitas e despesas
+                <p className="text-muted-foreground mt-1 font-mono text-sm">
+                  CONTROLE :: RECEITAS_E_DESPESAS
                 </p>
               </div>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button 
-                    className="gap-2 bg-emerald-500 hover:bg-emerald-600 rounded-xl h-11 px-6 shadow-sm"
+                    className="gap-2 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl h-11 px-6 font-semibold"
                     data-tour="financeiro-new-btn"
                   >
                     <Plus className="w-4 h-4" />
                     Novo Lançamento
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-white border-slate-200 rounded-2xl">
+                <DialogContent className="glass-strong border-white/10 rounded-2xl">
                   <DialogHeader>
-                    <DialogTitle className="text-slate-800">Novo Lançamento</DialogTitle>
+                    <DialogTitle className="text-foreground flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-cyber-lime" />
+                      Novo Lançamento
+                    </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 pt-4">
                     <div className="space-y-2">
-                      <Label className="text-slate-700">Tipo</Label>
+                      <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Tipo</Label>
                       <Select value={formType} onValueChange={(v) => setFormType(v as 'Receita' | 'Despesa')}>
-                        <SelectTrigger className="rounded-xl border-slate-200">
+                        <SelectTrigger className="glass border-white/10 focus:border-cyber-lime/50">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="glass-strong border-white/10">
                           <SelectItem value="Receita">Receita</SelectItem>
                           <SelectItem value="Despesa">Despesa</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700">Valor (R$)</Label>
+                      <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Valor (R$)</Label>
                       <Input 
                         type="text" 
                         placeholder="0,00" 
                         value={formAmount}
                         onChange={(e) => setFormAmount(e.target.value)}
-                        className="rounded-xl border-slate-200"
+                        className="glass border-white/10 focus:border-cyber-lime/50"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700">Descrição</Label>
+                      <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Descrição</Label>
                       <Input 
                         placeholder="Ex: Consulta - João Silva" 
                         value={formDescription}
                         onChange={(e) => setFormDescription(e.target.value)}
-                        className="rounded-xl border-slate-200"
+                        className="glass border-white/10 focus:border-cyber-lime/50"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700">Data</Label>
+                      <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Data</Label>
                       <Input 
                         type="date" 
                         value={formDate}
                         onChange={(e) => setFormDate(e.target.value)}
-                        className="rounded-xl border-slate-200"
+                        className="glass border-white/10 focus:border-cyber-lime/50"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700">Status</Label>
+                      <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Status</Label>
                       <Select value={formStatus} onValueChange={(v) => setFormStatus(v as 'completed' | 'pending')}>
-                        <SelectTrigger className="rounded-xl border-slate-200">
+                        <SelectTrigger className="glass border-white/10 focus:border-cyber-lime/50">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="glass-strong border-white/10">
                           <SelectItem value="completed">Recebido</SelectItem>
                           <SelectItem value="pending">A Receber</SelectItem>
                         </SelectContent>
@@ -272,7 +275,7 @@ const Financeiro = () => {
                     </div>
                     <Button 
                       onClick={handleCreateRecord} 
-                      className="w-full bg-emerald-500 hover:bg-emerald-600 rounded-xl h-11"
+                      className="w-full bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl h-11 font-semibold"
                     >
                       Salvar Lançamento
                     </Button>
@@ -286,178 +289,182 @@ const Financeiro = () => {
         <main className="p-6 lg:p-8 max-w-6xl">
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card className="bg-white rounded-2xl border-0 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
-                    <Wallet className="w-6 h-6 text-emerald-500" />
-                  </div>
-                  <TrendingUp className="w-5 h-5 text-emerald-500" />
+            <GlassCard glow="lime">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-cyber-lime/10 flex items-center justify-center border border-cyber-lime/30">
+                  <Wallet className="w-6 h-6 text-cyber-lime" />
                 </div>
-                <p className="text-sm font-medium text-slate-500 mb-1">Entradas do Mês</p>
-                <p className="text-2xl lg:text-3xl font-bold text-slate-800">
-                  R$ {monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-xs text-slate-400 mt-2">
-                  {format(now, 'MMMM yyyy', { locale: ptBR })}
-                </p>
-              </CardContent>
-            </Card>
+                <TrendingUp className="w-5 h-5 text-cyber-lime" />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Entradas do Mês</p>
+              <p className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyber-lime to-electric-violet bg-clip-text text-transparent">
+                R$ {monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2 font-mono">
+                {format(now, 'MMMM yyyy', { locale: ptBR }).toUpperCase()}
+              </p>
+            </GlassCard>
 
-            <Card className="bg-white rounded-2xl border-0 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-amber-500" />
-                  </div>
+            <GlassCard>
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/30">
+                  <Clock className="w-6 h-6 text-amber-400" />
                 </div>
-                <p className="text-sm font-medium text-slate-500 mb-1">Pendentes</p>
-                <p className="text-2xl lg:text-3xl font-bold text-amber-600">
-                  R$ {pendingAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-xs text-slate-400 mt-2">
-                  A receber
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Pendentes</p>
+              <p className="text-2xl lg:text-3xl font-bold text-amber-400">
+                R$ {pendingAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2 font-mono">
+                A RECEBER
+              </p>
+            </GlassCard>
 
-            <Card className="bg-white rounded-2xl border-0 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <PiggyBank className="w-6 h-6 text-blue-500" />
-                  </div>
+            <GlassCard>
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-electric-violet/10 flex items-center justify-center border border-electric-violet/30">
+                  <PiggyBank className="w-6 h-6 text-electric-violet" />
                 </div>
-                <p className="text-sm font-medium text-slate-500 mb-1">Total do Mês</p>
-                <p className={`text-2xl lg:text-3xl font-bold ${totalMonth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                  R$ {Math.abs(totalMonth).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-xs text-slate-400 mt-2">
-                  Saldo líquido
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Total do Mês</p>
+              <p className={`text-2xl lg:text-3xl font-bold ${totalMonth >= 0 ? 'text-cyber-lime' : 'text-red-400'}`}>
+                R$ {Math.abs(totalMonth).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2 font-mono">
+                SALDO LÍQUIDO
+              </p>
+            </GlassCard>
           </div>
 
           {/* Chart */}
-          <Card className="bg-white rounded-2xl border-0 shadow-sm mb-8">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-semibold text-slate-800">
+          <GlassCard className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-cyber-lime" />
                 Faturamento dos Últimos 6 Meses
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <XAxis 
-                      dataKey="month" 
-                      axisLine={false} 
-                      tickLine={false}
-                      tick={{ fill: '#94A3B8', fontSize: 12 }}
-                    />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false}
-                      tick={{ fill: '#94A3B8', fontSize: 12 }}
-                      tickFormatter={(v) => `${v}`}
-                    />
-                    <Tooltip 
-                      formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Receita']}
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
-                        border: '1px solid #E2E8F0',
-                        borderRadius: 12,
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                      }}
-                    />
-                    <Bar 
-                      dataKey="receita" 
-                      fill="#10B981" 
-                      radius={[6, 6, 0, 0]} 
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+              </h2>
+            </div>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="financeGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#DFFF00" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="#DFFF00" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false} 
+                    tickLine={false}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                    tickFormatter={(v) => `${v}`}
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Receita']}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(220, 20%, 12%)', 
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 12,
+                      boxShadow: '0 0 20px rgba(223, 255, 0, 0.1)'
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="receita"
+                    stroke="#DFFF00"
+                    strokeWidth={2}
+                    fill="url(#financeGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </GlassCard>
 
           {/* Recent Transactions */}
-          <Card className="bg-white rounded-2xl border-0 shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-emerald-500" />
+          <GlassCard>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                <Receipt className="w-5 h-5 text-cyber-lime" />
                 Lançamentos Recentes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {records.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                    <DollarSign className="w-8 h-8 text-slate-300" />
-                  </div>
-                  <p className="text-slate-600 font-medium mb-1">Nenhum lançamento</p>
-                  <p className="text-sm text-slate-400">Adicione seu primeiro lançamento</p>
+              </h2>
+              <span className="text-xs font-mono text-muted-foreground">
+                {records.length} REGISTROS
+              </span>
+            </div>
+            
+            {records.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                  <DollarSign className="w-8 h-8 text-muted-foreground/50" />
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {records.slice(0, 10).map((record) => (
-                    <div 
-                      key={record.id} 
-                      className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          record.record_type === 'Receita' ? 'bg-emerald-100' : 'bg-red-100'
-                        }`}>
-                          {record.record_type === 'Receita' ? (
-                            <ArrowUpCircle className="w-5 h-5 text-emerald-600" />
-                          ) : (
-                            <ArrowDownCircle className="w-5 h-5 text-red-600" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-medium text-slate-800">
-                            {record.description || record.record_type}
-                          </p>
-                          <p className="text-sm text-slate-400">
-                            {format(new Date(record.record_date), 'dd/MM/yyyy')}
-                          </p>
-                        </div>
+                <p className="text-foreground font-medium mb-1">Nenhum lançamento</p>
+                <p className="text-sm text-muted-foreground">Adicione seu primeiro lançamento</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {records.slice(0, 10).map((record, index) => (
+                  <div 
+                    key={record.id} 
+                    className="flex items-center justify-between p-4 rounded-xl glass border border-white/10 hover:border-cyber-lime/30 transition-all group animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        record.record_type === 'Receita' 
+                          ? 'bg-cyber-lime/10 border border-cyber-lime/30' 
+                          : 'bg-red-500/10 border border-red-500/30'
+                      }`}>
+                        {record.record_type === 'Receita' ? (
+                          <ArrowUpCircle className="w-5 h-5 text-cyber-lime" />
+                        ) : (
+                          <ArrowDownCircle className="w-5 h-5 text-red-400" />
+                        )}
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className={`font-semibold ${
-                            record.record_type === 'Receita' ? 'text-emerald-600' : 'text-red-600'
-                          }`}>
-                            {record.record_type === 'Receita' ? '+' : '-'} R$ {Number(record.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </p>
-                          <Badge 
-                            variant="secondary"
-                            className={`text-xs ${
-                              record.status === 'completed' 
-                                ? 'bg-emerald-100 text-emerald-700' 
-                                : 'bg-amber-100 text-amber-700'
-                            } rounded-lg border-0`}
-                          >
-                            {record.status === 'completed' ? 'Recebido' : 'Pendente'}
-                          </Badge>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleDeleteRecord(record.id)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-500" />
-                        </Button>
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {record.description || record.record_type}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-mono">
+                          {format(new Date(record.record_date), 'dd/MM/yyyy')}
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className={`font-semibold ${
+                          record.record_type === 'Receita' ? 'text-cyber-lime' : 'text-red-400'
+                        }`}>
+                          {record.record_type === 'Receita' ? '+' : '-'} R$ {Number(record.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                          record.status === 'completed' 
+                            ? 'bg-cyber-lime/10 text-cyber-lime' 
+                            : 'bg-amber-500/10 text-amber-400'
+                        }`}>
+                          {record.status === 'completed' ? 'RECEBIDO' : 'PENDENTE'}
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-400"
+                        onClick={() => handleDeleteRecord(record.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
         </main>
       </div>
     </AppLayout>

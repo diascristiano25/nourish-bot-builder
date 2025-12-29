@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Users, ChevronRight, Target, Activity } from 'lucide-react';
+import { Plus, Search, Users, ChevronRight, Target, Activity, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { GlassCard } from '@/components/ui/GlassCard';
 
 const goalLabels: Record<string, string> = {
   hypertrophy: 'Hipertrofia',
@@ -20,18 +19,18 @@ const goalLabels: Record<string, string> = {
   performance: 'Performance',
 };
 
-const goalColors: Record<string, string> = {
-  hypertrophy: 'bg-purple-100 text-purple-700',
-  weight_loss: 'bg-blue-100 text-blue-700',
-  maintenance: 'bg-slate-100 text-slate-700',
-  health: 'bg-emerald-100 text-emerald-700',
-  performance: 'bg-amber-100 text-amber-700',
+const goalColors: Record<string, { bg: string; text: string; border: string }> = {
+  hypertrophy: { bg: 'bg-electric-violet/10', text: 'text-electric-violet', border: 'border-electric-violet/30' },
+  weight_loss: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30' },
+  maintenance: { bg: 'bg-slate-500/10', text: 'text-slate-400', border: 'border-slate-500/30' },
+  health: { bg: 'bg-cyber-lime/10', text: 'text-cyber-lime', border: 'border-cyber-lime/30' },
+  performance: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
 };
 
-const adherenceColors: Record<string, { bg: string; text: string; label: string }> = {
-  high: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Alta' },
-  medium: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Média' },
-  low: { bg: 'bg-red-100', text: 'text-red-700', label: 'Baixa' },
+const adherenceColors: Record<string, { bg: string; text: string; border: string; label: string }> = {
+  high: { bg: 'bg-cyber-lime/10', text: 'text-cyber-lime', border: 'border-cyber-lime/30', label: 'Alta' },
+  medium: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30', label: 'Média' },
+  low: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30', label: 'Baixa' },
 };
 
 const getRandomAdherence = () => {
@@ -74,22 +73,22 @@ const Patients = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50">
-        {/* Elite Header */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+      <div className="min-h-screen">
+        {/* Cyber Header */}
+        <header className="sticky top-0 z-30 glass-strong border-b border-white/10">
           <div className="px-6 lg:px-8 py-6">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight">
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyber-lime to-electric-violet bg-clip-text text-transparent">
                   Pacientes
                 </h1>
-                <p className="text-slate-500 mt-1">
-                  Gerencie sua carteira de {patients?.length || 0} pacientes
+                <p className="text-muted-foreground mt-1 font-mono text-sm">
+                  GERENCIANDO :: {patients?.length || 0} REGISTROS
                 </p>
               </div>
               <Button 
                 onClick={() => navigate('/patients/new')} 
-                className="gap-2 bg-emerald-500 hover:bg-emerald-600 rounded-xl h-11 px-6 shadow-sm"
+                className="gap-2 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl h-11 px-6 font-semibold"
                 data-tour="patients-new-btn"
               >
                 <Plus className="w-4 h-4" />
@@ -99,12 +98,12 @@ const Patients = () => {
 
             {/* Search Bar */}
             <div className="mt-6 relative max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar por nome ou email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 h-11 rounded-xl border-slate-200 bg-white focus:border-emerald-300 focus:ring-emerald-200"
+                className="pl-11 h-11 rounded-xl glass border-white/10 focus:border-cyber-lime/50"
               />
             </div>
           </div>
@@ -114,104 +113,93 @@ const Patients = () => {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card key={i} className="bg-white rounded-2xl border-0 shadow-sm animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-slate-200" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-slate-200 rounded w-3/4" />
-                        <div className="h-3 bg-slate-100 rounded w-1/2" />
-                      </div>
+                <GlassCard key={i} className="animate-pulse">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-white/10" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-white/10 rounded w-3/4" />
+                      <div className="h-3 bg-white/5 rounded w-1/2" />
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </GlassCard>
               ))}
             </div>
           ) : !filteredPatients || filteredPatients.length === 0 ? (
-            <Card className="bg-white rounded-2xl border-0 shadow-sm">
-              <CardContent className="py-16 text-center">
-                <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto mb-6">
-                  <Users className="w-10 h-10 text-slate-300" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                  {searchQuery ? 'Nenhum paciente encontrado' : 'Comece sua jornada'}
-                </h3>
-                <p className="text-slate-500 mb-6 max-w-sm mx-auto">
-                  {searchQuery 
-                    ? 'Tente buscar com outros termos' 
-                    : 'Cadastre seu primeiro paciente e comece a transformar vidas'
-                  }
-                </p>
-                {!searchQuery && (
-                  <Button 
-                    onClick={() => navigate('/patients/new')} 
-                    className="gap-2 bg-emerald-500 hover:bg-emerald-600 rounded-xl"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Cadastrar Paciente
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+            <GlassCard className="py-16 text-center">
+              <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
+                <Users className="w-10 h-10 text-muted-foreground/50" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                {searchQuery ? 'Nenhum paciente encontrado' : 'Comece sua jornada'}
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                {searchQuery 
+                  ? 'Tente buscar com outros termos' 
+                  : 'Cadastre seu primeiro paciente e comece a transformar vidas'
+                }
+              </p>
+              {!searchQuery && (
+                <Button 
+                  onClick={() => navigate('/patients/new')} 
+                  className="gap-2 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl"
+                >
+                  <Plus className="w-4 h-4" />
+                  Cadastrar Paciente
+                </Button>
+              )}
+            </GlassCard>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredPatients.map((patient, index) => {
                 const adherence = getRandomAdherence();
                 const adherenceStyle = adherenceColors[adherence];
+                const goalStyle = goalColors[patient.goal || 'health'];
                 
                 return (
-                  <Card 
+                  <GlassCard 
                     key={patient.id} 
-                    className="bg-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                    className="cursor-pointer group hover:border-cyber-lime/30 transition-all duration-300"
                     onClick={() => navigate(`/patients/${patient.id}`)}
-                    style={{ animationDelay: `${index * 0.05}s` }}
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        {/* Avatar */}
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-sm flex-shrink-0">
-                          <span className="text-xl font-bold text-white">
-                            {patient.full_name.charAt(0).toUpperCase()}
+                    <div className="flex items-start gap-4">
+                      {/* Avatar */}
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyber-lime/20 to-electric-violet/20 flex items-center justify-center border border-white/10 flex-shrink-0 group-hover:border-cyber-lime/30 transition-colors">
+                        <span className="text-xl font-bold bg-gradient-to-r from-cyber-lime to-electric-violet bg-clip-text text-transparent">
+                          {patient.full_name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="font-semibold text-foreground truncate group-hover:text-cyber-lime transition-colors">
+                              {patient.full_name}
+                            </h3>
+                            <p className="text-xs text-muted-foreground mt-0.5 font-mono">
+                              {format(new Date(patient.created_at), "MMM 'de' yyyy", { locale: ptBR })}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-cyber-lime group-hover:translate-x-1 transition-all flex-shrink-0" />
+                        </div>
+
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {patient.goal && goalStyle && (
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium ${goalStyle.bg} ${goalStyle.text} border ${goalStyle.border}`}>
+                              <Target className="w-3 h-3" />
+                              {goalLabels[patient.goal] || patient.goal}
+                            </span>
+                          )}
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium ${adherenceStyle.bg} ${adherenceStyle.text} border ${adherenceStyle.border}`}>
+                            <Activity className="w-3 h-3" />
+                            Adesão {adherenceStyle.label}
                           </span>
                         </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <h3 className="font-semibold text-slate-800 truncate group-hover:text-emerald-600 transition-colors">
-                                {patient.full_name}
-                              </h3>
-                              <p className="text-sm text-slate-400 mt-0.5">
-                                {format(new Date(patient.created_at), "MMM 'de' yyyy", { locale: ptBR })}
-                              </p>
-                            </div>
-                            <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all flex-shrink-0" />
-                          </div>
-
-                          {/* Tags */}
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {patient.goal && (
-                              <Badge 
-                                variant="secondary" 
-                                className={`${goalColors[patient.goal] || 'bg-slate-100 text-slate-600'} text-xs font-medium rounded-lg border-0`}
-                              >
-                                <Target className="w-3 h-3 mr-1" />
-                                {goalLabels[patient.goal] || patient.goal}
-                              </Badge>
-                            )}
-                            <Badge 
-                              variant="secondary"
-                              className={`${adherenceStyle.bg} ${adherenceStyle.text} text-xs font-medium rounded-lg border-0`}
-                            >
-                              <Activity className="w-3 h-3 mr-1" />
-                              Adesão {adherenceStyle.label}
-                            </Badge>
-                          </div>
-                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </GlassCard>
                 );
               })}
             </div>
