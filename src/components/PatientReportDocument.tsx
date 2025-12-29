@@ -66,7 +66,8 @@ const genderLabels: Record<string, string> = {
 
 const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentProps>(
   ({ patient, nutritionist, weightRecords, bodyFatRecords, latestMealPlan, currentWeight, initialWeight, currentBodyFat, initialBodyFat, height }, ref) => {
-    const primaryColor = nutritionist.primary_color || '#10B981';
+    const primaryColor = nutritionist.primary_color || '#a3e635';
+    const secondaryColor = '#8b5cf6';
     
     const calculateBMI = () => {
       if (currentWeight && height) {
@@ -78,7 +79,7 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
 
     const getBMIClassification = (bmi: number) => {
       if (bmi < 18.5) return { label: 'Abaixo do peso', color: '#3B82F6' };
-      if (bmi < 25) return { label: 'Peso normal', color: '#10B981' };
+      if (bmi < 25) return { label: 'Peso normal', color: '#a3e635' };
       if (bmi < 30) return { label: 'Sobrepeso', color: '#F59E0B' };
       return { label: 'Obesidade', color: '#EF4444' };
     };
@@ -90,138 +91,226 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
     return (
       <div 
         ref={ref}
-        className="bg-white text-black p-8 min-w-[800px] max-w-[800px]"
-        style={{ fontFamily: 'Inter, Arial, sans-serif' }}
+        className="bg-[#0a0a0f] text-white p-8 min-w-[800px] max-w-[800px]"
+        style={{ fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif" }}
       >
-        {/* Header */}
-        <div 
-          className="p-6 rounded-lg mb-6 text-white"
-          style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)` }}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {nutritionist.logo_url && (
-                <img 
-                  src={nutritionist.logo_url} 
-                  alt="Logo" 
-                  className="h-16 object-contain bg-white/20 p-2 rounded"
-                />
-              )}
-              <div>
-                <h1 className="text-2xl font-bold">{nutritionist.full_name}</h1>
-                {nutritionist.crn && (
-                  <p className="text-sm opacity-90">{nutritionist.crn}</p>
+        {/* Premium Header */}
+        <div className="relative overflow-hidden rounded-2xl mb-8">
+          <div 
+            className="absolute inset-0"
+            style={{ 
+              background: `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}20)`,
+            }}
+          />
+          <div 
+            className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)'
+            }}
+          />
+          
+          <div className="relative p-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-5">
+                {nutritionist.logo_url && (
+                  <div 
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center p-2"
+                    style={{ background: `linear-gradient(135deg, ${primaryColor}30, ${secondaryColor}30)` }}
+                  >
+                    <img 
+                      src={nutritionist.logo_url} 
+                      alt="Logo" 
+                      className="max-h-16 object-contain"
+                    />
+                  </div>
                 )}
-                {nutritionist.phone && (
-                  <p className="text-sm opacity-90">{nutritionist.phone}</p>
-                )}
+                <div>
+                  <h1 
+                    className="text-3xl font-bold tracking-tight"
+                    style={{ color: primaryColor }}
+                  >
+                    {nutritionist.full_name}
+                  </h1>
+                  {nutritionist.crn && (
+                    <p className="text-white/60 mt-1 font-medium">{nutritionist.crn}</p>
+                  )}
+                  {nutritionist.phone && (
+                    <p className="text-white/40 text-sm">{nutritionist.phone}</p>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm opacity-80">Relatório de Evolução</p>
-              <p className="font-semibold">
-                {format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-              </p>
+              <div className="text-right">
+                <div 
+                  className="inline-block px-4 py-2 rounded-xl text-sm font-medium"
+                  style={{ background: `${secondaryColor}20`, color: secondaryColor }}
+                >
+                  RELATÓRIO BIOLÓGICO
+                </div>
+                <p className="text-white/40 text-sm mt-2">
+                  {format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Patient Info */}
-        <div className="mb-6 pb-4 border-b-2" style={{ borderColor: primaryColor }}>
-          <h2 className="text-xl font-bold mb-3" style={{ color: primaryColor }}>
-            Dados do Paciente
+        <div 
+          className="mb-8 pb-6"
+          style={{ borderBottom: `2px solid ${primaryColor}30` }}
+        >
+          <h2 
+            className="text-sm font-semibold uppercase tracking-wider mb-4"
+            style={{ color: primaryColor }}
+          >
+            ◆ Dados do Paciente
           </h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             <div>
-              <p className="text-sm text-gray-500">Nome</p>
-              <p className="font-semibold">{patient.full_name}</p>
+              <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Nome</p>
+              <p className="text-xl font-semibold text-white">{patient.full_name}</p>
             </div>
             {patient.email && (
               <div>
-                <p className="text-sm text-gray-500">E-mail</p>
-                <p>{patient.email}</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">E-mail</p>
+                <p className="text-white/80">{patient.email}</p>
               </div>
             )}
             {patient.birth_date && (
               <div>
-                <p className="text-sm text-gray-500">Data de Nascimento</p>
-                <p>{format(new Date(patient.birth_date), "d/MM/yyyy", { locale: ptBR })}</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Data de Nascimento</p>
+                <p className="text-white/80">{format(new Date(patient.birth_date), "d/MM/yyyy", { locale: ptBR })}</p>
               </div>
             )}
             {patient.gender && (
               <div>
-                <p className="text-sm text-gray-500">Sexo</p>
-                <p>{genderLabels[patient.gender] || patient.gender}</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Sexo</p>
+                <p className="text-white/80">{genderLabels[patient.gender] || patient.gender}</p>
               </div>
             )}
             {patient.goal && (
               <div>
-                <p className="text-sm text-gray-500">Objetivo</p>
-                <p>{goalLabels[patient.goal] || patient.goal}</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Objetivo</p>
+                <p style={{ color: primaryColor }} className="font-medium">
+                  {goalLabels[patient.goal] || patient.goal}
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Evolution Summary */}
-        <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: `${primaryColor}15` }}>
-          <h3 className="font-bold mb-4" style={{ color: primaryColor }}>
-            📊 Resumo da Evolução
+        {/* Evolution Summary - Bio-Metrics */}
+        <div 
+          className="rounded-2xl p-6 mb-8"
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.05), rgba(139, 92, 246, 0.05))',
+            border: `1px solid ${primaryColor}20`
+          }}
+        >
+          <h3 
+            className="text-sm font-semibold uppercase tracking-wider mb-6"
+            style={{ color: primaryColor }}
+          >
+            ◆ Métricas Biológicas
           </h3>
-          <div className="grid grid-cols-4 gap-4 text-center">
-            <div className="p-3 bg-white rounded-lg shadow-sm">
-              <p className="text-2xl font-bold" style={{ color: primaryColor }}>
-                {currentWeight || '-'}
-              </p>
-              <p className="text-sm text-gray-600">Peso Atual (kg)</p>
-            </div>
-            <div className="p-3 bg-white rounded-lg shadow-sm">
-              <p className="text-2xl font-bold">{height || '-'}</p>
-              <p className="text-sm text-gray-600">Altura (cm)</p>
-            </div>
-            <div className="p-3 bg-white rounded-lg shadow-sm">
-              <p className="text-2xl font-bold" style={{ color: bmiInfo?.color }}>
-                {bmi || '-'}
-              </p>
-              <p className="text-sm text-gray-600">IMC {bmiInfo?.label && `(${bmiInfo.label})`}</p>
-            </div>
-            <div className="p-3 bg-white rounded-lg shadow-sm">
-              <p 
-                className="text-2xl font-bold"
-                style={{ color: weightDiff && weightDiff < 0 ? '#10B981' : weightDiff && weightDiff > 0 ? '#EF4444' : '#6B7280' }}
+          <div className="grid grid-cols-4 gap-4">
+            <div 
+              className="text-center p-4 rounded-xl"
+              style={{ background: `${primaryColor}10`, border: `1px solid ${primaryColor}20` }}
+            >
+              <div 
+                className="text-3xl font-bold font-mono"
+                style={{ color: primaryColor }}
               >
-                {weightDiff !== null ? (weightDiff > 0 ? '+' : '') + weightDiff.toFixed(1) : '-'}
+                {currentWeight || '—'}
+              </div>
+              <p className="text-white/50 text-xs mt-1 uppercase tracking-wider">Peso (kg)</p>
+            </div>
+            <div 
+              className="text-center p-4 rounded-xl"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
+            >
+              <div className="text-3xl font-bold font-mono text-white/80">{height || '—'}</div>
+              <p className="text-white/50 text-xs mt-1 uppercase tracking-wider">Altura (cm)</p>
+            </div>
+            <div 
+              className="text-center p-4 rounded-xl"
+              style={{ 
+                background: bmiInfo ? `${bmiInfo.color}10` : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${bmiInfo?.color || 'rgba(255,255,255,0.05)'}20`
+              }}
+            >
+              <div 
+                className="text-3xl font-bold font-mono"
+                style={{ color: bmiInfo?.color || 'rgba(255,255,255,0.8)' }}
+              >
+                {bmi || '—'}
+              </div>
+              <p className="text-white/50 text-xs mt-1 uppercase tracking-wider">
+                IMC {bmiInfo?.label && <span className="normal-case">({bmiInfo.label})</span>}
               </p>
-              <p className="text-sm text-gray-600">Variação (kg)</p>
+            </div>
+            <div 
+              className="text-center p-4 rounded-xl"
+              style={{ 
+                background: weightDiff && weightDiff < 0 ? 'rgba(163, 230, 53, 0.1)' : weightDiff && weightDiff > 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${weightDiff && weightDiff < 0 ? 'rgba(163, 230, 53, 0.2)' : weightDiff && weightDiff > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.05)'}`
+              }}
+            >
+              <div 
+                className="text-3xl font-bold font-mono"
+                style={{ color: weightDiff && weightDiff < 0 ? '#a3e635' : weightDiff && weightDiff > 0 ? '#EF4444' : 'rgba(255,255,255,0.6)' }}
+              >
+                {weightDiff !== null ? (weightDiff > 0 ? '+' : '') + weightDiff.toFixed(1) : '—'}
+              </div>
+              <p className="text-white/50 text-xs mt-1 uppercase tracking-wider">Variação (kg)</p>
             </div>
           </div>
         </div>
 
         {/* Before/After Comparison */}
         {initialWeight && currentWeight && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-bold mb-3" style={{ color: primaryColor }}>
-              🎯 Comparativo Antes e Depois
+          <div 
+            className="mb-8 p-6 rounded-xl"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+          >
+            <h3 
+              className="text-sm font-semibold uppercase tracking-wider mb-6"
+              style={{ color: secondaryColor }}
+            >
+              ◆ Evolução de Peso
             </h3>
             <div className="flex items-center justify-around">
               <div className="text-center">
-                <p className="text-sm text-gray-500">Peso Inicial</p>
-                <p className="text-3xl font-bold text-gray-600">{initialWeight} kg</p>
-              </div>
-              <div className="text-4xl">→</div>
-              <div className="text-center">
-                <p className="text-sm text-gray-500">Peso Atual</p>
-                <p className="text-3xl font-bold" style={{ color: primaryColor }}>{currentWeight} kg</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Peso Inicial</p>
+                <p className="text-4xl font-bold font-mono text-white/60">{initialWeight} kg</p>
               </div>
               <div 
-                className="text-center p-4 rounded-lg"
+                className="text-4xl px-6"
+                style={{ color: primaryColor }}
+              >
+                →
+              </div>
+              <div className="text-center">
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Peso Atual</p>
+                <p 
+                  className="text-4xl font-bold font-mono"
+                  style={{ color: primaryColor }}
+                >
+                  {currentWeight} kg
+                </p>
+              </div>
+              <div 
+                className="text-center p-5 rounded-xl"
                 style={{ 
-                  backgroundColor: weightDiff && weightDiff < 0 ? '#10B98120' : '#EF444420',
-                  color: weightDiff && weightDiff < 0 ? '#10B981' : '#EF4444'
+                  background: weightDiff && weightDiff < 0 ? 'rgba(163, 230, 53, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                 }}
               >
-                <p className="text-sm">Resultado</p>
-                <p className="text-3xl font-bold">
+                <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Resultado</p>
+                <p 
+                  className="text-3xl font-bold font-mono"
+                  style={{ color: weightDiff && weightDiff < 0 ? '#a3e635' : '#EF4444' }}
+                >
                   {weightDiff && weightDiff < 0 ? '' : '+'}{weightDiff?.toFixed(1)} kg
                 </p>
               </div>
@@ -231,29 +320,47 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
 
         {/* Body Fat Evolution */}
         {initialBodyFat !== undefined && currentBodyFat !== undefined && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-bold mb-3" style={{ color: primaryColor }}>
-              📉 Evolução do Percentual de Gordura
+          <div 
+            className="mb-8 p-6 rounded-xl"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+          >
+            <h3 
+              className="text-sm font-semibold uppercase tracking-wider mb-6"
+              style={{ color: secondaryColor }}
+            >
+              ◆ Evolução do Percentual de Gordura
             </h3>
             <div className="flex items-center justify-around">
               <div className="text-center">
-                <p className="text-sm text-gray-500">% Gordura Inicial</p>
-                <p className="text-2xl font-bold text-gray-600">{initialBodyFat}%</p>
-              </div>
-              <div className="text-3xl">→</div>
-              <div className="text-center">
-                <p className="text-sm text-gray-500">% Gordura Atual</p>
-                <p className="text-2xl font-bold" style={{ color: primaryColor }}>{currentBodyFat}%</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">% Inicial</p>
+                <p className="text-3xl font-bold font-mono text-white/60">{initialBodyFat}%</p>
               </div>
               <div 
-                className="text-center p-3 rounded-lg"
+                className="text-3xl px-6"
+                style={{ color: primaryColor }}
+              >
+                →
+              </div>
+              <div className="text-center">
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">% Atual</p>
+                <p 
+                  className="text-3xl font-bold font-mono"
+                  style={{ color: primaryColor }}
+                >
+                  {currentBodyFat}%
+                </p>
+              </div>
+              <div 
+                className="text-center p-4 rounded-xl"
                 style={{ 
-                  backgroundColor: (currentBodyFat - initialBodyFat) < 0 ? '#10B98120' : '#EF444420',
-                  color: (currentBodyFat - initialBodyFat) < 0 ? '#10B981' : '#EF4444'
+                  background: (currentBodyFat - initialBodyFat) < 0 ? 'rgba(163, 230, 53, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                 }}
               >
-                <p className="text-sm">Diferença</p>
-                <p className="text-2xl font-bold">
+                <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Diferença</p>
+                <p 
+                  className="text-2xl font-bold font-mono"
+                  style={{ color: (currentBodyFat - initialBodyFat) < 0 ? '#a3e635' : '#EF4444' }}
+                >
                   {(currentBodyFat - initialBodyFat) < 0 ? '' : '+'}
                   {(currentBodyFat - initialBodyFat).toFixed(1)}%
                 </p>
@@ -264,16 +371,22 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
 
         {/* Weight History Table */}
         {weightRecords.length > 0 && (
-          <div className="mb-6">
-            <h3 className="font-bold mb-3" style={{ color: primaryColor }}>
-              📋 Histórico de Pesagens
+          <div className="mb-8">
+            <h3 
+              className="text-sm font-semibold uppercase tracking-wider mb-4"
+              style={{ color: primaryColor }}
+            >
+              ◆ Histórico de Pesagens
             </h3>
-            <table className="w-full border-collapse">
+            <table className="w-full">
               <thead>
-                <tr style={{ backgroundColor: `${primaryColor}20` }}>
-                  <th className="p-2 text-left text-sm font-semibold">Data</th>
-                  <th className="p-2 text-right text-sm font-semibold">Peso (kg)</th>
-                  <th className="p-2 text-right text-sm font-semibold">Variação</th>
+                <tr 
+                  className="text-xs uppercase tracking-wider"
+                  style={{ background: `${primaryColor}10` }}
+                >
+                  <th className="p-3 text-left text-white/60 font-medium rounded-tl-xl">Data</th>
+                  <th className="p-3 text-right text-white/60 font-medium">Peso (kg)</th>
+                  <th className="p-3 text-right text-white/60 font-medium rounded-tr-xl">Variação</th>
                 </tr>
               </thead>
               <tbody>
@@ -281,16 +394,19 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
                   const prevWeight = weightRecords[index + 1]?.weight;
                   const variation = prevWeight ? record.weight - prevWeight : null;
                   return (
-                    <tr key={index} className="border-b">
-                      <td className="p-2 text-sm">
+                    <tr 
+                      key={index} 
+                      style={{ borderBottom: `1px solid ${primaryColor}10` }}
+                    >
+                      <td className="p-3 text-white/80">
                         {format(new Date(record.recorded_at), "d/MM/yyyy", { locale: ptBR })}
                       </td>
-                      <td className="p-2 text-right font-medium">{record.weight}</td>
+                      <td className="p-3 text-right font-mono font-medium text-white">{record.weight}</td>
                       <td 
-                        className="p-2 text-right text-sm font-medium"
-                        style={{ color: variation && variation < 0 ? '#10B981' : variation && variation > 0 ? '#EF4444' : '#6B7280' }}
+                        className="p-3 text-right font-mono font-medium"
+                        style={{ color: variation && variation < 0 ? '#a3e635' : variation && variation > 0 ? '#EF4444' : 'rgba(255,255,255,0.4)' }}
                       >
-                        {variation !== null ? (variation > 0 ? '+' : '') + variation.toFixed(1) : '-'}
+                        {variation !== null ? (variation > 0 ? '+' : '') + variation.toFixed(1) : '—'}
                       </td>
                     </tr>
                   );
@@ -302,21 +418,36 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
 
         {/* Latest Meal Plan Summary */}
         {latestMealPlan && (
-          <div className="mb-6 p-4 rounded-lg border" style={{ borderColor: primaryColor }}>
-            <h3 className="font-bold mb-3" style={{ color: primaryColor }}>
-              🍽️ Último Cardápio: {latestMealPlan.title}
+          <div 
+            className="mb-8 p-6 rounded-xl"
+            style={{ border: `1px solid ${secondaryColor}30`, background: `${secondaryColor}05` }}
+          >
+            <h3 
+              className="text-sm font-semibold uppercase tracking-wider mb-4"
+              style={{ color: secondaryColor }}
+            >
+              ◆ Último Plano: {latestMealPlan.title}
             </h3>
             {latestMealPlan.total_calories && (
-              <p className="text-sm mb-2">
-                <strong>Meta calórica:</strong> {latestMealPlan.total_calories} kcal/dia
+              <p className="text-white/70 mb-3">
+                <span className="text-white/40">Meta calórica:</span>{' '}
+                <span className="font-mono font-bold" style={{ color: primaryColor }}>
+                  {latestMealPlan.total_calories} kcal/dia
+                </span>
               </p>
             )}
             {latestMealPlan.plan_data?.meals && (
               <div className="space-y-2">
                 {latestMealPlan.plan_data.meals.map((meal: any, index: number) => (
-                  <div key={index} className="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
-                    <span className="font-medium">{meal.name}</span>
-                    <span className="text-sm text-gray-600">{meal.totalCalories || 0} kcal</span>
+                  <div 
+                    key={index} 
+                    className="flex justify-between items-center py-2"
+                    style={{ borderBottom: `1px solid ${secondaryColor}10` }}
+                  >
+                    <span className="text-white/80">{meal.name}</span>
+                    <span className="font-mono text-sm" style={{ color: primaryColor }}>
+                      {meal.totalCalories || 0} kcal
+                    </span>
                   </div>
                 ))}
               </div>
@@ -325,9 +456,11 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
         )}
 
         {/* Footer */}
-        <div className="mt-8 pt-4 border-t text-center text-sm text-gray-500">
-          <p>Relatório gerado automaticamente por NutriFlow</p>
-          <p className="mt-1">
+        <div className="mt-10 pt-6 text-center" style={{ borderTop: `1px solid ${primaryColor}10` }}>
+          <p className="text-white/30 text-xs">
+            Relatório gerado automaticamente por <span style={{ color: primaryColor }}>NutriFlow</span>
+          </p>
+          <p className="text-white/20 text-xs mt-1">
             Este documento é de uso profissional e não substitui avaliação presencial.
           </p>
         </div>

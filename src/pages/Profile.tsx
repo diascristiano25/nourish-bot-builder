@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Save, Upload, User, Link2, Image, Palette, GraduationCap, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, Upload, User, Link2, Image, Palette, GraduationCap, RotateCcw, Settings } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 import { restartOnboardingTour, isTourCompleted } from '@/components/OnboardingTour';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { NeonText } from '@/components/ui/NeonText';
+
 interface NutritionistProfile {
   id: string;
   full_name: string;
@@ -121,8 +123,8 @@ export default function Profile() {
   if (authLoading || loading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       </AppLayout>
     );
@@ -130,31 +132,36 @@ export default function Profile() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50">
-        {/* Elite Header */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
-          <div className="px-6 lg:px-8 py-4">
+      <div className="min-h-screen bg-background">
+        {/* Cyber Header */}
+        <header className="sticky top-0 z-30 glass-strong border-b border-border/30">
+          <div className="px-4 md:px-8 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Button 
                   variant="ghost" 
                   size="icon" 
                   onClick={() => navigate('/dashboard')}
-                  className="rounded-xl"
+                  className="rounded-xl glass hover:bg-primary/10"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
-                <div>
-                  <h1 className="text-xl lg:text-2xl font-bold text-slate-800 tracking-tight">
-                    Configurações
-                  </h1>
-                  <p className="text-sm text-slate-500">Personalize seu perfil profissional</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                    <Settings className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-foreground tracking-tight">
+                      <NeonText variant="lime">Configurações</NeonText>
+                    </h1>
+                    <p className="text-sm text-muted-foreground">Personalize seu perfil profissional</p>
+                  </div>
                 </div>
               </div>
               <Button 
                 onClick={handleSave} 
                 disabled={saving} 
-                className="gap-2 bg-emerald-500 hover:bg-emerald-600 rounded-xl h-10 px-5"
+                className="gap-2 bg-primary hover:bg-primary/90 rounded-xl h-10 px-5"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Salvar
@@ -163,75 +170,71 @@ export default function Profile() {
           </div>
         </header>
 
-        <main className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
+        <main className="p-4 md:p-8 max-w-3xl mx-auto space-y-6">
           {/* Personal Info */}
-          <Card className="bg-white rounded-2xl border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-slate-800">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                  <User className="w-4 h-4 text-emerald-500" />
-                </div>
-                Informações Pessoais
-              </CardTitle>
-              <CardDescription className="text-slate-500">
-                Dados que aparecerão nos documentos exportados
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <User className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-foreground">Informações Pessoais</h2>
+                <p className="text-sm text-muted-foreground">Dados que aparecerão nos documentos exportados</p>
+              </div>
+            </div>
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-slate-700">Nome Completo</Label>
+                <Label htmlFor="fullName" className="text-muted-foreground text-sm">Nome Completo</Label>
                 <Input
                   id="fullName"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Dr(a). Nome Sobrenome"
-                  className="rounded-xl border-slate-200 focus:border-emerald-300"
+                  className="rounded-xl bg-background/50 border-border/50 focus:border-primary/50"
                 />
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="crn" className="text-slate-700">CRN</Label>
+                  <Label htmlFor="crn" className="text-muted-foreground text-sm">CRN</Label>
                   <Input
                     id="crn"
                     value={crn}
                     onChange={(e) => setCrn(e.target.value)}
                     placeholder="CRN-X 12345"
-                    className="rounded-xl border-slate-200 focus:border-emerald-300"
+                    className="rounded-xl bg-background/50 border-border/50 focus:border-primary/50"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-slate-700">Telefone</Label>
+                  <Label htmlFor="phone" className="text-muted-foreground text-sm">Telefone</Label>
                   <Input
                     id="phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(11) 99999-9999"
-                    className="rounded-xl border-slate-200 focus:border-emerald-300"
+                    className="rounded-xl bg-background/50 border-border/50 focus:border-primary/50"
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
           {/* Logo */}
-          <Card className="bg-white rounded-2xl border-0 shadow-sm" data-tour="profile-logo">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-slate-800">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <Image className="w-4 h-4 text-blue-500" />
-                </div>
-                Logo
-              </CardTitle>
-              <CardDescription className="text-slate-500">
-                Adicione sua logo para aparecer nos PDFs e Portal do Paciente
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50">
+          <GlassCard className="p-6" data-tour="profile-logo">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                <Image className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-foreground">Logo</h2>
+                <p className="text-sm text-muted-foreground">Adicione sua logo para aparecer nos PDFs e Portal do Paciente</p>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 rounded-xl glass">
                 <div className="flex items-center gap-2">
-                  <Link2 className={`w-4 h-4 ${useLogoUrl ? 'text-emerald-500' : 'text-slate-400'}`} />
-                  <span className={`text-sm ${useLogoUrl ? 'font-medium text-slate-700' : 'text-slate-400'}`}>
+                  <Link2 className={`w-4 h-4 ${useLogoUrl ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <span className={`text-sm ${useLogoUrl ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
                     Link
                   </span>
                 </div>
@@ -240,8 +243,8 @@ export default function Profile() {
                   onCheckedChange={(checked) => setUseLogoUrl(!checked)}
                 />
                 <div className="flex items-center gap-2">
-                  <Upload className={`w-4 h-4 ${!useLogoUrl ? 'text-emerald-500' : 'text-slate-400'}`} />
-                  <span className={`text-sm ${!useLogoUrl ? 'font-medium text-slate-700' : 'text-slate-400'}`}>
+                  <Upload className={`w-4 h-4 ${!useLogoUrl ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <span className={`text-sm ${!useLogoUrl ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
                     Upload
                   </span>
                 </div>
@@ -249,17 +252,17 @@ export default function Profile() {
 
               {useLogoUrl ? (
                 <div className="space-y-2">
-                  <Label htmlFor="logoUrl" className="text-slate-700">URL da Logo</Label>
+                  <Label htmlFor="logoUrl" className="text-muted-foreground text-sm">URL da Logo</Label>
                   <Input
                     id="logoUrl"
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
                     placeholder="https://exemplo.com/logo.png"
-                    className="rounded-xl border-slate-200 focus:border-emerald-300"
+                    className="rounded-xl bg-background/50 border-border/50 focus:border-primary/50"
                   />
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-emerald-300 transition-colors cursor-pointer">
+                <div className="border-2 border-dashed border-border/50 rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer glass">
                   <input
                     type="file"
                     id="logo-upload"
@@ -303,14 +306,14 @@ export default function Profile() {
                   />
                   <label htmlFor="logo-upload" className="cursor-pointer">
                     {uploadingLogo ? (
-                      <Loader2 className="w-8 h-8 mx-auto text-slate-400 animate-spin" />
+                      <Loader2 className="w-8 h-8 mx-auto text-muted-foreground animate-spin" />
                     ) : (
-                      <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                      <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                     )}
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                       Clique para selecionar
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       PNG, JPG (máx. 2MB)
                     </p>
                   </label>
@@ -318,19 +321,19 @@ export default function Profile() {
               )}
               
               {logoUrl && (
-                <div className="p-4 bg-slate-50 rounded-xl">
+                <div className="p-4 rounded-xl glass">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium text-slate-600">Prévia</p>
+                    <p className="text-sm font-medium text-muted-foreground">Prévia</p>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setLogoUrl('')}
-                      className="text-xs h-7 text-slate-500"
+                      className="text-xs h-7 text-muted-foreground hover:text-foreground"
                     >
                       Remover
                     </Button>
                   </div>
-                  <div className="bg-white rounded-lg p-4 flex justify-center">
+                  <div className="bg-background/50 rounded-lg p-4 flex justify-center">
                     <img 
                       src={logoUrl} 
                       alt="Logo preview" 
@@ -342,26 +345,24 @@ export default function Profile() {
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
           {/* Colors */}
-          <Card className="bg-white rounded-2xl border-0 shadow-sm" data-tour="profile-colors">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-slate-800">
-                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
-                  <Palette className="w-4 h-4 text-purple-500" />
-                </div>
-                Cores da Marca
-              </CardTitle>
-              <CardDescription className="text-slate-500">
-                Personalize as cores dos documentos
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <GlassCard className="p-6" data-tour="profile-colors">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center">
+                <Palette className="w-5 h-5 text-secondary" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-foreground">Cores da Marca</h2>
+                <p className="text-sm text-muted-foreground">Personalize as cores dos documentos</p>
+              </div>
+            </div>
+            <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="primaryColor" className="text-slate-700">Cor Principal</Label>
+                  <Label htmlFor="primaryColor" className="text-muted-foreground text-sm">Cor Principal</Label>
                   <div className="flex gap-2">
                     <Input
                       type="color"
@@ -373,12 +374,12 @@ export default function Profile() {
                     <Input
                       value={primaryColor}
                       onChange={(e) => setPrimaryColor(e.target.value)}
-                      className="flex-1 rounded-xl border-slate-200"
+                      className="flex-1 rounded-xl bg-background/50 border-border/50"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="secondaryColor" className="text-slate-700">Cor Secundária</Label>
+                  <Label htmlFor="secondaryColor" className="text-muted-foreground text-sm">Cor Secundária</Label>
                   <div className="flex gap-2">
                     <Input
                       type="color"
@@ -390,15 +391,15 @@ export default function Profile() {
                     <Input
                       value={secondaryColor}
                       onChange={(e) => setSecondaryColor(e.target.value)}
-                      className="flex-1 rounded-xl border-slate-200"
+                      className="flex-1 rounded-xl bg-background/50 border-border/50"
                     />
                   </div>
                 </div>
               </div>
               
               {/* Preview */}
-              <div className="p-4 rounded-xl border border-slate-200">
-                <p className="text-sm font-medium text-slate-600 mb-3">Prévia do Cabeçalho</p>
+              <div className="p-4 rounded-xl glass">
+                <p className="text-sm font-medium text-muted-foreground mb-3">Prévia do Cabeçalho</p>
                 <div 
                   className="p-4 rounded-xl text-white"
                   style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
@@ -414,78 +415,72 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
           {/* Email Signature */}
-          <Card className="bg-white rounded-2xl border-0 shadow-sm" data-tour="profile-signature">
-            <CardHeader>
-              <CardTitle className="text-slate-800">Assinatura</CardTitle>
-              <CardDescription className="text-slate-500">
-                Texto que aparece no rodapé do Portal do Paciente
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <GlassCard className="p-6" data-tour="profile-signature">
+            <h2 className="font-semibold text-foreground mb-1">Assinatura</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Texto que aparece no rodapé do Portal do Paciente
+            </p>
+            <div className="space-y-4">
               <Textarea
                 id="emailSignature"
                 value={emailSignature}
                 onChange={(e) => setEmailSignature(e.target.value)}
                 placeholder="Ex: Atenciosamente, Dra. Maria Silva - Nutricionista Clínica"
                 rows={3}
-                className="rounded-xl border-slate-200 focus:border-emerald-300"
+                className="rounded-xl bg-background/50 border-border/50 focus:border-primary/50"
               />
               
               {emailSignature && (
-                <div className="p-4 bg-slate-50 rounded-xl">
-                  <p className="text-sm font-medium text-slate-600 mb-2">Prévia</p>
-                  <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-200 pt-3">
+                <div className="p-4 rounded-xl glass">
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Prévia</p>
+                  <div className="text-sm text-foreground whitespace-pre-line border-t border-border/30 pt-3">
                     {emailSignature}
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
           {/* Tour Training Section */}
-          <Card className="bg-white rounded-2xl border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-slate-800">
-                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                  <GraduationCap className="w-4 h-4 text-amber-500" />
-                </div>
-                Treinamento
-              </CardTitle>
-              <CardDescription className="text-slate-500">
-                Reinicie o tour de treinamento para rever as funcionalidades
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                <div>
-                  <p className="font-medium text-slate-700">Tour de Onboarding</p>
-                  <p className="text-sm text-slate-500">
-                    Clique para reiniciar o tour
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    if (profile) {
-                      await restartOnboardingTour(profile.id);
-                      toast({
-                        title: "Tour reiniciado",
-                        description: "O tour começará na próxima vez que você acessar o Dashboard.",
-                      });
-                    }
-                  }}
-                  className="gap-2 rounded-xl"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Reiniciar Tour
-                </Button>
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                <GraduationCap className="w-5 h-5 text-amber-400" />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <h2 className="font-semibold text-foreground">Treinamento</h2>
+                <p className="text-sm text-muted-foreground">Reinicie o tour de treinamento para rever as funcionalidades</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-xl glass">
+              <div>
+                <p className="font-medium text-foreground">Tour de Onboarding</p>
+                <p className="text-sm text-muted-foreground">
+                  Clique para reiniciar o tour
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (profile) {
+                    await restartOnboardingTour(profile.id);
+                    toast({
+                      title: "Tour reiniciado",
+                      description: "O tour começará na próxima vez que você acessar o Dashboard.",
+                    });
+                  }
+                }}
+                className="gap-2 rounded-xl border-border/50 hover:bg-primary/10"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reiniciar Tour
+              </Button>
+            </div>
+          </GlassCard>
         </main>
       </div>
     </AppLayout>
