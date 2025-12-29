@@ -331,27 +331,33 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
             <h3 style={{ color: NEON_GREEN, fontSize: '12px', fontWeight: '600', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 0, marginBottom: '20px' }}>
               ◆ Dados do Paciente
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '40% 60%', gap: '12px' }}>
               <div>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>Nome</p>
-                <p style={{ color: 'white', fontSize: '16px', fontWeight: '500', margin: 0, ...noWordBreakStyle }}>{sanitizeText(patient.full_name)}</p>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px', textTransform: 'uppercase', marginBottom: '2px' }}>Nome</p>
+                <p style={{ color: 'white', fontSize: '9px', fontWeight: '500', margin: 0, ...noWordBreakStyle }}>{sanitizeText(patient.full_name)}</p>
               </div>
               {patient.email && (
-                <div>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>E-mail</p>
-                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0 }}>{patient.email}</p>
+                <div style={{ gridColumn: 'span 1' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px', textTransform: 'uppercase', marginBottom: '2px' }}>E-mail</p>
+                  <p style={{ 
+                    color: 'rgba(255,255,255,0.7)', 
+                    fontSize: '9px', 
+                    margin: 0,
+                    wordBreak: 'break-all',
+                    overflowWrap: 'anywhere',
+                  }}>{patient.email}</p>
                 </div>
               )}
               {patient.birth_date && (
                 <div>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>Nascimento</p>
-                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0 }}>{format(new Date(patient.birth_date), "d/MM/yyyy", { locale: ptBR })}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px', textTransform: 'uppercase', marginBottom: '2px' }}>Nascimento</p>
+                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '9px', margin: 0 }}>{format(new Date(patient.birth_date), "d/MM/yyyy", { locale: ptBR })}</p>
                 </div>
               )}
               {patient.gender && (
                 <div>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}>Sexo</p>
-                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0 }}>{genderLabels[patient.gender] || patient.gender}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px', textTransform: 'uppercase', marginBottom: '2px' }}>Sexo</p>
+                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '9px', margin: 0 }}>{genderLabels[patient.gender] || patient.gender}</p>
                 </div>
               )}
             </div>
