@@ -196,44 +196,52 @@ serve(async (req) => {
       userAlreadyExisted = true;
     }
 
-    // Now send magic link to the user using inviteUserByEmail which ACTUALLY sends email
+    // Now send magic link using signInWithOtp - this ACTUALLY sends email
     const finalRedirectUrl = redirectUrl || `${req.headers.get('origin')}/patient-portal`;
     
     console.log('Sending magic link to:', patientEmail, 'with redirect:', finalRedirectUrl);
     
-    // Use inviteUserByEmail for existing users - this sends an actual email
-    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
-      patientEmail,
+    // Create a regular client (not admin) to use signInWithOtp which sends actual emails
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
-        redirectTo: finalRedirectUrl,
-        data: {
-          full_name: patient.full_name,
-          is_patient: true,
-          patient_id: patientId,
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
         },
       }
     );
 
-    if (inviteError) {
-      console.log('inviteUserByEmail failed (user may already be confirmed):', inviteError.message);
-      
-      // If invite fails (user already confirmed), generate a recovery/magic link
-      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'recovery',
-        email: patientEmail,
-        options: {
-          redirectTo: finalRedirectUrl,
-        },
-      });
+    // Use signInWithOtp which actually sends the email
+    const { error: otpError } = await supabaseClient.auth.signInWithOtp({
+      email: patientEmail,
+      options: {
+        emailRedirectTo: finalRedirectUrl,
+        shouldCreateUser: false, // User should already exist
+      },
+    });
 
-      if (linkError) {
-        console.error('generateLink also failed:', linkError);
-        // Still return success if user was created - they can use the login page
+    if (otpError) {
+      console.error('signInWithOtp failed:', otpError.message);
+      
+      // Try resetPasswordForEmail as fallback - this also sends email
+      const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(
+        patientEmail,
+        {
+          redirectTo: finalRedirectUrl,
+        }
+      );
+
+      if (resetError) {
+        console.error('resetPasswordForEmail also failed:', resetError.message);
+        
+        // Still return success if user was created/linked - they can use the login page
         if (userCreated || userAlreadyExisted) {
           return new Response(
             JSON.stringify({ 
               success: true, 
-              message: 'Acesso liberado! O paciente pode acessar o portal usando o email cadastrado.',
+              message: 'Acesso liberado! O paciente pode acessar o portal usando "Esqueci minha senha" para definir uma senha.',
               userCreated,
               userLinked: true,
               emailSent: false,
@@ -247,19 +255,17 @@ serve(async (req) => {
         }
         
         return new Response(
-          JSON.stringify({ error: 'Failed to send access link: ' + linkError.message }),
+          JSON.stringify({ error: 'Failed to send access link: ' + resetError.message }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // We have the link, need to send it via email manually or show it
-      console.log('Generated recovery link successfully');
+      console.log('Password reset email sent successfully to:', patientEmail);
       
-      // Return success - the link was generated (Supabase should send the email for recovery type)
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'Link de recuperação enviado! O paciente receberá um email para definir a senha.',
+          message: 'Email de redefinição de senha enviado! O paciente receberá um link para criar sua senha.',
           userCreated,
           userLinked: true,
           emailSent: true,
@@ -271,7 +277,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Invite sent successfully to:', patientEmail);
+    console.log('Magic link email sent successfully to:', patientEmail);
 
     console.log('Magic link process completed successfully for:', patientEmail);
 
