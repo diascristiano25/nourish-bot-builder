@@ -427,13 +427,13 @@ export default function Biblioteca() {
       <PageTour tourKey="biblioteca" steps={bibliotecaTourSteps} run />
       <div className="min-h-screen bg-background">
         {/* Glassmorphism Header */}
-        <header className="sticky top-0 z-30 bg-[rgba(10,12,16,0.85)] backdrop-blur-[40px] border-b border-[rgba(255,255,255,0.08)]">
+        <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-[40px] border-b border-border">
           <div className="px-4 md:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-10 w-10 rounded-xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] hover:bg-primary/10 hover:border-primary/30"
+                className="h-10 w-10 rounded-xl bg-muted/50 border border-border hover:bg-primary/10 hover:border-primary/30"
                 onClick={() => navigate('/dashboard')}
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -462,13 +462,13 @@ export default function Biblioteca() {
                 placeholder="Buscar alimentos ou receitas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-11 h-12 rounded-xl bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] focus:border-primary/50"
+                className="pl-11 h-12 rounded-xl bg-muted/50 border-border focus:border-primary/50"
               />
             </div>
           </BentoCard>
 
           <Tabs defaultValue="foods" className="space-y-6">
-            <TabsList className="bg-[rgba(15,18,22,0.7)] backdrop-blur-[20px] border border-[rgba(255,255,255,0.08)] p-1.5 rounded-2xl h-auto">
+            <TabsList className="bg-muted/70 backdrop-blur-[20px] border border-border p-1.5 rounded-2xl h-auto">
               <TabsTrigger 
                 value="foods" 
                 className="rounded-xl px-6 py-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-2 font-medium transition-all"
@@ -505,7 +505,7 @@ export default function Biblioteca() {
                       Novo Alimento
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-[rgba(15,18,22,0.95)] backdrop-blur-[40px] border-[rgba(255,255,255,0.1)]">
+                  <DialogContent className="bg-card/95 backdrop-blur-[40px] border-border">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
                         <Apple className="w-5 h-5 text-primary" />
@@ -519,7 +519,7 @@ export default function Biblioteca() {
                           placeholder="Ex: Pão de queijo fit"
                           value={foodForm.name}
                           onChange={(e) => setFoodForm(prev => ({ ...prev, name: e.target.value }))}
-                          className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                          className="bg-muted/50 border-border h-11 rounded-xl"
                         />
                       </div>
                       <div className="space-y-2">
@@ -528,10 +528,10 @@ export default function Biblioteca() {
                           value={foodForm.unit_type}
                           onValueChange={(v) => setFoodForm(prev => ({ ...prev, unit_type: v }))}
                         >
-                          <SelectTrigger className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl">
+                          <SelectTrigger className="bg-muted/50 border-border h-11 rounded-xl">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-[rgba(15,18,22,0.95)] backdrop-blur-[40px] border-[rgba(255,255,255,0.1)]">
+                          <SelectContent className="bg-card/95 backdrop-blur-[40px] border-border">
                             <SelectItem value="g">Gramas (g)</SelectItem>
                             <SelectItem value="ml">Mililitros (ml)</SelectItem>
                             <SelectItem value="unidade">Unidade</SelectItem>
@@ -548,7 +548,7 @@ export default function Biblioteca() {
                             placeholder="0"
                             value={foodForm.kcal}
                             onChange={(e) => setFoodForm(prev => ({ ...prev, kcal: e.target.value }))}
-                            className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                            className="bg-muted/50 border-border h-11 rounded-xl"
                           />
                         </div>
                         <div className="space-y-2">
@@ -558,7 +558,7 @@ export default function Biblioteca() {
                             placeholder="0"
                             value={foodForm.protein}
                             onChange={(e) => setFoodForm(prev => ({ ...prev, protein: e.target.value }))}
-                            className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                            className="bg-muted/50 border-border h-11 rounded-xl"
                           />
                         </div>
                         <div className="space-y-2">
@@ -568,7 +568,7 @@ export default function Biblioteca() {
                             placeholder="0"
                             value={foodForm.carb}
                             onChange={(e) => setFoodForm(prev => ({ ...prev, carb: e.target.value }))}
-                            className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                            className="bg-muted/50 border-border h-11 rounded-xl"
                           />
                         </div>
                         <div className="space-y-2">
@@ -578,7 +578,7 @@ export default function Biblioteca() {
                             placeholder="0"
                             value={foodForm.fat}
                             onChange={(e) => setFoodForm(prev => ({ ...prev, fat: e.target.value }))}
-                            className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                            className="bg-muted/50 border-border h-11 rounded-xl"
                           />
                         </div>
                       </div>
@@ -689,7 +689,7 @@ export default function Biblioteca() {
                       Nova Receita
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-[rgba(15,18,22,0.95)] backdrop-blur-[40px] border-[rgba(255,255,255,0.1)] max-w-lg max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="bg-card/95 backdrop-blur-[40px] border-border max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
                         <ChefHat className="w-5 h-5 text-secondary" />
@@ -703,7 +703,7 @@ export default function Biblioteca() {
                         <Button
                           variant={recipeMode === 'manual' ? 'default' : 'outline'}
                           size="sm"
-                          className={`flex-1 gap-2 rounded-xl ${recipeMode === 'manual' ? 'bg-secondary hover:bg-secondary/90' : 'border-[rgba(255,255,255,0.08)]'}`}
+                          className={`flex-1 gap-2 rounded-xl ${recipeMode === 'manual' ? 'bg-secondary hover:bg-secondary/90' : 'border-border'}`}
                           onClick={() => setRecipeMode('manual')}
                         >
                           <PenLine className="w-4 h-4" />
@@ -712,7 +712,7 @@ export default function Biblioteca() {
                         <Button
                           variant={recipeMode === 'ai' ? 'default' : 'outline'}
                           size="sm"
-                          className={`flex-1 gap-2 rounded-xl ${recipeMode === 'ai' ? 'bg-gradient-to-r from-primary to-secondary' : 'border-[rgba(255,255,255,0.08)]'}`}
+                          className={`flex-1 gap-2 rounded-xl ${recipeMode === 'ai' ? 'bg-gradient-to-r from-primary to-secondary' : 'border-border'}`}
                           onClick={() => setRecipeMode('ai')}
                         >
                           <Sparkles className="w-4 h-4" />
@@ -737,7 +737,7 @@ export default function Biblioteca() {
                             placeholder="Ex: frango, batata doce, brócolis, azeite..."
                             value={aiRecipeForm.ingredients}
                             onChange={(e) => setAiRecipeForm(prev => ({ ...prev, ingredients: e.target.value }))}
-                            className="min-h-[80px] bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] rounded-xl"
+                            className="min-h-[80px] bg-muted/50 border-border rounded-xl"
                           />
                         </div>
                         
@@ -748,10 +748,10 @@ export default function Biblioteca() {
                               value={aiRecipeForm.servings}
                               onValueChange={(v) => setAiRecipeForm(prev => ({ ...prev, servings: v }))}
                             >
-                              <SelectTrigger className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl">
+                              <SelectTrigger className="bg-muted/50 border-border h-11 rounded-xl">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-[rgba(15,18,22,0.95)] backdrop-blur-[40px] border-[rgba(255,255,255,0.1)]">
+                              <SelectContent className="bg-card/95 backdrop-blur-[40px] border-border">
                                 <SelectItem value="1">1 porção</SelectItem>
                                 <SelectItem value="2">2 porções</SelectItem>
                                 <SelectItem value="4">4 porções</SelectItem>
@@ -765,10 +765,10 @@ export default function Biblioteca() {
                               value={aiRecipeForm.goal}
                               onValueChange={(v) => setAiRecipeForm(prev => ({ ...prev, goal: v }))}
                             >
-                              <SelectTrigger className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl">
+                              <SelectTrigger className="bg-muted/50 border-border h-11 rounded-xl">
                                 <SelectValue placeholder="Selecione..." />
                               </SelectTrigger>
-                              <SelectContent className="bg-[rgba(15,18,22,0.95)] backdrop-blur-[40px] border-[rgba(255,255,255,0.1)]">
+                              <SelectContent className="bg-card/95 backdrop-blur-[40px] border-border">
                                 <SelectItem value="none">Nenhum específico</SelectItem>
                                 <SelectItem value="hipertrofia">Hipertrofia</SelectItem>
                                 <SelectItem value="emagrecimento">Emagrecimento</SelectItem>
@@ -786,7 +786,7 @@ export default function Biblioteca() {
                             placeholder="Ex: sem lactose, sem glúten, sem amendoim..."
                             value={aiRecipeForm.dietary_restrictions}
                             onChange={(e) => setAiRecipeForm(prev => ({ ...prev, dietary_restrictions: e.target.value }))}
-                            className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                            className="bg-muted/50 border-border h-11 rounded-xl"
                           />
                         </div>
                         
@@ -813,7 +813,7 @@ export default function Biblioteca() {
                             placeholder="Ex: Frango grelhado com legumes"
                             value={recipeForm.name}
                             onChange={(e) => setRecipeForm(prev => ({ ...prev, name: e.target.value }))}
-                            className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                            className="bg-muted/50 border-border h-11 rounded-xl"
                           />
                         </div>
                         
@@ -823,7 +823,7 @@ export default function Biblioteca() {
                             placeholder="Ingredientes, instruções..."
                             value={recipeForm.notes}
                             onChange={(e) => setRecipeForm(prev => ({ ...prev, notes: e.target.value }))}
-                            className="min-h-[100px] bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] rounded-xl"
+                            className="min-h-[100px] bg-muted/50 border-border rounded-xl"
                           />
                         </div>
                         
@@ -835,7 +835,7 @@ export default function Biblioteca() {
                               placeholder="0"
                               value={recipeForm.kcal}
                               onChange={(e) => setRecipeForm(prev => ({ ...prev, kcal: e.target.value }))}
-                              className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                              className="bg-muted/50 border-border h-11 rounded-xl"
                             />
                           </div>
                           <div className="space-y-2">
@@ -845,7 +845,7 @@ export default function Biblioteca() {
                               placeholder="0"
                               value={recipeForm.protein}
                               onChange={(e) => setRecipeForm(prev => ({ ...prev, protein: e.target.value }))}
-                              className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                              className="bg-muted/50 border-border h-11 rounded-xl"
                             />
                           </div>
                           <div className="space-y-2">
@@ -855,7 +855,7 @@ export default function Biblioteca() {
                               placeholder="0"
                               value={recipeForm.carb}
                               onChange={(e) => setRecipeForm(prev => ({ ...prev, carb: e.target.value }))}
-                              className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                              className="bg-muted/50 border-border h-11 rounded-xl"
                             />
                           </div>
                           <div className="space-y-2">
@@ -865,7 +865,7 @@ export default function Biblioteca() {
                               placeholder="0"
                               value={recipeForm.fat}
                               onChange={(e) => setRecipeForm(prev => ({ ...prev, fat: e.target.value }))}
-                              className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] h-11 rounded-xl"
+                              className="bg-muted/50 border-border h-11 rounded-xl"
                             />
                           </div>
                         </div>
@@ -940,7 +940,7 @@ export default function Biblioteca() {
                       )}
                       
                       {/* Macro Summary */}
-                      <div className="flex items-center gap-3 pt-4 border-t border-[rgba(255,255,255,0.08)]">
+                      <div className="flex items-center gap-3 pt-4 border-t border-border">
                         <div className="flex items-center gap-1">
                           <Flame className="w-3.5 h-3.5 text-secondary" />
                           <span className="text-xs font-mono font-medium text-secondary">{recipe.estimated_macros.kcal}</span>
