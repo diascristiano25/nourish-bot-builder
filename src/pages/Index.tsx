@@ -173,11 +173,6 @@ export default function Index() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-8 px-5 py-2.5 text-sm font-semibold glass border-primary/30 text-primary rounded-full animate-glow-pulse">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Plataforma Premium 2026
-            </Badge>
-            
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight tracking-tight">
               Cardápios com{' '}
               <NeonText variant="gradient" className="inline">
@@ -342,11 +337,9 @@ export default function Index() {
                 variant={plan.popular ? 'strong' : 'default'}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-secondary text-secondary-foreground px-4 py-1 rounded-full font-semibold text-xs">
-                      Mais Popular
-                    </Badge>
-                  </div>
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-secondary text-secondary-foreground px-4 py-1 rounded-full font-semibold text-xs whitespace-nowrap shadow-lg">
+                    Mais Popular
+                  </Badge>
                 )}
                 
                 <div className="flex items-center gap-3 mb-6">
