@@ -20,12 +20,16 @@ import {
   Star,
   Crown,
   Rocket,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 import logoImg from '@/assets/logo.png';
 
 export default function Index() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (!loading && user) {
@@ -131,6 +135,15 @@ export default function Index() {
             >
               Contato
             </a>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted"
+              aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
             <Button 
               onClick={() => navigate('/auth')} 
               variant="outline" 
