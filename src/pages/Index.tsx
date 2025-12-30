@@ -328,19 +328,19 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-6">
             {pricingPlans.map((plan, index) => (
-              <GlassCard 
-                key={plan.name}
-                className={`p-8 relative ${plan.popular ? 'md:-mt-4 md:mb-4' : ''}`}
-                glow={plan.glowColor}
-                variant={plan.popular ? 'strong' : 'default'}
-              >
+              <div key={plan.name} className={`relative ${plan.popular ? 'md:-mt-4 md:mb-4' : ''}`}>
                 {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-secondary text-secondary-foreground px-4 py-1 rounded-full font-semibold text-xs whitespace-nowrap shadow-lg">
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-secondary text-secondary-foreground px-4 py-1.5 rounded-full font-semibold text-xs whitespace-nowrap shadow-lg">
                     Mais Popular
                   </Badge>
                 )}
+                <GlassCard 
+                  className="p-8 h-full"
+                  glow={plan.glowColor}
+                  variant={plan.popular ? 'strong' : 'default'}
+                >
                 
                 <div className="flex items-center gap-3 mb-6">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${plan.popular ? 'bg-secondary/20' : 'bg-primary/20'}`}>
@@ -381,6 +381,7 @@ export default function Index() {
                   {plan.cta}
                 </Button>
               </GlassCard>
+              </div>
             ))}
           </div>
         </div>
