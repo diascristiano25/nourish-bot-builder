@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,8 @@ import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
 import PatientReportDocument from '@/components/PatientReportDocument';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { NeonText } from '@/components/ui/NeonText';
+import { NutritionistChat } from '@/components/NutritionistChat';
+import { useNotifications } from '@/hooks/useNotifications';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { 
@@ -36,10 +38,13 @@ import {
   Download,
   MessageCircle,
   KeyRound,
-  UserCheck
+  UserCheck,
+  Bell,
+  BellOff
 } from 'lucide-react';
 import { format, differenceInYears, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -126,6 +131,8 @@ const genderLabels: Record<string, string> = {
 
 export default function PatientDetail() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'overview';
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -141,11 +148,15 @@ export default function PatientDetail() {
   const [sendingMagicLink, setSendingMagicLink] = useState(false);
   const [nutritionistName, setNutritionistName] = useState<string>('');
   const [nutritionist, setNutritionist] = useState<any>(null);
+  const [nutritionistId, setNutritionistId] = useState<string | null>(null);
   const [weightLogs, setWeightLogs] = useState<any[]>([]);
   const [bodyFatLogs, setBodyFatLogs] = useState<any[]>([]);
   const [latestMealPlan, setLatestMealPlan] = useState<any>(null);
   const [exportingPDF, setExportingPDF] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const reportRef = useRef<HTMLDivElement>(null);
+  
+  const { permission, requestPermission, isSupported } = useNotifications(nutritionistId);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -156,8 +167,48 @@ export default function PatientDetail() {
   useEffect(() => {
     if (user && id) {
       fetchPatientData();
+      fetchUnreadMessages();
     }
   }, [user, id]);
+
+  // Subscribe to new messages for unread count
+  useEffect(() => {
+    if (!id || !nutritionistId) return;
+
+    const channel = supabase
+      .channel(`unread-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `patient_id=eq.${id}`,
+        },
+        () => {
+          fetchUnreadMessages();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, nutritionistId]);
+
+  const fetchUnreadMessages = async () => {
+    if (!id || !nutritionistId) return;
+    
+    const { count } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('patient_id', id)
+      .eq('nutritionist_id', nutritionistId)
+      .eq('sender_type', 'patient')
+      .eq('is_read', false);
+
+    setUnreadMessages(count || 0);
+  };
 
   const fetchPatientData = async () => {
     try {
@@ -170,6 +221,7 @@ export default function PatientDetail() {
       if (nutriData) {
         setNutritionistName(nutriData.full_name);
         setNutritionist(nutriData);
+        setNutritionistId(nutriData.id);
       }
 
       const { data: patientData, error: patientError } = await supabase
@@ -706,8 +758,8 @@ export default function PatientDetail() {
         </GlassCard>
 
         {/* Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="glass border border-border/50 p-1">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
+          <TabsList className="glass border border-border/50 p-1 flex-wrap">
             <TabsTrigger value="overview" className="data-[state=active]:bg-primary/20">
               Visão Geral
             </TabsTrigger>
@@ -716,6 +768,15 @@ export default function PatientDetail() {
             </TabsTrigger>
             <TabsTrigger value="mealplans" className="data-[state=active]:bg-primary/20">
               Cardápios
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="data-[state=active]:bg-primary/20 gap-2">
+              <MessageCircle className="w-4 h-4" />
+              Chat
+              {unreadMessages > 0 && (
+                <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
+                  {unreadMessages}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="history" className="data-[state=active]:bg-primary/20">
               Histórico
@@ -825,6 +886,52 @@ export default function PatientDetail() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="chat" className="space-y-4">
+            <GlassCard className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <MessageCircle className="w-5 h-5 text-primary" />
+                  <NeonText as="h3" color="primary" className="font-semibold">
+                    Chat com {patient.full_name.split(' ')[0]}
+                  </NeonText>
+                </div>
+                {isSupported && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={requestPermission}
+                    className={cn(
+                      "gap-2 border-border/50",
+                      permission === 'granted' 
+                        ? "text-success border-success/50" 
+                        : "hover:border-primary/50"
+                    )}
+                  >
+                    {permission === 'granted' ? (
+                      <>
+                        <Bell className="w-4 h-4" />
+                        Notificações ativas
+                      </>
+                    ) : (
+                      <>
+                        <BellOff className="w-4 h-4" />
+                        Ativar notificações
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+              
+              {nutritionistId && (
+                <NutritionistChat 
+                  patientId={id!}
+                  patientName={patient.full_name}
+                  nutritionistId={nutritionistId}
+                />
+              )}
+            </GlassCard>
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">
