@@ -17,6 +17,7 @@ export interface PatientData {
   email: string | null;
   phone: string | null;
   goal: string | null;
+  nutritionist_id: string;
 }
 
 export interface MealItem {
@@ -76,14 +77,14 @@ export default function PatientMobileApp() {
     try {
       let { data: patientData } = await supabase
         .from('patients')
-        .select('id, full_name, email, phone, goal')
+        .select('id, full_name, email, phone, goal, nutritionist_id')
         .eq('user_id', user!.id)
         .maybeSingle();
 
       if (!patientData && user?.email) {
         const { data: patientByEmail } = await supabase
           .from('patients')
-          .select('id, full_name, email, phone, goal')
+          .select('id, full_name, email, phone, goal, nutritionist_id')
           .eq('email', user.email)
           .maybeSingle();
 

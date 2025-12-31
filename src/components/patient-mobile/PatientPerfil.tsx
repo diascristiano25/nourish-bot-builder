@@ -3,14 +3,13 @@ import { PatientData } from '@/pages/PatientMobileApp';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { PatientChat } from './PatientChat';
 import { 
   User, 
   Bell, 
-  MessageCircle, 
   LogOut,
   ChevronRight,
   Moon,
-  Smartphone,
   Shield,
   HelpCircle,
   Heart
@@ -39,7 +38,7 @@ export function PatientPerfil({ patient, onSignOut }: PatientPerfilProps) {
       icon: Bell,
       label: 'Notificações',
       description: 'Lembretes de refeições e água',
-      action: 'toggle',
+      action: 'toggle' as const,
       value: notifications,
       onChange: setNotifications,
     },
@@ -47,27 +46,21 @@ export function PatientPerfil({ patient, onSignOut }: PatientPerfilProps) {
       icon: Moon,
       label: 'Modo escuro',
       description: 'Aparência do aplicativo',
-      action: 'toggle',
+      action: 'toggle' as const,
       value: darkMode,
       onChange: setDarkMode,
-    },
-    {
-      icon: MessageCircle,
-      label: 'Falar com Nutri',
-      description: 'Envie uma mensagem',
-      action: 'link',
     },
     {
       icon: Shield,
       label: 'Privacidade',
       description: 'Termos e políticas',
-      action: 'link',
+      action: 'link' as const,
     },
     {
       icon: HelpCircle,
       label: 'Ajuda',
       description: 'Dúvidas frequentes',
-      action: 'link',
+      action: 'link' as const,
     },
   ];
 
@@ -137,13 +130,13 @@ export function PatientPerfil({ patient, onSignOut }: PatientPerfilProps) {
         </CardContent>
       </Card>
 
-      {/* Contact Nutritionist */}
-      <Button 
-        className="w-full h-12 rounded-xl mb-4 bg-secondary hover:bg-secondary/90"
-      >
-        <MessageCircle className="w-5 h-5 mr-2" />
-        Falar com meu Nutricionista
-      </Button>
+      {/* Contact Nutritionist - Chat */}
+      <div className="mb-4">
+        <PatientChat 
+          patientId={patient.id}
+          nutritionistId={patient.nutritionist_id}
+        />
+      </div>
 
       {/* Logout */}
       <Button 
