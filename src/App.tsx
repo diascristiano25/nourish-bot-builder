@@ -35,6 +35,7 @@ const Financeiro = lazy(() => import("./pages/Financeiro"));
 const Patients = lazy(() => import("./pages/Patients"));
 const Biblioteca = lazy(() => import("./pages/Biblioteca"));
 const Privacidade = lazy(() => import("./pages/Privacidade"));
+const Termos = lazy(() => import("./pages/Termos"));
 const Sobre = lazy(() => import("./pages/Sobre"));
 
 // Global loading fallback component
@@ -84,6 +85,7 @@ function App() {
                     {/* If on patient subdomain, show PatientAuth as landing page */}
                     <Route path="/" element={patientDomain ? <PatientAuth /> : <Index />} />
                     <Route path="/privacidade" element={<Privacidade />} />
+                    <Route path="/termos" element={<Termos />} />
                     <Route path="/sobre" element={<Sobre />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/patient-auth" element={<PatientAuth />} />

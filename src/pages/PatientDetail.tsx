@@ -12,6 +12,7 @@ import PatientReportDocument from '@/components/PatientReportDocument';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { NeonText } from '@/components/ui/NeonText';
 import { NutritionistChat } from '@/components/NutritionistChat';
+import { PatientPreviewModal } from '@/components/PatientPreviewModal';
 import { useNotifications } from '@/hooks/useNotifications';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -40,7 +41,8 @@ import {
   KeyRound,
   UserCheck,
   Bell,
-  BellOff
+  BellOff,
+  Eye
 } from 'lucide-react';
 import { format, differenceInYears, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -154,6 +156,7 @@ export default function PatientDetail() {
   const [latestMealPlan, setLatestMealPlan] = useState<any>(null);
   const [exportingPDF, setExportingPDF] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
   
   const { permission, requestPermission, isSupported } = useNotifications(nutritionistId);
@@ -717,6 +720,15 @@ export default function PatientDetail() {
 
             <Button 
               variant="outline"
+              onClick={() => setPreviewModalOpen(true)}
+              className="gap-2 border-border/50 hover:border-info/50 hover:text-info"
+            >
+              <Eye className="w-4 h-4" />
+              Visualizar como Paciente
+            </Button>
+
+            <Button 
+              variant="outline"
               onClick={handleExportPDF}
               disabled={exportingPDF}
               className="gap-2 border-border/50 hover:border-primary/50"
@@ -996,6 +1008,14 @@ export default function PatientDetail() {
           height={latestHeight}
         />
       </div>
+
+      {/* Patient Preview Modal */}
+      <PatientPreviewModal
+        open={previewModalOpen}
+        onOpenChange={setPreviewModalOpen}
+        patientId={id!}
+        patientName={patient.full_name}
+      />
     </div>
   );
 }

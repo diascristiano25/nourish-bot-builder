@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -304,9 +304,21 @@ export default function Auth() {
           </Tabs>
         </GlassCard>
 
-        <p className="text-center text-xs text-muted-foreground mt-6 font-mono">
-          FLOWTECH_GROUP :: NUTRIFLOW_2026
-        </p>
+        {/* Footer Links */}
+        <div className="text-center mt-6 space-y-2">
+          <div className="flex justify-center gap-4 text-xs">
+            <Link to="/termos" className="text-muted-foreground hover:text-primary transition-colors">
+              Termos de Uso
+            </Link>
+            <span className="text-muted-foreground">•</span>
+            <Link to="/privacidade" className="text-muted-foreground hover:text-primary transition-colors">
+              Privacidade
+            </Link>
+          </div>
+          <p className="text-xs text-muted-foreground font-mono">
+            FLOWTECH_GROUP :: NUTRIFLOW_2026
+          </p>
+        </div>
       </div>
     </div>
   );

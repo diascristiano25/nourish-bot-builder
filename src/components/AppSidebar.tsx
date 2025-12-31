@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { 
   Home, 
   Users, 
@@ -12,7 +12,9 @@ import {
   Command,
   Sun,
   Moon,
-  MessageCircle
+  MessageCircle,
+  FileText,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -276,6 +278,26 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
           <LogOut className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
           {!isCollapsed && <span className="text-sm font-medium">Sair</span>}
         </Button>
+
+        {/* Legal Links */}
+        {!isCollapsed && (
+          <div className="pt-3 mt-2 border-t border-border/30 flex flex-wrap gap-x-3 gap-y-1 px-1">
+            <Link 
+              to="/termos" 
+              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+            >
+              <FileText className="w-3 h-3" />
+              Termos
+            </Link>
+            <Link 
+              to="/privacidade" 
+              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+            >
+              <Shield className="w-3 h-3" />
+              Privacidade
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Collapse Toggle - Desktop only */}
