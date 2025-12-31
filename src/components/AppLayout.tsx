@@ -1,6 +1,7 @@
 import { ReactNode, useState, memo } from 'react';
 import { AppSidebar } from './AppSidebar';
 import { CommandBar } from './CommandBar';
+import { FloatingSupportButton } from './FloatingSupportButton';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
@@ -72,6 +73,9 @@ export const AppLayout = memo(function AppLayout({ children, showSidebar = true 
           {children}
         </div>
       </main>
+
+      {/* Floating Support Button */}
+      <FloatingSupportButton />
     </div>
   );
 });
