@@ -11,14 +11,17 @@ import {
   HelpCircle,
   Command,
   Sun,
-  Moon
+  Moon,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { NeonText } from '@/components/ui/NeonText';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 import logoImg from '@/assets/logo.png';
 
 interface NavItem {
@@ -40,6 +43,10 @@ const navItems: NavItemWithTour[] = [
   { label: 'Configurações', icon: Settings, href: '/profile', tourId: 'nav-config' },
 ];
 
+interface NavItemWithBadge extends NavItemWithTour {
+  showBadge?: boolean;
+}
+
 const WHATSAPP_HELP_URL = "https://wa.me/5547992381906?text=Olá! Preciso de ajuda com o NutriFlow.";
 
 interface AppSidebarProps {
@@ -51,9 +58,68 @@ interface AppSidebarProps {
 export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [nutritionistId, setNutritionistId] = useState<string | null>(null);
+
+  // Fetch nutritionist ID and unread messages
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchNutritionistId = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (data) {
+        setNutritionistId(data.id);
+      }
+    };
+
+    fetchNutritionistId();
+  }, [user]);
+
+  useEffect(() => {
+    if (!nutritionistId) return;
+
+    const fetchUnread = async () => {
+      const { count } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('nutritionist_id', nutritionistId)
+        .eq('sender_type', 'patient')
+        .eq('is_read', false);
+
+      setUnreadMessages(count || 0);
+    };
+
+    fetchUnread();
+
+    // Subscribe to message changes
+    const channel = supabase
+      .channel('sidebar-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `nutritionist_id=eq.${nutritionistId}`,
+        },
+        () => {
+          fetchUnread();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [nutritionistId]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -117,6 +183,7 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
         {navItems.map((item) => {
           const isActive = location.pathname === item.href || 
             (item.href === '/dashboard' && location.pathname === '/');
+          const showBadge = item.href === '/patients' && unreadMessages > 0;
           
           return (
             <Button
@@ -125,7 +192,7 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
               onClick={() => handleNavigation(item.href)}
               data-tour={item.tourId}
               className={cn(
-                "w-full justify-start gap-3 h-11 rounded-xl transition-all duration-200 touch-manipulation group",
+                "w-full justify-start gap-3 h-11 rounded-xl transition-all duration-200 touch-manipulation group relative",
                 isCollapsed && "justify-center px-0",
                 isActive 
                   ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_20px_hsl(68_100%_50%/0.15)]" 
@@ -137,12 +204,30 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
                 isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
               )} strokeWidth={isActive ? 2 : 1.5} />
               {!isCollapsed && (
-                <span className={cn(
-                  "text-sm transition-colors",
-                  isActive ? "font-semibold" : "font-medium"
-                )}>
-                  {item.label}
-                </span>
+                <>
+                  <span className={cn(
+                    "text-sm transition-colors flex-1 text-left",
+                    isActive ? "font-semibold" : "font-medium"
+                  )}>
+                    {item.label}
+                  </span>
+                  {showBadge && (
+                    <Badge 
+                      variant="destructive" 
+                      className="h-5 min-w-5 px-1.5 text-xs font-bold animate-pulse"
+                    >
+                      {unreadMessages > 99 ? '99+' : unreadMessages}
+                    </Badge>
+                  )}
+                </>
+              )}
+              {isCollapsed && showBadge && (
+                <div className="absolute -top-1 -right-1">
+                  <span className="flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
+                  </span>
+                </div>
               )}
             </Button>
           );
