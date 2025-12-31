@@ -1,0 +1,9 @@
+export { PatientBottomNav } from './PatientBottomNav';
+export { PatientDashboard } from './PatientDashboard';
+export { PatientPlano } from './PatientPlano';
+export { PatientRegistro } from './PatientRegistro';
+export { PatientEvolucao } from './PatientEvolucao';
+export { PatientPerfil } from './PatientPerfil';
+export { CircularWaterTracker } from './CircularWaterTracker';
+export { MacroSummary } from './MacroSummary';
+export { NextMealCard } from './NextMealCard';

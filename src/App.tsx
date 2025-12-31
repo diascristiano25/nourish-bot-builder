@@ -15,6 +15,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const PatientAuth = lazy(() => import("./pages/PatientAuth"));
 const PatientPortal = lazy(() => import("./pages/PatientPortal"));
 const PatientApp = lazy(() => import("./pages/PatientApp"));
+const PatientMobileApp = lazy(() => import("./pages/PatientMobileApp"));
 const PublicPatientPortal = lazy(() => import("./pages/PublicPatientPortal"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const NewPatient = lazy(() => import("./pages/NewPatient"));
@@ -78,6 +79,7 @@ function App() {
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/patient-auth" element={<PatientAuth />} />
                     <Route path="/patient-portal" element={<PatientPortal />} />
+                    <Route path="/meu-app" element={<PatientMobileApp />} />
                     <Route path="/app/:patientId" element={<PatientApp />} />
                     <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
                     <Route path="/access-denied" element={<AccessDenied />} />
