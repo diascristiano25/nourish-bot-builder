@@ -4,6 +4,7 @@ export { PatientPlano } from './PatientPlano';
 export { PatientRegistro } from './PatientRegistro';
 export { PatientEvolucao } from './PatientEvolucao';
 export { PatientPerfil } from './PatientPerfil';
+export { PatientChat } from './PatientChat';
 export { CircularWaterTracker } from './CircularWaterTracker';
 export { MacroSummary } from './MacroSummary';
 export { NextMealCard } from './NextMealCard';
