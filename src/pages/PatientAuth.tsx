@@ -6,12 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff, Leaf, Heart, Sparkles } from 'lucide-react';
 import { z } from 'zod';
 import logoImg from '@/assets/logo.png';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { NeonText } from '@/components/ui/NeonText';
-import { ParticleField } from '@/components/ui/ParticleField';
+import { motion } from 'framer-motion';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -37,7 +35,6 @@ export default function PatientAuth() {
       }
     });
 
-    // Check if already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         checkUserTypeAndRedirect(session.user);
@@ -49,7 +46,6 @@ export default function PatientAuth() {
 
   const checkUserTypeAndRedirect = async (authUser: { id: string; email?: string }) => {
     try {
-      // Check if user is a patient
       const { data: patient } = await supabase
         .from('patients')
         .select('id, nutritionist_id')
@@ -61,7 +57,6 @@ export default function PatientAuth() {
         return;
       }
 
-      // Check if user is a nutritionist
       const { data: nutritionist } = await supabase
         .from('profiles')
         .select('id')
@@ -73,7 +68,6 @@ export default function PatientAuth() {
         return;
       }
 
-      // If not found, try to link by email
       if (authUser.email) {
         const { data: patientByEmail } = await supabase
           .from('patients')
@@ -82,7 +76,6 @@ export default function PatientAuth() {
           .maybeSingle();
 
         if (patientByEmail) {
-          // Update patient with user_id
           await supabase
             .from('patients')
             .update({ user_id: authUser.id })
@@ -93,7 +86,6 @@ export default function PatientAuth() {
         }
       }
 
-      // User is authenticated but not a patient or nutritionist
       toast({
         title: "Acesso não encontrado",
         description: "Seu email não está cadastrado. Entre em contato com seu nutricionista.",
@@ -110,7 +102,6 @@ export default function PatientAuth() {
     try {
       loginSchema.shape.email.parse(email);
       
-      // Check if patient exists
       const { data: patient, error } = await supabase
         .from('patients')
         .select('id, user_id')
@@ -128,7 +119,6 @@ export default function PatientAuth() {
         return false;
       }
 
-      // If patient has no user_id, it's first access
       setIsFirstAccess(!patient.user_id);
       return true;
     } catch (err) {
@@ -202,7 +192,6 @@ export default function PatientAuth() {
 
       loginSchema.parse({ email, password });
 
-      // Check if patient exists
       const { data: patient, error: patientError } = await supabase
         .from('patients')
         .select('id, full_name, nutritionist_id')
@@ -221,7 +210,6 @@ export default function PatientAuth() {
         return;
       }
 
-      // Sign up the user
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -250,7 +238,6 @@ export default function PatientAuth() {
         return;
       }
 
-      // Link user_id to patient
       if (signUpData.user) {
         await supabase
           .from('patients')
@@ -263,7 +250,6 @@ export default function PatientAuth() {
         description: "Você já pode acessar seu portal.",
       });
 
-      // Auto-login after signup (if email confirm is disabled)
       if (signUpData.session) {
         navigate('/meu-app');
       }
@@ -286,100 +272,212 @@ export default function PatientAuth() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-      <ParticleField />
-      
-      {/* Gradient orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
-      
-      <div className="w-full max-w-md animate-fade-in relative z-10">
-        <div className="text-center mb-8">
-          <img src={logoImg} alt="NutriFlow" className="w-20 h-20 object-contain mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-foreground">
-            Portal do <NeonText variant="lime">Paciente</NeonText>
-          </h1>
-          <p className="text-muted-foreground mt-2">Acesse seu cardápio personalizado</p>
-        </div>
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Digite seu email",
+        description: "Preencha o campo de email para recuperar sua senha.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-        <GlassCard glow="lime" className="p-6">
+    try {
+      loginSchema.shape.email.parse(email);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/patient-auth`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email enviado!",
+        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+      });
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível enviar o email. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      {/* Beautiful gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-teal-50" />
+      
+      {/* Animated gradient orbs */}
+      <motion.div 
+        className="absolute top-0 left-0 w-[600px] h-[600px] bg-gradient-to-br from-emerald-200/40 to-teal-200/30 rounded-full blur-3xl"
+        animate={{ 
+          x: [0, 50, 0], 
+          y: [0, 30, 0],
+          scale: [1, 1.1, 1] 
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div 
+        className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-tl from-green-200/40 to-emerald-100/30 rounded-full blur-3xl"
+        animate={{ 
+          x: [0, -40, 0], 
+          y: [0, -50, 0],
+          scale: [1, 1.15, 1] 
+        }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-r from-lime-100/30 to-emerald-100/20 rounded-full blur-3xl"
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.5, 0.8, 0.5]
+        }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Decorative floating icons */}
+      <motion.div 
+        className="absolute top-20 right-20 text-emerald-300/50"
+        animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Leaf className="w-12 h-12" />
+      </motion.div>
+      <motion.div 
+        className="absolute bottom-32 left-16 text-teal-300/50"
+        animate={{ y: [0, 15, 0], rotate: [0, -10, 0] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Heart className="w-10 h-10" />
+      </motion.div>
+      <motion.div 
+        className="absolute top-1/3 left-10 text-green-300/40"
+        animate={{ y: [0, -15, 0], scale: [1, 1.2, 1] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Sparkles className="w-8 h-8" />
+      </motion.div>
+      
+      {/* Main content */}
+      <motion.div 
+        className="w-full max-w-md relative z-10"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        {/* Logo and Title */}
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <motion.div
+            className="relative inline-block"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-3xl blur-xl opacity-30" />
+            <img 
+              src={logoImg} 
+              alt="NutriFlow" 
+              className="w-24 h-24 object-contain mx-auto relative drop-shadow-lg" 
+            />
+          </motion.div>
+          <h1 className="text-4xl font-bold mt-6 bg-gradient-to-r from-emerald-700 via-teal-600 to-green-600 bg-clip-text text-transparent">
+            NutriFlow
+          </h1>
+          <p className="text-lg text-emerald-700/80 mt-2 font-medium">
+            Área do Paciente
+          </p>
+        </motion.div>
+
+        {/* Glass Card */}
+        <motion.div 
+          className="backdrop-blur-xl bg-white/70 rounded-3xl shadow-2xl shadow-emerald-900/10 border border-white/50 p-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           {isFirstAccess ? (
             <>
               <div className="text-center mb-6">
-                <h2 className="text-lg font-semibold text-foreground">Primeiro Acesso</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="text-xl font-semibold text-emerald-900">Primeiro Acesso</h2>
+                <p className="text-sm text-emerald-700/70 mt-1">
                   Crie uma senha para acessar seu portal
                 </p>
               </div>
-              <form onSubmit={handleFirstAccess} className="space-y-4">
+              <form onSubmit={handleFirstAccess} className="space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground text-sm">Email</Label>
+                  <Label className="text-emerald-800 text-sm font-medium">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-emerald-500" />
                     <Input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 bg-background/50 border-border/50"
+                      className="pl-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       disabled
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground text-sm">Criar Senha</Label>
+                  <Label className="text-emerald-800 text-sm font-medium">Criar Senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-emerald-500" />
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Mínimo 6 caracteres"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 bg-background/50 border-border/50"
+                      className="pl-12 pr-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-emerald-500 hover:text-emerald-700 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground text-sm">Confirmar Senha</Label>
+                  <Label className="text-emerald-800 text-sm font-medium">Confirmar Senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-emerald-500" />
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Repita a senha"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="pl-10 bg-background/50 border-border/50"
+                      className="pl-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       required
                     />
                   </div>
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary hover:bg-primary/90" 
-                  size="lg" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Criando conta...
-                    </>
-                  ) : (
-                    'Criar conta e entrar'
-                  )}
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 transition-all duration-300" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Criando conta...
+                      </>
+                    ) : (
+                      'Criar conta e entrar'
+                    )}
+                  </Button>
+                </motion.div>
                 <Button 
                   type="button"
                   variant="ghost"
-                  className="w-full"
+                  className="w-full h-12 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50/50"
                   onClick={() => setIsFirstAccess(false)}
                 >
                   Já tenho conta
@@ -389,66 +487,79 @@ export default function PatientAuth() {
           ) : (
             <>
               <div className="text-center mb-6">
-                <h2 className="text-lg font-semibold text-foreground">Entrar</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Use seu email e senha para acessar
+                <h2 className="text-xl font-semibold text-emerald-900">Bem-vindo de volta!</h2>
+                <p className="text-sm text-emerald-700/70 mt-1">
+                  Entre para acessar seu plano alimentar
                 </p>
               </div>
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground text-sm">Email</Label>
+                  <Label className="text-emerald-800 text-sm font-medium">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-emerald-500" />
                     <Input
                       type="email"
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 bg-background/50 border-border/50"
+                      className="pl-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground text-sm">Senha</Label>
+                  <Label className="text-emerald-800 text-sm font-medium">Senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-emerald-500" />
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Sua senha"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 bg-background/50 border-border/50"
+                      className="pl-12 pr-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-emerald-500 hover:text-emerald-700 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary hover:bg-primary/90" 
-                  size="lg" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Entrando...
-                    </>
-                  ) : (
-                    'Entrar'
-                  )}
-                </Button>
+
+                {/* Forgot password link */}
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-sm text-emerald-600 hover:text-emerald-800 font-medium transition-colors"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
+
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 transition-all duration-300" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Entrando...
+                      </>
+                    ) : (
+                      'Entrar'
+                    )}
+                  </Button>
+                </motion.div>
                 <Button 
                   type="button"
                   variant="outline"
-                  className="w-full border-border/50"
+                  className="w-full h-12 border-emerald-200 text-emerald-700 hover:bg-emerald-50/50 hover:border-emerald-300 rounded-xl transition-all duration-300"
                   onClick={async () => {
                     const valid = await handleCheckEmail();
                     if (valid) setIsFirstAccess(true);
@@ -459,24 +570,19 @@ export default function PatientAuth() {
               </form>
             </>
           )}
-        </GlassCard>
+        </motion.div>
 
-        <div className="text-center mt-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/auth')} 
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Sou nutricionista
-          </Button>
-        </div>
-
-        <p className="text-center text-xs text-muted-foreground mt-4">
+        {/* Footer info */}
+        <motion.p 
+          className="text-center text-sm text-emerald-700/60 mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
           Seu acesso é gerado pelo seu nutricionista.<br />
           Caso não tenha acesso, entre em contato.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
     </div>
   );
 }

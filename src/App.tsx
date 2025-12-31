@@ -61,7 +61,15 @@ const queryClient = new QueryClient({
   },
 });
 
+// Check if we're on the patient subdomain
+const isPatientSubdomain = () => {
+  const hostname = window.location.hostname;
+  return hostname === 'paciente.nutriflow.inf.br' || hostname.startsWith('paciente.');
+};
+
 function App() {
+  const patientDomain = isPatientSubdomain();
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -73,7 +81,8 @@ function App() {
               <AccountStatusGuard>
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
-                    <Route path="/" element={<Index />} />
+                    {/* If on patient subdomain, show PatientAuth as landing page */}
+                    <Route path="/" element={patientDomain ? <PatientAuth /> : <Index />} />
                     <Route path="/privacidade" element={<Privacidade />} />
                     <Route path="/sobre" element={<Sobre />} />
                     <Route path="/auth" element={<Auth />} />
