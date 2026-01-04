@@ -9,7 +9,7 @@ import {
   LogOut,
   BookOpen,
   HelpCircle,
-  Command,
+  Search,
   Sun,
   Moon,
   MessageCircle,
@@ -170,11 +170,11 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
             className="w-full justify-between h-10 rounded-xl border-border/50 bg-muted/30 hover:bg-muted/50 hover:border-primary/30 text-muted-foreground text-sm"
           >
             <div className="flex items-center gap-2">
-              <Command className="w-4 h-4" />
+              <Search className="w-4 h-4" />
               <span>Buscar...</span>
             </div>
-            <kbd className="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-              ⌘K
+            <kbd className="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
+              Ctrl+K
             </kbd>
           </Button>
         </div>
