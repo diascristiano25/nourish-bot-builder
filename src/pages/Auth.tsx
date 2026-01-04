@@ -147,8 +147,8 @@ export default function Auth() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-cyber-lime via-foreground to-electric-violet bg-clip-text text-transparent">
             NutriFlow
           </h1>
-          <p className="text-muted-foreground mt-2 text-sm font-mono">
-            SISTEMA_NUTRICIONAL :: v2026
+          <p className="text-muted-foreground mt-2 text-sm">
+            Plataforma para Nutricionistas
           </p>
         </div>
 
@@ -315,8 +315,8 @@ export default function Auth() {
               Privacidade
             </Link>
           </div>
-          <p className="text-xs text-muted-foreground font-mono">
-            FLOWTECH_GROUP :: NUTRIFLOW_2026
+          <p className="text-xs text-muted-foreground">
+            FlowTech Group © 2026
           </p>
         </div>
       </div>
