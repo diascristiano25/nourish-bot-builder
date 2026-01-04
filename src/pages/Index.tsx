@@ -356,9 +356,9 @@ export default function Index() {
                   <span className={`text-4xl font-bold ${plan.popular ? 'text-secondary' : 'text-primary'}`}>
                     {plan.price}
                   </span>
-                  <span className="text-muted-foreground text-sm">
+                  <span className="text-muted-foreground text-sm ml-1">
                     {plan.period.includes('33') ? (
-                      <><strong className="text-primary font-bold">33</strong> dias</>
+                      <>por <span className="text-primary font-semibold">33 dias</span></>
                     ) : plan.period}
                   </span>
                 </div>
