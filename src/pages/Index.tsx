@@ -94,7 +94,7 @@ export default function Index() {
         'API personalizada',
         'Onboarding dedicado',
       ],
-      cta: 'Falar com Vendas',
+      cta: 'Assinar Agora',
       popular: false,
       glowColor: 'lime' as const,
     },
