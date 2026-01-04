@@ -28,8 +28,8 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
           <p className="text-muted-foreground text-sm">
             Vamos te mostrar como o <span className="text-cyber-lime font-semibold">FlowTech Group</span> simplifica sua rotina de atendimentos.
           </p>
-          <p className="text-xs text-muted-foreground/70 font-mono">
-            TOUR_DURATION :: ~3 minutos
+          <p className="text-xs text-muted-foreground/70">
+            Duração: aproximadamente 3 minutos
           </p>
         </div>
       ),
@@ -279,8 +279,8 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
           <p className="text-muted-foreground text-sm">
             Você já conhece o NutriFlow completo. Qualquer dúvida, acesse o <span className="text-cyber-lime font-semibold">AI Concierge</span> no topo da página.
           </p>
-          <p className="text-xs text-muted-foreground/70 font-mono">
-            DICA :: Reinicie este tour pelo botão de Suporte
+          <p className="text-xs text-muted-foreground/70">
+            Dica: Reinicie este tour pelo botão de Suporte
           </p>
         </div>
       ),

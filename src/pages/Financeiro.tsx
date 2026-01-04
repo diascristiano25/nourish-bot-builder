@@ -199,8 +199,8 @@ const Financeiro = () => {
                 <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyber-lime to-electric-violet bg-clip-text text-transparent">
                   Financeiro
                 </h1>
-                <p className="text-muted-foreground mt-1 font-mono text-sm">
-                  CONTROLE :: RECEITAS_E_DESPESAS
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Controle de receitas e despesas
                 </p>
               </div>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -347,10 +347,10 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                 </span>
                 <Sparkles className="w-4 h-4 text-cyber-lime animate-pulse" />
               </h2>
-              <p className="text-xs text-muted-foreground font-mono">
+              <p className="text-xs text-muted-foreground">
                 {selectedTicket 
-                  ? `TICKET_${selectedTicket.ticket_number} :: ${selectedTicket.subject}`
-                  : 'SISTEMA DE SUPORTE INTELIGENTE :: v2.0'
+                  ? `Ticket #${selectedTicket.ticket_number} - ${selectedTicket.subject}`
+                  : 'Central de Suporte Inteligente'
                 }
               </p>
             </div>
