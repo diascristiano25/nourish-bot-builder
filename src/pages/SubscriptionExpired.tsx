@@ -25,7 +25,7 @@ export default function SubscriptionExpired() {
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-amber-600">Período de Teste Expirado</h1>
             <p className="text-muted-foreground">
-              Seu período de teste de 60 dias como Membro Fundador chegou ao fim.
+              Seu período de teste de <strong>33 dias</strong> como Membro Fundador chegou ao fim.
             </p>
           </div>
           

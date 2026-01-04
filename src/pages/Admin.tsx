@@ -215,9 +215,9 @@ export default function Admin() {
   const getLicenseStatus = (createdAt: string) => {
     const daysSinceCreation = differenceInDays(new Date(), new Date(createdAt));
     
-    if (daysSinceCreation <= 60) {
+    if (daysSinceCreation <= 33) {
       return {
-        label: `Teste (${60 - daysSinceCreation} dias)`,
+        label: `Teste (${33 - daysSinceCreation} dias)`,
         variant: 'default' as const,
       };
     } else {
@@ -350,7 +350,7 @@ export default function Admin() {
   if (!isMasterAdmin) return null;
 
   const activeCount = nutritionists.filter(n => n.is_active).length;
-  const trialCount = nutritionists.filter(n => differenceInDays(new Date(), new Date(n.created_at)) <= 60).length;
+  const trialCount = nutritionists.filter(n => differenceInDays(new Date(), new Date(n.created_at)) <= 33).length;
 
   return (
     <div className="min-h-screen bg-background">
