@@ -2,9 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = "re_FjkR93Le_3kHDjEzjU7Sxa5G8bod8GPq4";
 
-// TEST MODE: Em modo de teste do Resend, só pode enviar para o email do dono da conta
-// Para produção, verifique um domínio em resend.com/domains
-const TEST_MODE = true;
+// Domínio verificado - modo produção ativo
+const TEST_MODE = false;
 const TEST_EMAIL = "dhyaazcristiano@gmail.com";
 
 const corsHeaders = {
