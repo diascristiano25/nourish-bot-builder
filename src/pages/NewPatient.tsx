@@ -272,7 +272,7 @@ export default function NewPatient() {
                     <SelectTrigger className="bg-background/50 border-border/50">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
-                    <SelectContent className="glass border-border/50">
+                    <SelectContent className="bg-popover border-border z-50">
                       <SelectItem value="female">Feminino</SelectItem>
                       <SelectItem value="male">Masculino</SelectItem>
                       <SelectItem value="other">Outro</SelectItem>
@@ -346,7 +346,7 @@ export default function NewPatient() {
                   <SelectTrigger className="bg-background/50 border-border/50">
                     <SelectValue placeholder="Selecione o objetivo" />
                   </SelectTrigger>
-                  <SelectContent className="glass border-border/50">
+                  <SelectContent className="bg-popover border-border z-50">
                     <SelectItem value="hypertrophy">Hipertrofia</SelectItem>
                     <SelectItem value="weight_loss">Emagrecimento</SelectItem>
                     <SelectItem value="maintenance">Manutenção</SelectItem>
@@ -362,7 +362,7 @@ export default function NewPatient() {
                   <SelectTrigger className="bg-background/50 border-border/50">
                     <SelectValue placeholder="Selecione o nível" />
                   </SelectTrigger>
-                  <SelectContent className="glass border-border/50">
+                  <SelectContent className="bg-popover border-border z-50">
                     <SelectItem value="sedentary">Sedentário</SelectItem>
                     <SelectItem value="light">Leve (1-2x/semana)</SelectItem>
                     <SelectItem value="moderate">Moderado (3-4x/semana)</SelectItem>
