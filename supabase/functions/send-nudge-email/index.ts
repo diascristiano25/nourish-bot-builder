@@ -75,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
             </ul>
             
             <div style="text-align: center; margin: 32px 0;">
-              <a href="https://nutriflow.app/patients/new" 
+              <a href="https://nutriflow.inf.br/patients/new" 
                  style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
                 Cadastrar Primeiro Paciente →
               </a>
