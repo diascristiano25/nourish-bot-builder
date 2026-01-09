@@ -186,15 +186,20 @@ export default function Admin() {
       
       if (userIds.length > 0) {
         try {
+          console.log('Fetching emails for user IDs:', userIds);
           const { data: emailData, error: emailError } = await supabase.functions.invoke('get-user-emails', {
             body: { user_ids: userIds },
           });
           
-          if (!emailError && emailData?.success) {
+          console.log('Email fetch response:', emailData, emailError);
+          
+          if (emailError) {
+            console.error('Error fetching emails:', emailError);
+          } else if (emailData?.success) {
             emailMap = emailData.emails || {};
           }
         } catch (e) {
-          console.error('Error fetching emails:', e);
+          console.error('Exception fetching emails:', e);
         }
       }
 
@@ -1010,7 +1015,7 @@ export default function Admin() {
                                     size="sm"
                                     variant="outline"
                                     onClick={() => handleSendNudgeEmail(user)}
-                                    disabled={sendingEmailTo === user.id || !user.email}
+                                    disabled={sendingEmailTo === user.id}
                                     className="border-primary/30 text-primary hover:bg-primary/10"
                                   >
                                     {sendingEmailTo === user.id ? (
