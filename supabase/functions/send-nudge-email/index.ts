@@ -2,6 +2,11 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = "re_FjkR93Le_3kHDjEzjU7Sxa5G8bod8GPq4";
 
+// TEST MODE: Em modo de teste do Resend, só pode enviar para o email do dono da conta
+// Para produção, verifique um domínio em resend.com/domains
+const TEST_MODE = true;
+const TEST_EMAIL = "dhyaazcristiano@gmail.com";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -90,6 +95,11 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
+    // Em modo de teste, envia para o email do dono da conta
+    const recipientEmail = TEST_MODE ? TEST_EMAIL : email;
+    
+    console.log(`Sending email to: ${recipientEmail} (original: ${email}, TEST_MODE: ${TEST_MODE})`);
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -98,8 +108,10 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "NutriFlow <onboarding@resend.dev>",
-        to: [email],
-        subject: "O app do seu paciente está esperando... 📱",
+        to: [recipientEmail],
+        subject: TEST_MODE 
+          ? `[TESTE] Email para ${email}: O app do seu paciente está esperando... 📱`
+          : "O app do seu paciente está esperando... 📱",
         html: htmlContent,
       }),
     });
