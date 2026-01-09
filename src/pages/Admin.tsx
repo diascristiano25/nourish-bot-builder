@@ -20,14 +20,14 @@ import {
 } from '@/components/ui/dialog';
 import { 
   Loader2, Shield, Users, Clock, CheckCircle, XCircle, MessageSquare, 
-  Send, Bell, Search, DollarSign, TrendingUp, Paperclip, Activity, 
-  UserCheck, UserX, CalendarDays, Utensils, BarChart3, Mail
+  Send, Bell, Search, DollarSign, TrendingUp, Paperclip, Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays, subDays, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line, PieChart, Pie, Cell, Legend, Area, AreaChart } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import logoImg from '@/assets/logo.png';
+import AdminAnalytics from '@/components/admin/AdminAnalytics';
 
 interface Nutritionist {
   id: string;
@@ -104,7 +104,6 @@ export default function Admin() {
   const [searchTerm, setSearchTerm] = useState('');
   const [engagementData, setEngagementData] = useState<UserEngagementData[]>([]);
   const [loadingEngagement, setLoadingEngagement] = useState(false);
-  const [sendingEmailTo, setSendingEmailTo] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const pendingTicketsCount = tickets.filter(t => t.status === 'open').length;
@@ -241,33 +240,6 @@ export default function Admin() {
       toast.error('Erro ao carregar dados de engajamento');
     } finally {
       setLoadingEngagement(false);
-    }
-  };
-
-  const handleSendNudgeEmail = async (user: UserEngagementData) => {
-    if (!user.email) {
-      toast.error('Usuário não possui email cadastrado');
-      return;
-    }
-
-    setSendingEmailTo(user.id);
-    try {
-      const { data, error } = await supabase.functions.invoke('send-nudge-email', {
-        body: { name: user.full_name, email: user.email },
-      });
-
-      if (error) throw error;
-
-      if (data?.success) {
-        toast.success('E-mail enviado com sucesso!');
-      } else {
-        throw new Error(data?.error || 'Erro ao enviar email');
-      }
-    } catch (error: any) {
-      console.error('Error sending nudge email:', error);
-      toast.error(error.message || 'Erro ao enviar e-mail');
-    } finally {
-      setSendingEmailTo(null);
     }
   };
 
@@ -458,61 +430,6 @@ export default function Admin() {
     return data;
   }, [tickets]);
 
-  // Analytics computed data
-  const analyticsStats = useMemo(() => {
-    const activeUsers = engagementData.filter(u => u.total_patients > 0 || u.total_meal_plans > 0).length;
-    const inactiveUsers = engagementData.length - activeUsers;
-    const onboardedUsers = engagementData.filter(u => u.has_seen_onboarding).length;
-    const totalPatients = engagementData.reduce((sum, u) => sum + u.total_patients, 0);
-    const totalMealPlans = engagementData.reduce((sum, u) => sum + u.total_meal_plans, 0);
-    const totalAppointments = engagementData.reduce((sum, u) => sum + u.total_appointments, 0);
-    
-    return {
-      activeUsers,
-      inactiveUsers,
-      onboardedUsers,
-      totalPatients,
-      totalMealPlans,
-      totalAppointments,
-      engagementRate: engagementData.length > 0 ? Math.round((activeUsers / engagementData.length) * 100) : 0,
-    };
-  }, [engagementData]);
-
-  const registrationTrendData = useMemo(() => {
-    const days = 30;
-    const data = [];
-    const today = startOfDay(new Date());
-    
-    for (let i = days - 1; i >= 0; i--) {
-      const date = subDays(today, i);
-      const dateStr = format(date, 'yyyy-MM-dd');
-      const displayDate = format(date, 'dd/MM');
-      
-      const registrations = nutritionists.filter(n => {
-        const regDate = format(startOfDay(new Date(n.created_at)), 'yyyy-MM-dd');
-        return regDate === dateStr;
-      }).length;
-      
-      data.push({ date: displayDate, registrations });
-    }
-    
-    return data;
-  }, [nutritionists]);
-
-  const engagementPieData = useMemo(() => {
-    return [
-      { name: 'Ativos', value: analyticsStats.activeUsers, color: 'hsl(var(--success))' },
-      { name: 'Inativos', value: analyticsStats.inactiveUsers, color: 'hsl(var(--destructive))' },
-    ];
-  }, [analyticsStats]);
-
-  const activityDistributionData = useMemo(() => {
-    return [
-      { name: 'Pacientes', value: analyticsStats.totalPatients, fill: 'hsl(var(--primary))' },
-      { name: 'Planos', value: analyticsStats.totalMealPlans, fill: 'hsl(var(--info))' },
-      { name: 'Consultas', value: analyticsStats.totalAppointments, fill: 'hsl(var(--warning))' },
-    ];
-  }, [analyticsStats]);
 
   if (authLoading || loading) {
     return (
@@ -789,255 +706,13 @@ export default function Admin() {
           </TabsContent>
 
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <GlassCard className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{engagementData.length}</p>
-                    <p className="text-sm text-muted-foreground">Novos (30 dias)</p>
-                  </div>
-                </div>
-              </GlassCard>
-              <GlassCard className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                    <UserCheck className="w-6 h-6 text-success" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{analyticsStats.activeUsers}</p>
-                    <p className="text-sm text-muted-foreground">Engajados</p>
-                  </div>
-                </div>
-              </GlassCard>
-              <GlassCard className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
-                    <UserX className="w-6 h-6 text-destructive" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{analyticsStats.inactiveUsers}</p>
-                    <p className="text-sm text-muted-foreground">Sem atividade</p>
-                  </div>
-                </div>
-              </GlassCard>
-              <GlassCard className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-info" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{analyticsStats.engagementRate}%</p>
-                    <p className="text-sm text-muted-foreground">Taxa Engajamento</p>
-                  </div>
-                </div>
-              </GlassCard>
-            </div>
-
-            {/* Charts Row */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Registration Trend */}
-              <GlassCard className="lg:col-span-2 p-6">
-                <NeonText as="h3" color="primary" className="font-semibold mb-4">
-                  Novos Cadastros (30 dias)
-                </NeonText>
-                <ResponsiveContainer width="100%" height={250}>
-                  <AreaChart data={registrationTrendData}>
-                    <defs>
-                      <linearGradient id="colorReg" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-                    <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
-                      }} 
-                    />
-                    <Area type="monotone" dataKey="registrations" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorReg)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </GlassCard>
-
-              {/* Engagement Pie */}
-              <GlassCard className="p-6">
-                <NeonText as="h3" color="primary" className="font-semibold mb-4">
-                  Engajamento
-                </NeonText>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={engagementPieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={70}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {engagementPieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Legend 
-                      formatter={(value) => <span className="text-sm text-foreground">{value}</span>}
-                    />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
-                      }} 
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </GlassCard>
-            </div>
-
-            {/* Activity Stats */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              <GlassCard className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{analyticsStats.totalPatients}</p>
-                    <p className="text-sm text-muted-foreground">Pacientes Cadastrados</p>
-                  </div>
-                </div>
-              </GlassCard>
-              <GlassCard className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center">
-                    <Utensils className="w-5 h-5 text-info" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{analyticsStats.totalMealPlans}</p>
-                    <p className="text-sm text-muted-foreground">Planos Alimentares</p>
-                  </div>
-                </div>
-              </GlassCard>
-              <GlassCard className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                    <CalendarDays className="w-5 h-5 text-warning" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{analyticsStats.totalAppointments}</p>
-                    <p className="text-sm text-muted-foreground">Consultas Agendadas</p>
-                  </div>
-                </div>
-              </GlassCard>
-            </div>
-
-            {/* User Engagement Table */}
-            <GlassCard className="p-6">
-              <NeonText as="h3" color="primary" className="font-semibold mb-4">
-                Detalhamento de Engajamento (Últimos 30 dias)
-              </NeonText>
-              {loadingEngagement ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                </div>
-              ) : (
-                <div className="rounded-lg border border-border/50 overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/30">
-                        <TableHead>Nutricionista</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Cadastro</TableHead>
-                        <TableHead>Onboarding</TableHead>
-                        <TableHead className="text-center">Pacientes</TableHead>
-                        <TableHead className="text-center">Planos</TableHead>
-                        <TableHead className="text-center">Consultas</TableHead>
-                        <TableHead>Última Atividade</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {engagementData.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
-                            Nenhum usuário cadastrado nos últimos 30 dias
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        engagementData.map((user) => {
-                          const isActive = user.total_patients > 0 || user.total_meal_plans > 0;
-                          return (
-                            <TableRow key={user.id} className="border-border/30">
-                              <TableCell className="font-medium">{user.full_name}</TableCell>
-                              <TableCell className="text-sm text-muted-foreground">
-                                {user.email || '-'}
-                              </TableCell>
-                              <TableCell>
-                                {format(new Date(user.created_at), 'dd/MM/yyyy', { locale: ptBR })}
-                              </TableCell>
-                              <TableCell>
-                                {user.has_seen_onboarding ? (
-                                  <CheckCircle className="w-4 h-4 text-success" />
-                                ) : (
-                                  <XCircle className="w-4 h-4 text-muted-foreground" />
-                                )}
-                              </TableCell>
-                              <TableCell className="text-center">{user.total_patients}</TableCell>
-                              <TableCell className="text-center">{user.total_meal_plans}</TableCell>
-                              <TableCell className="text-center">{user.total_appointments}</TableCell>
-                              <TableCell>
-                                {user.last_activity 
-                                  ? format(new Date(user.last_activity), 'dd/MM HH:mm', { locale: ptBR })
-                                  : '-'
-                                }
-                              </TableCell>
-                              <TableCell>
-                                <Badge 
-                                  variant={isActive ? 'default' : 'secondary'}
-                                  className={isActive ? 'bg-success/20 text-success border-success/30' : 'bg-destructive/20 text-destructive border-destructive/30'}
-                                >
-                                  {isActive ? 'Ativo' : 'Inativo'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {!isActive && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleSendNudgeEmail(user)}
-                                    disabled={sendingEmailTo === user.id}
-                                    className="border-primary/30 text-primary hover:bg-primary/10"
-                                  >
-                                    {sendingEmailTo === user.id ? (
-                                      <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                      <>
-                                        <Mail className="w-4 h-4 mr-1" />
-                                        Enviar Alerta
-                                      </>
-                                    )}
-                                  </Button>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </GlassCard>
+          <TabsContent value="analytics">
+            <AdminAnalytics 
+              engagementData={engagementData}
+              nutritionists={nutritionists}
+              loadingEngagement={loadingEngagement}
+              onRefresh={fetchEngagementData}
+            />
           </TabsContent>
 
           {/* Financeiro Tab */}
