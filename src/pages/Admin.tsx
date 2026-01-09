@@ -21,7 +21,7 @@ import {
 import { 
   Loader2, Shield, Users, Clock, CheckCircle, XCircle, MessageSquare, 
   Send, Bell, Search, DollarSign, TrendingUp, Paperclip, Activity, 
-  UserCheck, UserX, CalendarDays, Utensils, BarChart3
+  UserCheck, UserX, CalendarDays, Utensils, BarChart3, Mail
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays, subDays, startOfDay } from 'date-fns';
@@ -72,6 +72,8 @@ const priorityConfig = {
 interface UserEngagementData {
   id: string;
   full_name: string;
+  email: string | null;
+  user_id: string;
   created_at: string;
   has_seen_onboarding: boolean;
   total_patients: number;
@@ -102,6 +104,7 @@ export default function Admin() {
   const [searchTerm, setSearchTerm] = useState('');
   const [engagementData, setEngagementData] = useState<UserEngagementData[]>([]);
   const [loadingEngagement, setLoadingEngagement] = useState(false);
+  const [sendingEmailTo, setSendingEmailTo] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const pendingTicketsCount = tickets.filter(t => t.status === 'open').length;
@@ -170,12 +173,30 @@ export default function Admin() {
       
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, created_at, has_seen_onboarding')
+        .select('id, full_name, user_id, created_at, has_seen_onboarding')
         .eq('is_admin', false)
         .gte('created_at', thirtyDaysAgo)
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
+
+      // Fetch emails from edge function
+      const userIds = (profiles || []).map(p => p.user_id);
+      let emailMap: Record<string, string | null> = {};
+      
+      if (userIds.length > 0) {
+        try {
+          const { data: emailData, error: emailError } = await supabase.functions.invoke('get-user-emails', {
+            body: { user_ids: userIds },
+          });
+          
+          if (!emailError && emailData?.success) {
+            emailMap = emailData.emails || {};
+          }
+        } catch (e) {
+          console.error('Error fetching emails:', e);
+        }
+      }
 
       const engagementPromises = (profiles || []).map(async (profile) => {
         const [patientsRes, mealPlansRes, appointmentsRes] = await Promise.all([
@@ -197,6 +218,8 @@ export default function Admin() {
         return {
           id: profile.id,
           full_name: profile.full_name,
+          email: emailMap[profile.user_id] || null,
+          user_id: profile.user_id,
           created_at: profile.created_at,
           has_seen_onboarding: profile.has_seen_onboarding,
           total_patients: patientsRes.data?.length || 0,
@@ -213,6 +236,33 @@ export default function Admin() {
       toast.error('Erro ao carregar dados de engajamento');
     } finally {
       setLoadingEngagement(false);
+    }
+  };
+
+  const handleSendNudgeEmail = async (user: UserEngagementData) => {
+    if (!user.email) {
+      toast.error('Usuário não possui email cadastrado');
+      return;
+    }
+
+    setSendingEmailTo(user.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-nudge-email', {
+        body: { name: user.full_name, email: user.email },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success('E-mail enviado com sucesso!');
+      } else {
+        throw new Error(data?.error || 'Erro ao enviar email');
+      }
+    } catch (error: any) {
+      console.error('Error sending nudge email:', error);
+      toast.error(error.message || 'Erro ao enviar e-mail');
+    } finally {
+      setSendingEmailTo(null);
     }
   };
 
@@ -900,6 +950,7 @@ export default function Admin() {
                     <TableHeader>
                       <TableRow className="bg-muted/30">
                         <TableHead>Nutricionista</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead>Cadastro</TableHead>
                         <TableHead>Onboarding</TableHead>
                         <TableHead className="text-center">Pacientes</TableHead>
@@ -907,12 +958,13 @@ export default function Admin() {
                         <TableHead className="text-center">Consultas</TableHead>
                         <TableHead>Última Atividade</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {engagementData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                          <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                             Nenhum usuário cadastrado nos últimos 30 dias
                           </TableCell>
                         </TableRow>
@@ -922,6 +974,9 @@ export default function Admin() {
                           return (
                             <TableRow key={user.id} className="border-border/30">
                               <TableCell className="font-medium">{user.full_name}</TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {user.email || '-'}
+                              </TableCell>
                               <TableCell>
                                 {format(new Date(user.created_at), 'dd/MM/yyyy', { locale: ptBR })}
                               </TableCell>
@@ -948,6 +1003,26 @@ export default function Admin() {
                                 >
                                   {isActive ? 'Ativo' : 'Inativo'}
                                 </Badge>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {!isActive && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleSendNudgeEmail(user)}
+                                    disabled={sendingEmailTo === user.id || !user.email}
+                                    className="border-primary/30 text-primary hover:bg-primary/10"
+                                  >
+                                    {sendingEmailTo === user.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <>
+                                        <Mail className="w-4 h-4 mr-1" />
+                                        Enviar Alerta
+                                      </>
+                                    )}
+                                  </Button>
+                                )}
                               </TableCell>
                             </TableRow>
                           );
