@@ -106,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "NutriFlow <onboarding@resend.dev>",
+        from: "NutriFlow <noreply@nutriflow.inf.br>",
         to: [recipientEmail],
         subject: TEST_MODE 
           ? `[TESTE] Email para ${email}: O app do seu paciente está esperando... 📱`
