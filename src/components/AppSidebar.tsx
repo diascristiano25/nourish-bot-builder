@@ -122,9 +122,6 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
               <Search className="w-4 h-4" />
               <span>Buscar...</span>
             </div>
-            <kbd className="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
-              Ctrl+K
-            </kbd>
           </Button>
         </div>
       )}
