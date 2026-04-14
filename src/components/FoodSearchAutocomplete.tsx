@@ -85,7 +85,7 @@ export function FoodSearchAutocomplete({ onSelect, placeholder = "Buscar aliment
   const [brandFilter, setBrandFilter] = useState<string>('all');
   const [brands, setBrands] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Fetch available brands on mount
   useEffect(() => {
