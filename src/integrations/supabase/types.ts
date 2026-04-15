@@ -288,6 +288,39 @@ export type Database = {
         }
         Relationships: []
       }
+      leads_nutriflow: {
+        Row: {
+          contexto_post: string | null
+          created_at: string
+          id: string
+          instagram: string | null
+          nome: string
+          status: string
+          ultima_interacao: string | null
+          whatsapp: string
+        }
+        Insert: {
+          contexto_post?: string | null
+          created_at?: string
+          id?: string
+          instagram?: string | null
+          nome: string
+          status?: string
+          ultima_interacao?: string | null
+          whatsapp: string
+        }
+        Update: {
+          contexto_post?: string | null
+          created_at?: string
+          id?: string
+          instagram?: string | null
+          nome?: string
+          status?: string
+          ultima_interacao?: string | null
+          whatsapp?: string
+        }
+        Relationships: []
+      }
       meal_plans: {
         Row: {
           created_at: string
