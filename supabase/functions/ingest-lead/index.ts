@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-n8n-token",
 };
 
 Deno.serve(async (req) => {
@@ -17,9 +17,12 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Token auth
+  // Token auth - accepts both x-n8n-token header and Bearer token
+  const customToken = req.headers.get("x-n8n-token") || "";
   const authHeader = req.headers.get("authorization") || "";
-  const token = authHeader.replace("Bearer ", "");
+  const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.replace("Bearer ", "") : "";
+  const token = customToken || bearerToken;
+
   const expectedToken = Deno.env.get("NUTRIFLOW_N8N_TOKEN");
 
   if (!expectedToken || token !== expectedToken) {
