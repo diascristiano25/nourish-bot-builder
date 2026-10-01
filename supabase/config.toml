@@ -1,0 +1,25 @@
+project_id = "fqeruutxahrrxjusxndl"
+
+[functions.generate-meal-plan]
+verify_jwt = true
+
+[functions.generate-grocery-list]
+verify_jwt = true
+
+[functions.send-patient-magic-link]
+verify_jwt = true
+
+[functions.generate-recipe]
+verify_jwt = true
+
+[functions.public-patient-portal]
+verify_jwt = true
+
+[functions.iframe-headers]
+verify_jwt = false
+
+[functions.send-nudge-email]
+verify_jwt = true
+
+[functions.get-user-emails]
+verify_jwt = true
