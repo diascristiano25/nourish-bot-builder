@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { AppLayout } from '@/components/AppLayout';
 import { SupportDialog } from '@/components/SupportDialog';
 import { OnboardingTour } from '@/components/OnboardingTour';
+import { TrialAlert } from '@/components/TrialAlert';
 import { 
   Plus, Users, Calendar, Clock, ChevronRight, Loader2, Settings2,
   Eye, EyeOff, User, TrendingUp, DollarSign, Activity, Sparkles, Zap, Leaf
@@ -236,6 +237,9 @@ export default function Dashboard() {
         </header>
 
         <main className="p-6 lg:p-8 relative z-10">
+          {/* Trial Alert */}
+          {user && <TrialAlert userId={user.id} />}
+
           {/* Stat Cards */}
           {!zenMode && preferences.stats && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-fade-in">
