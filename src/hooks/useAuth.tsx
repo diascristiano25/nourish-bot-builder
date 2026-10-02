@@ -43,8 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string) => {
     const redirectUrl = `${window.location.origin}/`;
 
-    // Sanitize fullName to remove non-ASCII characters that could cause header issues
-    const sanitizedFullName = fullName.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    // Sanitize fullName to remove accents and special chars that could cause header issues
+    const sanitizedFullName = fullName
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '') // Remove diacritics
+      .replace(/[^\x00-\x7F]/g, '');   // Remove non-ASCII
 
     const { data, error } = await supabase.auth.signUp({
       email,
