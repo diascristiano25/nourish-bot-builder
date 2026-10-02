@@ -1,4 +1,22 @@
-# NutriFlow
+# 🥗 NutriFlow - SaaS para Nutricionistas
+
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)]()
+[![React](https://img.shields.io/badge/React-18.3-61dafb)]()
+[![Gemini AI](https://img.shields.io/badge/Gemini-2.0_Flash-orange)]()
+
+> Plataforma completa para nutricionistas gerenciarem pacientes e criarem cardápios personalizados com Inteligência Artificial
+
+## ✨ Features Principais
+
+- 🤖 **Gerador de Cardápios com IA** (Gemini 2.5 Flash)
+- 👥 **Gestão Completa de Pacientes**
+- 📊 **Dashboard de Métricas e Evolução**
+- 💰 **Financeiro e Pagamentos** (Stripe)
+- 📱 **App Mobile para Pacientes**
+- 🎯 **[NOVO] Agent de Tráfego Pago** - Cria campanhas de anúncios automaticamente
+
+---
 
 # Project Name: NutriFlow SaaS
 
@@ -24,7 +42,15 @@ Não crie apenas uma landing page. Eu preciso de uma aplicação web funcional (
     * **Base de Dados Nutricional:** A IA deve ser instruída a priorizar alimentos e valores nutricionais baseados na **Tabela TACO (Tabela Brasileira de Composição de Alimentos)**.
     * A resposta deve vir em formato JSON estruturado para ser renderizada no frontend (Café da manhã, Almoço, Lanche, Jantar).
 
-4.  **UI/UX & Design System:**
+4.  **🆕 Agent de Tráfego Pago (Marketing Automation):**
+    * Agent com IA (Gemini 2.0 Flash) que gera estratégias de campanhas de anúncios
+    * Integração com **Meta Ads API** (Facebook/Instagram Ads)
+    * Análise de mercado e público-alvo automatizada
+    * Criação de múltiplas variações de anúncios para teste A/B
+    * Dashboard para visualizar estratégias e métricas esperadas
+    * [📖 Ver documentação completa](./README-AGENT-TRAFEGO.md)
+
+5.  **UI/UX & Design System:**
     * Interface limpa, moderna e responsiva (Mobile-first), focada em produtividade.
     * Use componentes Shadcn/UI e Tailwind CSS.
     * Visualização do cardápio deve ser clara, permitindo edição manual pelo nutricionista se necessário.

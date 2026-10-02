@@ -39,6 +39,7 @@ const Termos = lazy(() => import("./pages/Termos"));
 const Privacidade = lazy(() => import("./pages/Privacidade"));
 const Sobre = lazy(() => import("./pages/Sobre"));
 const ConsultationMealPlanEditor = lazy(() => import("./pages/Consultation"));
+const PaidTrafficAgent = lazy(() => import("./pages/PaidTrafficAgent"));
 
 function PageLoader() {
   return (
@@ -113,6 +114,7 @@ function App() {
                       <Route path="/cardapio/:mealPlanId" element={<AccountStatusGuard><MealPlanView /></AccountStatusGuard>} />
                       <Route path="/consulta/:patientId" element={<AccountStatusGuard><Consultation /></AccountStatusGuard>} />
                       <Route path="/lista-compras" element={<AccountStatusGuard><GroceryList /></AccountStatusGuard>} />
+                      <Route path="/trafego-pago" element={<AccountStatusGuard><PaidTrafficAgent /></AccountStatusGuard>} />
                       <Route path="/admin" element={<AccountStatusGuard><Admin /></AccountStatusGuard>} />
                       <Route path="/subscription-expired" element={<SubscriptionExpired />} />
                       <Route path="/portal/:patientId" element={<PublicPatientPortal />} />

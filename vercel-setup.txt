@@ -1,0 +1,45 @@
+==============================================
+NUTRIFLOW.INF.BR - PRODUCTION SETUP
+==============================================
+
+PASSO 1: VERCEL REDEPLOY
+========================
+URL: https://vercel.com/dashboard
+1. Seleciona "nourish-bot-builder"
+2. Vai em "Deployments" tab
+3. Clica em "Redeploy" (latest deployment)
+4. Seleciona "Redeploy to Production"
+5. Aguarda 2-3 minutos
+
+PASSO 2: DOMÍNIO DNS
+====================
+Seu domínio: nutriflow.inf.br
+Provedor: (onde você registrou o domínio)
+
+Adiciona CNAME record:
+- Host: @ (ou raiz)
+- Type: CNAME
+- Value: cname.vercel-dns.com
+- TTL: 3600
+
+OU Adiciona A record:
+- Host: @
+- Type: A
+- Value: 76.76.19.165
+
+PASSO 3: VERIFICA PROPAGAÇÃO
+=============================
+URL: https://www.whatsmydns.net
+1. Digite: nutriflow.inf.br
+2. Seleciona "A record" ou "CNAME"
+3. Aguarda mostrar Vercel IP (76.76.19.165)
+
+RESULTADO FINAL
+===============
+✅ https://nutriflow.inf.br
+   - Landing page com "14 dias grátis"
+   - Trial system ativo
+   - Checkout com Stripe
+   - 100% PRODUCTION READY
+
+==============================================
