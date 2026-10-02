@@ -42,14 +42,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
+    // Sanitize fullName to remove non-ASCII characters that could cause header issues
+    const sanitizedFullName = fullName.normalize('NFD').replace(/[̀-ͯ]/g, '');
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          full_name: fullName,
+          full_name: sanitizedFullName,
         }
       }
     });
@@ -64,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .from('profiles')
         .insert({
           user_id: data.user.id,
-          full_name: fullName,
+          full_name: sanitizedFullName,
         });
 
       if (profileError) {
