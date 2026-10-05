@@ -1,6 +1,5 @@
-// Direct REST API calls to Supabase, bypassing the problematic JS Client
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+// Proxy-based REST API calls to Supabase
+const PROXY_URL = '/api/supabase-proxy';
 
 interface AuthResponse {
   user: { id: string; email: string } | null;
@@ -19,16 +18,20 @@ interface SignInPayload {
   password: string;
 }
 
-// Only ASCII-safe headers
-function getHeaders() {
-  return {
+function getHeaders(token?: string) {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'apikey': SUPABASE_KEY,
   };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return headers;
 }
 
 export async function restSignUp(payload: SignUpPayload): Promise<AuthResponse> {
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+  const response = await fetch(`${PROXY_URL}?path=auth/v1/signup`, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify(payload),
@@ -39,7 +42,7 @@ export async function restSignUp(payload: SignUpPayload): Promise<AuthResponse> 
 }
 
 export async function restSignIn(payload: SignInPayload): Promise<AuthResponse> {
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+  const response = await fetch(`${PROXY_URL}?path=auth/v1/token&grant_type=password`, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify(payload),
@@ -50,23 +53,17 @@ export async function restSignIn(payload: SignInPayload): Promise<AuthResponse> 
 }
 
 export async function restGetUser(token: string) {
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-    headers: {
-      ...getHeaders(),
-      'Authorization': `Bearer ${token}`,
-    },
+  const response = await fetch(`${PROXY_URL}?path=auth/v1/user`, {
+    headers: getHeaders(token),
   });
 
   return response.json();
 }
 
 export async function restSignOut(token: string) {
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+  const response = await fetch(`${PROXY_URL}?path=auth/v1/logout`, {
     method: 'POST',
-    headers: {
-      ...getHeaders(),
-      'Authorization': `Bearer ${token}`,
-    },
+    headers: getHeaders(token),
   });
 
   return response.ok;
