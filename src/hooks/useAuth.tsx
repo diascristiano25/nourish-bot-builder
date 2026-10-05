@@ -1,7 +1,16 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client-custom';
 import { useToast } from '@/hooks/use-toast';
+import * as restApi from '@/services/supabase-rest';
+
+interface User {
+  id: string;
+  email: string;
+}
+
+interface Session {
+  access_token: string;
+  user: User;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -21,80 +30,104 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    // Check localStorage for existing session
+    const stored = localStorage.getItem('nutriflow_session');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setSession(parsed);
+        setUser(parsed.user);
+      } catch (e) {
+        console.error('Failed to restore session:', e);
       }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    }
+    setLoading(false);
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+    try {
+      // Sanitize fullName to ASCII-only
+      const sanitizedFullName = fullName
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^\x00-\x7F]/g, '');
 
-    // Sanitize fullName to remove accents and special chars that could cause header issues
-    const sanitizedFullName = fullName
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '') // Remove diacritics
-      .replace(/[^\x00-\x7F]/g, '');   // Remove non-ASCII
+      const result = await restApi.restSignUp({
+        email,
+        password,
+        data: { full_name: sanitizedFullName }
+      });
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: sanitizedFullName,
-        }
+      if (result.error) {
+        return { error: new Error(result.error.message) };
       }
-    });
 
-    if (error) {
-      return { error };
-    }
+      if (result.session && result.user) {
+        const sessionData = {
+          access_token: result.session.access_token,
+          user: result.user
+        };
+        localStorage.setItem('nutriflow_session', JSON.stringify(sessionData));
+        setSession(sessionData);
+        setUser(result.user);
 
-    // Create nutritionist profile
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: data.user.id,
-          full_name: sanitizedFullName,
+        // Create profile
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${result.session.access_token}`,
+          },
+          body: JSON.stringify({
+            user_id: result.user.id,
+            full_name: sanitizedFullName,
+          })
         });
-
-      if (profileError) {
-        console.error('Error creating nutritionist profile:', profileError);
       }
-    }
 
-    return { error: null };
+      return { error: null };
+    } catch (error) {
+      return { error: error instanceof Error ? error : new Error('Sign up failed') };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      const result = await restApi.restSignIn({ email, password });
+
+      if (result.error) {
+        return { error: new Error(result.error.message) };
+      }
+
+      if (result.session && result.user) {
+        const sessionData = {
+          access_token: result.session.access_token,
+          user: result.user
+        };
+        localStorage.setItem('nutriflow_session', JSON.stringify(sessionData));
+        setSession(sessionData);
+        setUser(result.user);
+      }
+
+      return { error: null };
+    } catch (error) {
+      return { error: error instanceof Error ? error : new Error('Sign in failed') };
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      if (session?.access_token) {
+        await restApi.restSignOut(session.access_token);
+      }
+      localStorage.removeItem('nutriflow_session');
+      setSession(null);
+      setUser(null);
+    } catch (error) {
       toast({
         title: "Erro ao sair",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Erro desconhecido",
         variant: "destructive",
       });
     }

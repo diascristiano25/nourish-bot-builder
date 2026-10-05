@@ -18,7 +18,7 @@ import {
   Receipt,
   Sparkles
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client-custom';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';

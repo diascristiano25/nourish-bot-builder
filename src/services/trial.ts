@@ -1,5 +1,5 @@
 // Trial period service
-import { supabase } from '@/integrations/supabase/client-custom';
+import { supabase } from '@/integrations/supabase/client';
 
 export const TRIAL_DURATION_DAYS = 14;
 export const ALERT_DAYS_BEFORE = 3; // Alert when 3 days left
