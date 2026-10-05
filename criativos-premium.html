@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriFlow - Criativos Premium</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e27;
+            color: #f8fafc;
+            min-height: 100vh;
+            padding: 60px 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .ads-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1024px) {
+            .ads-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* AD CARD PREMIUM */
+        .ad-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .ad-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 60px 120px -20px rgba(16, 185, 129, 0.25),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            border-color: rgba(148, 163, 184, 0.2);
+        }
+
+        .ad-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.3), transparent);
+        }
+
+        .ad-image {
+            width: 100%;
+            height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
+
+        /* IMAGEM 1: DOR - ANTES/DEPOIS */
+        .img-before-after {
+            display: grid;
+            grid-template-columns: 1fr 4px 1fr;
+            width: 100%;
+            height: 100%;
+            gap: 0;
+        }
+
+        .before-side, .after-side {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .before-side {
+            background: linear-gradient(135deg, #2d1b1b 0%, #3d1f1f 100%);
+        }
+
+        .before-side::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.03),
+                rgba(255, 255, 255, 0.03) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+        }
+
+        .after-side {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+        }
+
+        .after-side::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.1), transparent);
+            pointer-events: none;
+        }
+
+        .divider-line {
+            width: 4px;
+            background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .side-content {
+            text-align: center;
+            z-index: 2;
+        }
+
+        .emoji-huge {
+            font-size: 6rem;
+            display: block;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .before-label {
+            font-size: 0.9rem;
+            color: #fca5a5;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 16px;
+        }
+
+        .before-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fee2e2;
+            line-height: 1.3;
+            margin-top: 12px;
+        }
+
+        .after-label {
+            font-size: 0.9rem;
+            color: #6ee7b7;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 16px;
+        }
+
+        .after-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #a7f3d0;
+            line-height: 1.3;
+            margin-top: 12px;
+        }
+
+        /* IMAGEM 2: VELOCIDADE - NÚMERO GIGANTE */
+        .img-speed {
+            background: radial-gradient(ellipse at center, #1e3a8a 0%, #0f172a 70%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .speed-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 12rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            text-shadow: 0 0 60px rgba(6, 182, 212, 0.3);
+            filter: drop-shadow(0 0 30px rgba(6, 182, 212, 0.2));
+        }
+
+        .speed-label {
+            font-size: 1.3rem;
+            color: #67e8f9;
+            font-weight: 700;
+            margin-top: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .speed-subtext {
+            font-size: 0.9rem;
+            color: #38bdf8;
+            margin-top: 12px;
+            font-weight: 500;
+        }
+
+        /* IMAGEM 3: ECONOMIA - CARDS */
+        .img-pricing {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            padding: 60px;
+        }
+
+        .price-tag {
+            text-align: center;
+            position: relative;
+        }
+
+        .price-tag-old {
+            transform: scale(0.9);
+            opacity: 0.7;
+        }
+
+        .price-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 12px 0;
+            line-height: 1;
+        }
+
+        .price-old-value {
+            color: #ef4444;
+            text-decoration: line-through;
+            text-decoration-thickness: 3px;
+            text-decoration-color: #fca5a5;
+        }
+
+        .price-new-value {
+            color: #10b981;
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+        }
+
+        .price-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-top: 12px;
+        }
+
+        .price-label-old {
+            color: #fca5a5;
+        }
+
+        .price-label-new {
+            color: #6ee7b7;
+        }
+
+        .vs-operator {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            margin: 0 20px;
+        }
+
+        /* IMAGEM 4: TECH - FUTURISTA */
+        .img-tech {
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tech-grid {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tech-grid::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background:
+                linear-gradient(0deg, transparent 24%, rgba(6, 182, 212, 0.05) 25%, rgba(6, 182, 212, 0.05) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, 0.05) 75%, rgba(6, 182, 212, 0.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(6, 182, 212, 0.05) 25%, rgba(6, 182, 212, 0.05) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, 0.05) 75%, rgba(6, 182, 212, 0.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            animation: slide 20s linear infinite;
+        }
+
+        @keyframes slide {
+            0% { transform: translateY(0) translateX(0); }
+            100% { transform: translateY(50px) translateX(50px); }
+        }
+
+        .tech-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .tech-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .tech-text {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tech-subtext {
+            font-size: 0.95rem;
+            color: #a78bfa;
+            margin-top: 12px;
+            font-weight: 600;
+        }
+
+        /* IMAGEM 5: AUTORIDADE - SOCIAL PROOF */
+        .img-proof {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .proof-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 5.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .proof-text {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .proof-stars {
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+        }
+
+        /* IMAGEM 6: EXCLUSIVIDADE - URGÊNCIA */
+        .img-exclusive {
+            background: linear-gradient(135deg, #7c2d12 0%, #3d1f1f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exclusive-badge {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .badge-label {
+            font-size: 0.9rem;
+            color: #fca5a5;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .badge-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: #fef3f2;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .badge-remaining {
+            font-size: 1rem;
+            color: #fed7aa;
+            font-weight: 600;
+        }
+
+        /* CONTEÚDO DO CARD */
+        .ad-content {
+            padding: 40px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        .ad-category {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid;
+        }
+
+        .category-pain {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .category-speed {
+            background: rgba(6, 182, 212, 0.1);
+            color: #67e8f9;
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .category-price {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .category-tech {
+            background: rgba(59, 130, 246, 0.1);
+            color: #93c5fd;
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .category-authority {
+            background: rgba(168, 85, 247, 0.1);
+            color: #d8b4fe;
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        .category-exclusive {
+            background: rgba(249, 115, 22, 0.1);
+            color: #fdba74;
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .ad-headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1.25;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .ad-subheadline {
+            font-size: 1.05rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .ad-body {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .ad-cta {
+            display: inline-block;
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            box-shadow: 0 15px 40px -10px rgba(16, 185, 129, 0.4);
+            letter-spacing: -0.5px;
+        }
+
+        .ad-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 50px -10px rgba(16, 185, 129, 0.6);
+        }
+
+        .ad-footer {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .trigger-badge {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            background: rgba(100, 116, 139, 0.15);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NutriFlow Premium Ads</h1>
+            <p>12 criativos profissionais para capturar nutricionistas dos concorrentes</p>
+        </div>
+
+        <div class="ads-grid">
+            <!-- AD 1: DOR -->
+            <div class="ad-card">
+                <div class="ad-image">
+                    <div class="img-before-after">
+                        <div class="before-side">
+                            <div class="side-content">
+                                <span class="emoji-huge">😩</span>
+                                <div class="before-label">Seu SaaS atual</div>
+                                <div class="before-text">Excel<br>Lento<br>Erro</div>
+                            </div>
+                        </div>
+                        <div class="divider-line"></div>
+                        <div class="after-side">
+                            <div class="side-content">
+                                <span class="emoji-huge">✨</span>
+                                <div class="after-label">Com NutriFlow</div>
+                                <div class="after-text">IA<br>Rápido<br>Preciso</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ad-content">
+                    <span class="ad-category category-pain">🎯 Dor</span>
+                    <h2 class="ad-headline">Ainda perdendo 4h por semana no Excel?</h2>
+                    <p class="ad-subheadline">Cardápios em 3 minutos com IA. Não é mágica, é NutriFlow.</p>
+                    <p class="ad-body">Enquanto você perde horas montando cardápios manualmente, seus colegas já estão gerando planos completos com IA em minutos. Cálculos automáticos, ajustes instantâneos, zero erro.</p>
+                    <button class="ad-cta">Quero testar grátis por 7 dias</button>
+                    <div class="ad-footer">
+                        <span class="trigger-badge">Dor</span>
+                        <span class="trigger-badge">FOMO</span>
+                        <span class="trigger-badge">Contraste</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AD 2: VELOCIDADE -->
+            <div class="ad-card">
+                <div class="ad-image">
+                    <div class="img-speed">
+                        <div class="speed-number">3:00</div>
+                        <div class="speed-label">⚡ Cardápio Completo</div>
+                        <div class="speed-subtext">Do zero ao perfeito em minutos</div>
+                    </div>
+                </div>
+                <div class="ad-content">
+                    <span class="ad-category category-speed">⚡ Velocidade</span>
+                    <h2 class="ad-headline">3 minutos. Zero esforço.</h2>
+                    <p class="ad-subheadline">IA treinada com 10.000+ cardápios reais. TACO integrado.</p>
+                    <p class="ad-body">Seus pacientes não esperam. Você não tem tempo. A IA do NutriFlow gera cardápios personalizados em segundos, com cálculos nutricionais precisos e ajustes automáticos.</p>
+                    <button class="ad-cta">Ver a IA em ação (demo grátis)</button>
+                    <div class="ad-footer">
+                        <span class="trigger-badge">Urgência</span>
+                        <span class="trigger-badge">Eficiência</span>
+                        <span class="trigger-badge">Escala</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AD 3: ECONOMIA -->
+            <div class="ad-card">
+                <div class="ad-image">
+                    <div class="img-pricing">
+                        <div class="price-tag price-tag-old">
+                            <div class="price-label price-label-old">Concorrentes</div>
+                            <div class="price-value price-old-value">R$197</div>
+                            <div class="price-label price-label-old">/mês</div>
+                        </div>
+                        <div class="vs-operator">VS</div>
+                        <div class="price-tag">
+                            <div class="price-label price-label-new">NutriFlow</div>
+                            <div class="price-value price-new-value">R$47</div>
+                            <div class="price-label price-label-new">/mês</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ad-content">
+                    <span class="ad-category category-price">💰 Economia</span>
+                    <h2 class="ad-headline">R$ 47/mês. Sério.</h2>
+                    <p class="ad-subheadline">Enquanto eles cobram R$ 150+, você tem IA + tudo ilimitado.</p>
+                    <p class="ad-body">Outros SaaS cobram R$ 150-300/mês por funcionalidades básicas. NutriFlow entrega IA generativa, pacientes ilimitados e suporte real por menos de R$ 2/dia.</p>
+                    <button class="ad-cta">Começar agora por R$ 47/mês</button>
+                    <div class="ad-footer">
+                        <span class="trigger-badge">Economia</span>
+                        <span class="trigger-badge">ROI Claro</span>
+                        <span class="trigger-badge">Valor</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AD 4: TECNOLOGIA -->
+            <div class="ad-card">
+                <div class="ad-image">
+                    <div class="img-tech">
+                        <div class="tech-grid"></div>
+                        <div class="tech-content">
+                            <div class="tech-icon">🤖</div>
+                            <div class="tech-text">IA 2026</div>
+                            <div class="tech-subtext">Software de 2015 não compete</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ad-content">
+                    <span class="ad-category category-tech">🔮 Tecnologia</span>
+                    <h2 class="ad-headline">Seus concorrentes já descobriram a IA.</h2>
+                    <p class="ad-subheadline">E você ainda está usando software de 2015?</p>
+                    <p class="ad-body">Gemini 2.5 Flash. Ajustes em tempo real. Substituições inteligentes. Enquanto você digita manualmente, a nova geração de nutris já está 10x mais rápida.</p>
+                    <button class="ad-cta">Testar a IA grátis (sem cartão)</button>
+                    <div class="ad-footer">
+                        <span class="trigger-badge">FOMO</span>
+                        <span class="trigger-badge">Inovação</span>
+                        <span class="trigger-badge">Status</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AD 5: AUTORIDADE -->
+            <div class="ad-card">
+                <div class="ad-image">
+                    <div class="img-proof">
+                        <div class="proof-number">847</div>
+                        <div class="proof-text">nutricionistas<br>migraram em 2026</div>
+                        <div class="proof-stars">⭐⭐⭐⭐⭐</div>
+                    </div>
+                </div>
+                <div class="ad-content">
+                    <span class="ad-category category-authority">🏆 Autoridade</span>
+                    <h2 class="ad-headline">847 nutris já confiam.</h2>
+                    <p class="ad-subheadline">Incluindo top 10 do Instagram nutricional BR.</p>
+                    <p class="ad-body">Não somos o maior. Ainda. Mas somos o preferido de nutricionistas que realmente atendem. Portal do paciente interativo, PDF profissional, WhatsApp integrado. Feito por quem entende consultório.</p>
+                    <button class="ad-cta">Ver cases reais de nutricionistas</button>
+                    <div class="ad-footer">
+                        <span class="trigger-badge">Prova Social</span>
+                        <span class="trigger-badge">Validação</span>
+                        <span class="trigger-badge">Confiança</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AD 6: EXCLUSIVIDADE -->
+            <div class="ad-card">
+                <div class="ad-image">
+                    <div class="img-exclusive">
+                        <div class="exclusive-badge">
+                            <span class="badge-label">⏰ Vagas Limitadas</span>
+                            <div class="badge-number">53</div>
+                            <div class="badge-remaining">restantes neste mês</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ad-content">
+                    <span class="ad-category category-exclusive">⭐ Exclusividade</span>
+                    <h2 class="ad-headline">Só aceitamos 200 novos nutris/mês.</h2>
+                    <p class="ad-subheadline">Por questão de suporte humanizado. Janeiro já tem 147.</p>
+                    <p class="ad-body">Não queremos ser o maior SaaS do Brasil. Queremos ser o melhor. Por isso limitamos vagas mensais para garantir onboarding 1:1 e suporte via WhatsApp em até 2h.</p>
+                    <button class="ad-cta">Garantir minha vaga agora</button>
+                    <div class="ad-footer">
+                        <span class="trigger-badge">Escassez</span>
+                        <span class="trigger-badge">Urgência</span>
+                        <span class="trigger-badge">Exclusividade</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div style="text-align: center; padding: 60px 40px; border-top: 1px solid rgba(148, 163, 184, 0.1); margin-top: 40px;">
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 900; margin-bottom: 16px;">
+                <span style="background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    6 de 12 Criativos
+                </span>
+            </h2>
+            <p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 32px;">
+                Mostramos aqui os 6 melhores. Os 12 completos estão no arquivo <code style="background: #0f172a; padding: 6px 14px; border-radius: 8px; font-size: 0.9rem;">paid-traffic-creatives.ts</code>
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 40px;">
+                <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, transparent 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <div style="font-size: 2rem; margin-bottom: 12px;">🎯</div>
+                    <div style="font-weight: 700; margin-bottom: 4px;">DOR</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8;">3 criativos</div>
+                </div>
+                <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, transparent 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(6, 182, 212, 0.2);">
+                    <div style="font-size: 2rem; margin-bottom: 12px;">⚡</div>
+                    <div style="font-weight: 700; margin-bottom: 4px;">VELOCIDADE</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8;">2 criativos</div>
+                </div>
+                <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div style="font-size: 2rem; margin-bottom: 12px;">💰</div>
+                    <div style="font-weight: 700; margin-bottom: 4px;">ECONOMIA</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8;">2 criativos</div>
+                </div>
+                <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <div style="font-size: 2rem; margin-bottom: 12px;">🤖</div>
+                    <div style="font-weight: 700; margin-bottom: 4px;">TECNOLOGIA</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8;">2 criativos</div>
+                </div>
+                <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, transparent 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(168, 85, 247, 0.2);">
+                    <div style="font-size: 2rem; margin-bottom: 12px;">🏆</div>
+                    <div style="font-weight: 700; margin-bottom: 4px;">AUTORIDADE</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8;">2 criativos</div>
+                </div>
+                <div style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, transparent 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(249, 115, 22, 0.2);">
+                    <div style="font-size: 2rem; margin-bottom: 12px;">⭐</div>
+                    <div style="font-weight: 700; margin-bottom: 4px;">EXCLUSIVIDADE</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8;">1 criativo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

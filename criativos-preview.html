@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriFlow - Criativos de Tráfego Pago</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .creative {
+            background: #1e293b;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .creative:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px -12px rgba(16, 185, 129, 0.3);
+        }
+
+        .creative-image {
+            width: 100%;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .creative-content {
+            padding: 32px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-dor {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .badge-velocidade {
+            background: rgba(6, 182, 212, 0.1);
+            color: #67e8f9;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .badge-economia {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .headline {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .subheadline {
+            font-size: 1.1rem;
+            color: #06b6d4;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .body-text {
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            color: white;
+            text-align: center;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 35px -5px rgba(16, 185, 129, 0.6);
+        }
+
+        .triggers {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #334155;
+        }
+
+        .triggers-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .triggers-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .trigger-tag {
+            padding: 4px 12px;
+            background: rgba(100, 116, 139, 0.2);
+            border: 1px solid #334155;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        /* Imagens mockup */
+        .img-planilhas {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            display: grid;
+            grid-template-columns: 1fr 1px 1fr;
+            gap: 0;
+        }
+
+        .img-half {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img-half-left {
+            background: #1e1e1e;
+        }
+
+        .img-half-right {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        }
+
+        .divider {
+            background: #475569;
+            width: 2px;
+        }
+
+        .emoji-sad {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .emoji-happy {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .mock-text {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .img-velocidade {
+            background: radial-gradient(circle at center, #1e3a8a 0%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clock {
+            font-size: 5rem;
+            font-weight: 800;
+            color: #06b6d4;
+            text-shadow: 0 0 40px rgba(6, 182, 212, 0.6);
+            margin-bottom: 16px;
+        }
+
+        .img-economia {
+            background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .price-card {
+            padding: 24px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 16px;
+            text-align: center;
+            min-width: 140px;
+        }
+
+        .price-old {
+            font-size: 1.2rem;
+            color: #ef4444;
+            text-decoration: line-through;
+            margin-bottom: 8px;
+        }
+
+        .price-new {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #10b981;
+        }
+
+        .vs-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Criativos NutriFlow</h1>
+            <p>12 anúncios persuasivos para capturar nutricionistas dos concorrentes</p>
+        </div>
+
+        <div class="grid">
+            <!-- Criativo 1: DOR - Planilhas -->
+            <div class="creative">
+                <div class="creative-image img-planilhas">
+                    <div class="img-half img-half-left">
+                        <div class="emoji-sad">😩</div>
+                        <div class="mock-text">Excel<br>Planilhas<br>4h perdidas</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="img-half img-half-right">
+                        <div class="emoji-happy">😊</div>
+                        <div class="mock-text">NutriFlow<br>IA<br>3 minutos</div>
+                    </div>
+                </div>
+                <div class="creative-content">
+                    <span class="badge badge-dor">🎯 DOR</span>
+                    <h2 class="headline">Ainda perdendo 4h por semana no Excel?</h2>
+                    <p class="subheadline">Cardápios em 3 minutos com IA. Não é mágica, é NutriFlow.</p>
+                    <p class="body-text">
+                        Enquanto você perde horas montando cardápios manualmente, seus colegas já estão gerando planos completos com IA em minutos. Cálculos automáticos, ajustes instantâneos, zero erro. Pare de trabalhar como em 2010.
+                    </p>
+                    <a href="#" class="cta-button">Quero testar grátis por 7 dias</a>
+                    <div class="triggers">
+                        <div class="triggers-label">Gatilhos Psicológicos:</div>
+                        <div class="triggers-list">
+                            <span class="trigger-tag">Dor</span>
+                            <span class="trigger-tag">FOMO</span>
+                            <span class="trigger-tag">Contraste</span>
+                            <span class="trigger-tag">Prova Social</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Criativo 2: VELOCIDADE - IA -->
+            <div class="creative">
+                <div class="creative-image img-velocidade">
+                    <div class="clock">03:00</div>
+                    <div class="mock-text" style="color: #67e8f9;">⚡ Cardápio completo gerado</div>
+                </div>
+                <div class="creative-content">
+                    <span class="badge badge-velocidade">⚡ VELOCIDADE</span>
+                    <h2 class="headline">3 minutos. Do zero ao cardápio completo.</h2>
+                    <p class="subheadline">IA treinada com 10.000+ cardápios reais. TACO integrado.</p>
+                    <p class="body-text">
+                        Seus pacientes não esperam. Você não tem tempo. A IA do NutriFlow gera cardápios personalizados em segundos, com cálculos nutricionais precisos e ajustes automáticos. Atenda 3x mais pacientes sem contratar ajuda.
+                    </p>
+                    <a href="#" class="cta-button">Ver a IA em ação (demo grátis)</a>
+                    <div class="triggers">
+                        <div class="triggers-label">Gatilhos Psicológicos:</div>
+                        <div class="triggers-list">
+                            <span class="trigger-tag">Urgência</span>
+                            <span class="trigger-tag">Eficiência</span>
+                            <span class="trigger-tag">Ganho de Tempo</span>
+                            <span class="trigger-tag">Escalabilidade</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Criativo 3: ECONOMIA - Preço -->
+            <div class="creative">
+                <div class="creative-image img-economia">
+                    <div class="price-card">
+                        <div class="price-old">R$197</div>
+                        <div class="mock-text">Concorrentes</div>
+                    </div>
+                    <div class="vs-text">VS</div>
+                    <div class="price-card" style="border: 2px solid #10b981;">
+                        <div class="price-new">R$47</div>
+                        <div class="mock-text" style="color: #6ee7b7;">NutriFlow</div>
+                    </div>
+                </div>
+                <div class="creative-content">
+                    <span class="badge badge-economia">💰 ECONOMIA</span>
+                    <h2 class="headline">R$ 47/mês. Sério.</h2>
+                    <p class="subheadline">Enquanto eles cobram R$ 150+, você tem IA + tudo ilimitado.</p>
+                    <p class="body-text">
+                        Outros SaaS cobram R$ 150-300/mês por funcionalidades básicas. NutriFlow entrega IA generativa, pacientes ilimitados, cardápios ilimitados e suporte real por menos de R$ 2/dia. Simples assim.
+                    </p>
+                    <a href="#" class="cta-button">Começar agora por R$ 47/mês</a>
+                    <div class="triggers">
+                        <div class="triggers-label">Gatilhos Psicológicos:</div>
+                        <div class="triggers-list">
+                            <span class="trigger-tag">Economia</span>
+                            <span class="trigger-tag">Valor Percebido</span>
+                            <span class="trigger-tag">Ancoragem de Preço</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 40px; background: rgba(16, 185, 129, 0.1); border-radius: 24px; border: 2px solid rgba(16, 185, 129, 0.3);">
+            <h2 style="font-size: 1.5rem; margin-bottom: 12px;">✅ 12 Criativos Completos Disponíveis</h2>
+            <p style="color: #94a3b8; margin-bottom: 20px;">
+                Estes são apenas 3 dos 12 criativos criados. Cada um com copy completo, gatilhos psicológicos e prompts para imagens.
+            </p>
+            <p style="color: #6ee7b7; font-weight: 600;">
+                📁 Acesse: <code style="background: #0f172a; padding: 4px 12px; border-radius: 8px;">src/data/paid-traffic-creatives.ts</code>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
