@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client-custom';
 import { useToast } from '@/hooks/use-toast';
 
 export function useNotifications(nutritionistId: string | null) {

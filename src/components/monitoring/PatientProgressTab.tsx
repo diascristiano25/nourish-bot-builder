@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client-custom';
 import { useToast } from '@/hooks/use-toast';
 import { WeightChart } from './WeightChart';
 import { WaterTracker } from './WaterTracker';

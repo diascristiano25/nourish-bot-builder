@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Joyride, { CallBackProps, STATUS, Step, ACTIONS, EVENTS } from 'react-joyride';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client-custom';
 
 interface OnboardingTourProps {
   nutritionistId: string;

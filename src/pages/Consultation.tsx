@@ -11,7 +11,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { NeonText } from '@/components/ui/NeonText';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client-custom';
 import {
   Popover,
   PopoverContent,
