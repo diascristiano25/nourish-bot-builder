@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(parsed.user);
       } catch (e) {
         console.error('Failed to restore session:', e);
+        localStorage.removeItem('nutriflow_session');
       }
     }
     setLoading(false);
@@ -46,44 +47,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      // Sanitize fullName to ASCII-only
-      const sanitizedFullName = fullName
-        .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
-        .replace(/[^\x00-\x7F]/g, '');
-
-      const result = await restApi.restSignUp({
-        email,
-        password,
-        data: { full_name: sanitizedFullName }
-      });
+      const result = await restApi.restSignUp(email, password, fullName);
 
       if (result.error) {
         return { error: new Error(result.error.message) };
       }
 
-      if (result.session && result.user) {
+      if (result.access_token && result.user) {
         const sessionData = {
-          access_token: result.session.access_token,
+          access_token: result.access_token,
           user: result.user
         };
         localStorage.setItem('nutriflow_session', JSON.stringify(sessionData));
         setSession(sessionData);
         setUser(result.user);
-
-        // Create profile
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${result.session.access_token}`,
-          },
-          body: JSON.stringify({
-            user_id: result.user.id,
-            full_name: sanitizedFullName,
-          })
-        });
       }
 
       return { error: null };
@@ -94,15 +71,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const result = await restApi.restSignIn({ email, password });
+      const result = await restApi.restSignIn(email, password);
 
       if (result.error) {
         return { error: new Error(result.error.message) };
       }
 
-      if (result.session && result.user) {
+      if (result.access_token && result.user) {
         const sessionData = {
-          access_token: result.session.access_token,
+          access_token: result.access_token,
           user: result.user
         };
         localStorage.setItem('nutriflow_session', JSON.stringify(sessionData));

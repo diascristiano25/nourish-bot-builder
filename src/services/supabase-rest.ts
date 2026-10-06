@@ -1,70 +1,75 @@
-// Proxy-based REST API calls to Supabase
-const PROXY_URL = '/api/supabase-proxy';
+// Simple REST API calls directly to Supabase (no proxy, no JS Client)
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
 
 interface AuthResponse {
-  user: { id: string; email: string } | null;
-  session: { access_token: string } | null;
-  error?: { message: string };
-}
-
-interface SignUpPayload {
-  email: string;
-  password: string;
-  data?: { full_name?: string };
-}
-
-interface SignInPayload {
-  email: string;
-  password: string;
-}
-
-function getHeaders(token?: string) {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+  access_token?: string;
+  user?: {
+    id: string;
+    email: string;
   };
+  error?: {
+    message: string;
+  };
+}
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+export async function restSignUp(email: string, password: string, fullName: string): Promise<AuthResponse> {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          }
+        }
+      }),
+    });
+
+    return await response.json();
+  } catch (error) {
+    return { error: { message: error instanceof Error ? error.message : 'Signup failed' } };
   }
-
-  return headers;
 }
 
-export async function restSignUp(payload: SignUpPayload): Promise<AuthResponse> {
-  const response = await fetch(`${PROXY_URL}?path=auth/v1/signup`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(payload),
-  });
+export async function restSignIn(email: string, password: string): Promise<AuthResponse> {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
 
-  const data = await response.json();
-  return data;
+    return await response.json();
+  } catch (error) {
+    return { error: { message: error instanceof Error ? error.message : 'Login failed' } };
+  }
 }
 
-export async function restSignIn(payload: SignInPayload): Promise<AuthResponse> {
-  const response = await fetch(`${PROXY_URL}?path=auth/v1/token&grant_type=password`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(payload),
-  });
+export async function restSignOut(token: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': SUPABASE_KEY,
+      },
+    });
 
-  const data = await response.json();
-  return data;
-}
-
-export async function restGetUser(token: string) {
-  const response = await fetch(`${PROXY_URL}?path=auth/v1/user`, {
-    headers: getHeaders(token),
-  });
-
-  return response.json();
-}
-
-export async function restSignOut(token: string) {
-  const response = await fetch(`${PROXY_URL}?path=auth/v1/logout`, {
-    method: 'POST',
-    headers: getHeaders(token),
-  });
-
-  return response.ok;
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
 }
