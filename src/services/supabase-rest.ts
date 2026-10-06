@@ -52,8 +52,11 @@ export async function restSignIn(email: string, password: string): Promise<AuthR
       }),
     });
 
-    return await response.json();
+    const data = await response.json();
+    console.log('Supabase login response:', data);
+    return data;
   } catch (error) {
+    console.error('Login error:', error);
     return { error: { message: error instanceof Error ? error.message : 'Login failed' } };
   }
 }
