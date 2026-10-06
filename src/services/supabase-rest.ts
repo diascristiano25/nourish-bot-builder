@@ -2,6 +2,13 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
 
+// Debug: log environment variables (remove after testing)
+console.log('Environment check:', {
+  url: SUPABASE_URL,
+  keyPrefix: SUPABASE_KEY.substring(0, 20) + '...',
+  keyLength: SUPABASE_KEY.length
+});
+
 interface AuthResponse {
   access_token?: string;
   user?: {
