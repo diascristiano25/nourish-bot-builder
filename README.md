@@ -95,3 +95,4 @@ npm i
 npm run dev
 ```
 # Deploy trigger Mon Oct  5 17:15:01     2026
+# Force Netlify rebuild Tue Oct  6 10:33:42     2026
