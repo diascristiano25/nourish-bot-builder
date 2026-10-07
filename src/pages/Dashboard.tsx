@@ -310,10 +310,10 @@ export default function Dashboard() {
                   <Button className="w-full justify-start h-12 rounded-xl text-sm font-medium" onClick={() => navigate('/consulta')} data-tour="ai-consultation">
                     <Sparkles className="w-4 h-4 mr-3" /> Nova Consulta com IA
                   </Button>
-                  <Button variant="outline" className="w-full justify-start h-12 rounded-xl text-sm font-medium" onClick={() => navigate('/patients/new')} data-tour="new-patient">
+                  <Button variant="outline" className="w-full justify-start h-12 rounded-xl text-sm font-medium" onClick={() => navigate('/novo-paciente')} data-tour="new-patient">
                     <Users className="w-4 h-4 mr-3 text-primary" /> Cadastrar Paciente
                   </Button>
-                  <Button variant="ghost" className="w-full justify-start h-12 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => navigate('/profile')} data-tour="profile-settings">
+                  <Button variant="ghost" className="w-full justify-start h-12 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => navigate('/perfil')} data-tour="profile-settings">
                     <User className="w-4 h-4 mr-3" /> Configurar Perfil
                   </Button>
                 </div>
@@ -375,7 +375,7 @@ export default function Dashboard() {
                     Pacientes Recentes
                   </h3>
                   {patients.length > 0 && (
-                    <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground hover:text-foreground" onClick={() => navigate('/patients')}>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground hover:text-foreground" onClick={() => navigate('/pacientes')}>
                       Ver todos <ChevronRight className="w-3 h-3 ml-1" />
                     </Button>
                   )}
@@ -388,14 +388,14 @@ export default function Dashboard() {
                       </div>
                       <p className="text-sm font-medium text-foreground mb-1">Comece agora</p>
                       <p className="text-xs text-muted-foreground mb-4">Cadastre seu primeiro paciente</p>
-                      <Button variant="outline" size="sm" className="rounded-xl" onClick={() => navigate('/patients/new')}>
+                      <Button variant="outline" size="sm" className="rounded-xl" onClick={() => navigate('/novo-paciente')}>
                         Adicionar paciente
                       </Button>
                     </div>
                   ) : (
                     <div className="space-y-1">
                       {recentPatients.map((patient) => (
-                        <div key={patient.id} onClick={() => navigate(`/patients/${patient.id}`)} className="group flex items-center justify-between p-3 rounded-2xl hover:bg-muted/50 cursor-pointer transition-colors">
+                        <div key={patient.id} onClick={() => navigate(`/pacientes/${patient.id}`)} className="group flex items-center justify-between p-3 rounded-2xl hover:bg-muted/50 cursor-pointer transition-colors">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center">
                               <span className="text-sm font-semibold text-primary">{patient.full_name.charAt(0).toUpperCase()}</span>

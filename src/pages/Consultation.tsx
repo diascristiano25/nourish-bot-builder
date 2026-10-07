@@ -270,7 +270,7 @@ export default function Consultation() {
         description: `Todos os dados de ${selectedPatientName} foram salvos.`,
       });
 
-      navigate(`/patients/${selectedPatientId}`);
+      navigate(`/pacientes/${selectedPatientId}`);
       
     } catch (error: any) {
       console.error('Error saving consultation:', error);
@@ -438,7 +438,7 @@ export default function Consultation() {
                           className="gap-2"
                           onClick={() => {
                             setPatientSelectorOpen(false);
-                            navigate('/patients/new');
+                            navigate('/novo-paciente');
                           }}
                         >
                           <UserPlus className="w-4 h-4" />

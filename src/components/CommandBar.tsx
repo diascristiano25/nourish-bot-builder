@@ -110,7 +110,7 @@ export function CommandBar({ open, onOpenChange }: CommandBarProps) {
       id: 'profile',
       label: 'Perfil',
       icon: User,
-      action: () => navigate('/profile'),
+      action: () => navigate('/perfil'),
       keywords: ['conta', 'configurações'],
       group: 'navigation',
     },

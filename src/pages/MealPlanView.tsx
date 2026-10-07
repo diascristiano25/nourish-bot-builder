@@ -388,7 +388,7 @@ export default function MealPlanView() {
                 </p>
               </div>
               <Button 
-                onClick={() => navigate('/profile')} 
+                onClick={() => navigate('/perfil')} 
                 variant="outline"
                 className="border-warning/30 text-warning hover:bg-warning/10"
               >

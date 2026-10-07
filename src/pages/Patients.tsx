@@ -92,8 +92,8 @@ const Patients = () => {
                   {patients?.length || 0} registros ativos
                 </p>
               </div>
-              <Button 
-                onClick={() => navigate('/patients/new')} 
+              <Button
+                onClick={() => navigate('/novo-paciente')}
                 className="gap-2 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl h-12 px-6 font-semibold shadow-lg shadow-cyber-lime/20"
                 data-tour="patients-new-btn"
               >
@@ -145,8 +145,8 @@ const Patients = () => {
                 }
               </p>
               {!searchQuery && (
-                <Button 
-                  onClick={() => navigate('/patients/new')} 
+                <Button
+                  onClick={() => navigate('/novo-paciente')}
                   className="gap-2 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background rounded-xl h-12 px-8"
                 >
                   <Sparkles className="w-5 h-5" />
@@ -162,10 +162,10 @@ const Patients = () => {
                 const goalStyle = goalColors[patient.goal || 'health'];
                 
                 return (
-                  <BentoCard 
-                    key={patient.id} 
+                  <BentoCard
+                    key={patient.id}
                     className="group"
-                    onClick={() => navigate(`/patients/${patient.id}`)}
+                    onClick={() => navigate(`/pacientes/${patient.id}`)}
                     glow="lime"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
