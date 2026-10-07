@@ -33,7 +33,7 @@ interface NavItemWithTour {
 
 const navItems: NavItemWithTour[] = [
   { label: 'Dashboard', icon: Home, href: '/dashboard', tourId: 'nav-home' },
-  { label: 'Pacientes', icon: Users, href: '/patients', tourId: 'nav-pacientes' },
+  { label: 'Pacientes', icon: Users, href: '/pacientes', tourId: 'nav-pacientes' },
   { label: 'Agenda', icon: Calendar, href: '/agenda', tourId: 'nav-agenda' },
   { label: 'Biblioteca', icon: BookOpen, href: '/biblioteca', tourId: 'nav-biblioteca' },
   { label: 'Financeiro', icon: DollarSign, href: '/financeiro', tourId: 'nav-financeiro' },
@@ -130,7 +130,7 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
       <nav className="flex-1 py-2 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.href || (item.href === '/dashboard' && location.pathname === '/');
-          const showBadge = item.href === '/patients' && unreadMessages > 0;
+          const showBadge = item.href === '/pacientes' && unreadMessages > 0;
           
           return (
             <Button

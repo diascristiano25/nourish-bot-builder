@@ -78,7 +78,7 @@ export function CommandBar({ open, onOpenChange }: CommandBarProps) {
       id: 'patients',
       label: 'Pacientes',
       icon: Users,
-      action: () => navigate('/patients'),
+      action: () => navigate('/pacientes'),
       keywords: ['clientes', 'lista'],
       group: 'navigation',
     },
