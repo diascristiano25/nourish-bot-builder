@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import * as restApi from '@/services/supabase-rest';
+import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser, Session as SupabaseSession } from '@supabase/supabase-js';
 
 interface User {
   id: string;
@@ -30,37 +31,72 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check localStorage for existing session
-    const stored = localStorage.getItem('nutriflow_session');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setSession(parsed);
-        setUser(parsed.user);
-      } catch (e) {
-        console.error('Failed to restore session:', e);
-        localStorage.removeItem('nutriflow_session');
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session: supabaseSession } }) => {
+      if (supabaseSession) {
+        const sessionData = {
+          access_token: supabaseSession.access_token,
+          user: {
+            id: supabaseSession.user.id,
+            email: supabaseSession.user.email || '',
+          },
+        };
+        setSession(sessionData);
+        setUser(sessionData.user);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, supabaseSession) => {
+      if (supabaseSession) {
+        const sessionData = {
+          access_token: supabaseSession.access_token,
+          user: {
+            id: supabaseSession.user.id,
+            email: supabaseSession.user.email || '',
+          },
+        };
+        setSession(sessionData);
+        setUser(sessionData.user);
+      } else {
+        setSession(null);
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      const result = await restApi.restSignUp(email, password, fullName);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+          emailRedirectTo: `${window.location.origin}/auth`,
+        },
+      });
 
-      if (result.error) {
-        return { error: new Error(result.error.message) };
+      if (error) {
+        return { error: new Error(error.message) };
       }
 
-      if (result.access_token && result.user) {
+      if (data.session && data.user) {
         const sessionData = {
-          access_token: result.access_token,
-          user: result.user
+          access_token: data.session.access_token,
+          user: {
+            id: data.user.id,
+            email: data.user.email || '',
+          },
         };
-        localStorage.setItem('nutriflow_session', JSON.stringify(sessionData));
         setSession(sessionData);
-        setUser(result.user);
+        setUser(sessionData.user);
       }
 
       return { error: null };
@@ -71,20 +107,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const result = await restApi.restSignIn(email, password);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (result.error) {
-        return { error: new Error(result.error.message) };
+      if (error) {
+        return { error: new Error(error.message) };
       }
 
-      if (result.access_token && result.user) {
+      if (data.session && data.user) {
         const sessionData = {
-          access_token: result.access_token,
-          user: result.user
+          access_token: data.session.access_token,
+          user: {
+            id: data.user.id,
+            email: data.user.email || '',
+          },
         };
-        localStorage.setItem('nutriflow_session', JSON.stringify(sessionData));
         setSession(sessionData);
-        setUser(result.user);
+        setUser(sessionData.user);
       }
 
       return { error: null };
@@ -95,10 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      if (session?.access_token) {
-        await restApi.restSignOut(session.access_token);
-      }
-      localStorage.removeItem('nutriflow_session');
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
       setSession(null);
       setUser(null);
     } catch (error) {
