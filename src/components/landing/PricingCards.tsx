@@ -27,7 +27,7 @@ export function PricingCards(): JSX.Element {
           {pricingPlans.map((plan) => (
             <Card
               key={plan.id}
-              className={`relative ${
+              className={`relative bg-white ${
                 plan.highlighted
                   ? 'border-2 border-emerald-500 shadow-lg'
                   : 'border border-slate-200'

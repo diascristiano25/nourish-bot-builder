@@ -16,7 +16,7 @@ export function TestimonialGrid() {
             const instagramUrl = `https://instagram.com/${instagramHandle}`;
 
             return (
-              <Card key={testimonial.id} className="border-slate-200">
+              <Card key={testimonial.id} className="border-slate-200 bg-white">
                 <CardContent className="p-6">
                   <img
                     src={testimonial.photo}

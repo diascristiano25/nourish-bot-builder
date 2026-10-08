@@ -86,12 +86,12 @@ serve(async (req) => {
       );
     }
 
-    const validationResult = PatientDataSchema.safeParse(rawBody.patientData);
-    
+    const validationResult = PatientDataSchema.safeParse(rawBody);
+
     if (!validationResult.success) {
       console.error('Validation failed:', validationResult.error.errors);
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: 'Validation failed',
           details: validationResult.error.errors.map(e => ({
             field: e.path.join('.'),
@@ -110,11 +110,11 @@ serve(async (req) => {
       patientData.medicalConditions = sanitizeText(patientData.medicalConditions);
     }
 
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    const LLM_RELAY_API_KEY = Deno.env.get('LLM_RELAY_API_KEY');
 
-    if (!OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not configured');
-      throw new Error('AI service not configured. Please set OPENAI_API_KEY in Supabase Edge Function secrets.');
+    if (!LLM_RELAY_API_KEY) {
+      console.error('LLM_RELAY_API_KEY is not configured');
+      throw new Error('AI service not configured. Please set LLM_RELAY_API_KEY in Supabase Edge Function secrets.');
     }
 
     console.log('Generating meal plan for patient:', patientData.name);
@@ -180,6 +180,13 @@ ${patientData.additionalNotes ? `INSTRUÇÕES ADICIONAIS: ${patientData.addition
 
 Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS o JSON, sem texto adicional.`;
 
+    // Try OpenAI (most reliable)
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+
+    if (!OPENAI_API_KEY) {
+      throw new Error('OpenAI API key not configured');
+    }
+
     console.log('Calling OpenAI API...');
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -194,37 +201,35 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
+        response_format: { type: "json_object" }
       }),
     });
+
+    console.log('OpenAI response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI gateway error:', response.status, errorText);
-      
+
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again in a few moments.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: 'AI credits exhausted. Please add credits to continue.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      throw new Error(`AI request failed: ${response.status}`);
+
+      throw new Error(`AI request failed: ${response.status} - ${errorText}`);
     }
 
     const aiResponse = await response.json();
     console.log('AI response received');
 
+    // Extract content from OpenAI response format
     const content = aiResponse.choices?.[0]?.message?.content;
-    
+
     if (!content) {
-      throw new Error('No content in AI response');
+      console.error('Unexpected OpenAI response:', JSON.stringify(aiResponse));
+      throw new Error('No content in OpenAI response');
     }
 
     // Parse the JSON from the response

@@ -1,8 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(
-  import.meta.env.VITE_GEMINI_API_KEY || ""
-);
+// Edge Function handles Gemini API calls
 
 export interface MealPlanRequest {
   patientName: string;
@@ -41,61 +37,52 @@ export interface Meal {
 export async function generateMealPlan(
   request: MealPlanRequest
 ): Promise<MealPlan> {
-  if (!import.meta.env.VITE_GEMINI_API_KEY) {
-    throw new Error("Gemini API key not configured");
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Supabase configuration not found");
   }
 
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-  const prompt = `
-Você é um nutricionista profissional. Gere um plano alimentar detalhado baseado nas informações abaixo.
-
-PACIENTE:
-- Nome: ${request.patientName}
-- Idade: ${request.age} anos
-- Peso: ${request.weight} kg
-- Altura: ${request.height} cm
-- Objetivo: ${request.objective}
-- Restrições: ${request.dietary_restrictions.join(", ") || "Nenhuma"}
-- Alergias: ${request.allergies.join(", ") || "Nenhuma"}
-- Nível de atividade: ${request.activity_level}
-- Preferências: ${request.preferences.join(", ") || "Nenhuma"}
-- Refeições por dia: ${request.meals_per_day}
-
-INSTRUÇÕES:
-1. Baseie-se na Tabela TACO (Tabela Brasileira de Composição de Alimentos)
-2. Use alimentos brasileiros prioritariamente
-3. Retorne em formato JSON estruturado
-4. Cada refeição deve ter 2-3 itens
-5. Inclua macronutrientes em cada item
-6. Responda APENAS com JSON válido, sem markdown ou explicação
-
-FORMATO JSON ESPERADO:
-{
-  "breakfast": [{"name": "", "portion": "", "macros": {"calories": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": 0}}],
-  "lunch": [],
-  "dinner": [],
-  "notes": ""
-}
-`;
-
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const response = await fetch(
+      `${supabaseUrl}/functions/v1/generate-meal-plan`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify(request),
+      }
+    );
 
-    // Extract JSON from response (handles cases with markdown code blocks)
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Invalid response format from Gemini");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+
+      // Handle rate limit specifically
+      if (response.status === 429) {
+        throw new Error(
+          "Limite de requisições atingido. Por favor, aguarde alguns minutos e tente novamente."
+        );
+      }
+
+      throw new Error(
+        errorData.error || `HTTP ${response.status}: ${response.statusText}`
+      );
     }
 
-    const mealPlan = JSON.parse(jsonMatch[0]) as MealPlan;
-    return mealPlan;
+    const mealPlan = await response.json();
+    return mealPlan as MealPlan;
   } catch (error) {
     console.error("Error generating meal plan:", error);
-    throw new Error(
-      `Failed to generate meal plan: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+
+    // Re-throw with user-friendly message
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error("Falha ao gerar plano alimentar. Tente novamente.");
   }
 }
 
