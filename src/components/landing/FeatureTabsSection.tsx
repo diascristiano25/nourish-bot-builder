@@ -40,19 +40,15 @@ export function FeatureTabsSection(): JSX.Element {
                 <div className="order-2 lg:order-1">
                   {!imageLoaded[tab.id] ? (
                     <div className="w-full aspect-[4/3] rounded-lg bg-slate-200 animate-pulse" />
-                  ) : (
-                    <img
-                      src={tab.screenshot}
-                      alt={`Interface de ${tab.label} do NutriFlow`}
-                      className="rounded-lg border border-slate-200 shadow-lg w-full transition-opacity duration-300"
-                      loading="lazy"
-                    />
-                  )}
+                  ) : null}
                   <img
                     src={tab.screenshot}
-                    alt=""
-                    className="hidden"
+                    alt={`Interface de ${tab.label} do NutriFlow`}
+                    className={`rounded-lg border border-slate-200 shadow-lg w-full transition-opacity duration-300 ${
+                      imageLoaded[tab.id] ? 'opacity-100' : 'opacity-0'
+                    }`}
                     onLoad={() => handleImageLoad(tab.id)}
+                    loading="lazy"
                   />
                 </div>
 
