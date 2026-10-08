@@ -77,14 +77,14 @@ function parseSchema(typesPath: string): Map<string, Set<string>> {
   const secondPublicStart = matches[1].index! + matches[1][0].length;
   const contentFromSecondPublic = content.substring(secondPublicStart);
 
-  // Extract everything until the closing brace for Tables
-  const tablesEndMatch = contentFromSecondPublic.match(/^\s{6}\}/m);
-  if (!tablesEndMatch) {
-    console.error('⚠️ Could not find end of Tables section');
+  // Extract everything until the Views section (which comes after Tables)
+  const viewsMatch = contentFromSecondPublic.match(/^\s{4}Views:\s*\{/m);
+  if (!viewsMatch) {
+    console.error('⚠️ Could not find Views section after Tables');
     return schema;
   }
 
-  const tablesContent = contentFromSecondPublic.substring(0, tablesEndMatch.index);
+  const tablesContent = contentFromSecondPublic.substring(0, viewsMatch.index);
 
   // Match each table definition with proper brace counting
   // Pattern: tablename: { Row: { ... } Insert: { ... } Update: { ... } Relationships: [...] }
