@@ -63,14 +63,28 @@ function parseSchema(typesPath: string): Map<string, Set<string>> {
 
   const schema = new Map<string, Set<string>>();
 
-  // Find the Tables section
-  const tablesMatch = content.match(/Tables:\s*\{([\s\S]+?)^\s{4}\}/m);
-  if (!tablesMatch) {
-    console.error('⚠️ Could not find Tables section in types.ts');
+  // Find the second public schema (first one is empty with [_ in never]: never)
+  // Look for public schema that contains actual table definitions
+  const publicSchemasRegex = /public:\s*\{\s*Tables:\s*\{/g;
+  const matches = [...content.matchAll(publicSchemasRegex)];
+
+  if (matches.length < 2) {
+    console.error('⚠️ Could not find second public.Tables section in types.ts');
     return schema;
   }
 
-  const tablesContent = tablesMatch[1];
+  // Get content starting from the second public.Tables
+  const secondPublicStart = matches[1].index! + matches[1][0].length;
+  const contentFromSecondPublic = content.substring(secondPublicStart);
+
+  // Extract everything until the closing brace for Tables
+  const tablesEndMatch = contentFromSecondPublic.match(/^\s{6}\}/m);
+  if (!tablesEndMatch) {
+    console.error('⚠️ Could not find end of Tables section');
+    return schema;
+  }
+
+  const tablesContent = contentFromSecondPublic.substring(0, tablesEndMatch.index);
 
   // Match each table definition with proper brace counting
   // Pattern: tablename: { Row: { ... } Insert: { ... } Update: { ... } Relationships: [...] }
