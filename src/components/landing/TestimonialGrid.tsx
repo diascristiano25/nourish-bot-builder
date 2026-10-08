@@ -20,7 +20,7 @@ export function TestimonialGrid() {
                 <CardContent className="p-6">
                   <img
                     src={testimonial.photo}
-                    alt={`Foto de ${testimonial.name}`}
+                    alt={testimonial.name}
                     className="rounded-full w-16 h-16 mb-4 object-cover"
                     loading="lazy"
                   />
@@ -30,12 +30,12 @@ export function TestimonialGrid() {
                   </p>
 
                   <div className="space-y-1">
-                    <div className="font-semibold text-slate-900">
+                    <p className="font-semibold text-slate-900">
                       {testimonial.name}
-                    </div>
-                    <div className="text-sm text-slate-600">
+                    </p>
+                    <p className="text-sm text-slate-600">
                       {testimonial.city}, {testimonial.state}
-                    </div>
+                    </p>
                     <a
                       href={instagramUrl}
                       target="_blank"
