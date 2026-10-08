@@ -44,7 +44,7 @@ export interface FAQItem {
 export const heroContent = {
   headline: 'Software de Nutrição Profissional',
   subheadline: 'Crie cardápios personalizados, gerencie consultas e acompanhe a evolução dos pacientes em uma única plataforma',
-  screenshotUrl: 'https://picsum.photos/seed/nutriflow-dashboard/1200/800'
+  screenshotUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=800&fit=crop&auto=format&q=80'
 };
 
 export const pricingPlans: PricingPlan[] = [
@@ -109,7 +109,7 @@ export const featureTabs: FeatureTab[] = [
   {
     id: 'atendimento',
     label: 'Atendimento',
-    screenshot: 'https://picsum.photos/seed/nutriflow-atendimento/800/600',
+    screenshot: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop&auto=format&q=80',
     features: [
       {
         icon: 'CalendarBlank',
@@ -141,7 +141,7 @@ export const featureTabs: FeatureTab[] = [
   {
     id: 'prescricao',
     label: 'Prescrição',
-    screenshot: 'https://picsum.photos/seed/nutriflow-prescricao/800/600',
+    screenshot: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&h=600&fit=crop&auto=format&q=80',
     features: [
       {
         icon: 'ForkKnife',
@@ -173,7 +173,7 @@ export const featureTabs: FeatureTab[] = [
   {
     id: 'gestao',
     label: 'Gestão',
-    screenshot: 'https://picsum.photos/seed/nutriflow-gestao/800/600',
+    screenshot: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop&auto=format&q=80',
     features: [
       {
         icon: 'CurrencyDollar',
@@ -205,7 +205,7 @@ export const featureTabs: FeatureTab[] = [
   {
     id: 'anamnese',
     label: 'Anamnese',
-    screenshot: 'https://picsum.photos/seed/nutriflow-anamnese/800/600',
+    screenshot: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&h=600&fit=crop&auto=format&q=80',
     features: [
       {
         icon: 'ClipboardText',
@@ -240,7 +240,7 @@ export const testimonials: Testimonial[] = [
   {
     id: 't1',
     name: 'Dra. Mariana Oliveira',
-    photo: 'https://i.pravatar.cc/150?img=5',
+    photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&auto=format&q=80',
     city: 'São Paulo',
     state: 'SP',
     instagram: 'nutri.marianaoliveira',
@@ -249,7 +249,7 @@ export const testimonials: Testimonial[] = [
   {
     id: 't2',
     name: 'Dr. Rafael Costa',
-    photo: 'https://i.pravatar.cc/150?img=12',
+    photo: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=150&h=150&fit=crop&auto=format&q=80',
     city: 'Rio de Janeiro',
     state: 'RJ',
     instagram: 'nutrirafa',
@@ -258,7 +258,7 @@ export const testimonials: Testimonial[] = [
   {
     id: 't3',
     name: 'Dra. Juliana Mendes',
-    photo: 'https://i.pravatar.cc/150?img=9',
+    photo: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=150&h=150&fit=crop&auto=format&q=80',
     city: 'Belo Horizonte',
     state: 'MG',
     instagram: 'dra.junutri',
@@ -267,7 +267,7 @@ export const testimonials: Testimonial[] = [
   {
     id: 't4',
     name: 'Dra. Camila Souza',
-    photo: 'https://i.pravatar.cc/150?img=47',
+    photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&auto=format&q=80',
     city: 'Curitiba',
     state: 'PR',
     instagram: 'camila.nutricao',
@@ -276,7 +276,7 @@ export const testimonials: Testimonial[] = [
   {
     id: 't5',
     name: 'Dr. Lucas Pereira',
-    photo: 'https://i.pravatar.cc/150?img=15',
+    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&auto=format&q=80',
     city: 'Porto Alegre',
     state: 'RS',
     instagram: 'lucasnutri.rs',
@@ -285,7 +285,7 @@ export const testimonials: Testimonial[] = [
   {
     id: 't6',
     name: 'Dra. Fernanda Lima',
-    photo: 'https://i.pravatar.cc/150?img=20',
+    photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&auto=format&q=80',
     city: 'Brasília',
     state: 'DF',
     instagram: 'fe.nutri',
