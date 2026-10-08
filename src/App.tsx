@@ -95,9 +95,9 @@ function App() {
                     </>
                   ) : (
                     <>
-                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/" element={<LandingPageProfessional />} />
+                      <Route path="/old" element={<LandingPage />} />
                       <Route path="/new" element={<LandingPageNew />} />
-                      <Route path="/landing-pro" element={<LandingPageProfessional />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/patient-auth" element={<PatientAuth />} />
                       <Route path="/meu-app" element={<PatientMobileApp />} />
