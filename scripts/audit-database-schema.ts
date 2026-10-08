@@ -51,7 +51,16 @@ function findTypeScriptFiles(dir: string, fileList: string[] = []): string[] {
 
 // Parse types.ts to extract schema information
 function parseSchema(typesPath: string): Map<string, Set<string>> {
-  const content = readFileSync(typesPath, 'utf-8');
+  let content: string;
+
+  try {
+    content = readFileSync(typesPath, 'utf-8');
+  } catch (error) {
+    console.error(`⚠️ Failed to read types file: ${typesPath}`);
+    console.error(error);
+    return new Map();
+  }
+
   const schema = new Map<string, Set<string>>();
 
   // Find the Tables section
@@ -63,14 +72,26 @@ function parseSchema(typesPath: string): Map<string, Set<string>> {
 
   const tablesContent = tablesMatch[1];
 
-  // Match each table definition
+  // Match each table definition with proper brace counting
   // Pattern: tablename: { Row: { ... } Insert: { ... } Update: { ... } Relationships: [...] }
-  const tablePattern = /(\w+):\s*\{\s*Row:\s*\{([^}]+)\}/g;
+  const tableNameRegex = /(\w+):\s*\{\s*Row:\s*\{/g;
   let match;
 
-  while ((match = tablePattern.exec(tablesContent)) !== null) {
+  while ((match = tableNameRegex.exec(tablesContent)) !== null) {
     const tableName = match[1];
-    const rowContent = match[2];
+    const startPos = match.index + match[0].length;
+
+    // Count braces to find the end of the Row object (handles nested objects)
+    let braceCount = 1;
+    let endPos = startPos;
+
+    while (endPos < tablesContent.length && braceCount > 0) {
+      if (tablesContent[endPos] === '{') braceCount++;
+      if (tablesContent[endPos] === '}') braceCount--;
+      endPos++;
+    }
+
+    const rowContent = tablesContent.substring(startPos, endPos - 1);
 
     // Extract column names from Row type
     // Pattern: column_name: type
@@ -88,6 +109,40 @@ function parseSchema(typesPath: string): Map<string, Set<string>> {
   }
 
   return schema;
+}
+
+// Helper function to parse select string with proper nesting support
+function parseSelectColumns(selectStr: string): string[] {
+  const columns: string[] = [];
+  let current = '';
+  let depth = 0;
+
+  for (let i = 0; i < selectStr.length; i++) {
+    const char = selectStr[i];
+
+    if (char === '(') {
+      depth++;
+      current += char;
+    } else if (char === ')') {
+      depth--;
+      current += char;
+    } else if (char === ',' && depth === 0) {
+      // Only split on commas at depth 0 (not inside nested relations)
+      if (current.trim()) {
+        columns.push(current.trim());
+      }
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  // Add the last column
+  if (current.trim()) {
+    columns.push(current.trim());
+  }
+
+  return columns;
 }
 
 // Extract Supabase queries from a file
@@ -109,18 +164,18 @@ function extractQueries(filePath: string, content: string): Array<{
       const table = fromMatch[1];
       const columns: string[] = [];
 
-      // Look for .select() in the same or following lines
+      // Look for .select() in the same or following lines (increased lookahead to 20 lines)
       let searchLine = i;
       let foundSelect = false;
 
-      while (searchLine < Math.min(i + 10, lines.length) && !foundSelect) {
+      while (searchLine < Math.min(i + 20, lines.length) && !foundSelect) {
         const selectMatch = lines[searchLine].match(/\.select\s*\(\s*['"]([^'"]+)['"]/);
         if (selectMatch) {
           foundSelect = true;
           const selectStr = selectMatch[1];
 
-          // Parse select string: 'col1, col2, table(col3, col4)'
-          const parts = selectStr.split(/,\s*/);
+          // Parse select string with proper nesting support
+          const parts = parseSelectColumns(selectStr);
           for (const part of parts) {
             // Handle nested selects like 'table(col1, col2)'
             const nestedMatch = part.match(/(\w+)\s*\(/);
@@ -182,7 +237,16 @@ function auditDatabase(srcDir: string, typesPath: string): DatabaseAuditReport {
   const tablesUsed = new Set<string>();
 
   for (const file of files) {
-    const content = readFileSync(file, 'utf-8');
+    let content: string;
+
+    try {
+      content = readFileSync(file, 'utf-8');
+    } catch (error) {
+      console.error(`⚠️ Failed to read file: ${relative(process.cwd(), file)}`);
+      console.error(error);
+      continue; // Skip this file and continue with the rest
+    }
+
     const queries = extractQueries(file, content);
 
     report.queriesFound += queries.length;

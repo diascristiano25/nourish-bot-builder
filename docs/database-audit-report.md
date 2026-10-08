@@ -12,7 +12,7 @@
 
 # Database Schema Audit Report
 
-**Generated:** 2026-10-08T10:20:29.941Z
+**Generated:** 2026-10-08T10:32:18.120Z
 **Files Scanned:** 156
 **Queries Found:** 150
 
@@ -165,34 +165,6 @@ _No specific columns found (may use wildcard or relations)_
 - `id`
 - `recorded_at`
 - `weight`
-
-## Prioritized Fix List
-
-Based on the audit, these schema mismatches need to be resolved:
-
-### High Priority (Blocking Features)
-
-1. **Missing `profiles` columns for trial management**
-   - `trial_start_date` - Used in trial.ts service
-   - `trial_ended` - Used in trial.ts service
-   - **Impact:** Trial period management is broken
-   - **Action:** Add these columns to profiles table and regenerate types
-
-2. **Missing `payment_events` table**
-   - Used in stripe-webhooks.ts (lines 83, 100)
-   - **Impact:** Payment event tracking not working
-   - **Action:** Create payment_events table or update webhook code
-
-3. **Missing `purchase_events` table**
-   - Used in stripe-webhooks.ts (line 36)
-   - **Impact:** Purchase event tracking not working
-   - **Action:** Create purchase_events table or update webhook code
-
-### Observations
-
-- **`meal_plans.total_calories`** - This column DOES exist in types.ts and is being queried correctly (no issue found)
-- Most core functionality (patients, appointments, meal_plans) has correct schema alignment
-- Payment/billing infrastructure appears to be incomplete or outdated
 
 ## Critical Issues
 
