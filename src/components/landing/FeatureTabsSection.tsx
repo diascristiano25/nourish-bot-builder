@@ -1,5 +1,4 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
 import * as PhosphorIcons from '@phosphor-icons/react';
 import { featureTabs } from '@/data/landingContent';
 import { useState } from 'react';
@@ -39,17 +38,21 @@ export function FeatureTabsSection(): JSX.Element {
               <div className="grid lg:grid-cols-2 gap-12 items-start">
                 {/* Left: Screenshot */}
                 <div className="order-2 lg:order-1">
-                  {!imageLoaded[tab.id] && (
+                  {!imageLoaded[tab.id] ? (
                     <div className="w-full aspect-[4/3] rounded-lg bg-slate-200 animate-pulse" />
+                  ) : (
+                    <img
+                      src={tab.screenshot}
+                      alt={`Interface de ${tab.label} do NutriFlow`}
+                      className="rounded-lg border border-slate-200 shadow-lg w-full transition-opacity duration-300"
+                      loading="lazy"
+                    />
                   )}
                   <img
                     src={tab.screenshot}
-                    alt={`Interface de ${tab.label} do NutriFlow`}
-                    className={`rounded-lg border border-slate-200 shadow-lg w-full transition-opacity duration-300 ${
-                      imageLoaded[tab.id] ? 'opacity-100' : 'opacity-0 absolute'
-                    }`}
+                    alt=""
+                    className="hidden"
                     onLoad={() => handleImageLoad(tab.id)}
-                    loading="lazy"
                   />
                 </div>
 
