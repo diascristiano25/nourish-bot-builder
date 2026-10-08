@@ -37,7 +37,7 @@ const navItems: NavItemWithTour[] = [
   { label: 'Agenda', icon: Calendar, href: '/agenda', tourId: 'nav-agenda' },
   { label: 'Biblioteca', icon: BookOpen, href: '/biblioteca', tourId: 'nav-biblioteca' },
   { label: 'Financeiro', icon: DollarSign, href: '/financeiro', tourId: 'nav-financeiro' },
-  { label: 'Configurações', icon: Settings, href: '/profile', tourId: 'nav-config' },
+  { label: 'Configurações', icon: Settings, href: '/perfil', tourId: 'nav-config' },
 ];
 
 const WHATSAPP_HELP_URL = "https://wa.me/5547992381906?text=Olá! Preciso de ajuda com o NutriFlow.";
