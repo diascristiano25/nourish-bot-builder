@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { heroContent } from '@/data/landingContent';
 import { useState } from 'react';
 
-export function HeroWithScreenshot() {
+export function HeroWithScreenshot(): JSX.Element {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [errors, setErrors] = useState({ name: '', email: '' });
 
@@ -70,7 +70,7 @@ export function HeroWithScreenshot() {
               <div>
                 <Input
                   type="email"
-                  placeholder="seu.email@exemplo.com"
+                  placeholder="Seu email profissional"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className={errors.email ? 'border-red-500' : ''}
