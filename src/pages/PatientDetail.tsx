@@ -331,7 +331,7 @@ export default function PatientDetail() {
   };
 
   const handleGenerateMealPlan = () => {
-    navigate(`/patients/${id}/meal-plan/generate`);
+    navigate(`/gerar-cardapio/${id}`);
   };
 
   const handleGenerateAccess = async () => {
@@ -579,10 +579,10 @@ export default function PatientDetail() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
+                  <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => navigate(`/patients/${id}/edit`)}
+                    onClick={() => navigate(`/editar-paciente/${id}`)}
                     className="border-border/50 hover:border-primary/50"
                   >
                     <Edit className="w-4 h-4" />
@@ -870,10 +870,10 @@ export default function PatientDetail() {
             ) : (
               <div className="grid gap-4">
                 {mealPlans.map((plan) => (
-                  <GlassCard 
-                    key={plan.id} 
+                  <GlassCard
+                    key={plan.id}
                     className="p-4 cursor-pointer hover:border-primary/50 transition-all"
-                    onClick={() => navigate(`/patients/${id}/meal-plan/${plan.id}`)}
+                    onClick={() => navigate(`/cardapio/${plan.id}`)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">

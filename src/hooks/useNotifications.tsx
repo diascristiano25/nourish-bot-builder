@@ -99,7 +99,7 @@ export function useNotifications(nutritionistId: string | null) {
             `Nova mensagem de ${patientName}`,
             message.content.substring(0, 100) + (message.content.length > 100 ? '...' : ''),
             () => {
-              window.location.href = `/patients/${message.patient_id}?tab=chat`;
+              window.location.href = `/pacientes/${message.patient_id}?tab=chat`;
             }
           );
         }

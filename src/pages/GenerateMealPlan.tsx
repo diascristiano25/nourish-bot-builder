@@ -49,7 +49,7 @@ const activityLabels: Record<string, string> = {
 };
 
 export default function GenerateMealPlan() {
-  const { id } = useParams<{ id: string }>();
+  const { patientId } = useParams<{ patientId: string }>();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -70,17 +70,17 @@ export default function GenerateMealPlan() {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user && id) {
+    if (user && patientId) {
       fetchPatientData();
     }
-  }, [user, id]);
+  }, [user, patientId]);
 
   const fetchPatientData = async () => {
     try {
       const { data: patientData, error: patientError } = await supabase
         .from('patients')
         .select('*')
-        .eq('id', id)
+        .eq('id', patientId)
         .single();
 
       if (patientError) throw patientError;
@@ -90,7 +90,7 @@ export default function GenerateMealPlan() {
       const { data: anthropData } = await supabase
         .from('anthropometrics')
         .select('weight_kg, height_cm')
-        .eq('patient_id', id)
+        .eq('patient_id', patientId)
         .order('measured_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -200,7 +200,7 @@ export default function GenerateMealPlan() {
         description: "O plano alimentar foi criado com sucesso.",
       });
 
-      navigate(`/patients/${id}/meal-plan/${savedPlan.id}`);
+      navigate(`/cardapio/${savedPlan.id}`);
     } catch (error: any) {
       console.error('Error generating meal plan:', error);
       toast({
@@ -236,7 +236,7 @@ export default function GenerateMealPlan() {
         {/* Cyber Header */}
         <header className="sticky top-0 z-30 glass-strong border-b border-border/30">
           <div className="px-4 md:px-8 h-16 flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(`/patients/${id}`)} className="glass hover:bg-primary/10 rounded-xl">
+            <Button variant="ghost" size="icon" onClick={() => navigate(`/pacientes/${patientId}`)} className="glass hover:bg-primary/10 rounded-xl">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-3">

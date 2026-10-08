@@ -166,7 +166,7 @@ export default function NewPatient() {
         description: `${fullName} foi adicionado com sucesso.`,
       });
 
-      navigate(`/patients/${patient.id}`);
+      navigate(`/pacientes/${patient.id}`);
     } catch (error: any) {
       console.error('Error creating patient:', error);
       toast({

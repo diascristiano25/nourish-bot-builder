@@ -307,8 +307,8 @@ export default function Dashboard() {
                   </h3>
                 </div>
                 <div className="px-6 pb-6 space-y-2">
-                  <Button className="w-full justify-start h-12 rounded-xl text-sm font-medium" onClick={() => navigate('/consulta')} data-tour="ai-consultation">
-                    <Sparkles className="w-4 h-4 mr-3" /> Nova Consulta com IA
+                  <Button className="w-full justify-start h-12 rounded-xl text-sm font-medium" onClick={() => navigate('/pacientes')} data-tour="ai-consultation">
+                    <Sparkles className="w-4 h-4 mr-3" /> Selecionar Paciente
                   </Button>
                   <Button variant="outline" className="w-full justify-start h-12 rounded-xl text-sm font-medium" onClick={() => navigate('/novo-paciente')} data-tour="new-patient">
                     <Users className="w-4 h-4 mr-3 text-primary" /> Cadastrar Paciente

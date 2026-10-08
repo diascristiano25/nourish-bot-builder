@@ -59,7 +59,7 @@ interface MealPlanData {
 }
 
 export default function GroceryList() {
-  const { id, planId } = useParams<{ id: string; planId: string }>();
+  const { mealPlanId } = useParams<{ mealPlanId: string }>();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -79,23 +79,23 @@ export default function GroceryList() {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user && planId) {
+    if (user && mealPlanId) {
       fetchDataAndGenerate();
     }
-  }, [user, planId]);
+  }, [user, mealPlanId]);
 
   const fetchDataAndGenerate = async () => {
     try {
       setLoading(true);
-      
+
       const { data: planDataResult, error: planError } = await supabase
         .from('meal_plans')
         .select('plan_data, title, patient_id')
-        .eq('id', planId)
+        .eq('id', mealPlanId)
         .single();
 
       if (planError) throw planError;
-      
+
       setPlanTitle(planDataResult.title);
 
       const { data: patientData, error: patientError } = await supabase
@@ -114,7 +114,7 @@ export default function GroceryList() {
         description: error.message,
         variant: "destructive",
       });
-      navigate(`/patients/${id}/meal-plan/${planId}`);
+      navigate(`/cardapio/${mealPlanId}`);
     } finally {
       setLoading(false);
     }
@@ -149,7 +149,7 @@ export default function GroceryList() {
       const { data: planDataResult, error } = await supabase
         .from('meal_plans')
         .select('plan_data')
-        .eq('id', planId)
+        .eq('id', mealPlanId)
         .single();
 
       if (error) throw error;
@@ -268,7 +268,7 @@ export default function GroceryList() {
         <header className="sticky top-0 z-30 glass-strong border-b border-border/30 print:hidden">
           <div className="px-4 md:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate(`/patients/${id}/meal-plan/${planId}`)} className="glass hover:bg-primary/10 rounded-xl">
+              <Button variant="ghost" size="icon" onClick={() => navigate(`/cardapio/${mealPlanId}`)} className="glass hover:bg-primary/10 rounded-xl">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div className="flex items-center gap-3">
@@ -388,10 +388,10 @@ export default function GroceryList() {
               <Copy className="w-4 h-4" />
               Copiar Texto
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="w-full"
-              onClick={() => navigate(`/patients/${id}/meal-plan/${planId}`)}
+              onClick={() => navigate(`/cardapio/${mealPlanId}`)}
             >
               Voltar ao Cardápio
             </Button>

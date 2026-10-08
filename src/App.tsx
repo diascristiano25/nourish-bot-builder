@@ -86,6 +86,8 @@ function App() {
                   {patientDomain ? (
                     <>
                       <Route path="/" element={<PatientMobileApp />} />
+                      <Route path="/meu-app" element={<PatientMobileApp />} />
+                      <Route path="/patient-auth" element={<PatientAuth />} />
                       <Route path="/portal/:patientId" element={<PatientPortal />} />
                       <Route path="*" element={<PatientMobileApp />} />
                     </>
@@ -94,6 +96,7 @@ function App() {
                       <Route path="/" element={<LandingPage />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/patient-auth" element={<PatientAuth />} />
+                      <Route path="/meu-app" element={<PatientMobileApp />} />
                       <Route
                         path="/dashboard"
                         element={
@@ -113,7 +116,7 @@ function App() {
                       <Route path="/gerar-cardapio/:patientId" element={<AccountStatusGuard><GenerateMealPlan /></AccountStatusGuard>} />
                       <Route path="/cardapio/:mealPlanId" element={<AccountStatusGuard><MealPlanView /></AccountStatusGuard>} />
                       <Route path="/consulta/:patientId" element={<AccountStatusGuard><Consultation /></AccountStatusGuard>} />
-                      <Route path="/lista-compras" element={<AccountStatusGuard><GroceryList /></AccountStatusGuard>} />
+                      <Route path="/lista-compras/:mealPlanId" element={<AccountStatusGuard><GroceryList /></AccountStatusGuard>} />
                       <Route path="/trafego-pago" element={<AccountStatusGuard><PaidTrafficAgent /></AccountStatusGuard>} />
                       <Route path="/admin" element={<AccountStatusGuard><Admin /></AccountStatusGuard>} />
                       <Route path="/subscription-expired" element={<SubscriptionExpired />} />

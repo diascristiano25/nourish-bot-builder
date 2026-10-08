@@ -230,7 +230,7 @@ export default function EditPatient() {
         description: `${fullName} foi atualizado com sucesso.`,
       });
 
-      navigate(`/patients/${id}`);
+      navigate(`/pacientes/${id}`);
     } catch (error: any) {
       console.error('Error updating patient:', error);
       toast({
@@ -259,10 +259,10 @@ export default function EditPatient() {
       {/* Cyber Header */}
       <header className="sticky top-0 z-50 glass border-b border-border/50">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate(`/patients/${id}`)}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(`/pacientes/${id}`)}
             className="hover:bg-primary/10"
           >
             <ArrowLeft className="w-5 h-5" />

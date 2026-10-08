@@ -370,11 +370,11 @@ export default function Consultation() {
           <div className="px-4 md:px-8 py-3 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="hover:bg-primary/10"
-                  onClick={() => navigate(selectedPatientId ? `/patients/${selectedPatientId}` : '/dashboard')}
+                  onClick={() => navigate(selectedPatientId ? `/pacientes/${selectedPatientId}` : '/dashboard')}
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
