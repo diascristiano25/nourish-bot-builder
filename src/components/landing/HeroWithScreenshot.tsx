@@ -27,8 +27,8 @@ export function HeroWithScreenshot(): JSX.Element {
 
     setErrors(newErrors);
     if (!newErrors.name && !newErrors.email) {
-      console.log('Form submitted:', formData);
-      // TODO: actual signup flow
+      // Redirect to auth page with signup mode
+      window.location.href = '/auth?mode=signup&email=' + encodeURIComponent(formData.email) + '&name=' + encodeURIComponent(formData.name);
     }
   };
 

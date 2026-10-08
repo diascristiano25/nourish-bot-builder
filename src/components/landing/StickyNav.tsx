@@ -48,10 +48,17 @@ export function StickyNav(): JSX.Element {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-4">
-              <Button variant="ghost" className="text-slate-700">
+              <Button
+                variant="ghost"
+                className="text-slate-700"
+                onClick={() => window.location.href = '/auth'}
+              >
                 Login
               </Button>
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={() => window.location.href = '/auth'}
+              >
                 Testar Grátis
               </Button>
             </div>
@@ -84,10 +91,17 @@ export function StickyNav(): JSX.Element {
               ))}
             </nav>
             <div className="flex flex-col items-center space-y-4 w-full max-w-xs">
-              <Button variant="outline" className="w-full text-slate-700 border-slate-300">
+              <Button
+                variant="outline"
+                className="w-full text-slate-700 border-slate-300"
+                onClick={() => window.location.href = '/auth'}
+              >
                 Login
               </Button>
-              <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={() => window.location.href = '/auth'}
+              >
                 Testar Grátis
               </Button>
             </div>

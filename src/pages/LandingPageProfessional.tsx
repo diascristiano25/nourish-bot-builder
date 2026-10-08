@@ -40,7 +40,11 @@ function FinalCTA() {
         <p className="text-xl text-slate-600 mb-8">
           Comece seu teste grátis de 14 dias agora. Sem cartão de crédito.
         </p>
-        <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-6 text-lg">
+        <Button
+          size="lg"
+          className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-6 text-lg"
+          onClick={() => window.location.href = '/auth'}
+        >
           Começar Teste Grátis
         </Button>
       </div>

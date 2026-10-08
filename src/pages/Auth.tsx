@@ -33,10 +33,25 @@ export default function Auth() {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
   const [signupFullName, setSignupFullName] = useState('');
-  
+  const [activeTab, setActiveTab] = useState('login');
+
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Read URL parameters for pre-filled email and name
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const email = params.get('email');
+    const name = params.get('name');
+
+    if (mode === 'signup') {
+      setActiveTab('signup');
+      if (email) setSignupEmail(email);
+      if (name) setSignupFullName(name);
+    }
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -153,18 +168,18 @@ export default function Auth() {
         </div>
 
         <GlassCard variant="strong" glow="lime" className="p-0 overflow-hidden">
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             {/* Tabs Header */}
             <div className="p-6 pb-0">
               <TabsList className="grid w-full grid-cols-2 glass rounded-xl p-1 h-12">
-                <TabsTrigger 
-                  value="login" 
+                <TabsTrigger
+                  value="login"
                   className="rounded-lg data-[state=active]:bg-cyber-lime/20 data-[state=active]:text-cyber-lime font-medium"
                 >
                   Entrar
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="signup" 
+                <TabsTrigger
+                  value="signup"
                   className="rounded-lg data-[state=active]:bg-electric-violet/20 data-[state=active]:text-electric-violet font-medium"
                 >
                   Cadastrar

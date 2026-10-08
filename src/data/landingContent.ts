@@ -63,7 +63,7 @@ export const pricingPlans: PricingPlan[] = [
     ],
     highlighted: false,
     ctaText: 'Começar agora',
-    ctaLink: '#signup'
+    ctaLink: '/auth'
   },
   {
     id: 'pro',
@@ -82,7 +82,7 @@ export const pricingPlans: PricingPlan[] = [
     ],
     highlighted: true,
     ctaText: 'Teste grátis por 14 dias',
-    ctaLink: '#signup'
+    ctaLink: '/auth'
   },
   {
     id: 'elite',
@@ -101,7 +101,7 @@ export const pricingPlans: PricingPlan[] = [
     ],
     highlighted: false,
     ctaText: 'Falar com consultor',
-    ctaLink: '#contact'
+    ctaLink: 'mailto:contato@nutriflow.com.br'
   }
 ];
 
