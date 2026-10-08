@@ -11,6 +11,8 @@ import { Loader2 } from "lucide-react";
 
 // Lazy load all pages for zero-latency SPA navigation
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const LandingPageNew = lazy(() => import("./pages/LandingPageNew"));
+const LandingPageProfessional = lazy(() => import("./pages/LandingPageProfessional"));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const PatientAuth = lazy(() => import("./pages/PatientAuth"));
@@ -94,6 +96,8 @@ function App() {
                   ) : (
                     <>
                       <Route path="/" element={<LandingPage />} />
+                      <Route path="/new" element={<LandingPageNew />} />
+                      <Route path="/landing-pro" element={<LandingPageProfessional />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/patient-auth" element={<PatientAuth />} />
                       <Route path="/meu-app" element={<PatientMobileApp />} />
