@@ -15,7 +15,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 
 interface Appointment {
   id: string;
-  date_time: string;
+  scheduled_at: string;
   notes: string | null;
   status: string;
   patient: {
@@ -73,15 +73,15 @@ export default function Agenda() {
         .from('appointments')
         .select(`
           id,
-          date_time,
+          scheduled_at,
           notes,
           status,
           patient:patients(id, full_name)
         `)
         .eq('nutritionist_id', nutritionistId)
-        .gte('date_time', start)
-        .lte('date_time', end)
-        .order('date_time');
+        .gte('scheduled_at', start)
+        .lte('scheduled_at', end)
+        .order('scheduled_at');
 
       if (error) throw error;
       
@@ -123,7 +123,7 @@ export default function Agenda() {
   };
 
   const dayAppointments = appointments.filter(apt => 
-    isSameDay(new Date(apt.date_time), selectedDate)
+    isSameDay(new Date(apt.scheduled_at), selectedDate)
   );
 
   return (
@@ -225,7 +225,7 @@ export default function Agenda() {
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground font-mono">
-                            <span>{format(new Date(appointment.date_time), 'HH:mm')}</span>
+                            <span>{format(new Date(appointment.scheduled_at), 'HH:mm')}</span>
                             {appointment.notes && (() => {
                               try {
                                 const parsed = JSON.parse(appointment.notes);

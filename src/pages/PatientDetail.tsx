@@ -104,7 +104,7 @@ interface MealPlan {
 
 interface Consultation {
   id: string;
-  date_time: string;
+  scheduled_at: string;
   status: string;
   notes: string | null;
 }
@@ -207,7 +207,7 @@ export default function PatientDetail() {
       .select('*', { count: 'exact', head: true })
       .eq('patient_id', id)
       .eq('nutritionist_id', nutritionistId)
-      .eq('sender_type', 'patient')
+      .eq('is_staff_reply', 'patient')
       .eq('is_read', false);
 
     setUnreadMessages(count || 0);
@@ -247,8 +247,8 @@ export default function PatientDetail() {
 
       const { data: mealData, error: mealError } = await supabase
         .from('meal_plans')
-        .select('id, title, description, total_calories, is_active, created_at, plan_data')
-        .eq('patient_id', id)
+        .select('id, title, description, total_calories, created_at, meals')
+        .eq('client_id', id)
         .order('created_at', { ascending: false });
 
       if (mealError) throw mealError;
@@ -259,9 +259,9 @@ export default function PatientDetail() {
 
       const { data: allWeightData } = await supabase
         .from('weight_logs')
-        .select('weight, recorded_at')
+        .select('weight, measured_at')
         .eq('patient_id', id)
-        .order('recorded_at', { ascending: false });
+        .order('measured_at', { ascending: false });
       
       if (allWeightData) {
         setWeightLogs(allWeightData);
@@ -286,10 +286,10 @@ export default function PatientDetail() {
 
       const { data: consultData, error: consultError } = await supabase
         .from('appointments')
-        .select('id, date_time, status, notes')
+        .select('id, scheduled_at, status, notes')
         .eq('patient_id', id)
         .eq('status', 'completed')
-        .order('date_time', { ascending: false });
+        .order('scheduled_at', { ascending: false });
 
       if (consultError) throw consultError;
       setConsultations(consultData || []);
@@ -974,10 +974,10 @@ export default function PatientDetail() {
                       </div>
                       <div className="flex-1">
                         <p className="font-medium text-foreground">
-                          Consulta em {format(new Date(consultation.date_time), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                          Consulta em {format(new Date(consultation.scheduled_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {format(new Date(consultation.date_time), 'HH:mm')}
+                          {format(new Date(consultation.scheduled_at), 'HH:mm')}
                         </p>
                       </div>
                       <Badge variant="secondary" className="bg-success/20 text-success">

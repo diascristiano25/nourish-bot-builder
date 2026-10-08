@@ -25,14 +25,14 @@ interface PatientProgressTabProps {
 interface WeightLog {
   id: string;
   weight: number;
-  recorded_at: string;
+  measured_at: string;
 }
 
 interface WaterLog {
   id: string;
-  quantity_ml: number;
+  amount_ml: number;
   goal_ml: number;
-  date: string;
+  logged_at: string;
 }
 
 export function PatientProgressTab({ patientId }: PatientProgressTabProps) {
@@ -54,9 +54,9 @@ export function PatientProgressTab({ patientId }: PatientProgressTabProps) {
       // Fetch weight logs
       const { data: weights, error: weightsError } = await supabase
         .from('weight_logs')
-        .select('id, weight, recorded_at')
+        .select('id, weight, measured_at')
         .eq('patient_id', patientId)
-        .order('recorded_at', { ascending: false })
+        .order('measured_at', { ascending: false })
         .limit(30);
 
       if (weightsError) throw weightsError;
@@ -69,9 +69,9 @@ export function PatientProgressTab({ patientId }: PatientProgressTabProps) {
       const today = new Date().toISOString().split('T')[0];
       const { data: water, error: waterError } = await supabase
         .from('water_logs')
-        .select('id, quantity_ml, goal_ml, date')
-        .eq('patient_id', patientId)
-        .eq('date', today)
+        .select('id, amount_ml, logged_at')
+        .eq('user_id', patientId)
+        .eq('logged_at', today)
         .maybeSingle();
 
       if (waterError) throw waterError;
@@ -107,9 +107,9 @@ export function PatientProgressTab({ patientId }: PatientProgressTabProps) {
         .upsert({
           patient_id: patientId,
           weight: Number(newWeight),
-          recorded_at: today,
+          measured_at: today,
         }, {
-          onConflict: 'patient_id,recorded_at',
+          onConflict: 'patient_id,measured_at',
         });
 
       if (error) throw error;
@@ -138,26 +138,26 @@ export function PatientProgressTab({ patientId }: PatientProgressTabProps) {
     setAddingWater(true);
     try {
       const today = new Date().toISOString().split('T')[0];
-      const newQuantity = (waterLog?.quantity_ml || 0) + amount;
+      const newQuantity = (waterLog?.amount_ml || 0) + amount;
 
       const { error } = await supabase
         .from('water_logs')
         .upsert({
           patient_id: patientId,
-          quantity_ml: newQuantity,
+          amount_ml: newQuantity,
           goal_ml: waterLog?.goal_ml || 2000,
-          date: today,
+          logged_at: today,
         }, {
-          onConflict: 'patient_id,date',
+          onConflict: 'patient_id,logged_at',
         });
 
       if (error) throw error;
 
       setWaterLog(prev => ({
         id: prev?.id || '',
-        quantity_ml: newQuantity,
+        amount_ml: newQuantity,
         goal_ml: prev?.goal_ml || 2000,
-        date: today,
+        logged_at: today,
       }));
 
       toast({
@@ -188,7 +188,7 @@ export function PatientProgressTab({ patientId }: PatientProgressTabProps) {
     <div className="space-y-4">
       {/* Water Tracker */}
       <WaterTracker
-        currentMl={waterLog?.quantity_ml || 0}
+        currentMl={waterLog?.amount_ml || 0}
         goalMl={waterLog?.goal_ml || 2000}
         onAddWater={handleAddWater}
         loading={addingWater}

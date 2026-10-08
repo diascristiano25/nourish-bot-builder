@@ -26,7 +26,7 @@ interface MealPlan {
 interface WeightLog {
   id: string;
   weight: number;
-  recorded_at: string;
+  measured_at: string;
 }
 
 const goalLabels: Record<string, string> = {

@@ -22,14 +22,14 @@ interface MealPlan {
 }
 
 interface WaterLog {
-  quantity_ml: number;
+  amount_ml: number;
   goal_ml: number;
-  date: string;
+  logged_at: string;
 }
 
 interface WeightLog {
   weight: number;
-  recorded_at: string;
+  measured_at: string;
 }
 
 export function PatientPreviewModal({ open, onOpenChange, patientId, patientName }: PatientPreviewModalProps) {
@@ -65,7 +65,7 @@ export function PatientPreviewModal({ open, onOpenChange, patientId, patientName
         .from('water_logs')
         .select('*')
         .eq('patient_id', patientId)
-        .eq('date', today)
+        .eq('logged_at', today)
         .maybeSingle();
 
       setWaterLog(waterData);
@@ -73,9 +73,9 @@ export function PatientPreviewModal({ open, onOpenChange, patientId, patientName
       // Fetch weight logs
       const { data: weightData } = await supabase
         .from('weight_logs')
-        .select('weight, recorded_at')
+        .select('weight, measured_at')
         .eq('patient_id', patientId)
-        .order('recorded_at', { ascending: false })
+        .order('measured_at', { ascending: false })
         .limit(10);
 
       setWeightLogs(weightData || []);
@@ -86,7 +86,7 @@ export function PatientPreviewModal({ open, onOpenChange, patientId, patientName
     }
   };
 
-  const waterPercentage = waterLog ? Math.min(100, (waterLog.quantity_ml / waterLog.goal_ml) * 100) : 0;
+  const waterPercentage = waterLog ? Math.min(100, (waterLog.amount_ml / waterLog.goal_ml) * 100) : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -216,10 +216,10 @@ export function PatientPreviewModal({ open, onOpenChange, patientId, patientName
 
                 <div className="text-center">
                   <p className="text-lg font-medium">
-                    {waterLog?.quantity_ml || 0} ml / {waterLog?.goal_ml || 2000} ml
+                    {waterLog?.amount_ml || 0} ml / {waterLog?.goal_ml || 2000} ml
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {waterLog ? `Faltam ${Math.max(0, (waterLog.goal_ml - waterLog.quantity_ml))} ml` : 'Sem registro hoje'}
+                    {waterLog ? `Faltam ${Math.max(0, (waterLog.goal_ml - waterLog.amount_ml))} ml` : 'Sem registro hoje'}
                   </p>
                 </div>
               </div>
@@ -234,7 +234,7 @@ export function PatientPreviewModal({ open, onOpenChange, patientId, patientName
                       {weightLogs[0].weight} kg
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Registrado em {format(parseISO(weightLogs[0].recorded_at), "dd/MM/yyyy", { locale: ptBR })}
+                      Registrado em {format(parseISO(weightLogs[0].measured_at), "dd/MM/yyyy", { locale: ptBR })}
                     </p>
                   </div>
 
@@ -247,7 +247,7 @@ export function PatientPreviewModal({ open, onOpenChange, patientId, patientName
                           className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
                         >
                           <span className="text-sm text-muted-foreground">
-                            {format(parseISO(log.recorded_at), "dd/MM/yyyy", { locale: ptBR })}
+                            {format(parseISO(log.measured_at), "dd/MM/yyyy", { locale: ptBR })}
                           </span>
                           <span className="font-medium">{log.weight} kg</span>
                         </div>

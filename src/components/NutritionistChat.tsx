@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 interface Message {
   id: string;
   content: string;
-  sender_type: 'patient' | 'nutritionist';
+  is_staff_reply: 'patient' | 'nutritionist';
   created_at: string;
   is_read: boolean;
 }
@@ -52,7 +52,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
           setMessages((prev) => [...prev, newMsg]);
           
           // Mark as read if from patient
-          if (newMsg.sender_type === 'patient') {
+          if (newMsg.is_staff_reply === 'patient') {
             markAsRead(newMsg.id);
           }
         }
@@ -74,7 +74,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
   // Mark patient messages as read when viewing
   useEffect(() => {
     const unreadMessages = messages.filter(
-      (m) => m.sender_type === 'patient' && !m.is_read
+      (m) => m.is_staff_reply === 'patient' && !m.is_read
     );
     
     unreadMessages.forEach((m) => markAsRead(m.id));
@@ -92,7 +92,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
       if (error) throw error;
       setMessages((data || []).map(m => ({
         ...m,
-        sender_type: m.sender_type as 'patient' | 'nutritionist'
+        is_staff_reply: m.is_staff_reply as 'patient' | 'nutritionist'
       })));
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -118,7 +118,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
         patient_id: patientId,
         nutritionist_id: nutritionistId,
         content: newMessage.trim(),
-        sender_type: 'nutritionist',
+        is_staff_reply: 'nutritionist',
       });
 
       if (error) throw error;
@@ -210,10 +210,10 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
                       key={message.id}
                       className={cn(
                         "flex gap-2",
-                        message.sender_type === 'nutritionist' ? "justify-end" : "justify-start"
+                        message.is_staff_reply === 'nutritionist' ? "justify-end" : "justify-start"
                       )}
                     >
-                      {message.sender_type === 'patient' && (
+                      {message.is_staff_reply === 'patient' && (
                         <Avatar className="h-8 w-8 flex-shrink-0">
                           <AvatarFallback className="bg-secondary/20 text-secondary text-xs">
                             <User className="w-4 h-4" />
@@ -224,7 +224,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
                       <div
                         className={cn(
                           "max-w-[75%] rounded-2xl px-4 py-2.5",
-                          message.sender_type === 'nutritionist'
+                          message.is_staff_reply === 'nutritionist'
                             ? "bg-primary text-primary-foreground rounded-br-md"
                             : "bg-muted text-foreground rounded-bl-md"
                         )}
@@ -234,11 +234,11 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
                         </p>
                         <div className={cn(
                           "flex items-center gap-1 mt-1",
-                          message.sender_type === 'nutritionist' ? "justify-end" : "justify-start"
+                          message.is_staff_reply === 'nutritionist' ? "justify-end" : "justify-start"
                         )}>
                           <span className={cn(
                             "text-[10px]",
-                            message.sender_type === 'nutritionist' 
+                            message.is_staff_reply === 'nutritionist' 
                               ? "text-primary-foreground/70" 
                               : "text-muted-foreground"
                           )}>
@@ -247,7 +247,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
                         </div>
                       </div>
 
-                      {message.sender_type === 'nutritionist' && (
+                      {message.is_staff_reply === 'nutritionist' && (
                         <Avatar className="h-8 w-8 flex-shrink-0">
                           <AvatarFallback className="bg-primary/20 text-primary text-xs">
                             <Stethoscope className="w-4 h-4" />

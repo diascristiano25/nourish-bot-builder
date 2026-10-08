@@ -38,7 +38,7 @@ interface NutritionistProfile {
 
 interface Appointment {
   id: string;
-  date_time: string;
+  scheduled_at: string;
   patient: { id: string; full_name: string };
 }
 
@@ -107,9 +107,9 @@ export default function Dashboard() {
         setPatients(patientsData || []);
 
         const { data: appointmentsData } = await supabase
-          .from('appointments').select(`id, date_time, patient:patients(id, full_name)`)
+          .from('appointments').select(`id, scheduled_at, patient:patients(id, full_name)`)
           .eq('nutritionist_id', nutritionistId).eq('status', 'scheduled')
-          .gte('date_time', new Date().toISOString()).order('date_time').limit(5);
+          .gte('scheduled_at', new Date().toISOString()).order('scheduled_at').limit(5);
         
         const formattedAppointments = (appointmentsData || []).map(item => ({
           ...item, patient: Array.isArray(item.patient) ? item.patient[0] : item.patient
@@ -122,7 +122,7 @@ export default function Dashboard() {
         
         const { count: monthlyCount } = await supabase
           .from('appointments').select('*', { count: 'exact', head: true })
-          .eq('nutritionist_id', nutritionistId).gte('date_time', monthStart).lte('date_time', monthEnd);
+          .eq('nutritionist_id', nutritionistId).gte('scheduled_at', monthStart).lte('scheduled_at', monthEnd);
         setMonthlyAppointments(monthlyCount || 0);
 
         const { data: revenueData } = await supabase
@@ -139,7 +139,7 @@ export default function Dashboard() {
           const mEnd = endOfMonth(targetMonth).toISOString();
           const { count } = await supabase
             .from('appointments').select('*', { count: 'exact', head: true })
-            .eq('nutritionist_id', nutritionistId).gte('date_time', mStart).lte('date_time', mEnd);
+            .eq('nutritionist_id', nutritionistId).gte('scheduled_at', mStart).lte('scheduled_at', mEnd);
           chartMonths.push({ month: monthNames[targetMonth.getMonth()], atendimentos: count || 0 });
         }
         setChartData(chartMonths);
@@ -355,7 +355,7 @@ export default function Dashboard() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-foreground truncate">{apt.patient?.full_name || 'Paciente'}</p>
-                            <p className="text-xs text-muted-foreground">{format(new Date(apt.date_time), "d 'de' MMM, HH:mm", { locale: ptBR })}</p>
+                            <p className="text-xs text-muted-foreground">{format(new Date(apt.scheduled_at), "d 'de' MMM, HH:mm", { locale: ptBR })}</p>
                           </div>
                           <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
                         </div>

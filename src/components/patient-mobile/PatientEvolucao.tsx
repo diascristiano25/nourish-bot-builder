@@ -30,7 +30,7 @@ interface PatientEvolucaoProps {
 interface WeightLog {
   id: string;
   weight: number;
-  recorded_at: string;
+  measured_at: string;
 }
 
 // Dummy before/after photos
@@ -54,9 +54,9 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
     try {
       const { data, error } = await supabase
         .from('weight_logs')
-        .select('id, weight, recorded_at')
+        .select('id, weight, measured_at')
         .eq('patient_id', patientId)
-        .order('recorded_at', { ascending: true })
+        .order('measured_at', { ascending: true })
         .limit(30);
 
       if (error) throw error;
@@ -65,12 +65,12 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
       console.error('Error fetching weight logs:', error);
       // Use dummy data if no real data
       setWeightLogs([
-        { id: '1', weight: 78.5, recorded_at: '2024-01-01' },
-        { id: '2', weight: 77.8, recorded_at: '2024-01-15' },
-        { id: '3', weight: 77.2, recorded_at: '2024-02-01' },
-        { id: '4', weight: 76.5, recorded_at: '2024-02-15' },
-        { id: '5', weight: 76.0, recorded_at: '2024-03-01' },
-        { id: '6', weight: 75.3, recorded_at: '2024-03-15' },
+        { id: '1', weight: 78.5, measured_at: '2024-01-01' },
+        { id: '2', weight: 77.8, measured_at: '2024-01-15' },
+        { id: '3', weight: 77.2, measured_at: '2024-02-01' },
+        { id: '4', weight: 76.5, measured_at: '2024-02-15' },
+        { id: '5', weight: 76.0, measured_at: '2024-03-01' },
+        { id: '6', weight: 75.3, measured_at: '2024-03-15' },
       ]);
     } finally {
       setLoading(false);
@@ -78,7 +78,7 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
   };
 
   const chartData = weightLogs.map(log => ({
-    date: format(new Date(log.recorded_at), 'dd/MM', { locale: ptBR }),
+    date: format(new Date(log.measured_at), 'dd/MM', { locale: ptBR }),
     weight: Number(log.weight),
   }));
 

@@ -48,7 +48,7 @@ export type Database = {
           id: string
           measured_at: string
           notes: string | null
-          patient_id: string
+          user_id: string
           waist_cm: number | null
           weight_kg: number | null
         }
@@ -60,7 +60,7 @@ export type Database = {
           id?: string
           measured_at?: string
           notes?: string | null
-          patient_id: string
+          user_id: string
           waist_cm?: number | null
           weight_kg?: number | null
         }
@@ -93,7 +93,7 @@ export type Database = {
           id: string
           notes: string | null
           nutritionist_id: string
-          patient_id: string
+          user_id: string
           reminder_sent: boolean | null
           scheduled_at: string
           status: string | null
@@ -106,7 +106,7 @@ export type Database = {
           id?: string
           notes?: string | null
           nutritionist_id: string
-          patient_id: string
+          user_id: string
           reminder_sent?: boolean | null
           scheduled_at: string
           status?: string | null
@@ -507,9 +507,9 @@ export type Database = {
           id: string
           is_read: boolean | null
           nutritionist_id: string
-          patient_id: string
+          user_id: string
           read_at: string | null
-          sender_type: string
+          is_staff_reply: string
         }
         Insert: {
           content: string
@@ -517,9 +517,9 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           nutritionist_id: string
-          patient_id: string
+          user_id: string
           read_at?: string | null
-          sender_type: string
+          is_staff_reply: string
         }
         Update: {
           content?: string
@@ -529,7 +529,7 @@ export type Database = {
           nutritionist_id?: string
           patient_id?: string
           read_at?: string | null
-          sender_type?: string
+          is_staff_reply?: string
         }
         Relationships: [
           {

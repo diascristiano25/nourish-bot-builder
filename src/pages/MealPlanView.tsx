@@ -64,7 +64,7 @@ interface MealPlan {
   plan_data: MealPlanData;
   is_active: boolean;
   created_at: string;
-  patient_id: string;
+  user_id: string;
 }
 
 interface Patient {

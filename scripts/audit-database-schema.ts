@@ -3,7 +3,7 @@
  * Database Schema Audit Script
  *
  * Scans all TypeScript files in src/ to find Supabase queries and compares
- * them against the types in src/integrations/supabase/types.ts to identify
+ * them against the types in src/lib/database.types.ts to identify
  * schema mismatches.
  */
 
@@ -69,7 +69,7 @@ function parseSchema(typesPath: string): Map<string, Set<string>> {
   const matches = [...content.matchAll(publicSchemasRegex)];
 
   if (matches.length < 2) {
-    console.error('⚠️ Could not find second public.Tables section in types.ts');
+    console.error('⚠️ Could not find second public.Tables section in database.types.ts');
     return schema;
   }
 
@@ -281,7 +281,7 @@ function auditDatabase(srcDir: string, typesPath: string): DatabaseAuditReport {
           file: relative(process.cwd(), file),
           line: query.line,
           table: query.table,
-          message: `Table "${query.table}" not found in types.ts`
+          message: `Table "${query.table}" not found in database.types.ts`
         });
         continue;
       }
@@ -302,7 +302,7 @@ function auditDatabase(srcDir: string, typesPath: string): DatabaseAuditReport {
             line: query.line,
             table: query.table,
             column: col,
-            message: `Column "${query.table}.${col}" not found in types.ts`
+            message: `Column "${query.table}.${col}" not found in database.types.ts`
           });
         }
       }
@@ -416,7 +416,7 @@ function generateReport(report: DatabaseAuditReport): string {
   } else {
     lines.push('## ✅ No Issues Found');
     lines.push('');
-    lines.push('All tables and columns referenced in the code match the schema in types.ts.');
+    lines.push('All tables and columns referenced in the code match the schema in database.types.ts.');
     lines.push('');
   }
 
@@ -430,7 +430,7 @@ function generateReport(report: DatabaseAuditReport): string {
 
 // Main execution
 const srcDir = join(process.cwd(), 'src');
-const typesPath = join(process.cwd(), 'src', 'integrations', 'supabase', 'types.ts');
+const typesPath = join(process.cwd(), 'src', 'lib', 'database.types.ts');
 
 const report = auditDatabase(srcDir, typesPath);
 const markdown = generateReport(report);

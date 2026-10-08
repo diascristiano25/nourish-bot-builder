@@ -28,14 +28,14 @@ interface PatientMonitoringTabProps {
 interface WeightLog {
   id: string;
   weight: number;
-  recorded_at: string;
+  measured_at: string;
 }
 
 interface WaterLog {
   id: string;
-  quantity_ml: number;
+  amount_ml: number;
   goal_ml: number;
-  date: string;
+  logged_at: string;
 }
 
 interface BodyFatRecord {
@@ -67,7 +67,7 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
       // Fetch all weight logs (ordered by creation time for accuracy)
       const { data: weights, error: weightsError } = await supabase
         .from('weight_logs')
-        .select('id, weight, recorded_at, created_at')
+        .select('id, weight, measured_at, created_at')
         .eq('patient_id', patientId)
         .order('created_at', { ascending: false });
 
@@ -80,9 +80,9 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
       // Fetch recent water logs
       const { data: water, error: waterError } = await supabase
         .from('water_logs')
-        .select('id, quantity_ml, goal_ml, date')
-        .eq('patient_id', patientId)
-        .order('date', { ascending: false })
+        .select('id, amount_ml, logged_at')
+        .eq('user_id', patientId)
+        .order('logged_at', { ascending: false })
         .limit(7);
 
       if (waterError) throw waterError;
@@ -127,9 +127,9 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
         .upsert({
           patient_id: patientId,
           weight: Number(newWeight),
-          recorded_at: newWeightDate,
+          measured_at: newWeightDate,
         }, {
-          onConflict: 'patient_id,recorded_at',
+          onConflict: 'patient_id,measured_at',
         });
 
       if (error) throw error;
@@ -159,7 +159,7 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
     if (periodFilter === 'all') return true;
     const days = periodFilter === '7d' ? 7 : 30;
     const cutoff = subDays(new Date(), days);
-    return new Date(log.recorded_at) >= cutoff;
+    return new Date(log.measured_at) >= cutoff;
   });
 
   // Calculate stats
@@ -168,7 +168,7 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
   const weightChange = latestWeight && oldestInRange ? (latestWeight - oldestInRange).toFixed(1) : null;
   
   const avgWaterIntake = waterLogs.length > 0 
-    ? Math.round(waterLogs.reduce((sum, log) => sum + log.quantity_ml, 0) / waterLogs.length)
+    ? Math.round(waterLogs.reduce((sum, log) => sum + log.amount_ml, 0) / waterLogs.length)
     : 0;
 
   if (loading) {
@@ -277,10 +277,10 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="date">Data</Label>
+                      <Label htmlFor="logged_at">Data</Label>
                       <Input
-                        id="date"
-                        type="date"
+                        id="logged_at"
+                        type="logged_at"
                         value={newWeightDate}
                         onChange={(e) => setNewWeightDate(e.target.value)}
                         className="h-12"
@@ -330,11 +330,11 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
           <CardContent>
             <div className="space-y-2">
               {waterLogs.map((log) => {
-                const percentage = Math.min((log.quantity_ml / log.goal_ml) * 100, 100);
+                const percentage = Math.min((log.amount_ml / log.goal_ml) * 100, 100);
                 return (
                   <div key={log.id} className="flex items-center gap-3">
                     <span className="text-sm text-muted-foreground w-20">
-                      {format(parseISO(log.date), 'dd/MM', { locale: ptBR })}
+                      {format(parseISO(log.logged_at), 'dd/MM', { locale: ptBR })}
                     </span>
                     <div className="flex-1 h-3 bg-muted/50 rounded-full overflow-hidden">
                       <div 
@@ -345,7 +345,7 @@ export function PatientMonitoringTab({ patientId }: PatientMonitoringTabProps) {
                       />
                     </div>
                     <span className="text-sm font-medium w-16 text-right">
-                      {(log.quantity_ml / 1000).toFixed(1)}L
+                      {(log.amount_ml / 1000).toFixed(1)}L
                     </span>
                   </div>
                 );

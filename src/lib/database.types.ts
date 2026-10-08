@@ -48,7 +48,7 @@ export type Database = {
           id: string
           measured_at: string
           notes: string | null
-          patient_id: string
+          user_id: string
           waist_cm: number | null
           weight_kg: number | null
         }
@@ -60,7 +60,7 @@ export type Database = {
           id?: string
           measured_at?: string
           notes?: string | null
-          patient_id: string
+          user_id: string
           waist_cm?: number | null
           weight_kg?: number | null
         }
@@ -93,7 +93,7 @@ export type Database = {
           id: string
           notes: string | null
           nutritionist_id: string
-          patient_id: string
+          user_id: string
           reminder_sent: boolean | null
           scheduled_at: string
           status: string | null
@@ -106,7 +106,7 @@ export type Database = {
           id?: string
           notes?: string | null
           nutritionist_id: string
-          patient_id: string
+          user_id: string
           reminder_sent?: boolean | null
           scheduled_at: string
           status?: string | null
@@ -387,6 +387,65 @@ export type Database = {
           },
         ]
       }
+      financial_records: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          user_id: string | null
+          payment_method: string | null
+          processed_at: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          transaction_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          patient_id?: string | null
+          payment_method?: string | null
+          processed_at?: string | null
+          status: string
+          stripe_payment_intent_id?: string | null
+          transaction_type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          patient_id?: string | null
+          payment_method?: string | null
+          processed_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          transaction_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_records_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       food_database: {
         Row: {
           brand: string | null
@@ -507,9 +566,9 @@ export type Database = {
           id: string
           is_read: boolean | null
           nutritionist_id: string
-          patient_id: string
+          user_id: string
           read_at: string | null
-          sender_type: string
+          is_staff_reply: string
         }
         Insert: {
           content: string
@@ -517,9 +576,9 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           nutritionist_id: string
-          patient_id: string
+          user_id: string
           read_at?: string | null
-          sender_type: string
+          is_staff_reply: string
         }
         Update: {
           content?: string
@@ -529,7 +588,7 @@ export type Database = {
           nutritionist_id?: string
           patient_id?: string
           read_at?: string | null
-          sender_type?: string
+          is_staff_reply?: string
         }
         Relationships: [
           {
@@ -656,6 +715,57 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_events: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string | null
+          customer_id: string | null
+          error: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          payment_intent_id: string | null
+          processed: boolean
+          processed_at: string | null
+          raw_event: Json
+          status: string | null
+          stripe_event_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          customer_id?: string | null
+          error?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          payment_intent_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          raw_event: Json
+          status?: string | null
+          stripe_event_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          customer_id?: string | null
+          error?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          payment_intent_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          raw_event?: Json
+          status?: string | null
+          stripe_event_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: string | null
@@ -712,6 +822,232 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      purchase_events: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json | null
+          user_id: string | null
+          payment_status: string
+          product_id: string | null
+          product_type: string
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          patient_id?: string | null
+          payment_status: string
+          product_id?: string | null
+          product_type: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          patient_id?: string | null
+          payment_status?: string
+          product_id?: string | null
+          product_type?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_ticket_messages: {
+        Row: {
+          attachments: Json | null
+          created_at: string
+          id: string
+          is_staff_reply: boolean
+          description: string
+          ticket_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          is_staff_reply?: boolean
+          description: string
+          ticket_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          is_staff_reply?: boolean
+          message?: string
+          ticket_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: string | null
+          created_at: string
+          description: string
+          id: string
+          user_id: string | null
+          priority: string
+          resolved_at: string | null
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          patient_id?: string | null
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          patient_id?: string | null
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      water_logs: {
+        Row: {
+          amount_ml: number
+          created_at: string
+          id: string
+          logged_at: string
+          notes: string | null
+          user_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_ml: number
+          created_at?: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          user_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_ml?: number
+          created_at?: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "water_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weight_logs: {
+        Row: {
+          created_at: string
+          id: string
+          measured_at: string
+          notes: string | null
+          user_id: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          measured_at?: string
+          notes?: string | null
+          user_id: string
+          updated_at?: string
+          weight: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          measured_at?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weight_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

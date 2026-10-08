@@ -90,7 +90,7 @@ export default function GroceryList() {
 
       const { data: planDataResult, error: planError } = await supabase
         .from('meal_plans')
-        .select('plan_data, title, patient_id')
+        .select('meals, title, client_id')
         .eq('id', mealPlanId)
         .single();
 
@@ -101,13 +101,13 @@ export default function GroceryList() {
       const { data: patientData, error: patientError } = await supabase
         .from('patients')
         .select('full_name')
-        .eq('id', planDataResult.patient_id)
+        .eq('id', planDataResult.client_id)
         .single();
 
       if (patientError) throw patientError;
       setPatientName(patientData.full_name);
 
-      await generateGroceryList(planDataResult.plan_data as unknown as MealPlanData);
+      await generateGroceryList(planDataResult.meals as unknown as MealPlanData);
     } catch (error: any) {
       toast({
         title: "Erro ao carregar dados",
@@ -148,12 +148,12 @@ export default function GroceryList() {
     try {
       const { data: planDataResult, error } = await supabase
         .from('meal_plans')
-        .select('plan_data')
+        .select('meals')
         .eq('id', mealPlanId)
         .single();
 
       if (error) throw error;
-      await generateGroceryList(planDataResult.plan_data as unknown as MealPlanData);
+      await generateGroceryList(planDataResult.meals as unknown as MealPlanData);
     } catch (error: any) {
       toast({
         title: "Erro ao regenerar",

@@ -191,7 +191,7 @@ export default function Consultation() {
           .from('weight_logs')
           .select('id')
           .eq('patient_id', selectedPatientId)
-          .eq('recorded_at', today)
+          .eq('measured_at', today)
           .maybeSingle();
         
         if (existingLog) {
@@ -205,7 +205,7 @@ export default function Consultation() {
             .insert({
               patient_id: selectedPatientId,
               weight: weightValue,
-              recorded_at: today,
+              measured_at: today,
             });
         }
       }
@@ -249,7 +249,7 @@ export default function Consultation() {
         .insert({
           patient_id: selectedPatientId,
           nutritionist_id: nutri.id,
-          date_time: new Date().toISOString(),
+          scheduled_at: new Date().toISOString(),
           status: 'completed',
           notes: consultationNotes
         });

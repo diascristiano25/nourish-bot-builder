@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
 interface Message {
   id: string;
   content: string;
-  sender_type: 'patient' | 'nutritionist';
+  is_staff_reply: 'patient' | 'nutritionist';
   is_read: boolean;
   created_at: string;
 }
@@ -71,7 +71,7 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
           const newMsg = payload.new as Message;
           setMessages(prev => [...prev, newMsg]);
           
-          if (newMsg.sender_type === 'nutritionist' && !isOpen) {
+          if (newMsg.is_staff_reply === 'nutritionist' && !isOpen) {
             setUnreadCount(prev => prev + 1);
           }
           
@@ -104,7 +104,7 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
       if (error) throw error;
       setMessages((data || []).map(msg => ({
         ...msg,
-        sender_type: msg.sender_type as 'patient' | 'nutritionist'
+        is_staff_reply: msg.is_staff_reply as 'patient' | 'nutritionist'
       })));
     } catch (error: any) {
       console.error('Error fetching messages:', error);
@@ -125,7 +125,7 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
         .select('*', { count: 'exact', head: true })
         .eq('patient_id', patientId)
         .eq('nutritionist_id', nutritionistId)
-        .eq('sender_type', 'nutritionist')
+        .eq('is_staff_reply', 'nutritionist')
         .eq('is_read', false);
 
       if (error) throw error;
@@ -142,7 +142,7 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
         .update({ is_read: true })
         .eq('patient_id', patientId)
         .eq('nutritionist_id', nutritionistId)
-        .eq('sender_type', 'nutritionist')
+        .eq('is_staff_reply', 'nutritionist')
         .eq('is_read', false);
 
       setUnreadCount(0);
@@ -161,7 +161,7 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
         .insert({
           patient_id: patientId,
           nutritionist_id: nutritionistId,
-          sender_type: 'patient',
+          is_staff_reply: 'patient',
           content: newMessage.trim(),
         });
 
@@ -242,13 +242,13 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
                   key={msg.id}
                   className={cn(
                     "flex",
-                    msg.sender_type === 'patient' ? 'justify-end' : 'justify-start'
+                    msg.is_staff_reply === 'patient' ? 'justify-end' : 'justify-start'
                   )}
                 >
                   <div
                     className={cn(
                       "max-w-[80%] rounded-2xl px-4 py-2.5",
-                      msg.sender_type === 'patient'
+                      msg.is_staff_reply === 'patient'
                         ? 'bg-primary text-primary-foreground rounded-br-md'
                         : 'bg-muted text-foreground rounded-bl-md'
                     )}
@@ -256,7 +256,7 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                     <p className={cn(
                       "text-[10px] mt-1",
-                      msg.sender_type === 'patient' 
+                      msg.is_staff_reply === 'patient' 
                         ? 'text-primary-foreground/70' 
                         : 'text-muted-foreground'
                     )}>

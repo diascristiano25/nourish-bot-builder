@@ -17,11 +17,11 @@ export async function getUserTrialStatus(userId: string): Promise<TrialStatus> {
   try {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('trial_start_date, trial_ended')
+      .select('trial_ends_at')
       .eq('id', userId)
       .single();
 
-    if (!profile?.trial_start_date) {
+    if (!profile?.trial_ends_at) {
       return {
         isOnTrial: false,
         trialStartDate: null,
@@ -32,18 +32,20 @@ export async function getUserTrialStatus(userId: string): Promise<TrialStatus> {
       };
     }
 
-    const startDate = new Date(profile.trial_start_date);
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + TRIAL_DURATION_DAYS);
-
     const now = new Date();
-    const isOnTrial = !profile.trial_ended && now < endDate;
+    const endDate = new Date(profile.trial_ends_at);
+    const isOnTrial = now < endDate;
+
+    // Calculate start date by subtracting trial duration from end date
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - TRIAL_DURATION_DAYS);
 
     const totalMs = endDate.getTime() - startDate.getTime();
     const usedMs = now.getTime() - startDate.getTime();
 
     const daysUsed = Math.floor(usedMs / (1000 * 60 * 60 * 24));
-    const daysRemaining = Math.max(0, TRIAL_DURATION_DAYS - daysUsed);
+    const remainingMs = endDate.getTime() - now.getTime();
+    const daysRemaining = Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
     const shouldShowAlert = isOnTrial && daysRemaining <= ALERT_DAYS_BEFORE;
 
     return {

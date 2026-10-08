@@ -132,7 +132,7 @@ export function NewAppointmentDialog({
         .insert({
           nutritionist_id: nutritionist.id,
           patient_id: patientId,
-          date_time: dateTime.toISOString(),
+          scheduled_at: dateTime.toISOString(),
           notes: notes || null,
           status: 'scheduled',
         });

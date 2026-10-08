@@ -73,7 +73,7 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
         .from('messages')
         .select('*', { count: 'exact', head: true })
         .eq('nutritionist_id', nutritionistId)
-        .eq('sender_type', 'patient')
+        .eq('is_staff_reply', 'patient')
         .eq('is_read', false);
       setUnreadMessages(count || 0);
     };

@@ -43,19 +43,18 @@ import { restartOnboardingTour } from './OnboardingTour';
 
 interface SupportTicket {
   id: string;
-  ticket_number: number;
   subject: string;
-  message: string;
+  description: string;
   status: string;
   priority: string;
   created_at: string;
-  attachment_url?: string;
+  user_id: string;
 }
 
 interface TicketMessage {
   id: string;
-  sender_type: string;
-  message: string;
+  is_staff_reply: boolean;
+  description: string;
   created_at: string;
 }
 
@@ -124,8 +123,8 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
     try {
       const { data, error } = await supabase
         .from('support_tickets')
-        .select('id, ticket_number, subject, message, status, priority, created_at, attachment_url')
-        .eq('nutritionist_id', nutritionistId)
+        .select('id, subject, description, status, priority, created_at, user_id')
+        .eq('user_id', nutritionistId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -142,7 +141,7 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
     try {
       const { data, error } = await supabase
         .from('support_ticket_messages')
-        .select('id, sender_type, message, created_at')
+        .select('id, is_staff_reply, description, created_at')
         .eq('ticket_id', ticketId)
         .order('created_at', { ascending: true });
 
@@ -211,13 +210,13 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
       const { data: ticketData, error: ticketError } = await supabase
         .from('support_tickets')
         .insert({
-          nutritionist_id: nutritionistId,
+          user_id: nutritionistId,
           subject: subject.trim(),
-          message: message.trim(),
+          description: message.trim(),
           priority,
-          attachment_url: attachmentUrl,
+          category: 'general'
         })
-        .select('id, ticket_number')
+        .select('id')
         .single();
 
       if (ticketError) throw ticketError;
@@ -226,13 +225,14 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
         .from('support_ticket_messages')
         .insert({
           ticket_id: ticketData.id,
-          sender_type: 'nutritionist',
-          message: message.trim(),
+          is_staff_reply: false,
+          description: message.trim(),
+          user_id: nutritionistId,
         });
 
       if (messageError) throw messageError;
 
-      setCreatedTicketNumber(ticketData.ticket_number);
+      setCreatedTicketNumber(null);
       setTicketCreated(true);
       setSubject('');
       setMessage('');
@@ -257,8 +257,8 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
         .from('support_ticket_messages')
         .insert({
           ticket_id: selectedTicket.id,
-          sender_type: 'nutritionist',
-          message: newMessage.trim(),
+          is_staff_reply: 'nutritionist',
+          description: newMessage.trim(),
         });
 
       if (error) throw error;
@@ -275,7 +275,7 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
       setNewMessage('');
       fetchMessages(selectedTicket.id);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error sending description:', error);
       toast.error('Erro ao enviar mensagem');
     } finally {
       setSendingMessage(false);
@@ -348,8 +348,8 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                 <Sparkles className="w-4 h-4 text-cyber-lime animate-pulse" />
               </h2>
               <p className="text-xs text-muted-foreground">
-                {selectedTicket 
-                  ? `Ticket #${selectedTicket.ticket_number} - ${selectedTicket.subject}`
+                {selectedTicket
+                  ? `${selectedTicket.subject}`
                   : 'Central de Suporte Inteligente'
                 }
               </p>
@@ -411,7 +411,7 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                     
                     <div className="space-y-6">
                       {messages.map((msg, index) => {
-                        const isUser = msg.sender_type === 'nutritionist';
+                        const isUser = msg.is_staff_reply === 'nutritionist';
                         return (
                           <div key={msg.id} className="relative flex gap-4 animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
                             {/* Timeline dot */}
@@ -441,7 +441,7 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                                   {format(new Date(msg.created_at), "dd/MM HH:mm", { locale: ptBR })}
                                 </span>
                               </div>
-                              <p className="text-sm text-foreground/90 leading-relaxed">{msg.message}</p>
+                              <p className="text-sm text-foreground/90 leading-relaxed">{msg.description}</p>
                             </div>
                           </div>
                         );
@@ -730,9 +730,6 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                                   <div className="flex items-start justify-between gap-3 mb-2">
                                     <div className="flex items-center gap-2 flex-wrap">
                                       <span className={`w-2 h-2 rounded-full ${priorityCfg.color}`} />
-                                      <span className="text-[10px] font-mono text-muted-foreground">
-                                        #{ticket.ticket_number}
-                                      </span>
                                       <h4 className="text-sm font-medium text-foreground">{ticket.subject}</h4>
                                     </div>
                                     <div className={`shrink-0 text-[10px] font-mono px-2 py-0.5 rounded ${statusCfg.bgColor} ${statusCfg.color}`}>
@@ -740,18 +737,12 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                                     </div>
                                   </div>
                                   <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                                    {ticket.message}
+                                    {ticket.description}
                                   </p>
                                   <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-mono text-muted-foreground">
                                       {format(new Date(ticket.created_at), "dd/MM/yyyy • HH:mm", { locale: ptBR })}
                                     </span>
-                                    {ticket.attachment_url && (
-                                      <div className="flex items-center gap-1 text-cyber-lime text-[10px]">
-                                        <Paperclip className="w-3 h-3" />
-                                        anexo
-                                      </div>
-                                    )}
                                   </div>
                                 </div>
                               </div>

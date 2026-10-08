@@ -205,7 +205,7 @@ export default function EditPatient() {
             .from('weight_logs')
             .select('id')
             .eq('patient_id', id)
-            .eq('recorded_at', today)
+            .eq('measured_at', today)
             .maybeSingle();
           
           if (existingLog) {
@@ -219,7 +219,7 @@ export default function EditPatient() {
               .insert({
                 patient_id: id,
                 weight: weightValue,
-                recorded_at: today,
+                measured_at: today,
               });
           }
         }

@@ -144,13 +144,14 @@ export default function PatientMobileApp() {
       const today = new Date().toISOString().split('T')[0];
       const { data: waterData } = await supabase
         .from('water_logs')
-        .select('quantity_ml, goal_ml')
-        .eq('patient_id', patientData.id)
-        .eq('date', today)
+        .select('amount_ml')
+        .eq('user_id', patientData.id)
+        .eq('logged_at', today)
         .maybeSingle();
 
       if (waterData) {
-        setWaterLog({ currentMl: waterData.quantity_ml, goalMl: waterData.goal_ml });
+        // Default goal: 2000ml (2 litros)
+        setWaterLog({ currentMl: waterData.amount_ml, goalMl: 2000 });
       }
     } catch (error: any) {
       console.error('Error fetching patient data:', error);
@@ -175,22 +176,22 @@ export default function PatientMobileApp() {
         .from('water_logs')
         .select('id')
         .eq('patient_id', patient.id)
-        .eq('date', today)
+        .eq('logged_at', today)
         .maybeSingle();
 
       if (existing) {
         await supabase
           .from('water_logs')
-          .update({ quantity_ml: newAmount })
+          .update({ amount_ml: newAmount })
           .eq('id', existing.id);
       } else {
         await supabase
           .from('water_logs')
           .insert({
-            patient_id: patient.id,
-            quantity_ml: newAmount,
+            user_id: patient.id,
+            amount_ml: newAmount,
             goal_ml: waterLog.goalMl,
-            date: today,
+            logged_at: today,
           });
       }
 

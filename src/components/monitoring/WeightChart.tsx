@@ -8,7 +8,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 interface WeightLog {
   id: string;
   weight: number;
-  recorded_at: string;
+  measured_at: string;
 }
 
 interface WeightChartProps {
@@ -20,10 +20,10 @@ interface WeightChartProps {
 export function WeightChart({ data, showHeader = true, className }: WeightChartProps) {
   const chartData = useMemo(() => {
     return [...data]
-      .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime())
+      .sort((a, b) => new Date(a.measured_at).getTime() - new Date(b.measured_at).getTime())
       .map(log => ({
-        date: format(parseISO(log.recorded_at), 'dd/MM', { locale: ptBR }),
-        fullDate: format(parseISO(log.recorded_at), "d 'de' MMM", { locale: ptBR }),
+        date: format(parseISO(log.measured_at), 'dd/MM', { locale: ptBR }),
+        fullDate: format(parseISO(log.measured_at), "d 'de' MMM", { locale: ptBR }),
         weight: Number(log.weight),
       }));
   }, [data]);

@@ -45,7 +45,7 @@ interface SupportTicket {
   id: string;
   ticket_number: number;
   subject: string;
-  message: string;
+  description: string;
   status: string;
   priority: string;
   created_at: string;
@@ -57,8 +57,8 @@ interface SupportTicket {
 
 interface TicketMessage {
   id: string;
-  sender_type: string;
-  message: string;
+  is_staff_reply: string;
+  description: string;
   created_at: string;
 }
 
@@ -293,7 +293,7 @@ export default function Admin() {
     try {
       const { data, error } = await supabase
         .from('support_ticket_messages')
-        .select('id, sender_type, message, created_at')
+        .select('id, is_staff_reply, description, created_at')
         .eq('ticket_id', ticketId)
         .order('created_at', { ascending: true });
 
@@ -356,8 +356,8 @@ export default function Admin() {
         .from('support_ticket_messages')
         .insert({
           ticket_id: selectedTicket.id,
-          sender_type: 'admin',
-          message: newMessage.trim(),
+          is_staff_reply: 'admin',
+          description: newMessage.trim(),
         });
 
       if (error) throw error;
@@ -373,7 +373,7 @@ export default function Admin() {
       fetchTickets();
       toast.success('Resposta enviada!');
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error sending description:', error);
       toast.error('Erro ao enviar mensagem');
     } finally {
       setSendingMessage(false);
@@ -744,7 +744,7 @@ export default function Admin() {
             <div className="space-y-4">
               <div className="p-4 rounded-lg bg-muted/30">
                 <h4 className="font-medium text-foreground">{selectedTicket.subject}</h4>
-                <p className="text-sm text-muted-foreground mt-1">{selectedTicket.message}</p>
+                <p className="text-sm text-muted-foreground mt-1">{selectedTicket.description}</p>
                 {selectedTicket.attachment_url && (
                   <a 
                     href={selectedTicket.attachment_url} 
@@ -769,12 +769,12 @@ export default function Admin() {
                       <div
                         key={msg.id}
                         className={`p-3 rounded-lg ${
-                          msg.sender_type === 'admin'
+                          msg.is_staff_reply === 'admin'
                             ? 'bg-primary/20 ml-4'
                             : 'bg-muted/50 mr-4'
                         }`}
                       >
-                        <p className="text-sm">{msg.message}</p>
+                        <p className="text-sm">{msg.description}</p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {format(new Date(msg.created_at), 'dd/MM HH:mm')}
                         </p>

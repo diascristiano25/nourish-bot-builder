@@ -84,7 +84,7 @@ export function useNotifications(nutritionistId: string | null) {
           const message = payload.new as any;
           
           // Only notify for patient messages
-          if (message.sender_type !== 'patient') return;
+          if (message.is_staff_reply !== 'patient') return;
 
           // Get patient name
           const { data: patient } = await supabase

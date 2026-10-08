@@ -182,7 +182,7 @@ export default function GenerateMealPlan() {
       const { data: savedPlan, error: saveError } = await supabase
         .from('meal_plans')
         .insert({
-          patient_id: patient.id,
+          user_id: patient.id,
           nutritionist_id: patient.nutritionist_id,
           title: planTitle || `Cardápio - ${patient.full_name}`,
           description: additionalNotes || null,

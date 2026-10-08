@@ -74,7 +74,7 @@ interface PatientData {
 
 interface WeightRecord {
   weight: number;
-  recorded_at: string;
+  measured_at: string;
 }
 
 interface BodyFatRecord {
@@ -503,7 +503,7 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
                       }}
                     >
                       <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
-                        {format(new Date(record.recorded_at), "d/MM/yyyy", { locale: ptBR })}
+                        {format(new Date(record.measured_at), "d/MM/yyyy", { locale: ptBR })}
                       </span>
                       <span style={{ color: 'white', fontSize: '14px', fontFamily: 'monospace', fontWeight: '500', textAlign: 'right' }}>
                         {record.weight} kg

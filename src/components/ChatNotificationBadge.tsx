@@ -43,7 +43,7 @@ export function ChatNotificationBadge({ nutritionistId, className }: ChatNotific
       .from('messages')
       .select('*', { count: 'exact', head: true })
       .eq('nutritionist_id', nutritionistId)
-      .eq('sender_type', 'patient')
+      .eq('is_staff_reply', 'patient')
       .eq('is_read', false);
 
     if (!error && count !== null) {
