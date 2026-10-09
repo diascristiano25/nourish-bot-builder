@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HybridPage } from '@/components/hybrid/HybridPage';
 import { TicketForm } from '@/components/support/TicketForm';
 import { TicketHistory } from '@/components/support/TicketHistory';
@@ -6,10 +6,40 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Contato() {
   const { user } = useAuth();
   const [refreshHistory, setRefreshHistory] = useState(0);
+  const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
+
+  useEffect(() => {
+    const fetchSubscriptionPlan = async () => {
+      if (!user) {
+        setLoadingSubscription(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('nutritionists')
+          .select('subscription_plan')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) throw error;
+        setSubscriptionPlan(data?.subscription_plan || null);
+      } catch (error) {
+        console.error('Error fetching subscription plan:', error);
+        setSubscriptionPlan(null);
+      } finally {
+        setLoadingSubscription(false);
+      }
+    };
+
+    fetchSubscriptionPlan();
+  }, [user]);
 
   const handleTicketSuccess = () => {
     setRefreshHistory((prev) => prev + 1);
@@ -67,6 +97,11 @@ export default function Contato() {
       <section className="py-16">
         <div className="container mx-auto px-4 max-w-2xl">
           <h2 className="text-3xl font-bold mb-6 text-center">Envie sua Mensagem</h2>
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-900">
+              💡 Faça login para enviar um ticket de suporte e acompanhar o histórico de suas solicitações.
+            </p>
+          </div>
           <TicketForm user={null} onSuccess={handleTicketSuccess} />
           {contactCards}
         </div>
@@ -81,10 +116,15 @@ export default function Contato() {
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-3 mb-4">
             <h1 className="text-4xl md:text-5xl font-bold">Suporte</h1>
-            <Badge className="bg-[#C4764A] text-white">Suporte Prioritário</Badge>
+            {!loadingSubscription && subscriptionPlan === 'pro' && (
+              <Badge className="bg-[#C4764A] text-white">Suporte Prioritário</Badge>
+            )}
           </div>
           <p className="text-xl text-white/90 max-w-2xl">
-            Como cliente Pro, seu suporte tem prioridade. Responderemos em até 24 horas.
+            {subscriptionPlan === 'pro'
+              ? 'Como cliente Pro, seu suporte tem prioridade. Responderemos em até 24 horas.'
+              : 'Envie sua dúvida e responderemos o mais breve possível.'
+            }
           </p>
         </div>
       </section>
