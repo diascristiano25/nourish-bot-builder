@@ -134,13 +134,6 @@ serve(async (req) => {
       patientData.medicalConditions = sanitizeText(patientData.medicalConditions);
     }
 
-    const LLM_RELAY_API_KEY = Deno.env.get('LLM_RELAY_API_KEY');
-
-    if (!LLM_RELAY_API_KEY) {
-      console.error('LLM_RELAY_API_KEY is not configured');
-      throw new Error('AI service not configured. Please set LLM_RELAY_API_KEY in Supabase Edge Function secrets.');
-    }
-
     console.log('Generating meal plan for patient:', patientData.name);
 
     // Build the prompt with TACO table reference
@@ -221,7 +214,7 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-3-5-sonnet-20240620',
         max_tokens: 4096,
         system: systemPrompt,
         messages: [
