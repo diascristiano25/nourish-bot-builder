@@ -1,0 +1,88 @@
+{
+  "uptime": 99.94,
+  "services": [
+    {
+      "name": "API",
+      "status": "operational",
+      "latency": "45ms",
+      "description": "API REST para geração de cardápios e gestão de dados"
+    },
+    {
+      "name": "Dashboard",
+      "status": "operational",
+      "latency": "120ms",
+      "description": "Interface principal da aplicação"
+    },
+    {
+      "name": "Banco de Dados",
+      "status": "operational",
+      "latency": "12ms",
+      "description": "Supabase PostgreSQL"
+    },
+    {
+      "name": "Autenticação",
+      "status": "operational",
+      "latency": "89ms",
+      "description": "Sistema de login e autorização"
+    }
+  ],
+  "incidents": [
+    {
+      "date": "2026-10-05",
+      "title": "Lentidão no Dashboard",
+      "status": "resolved",
+      "duration": "23min",
+      "description": "Identificado gargalo em queries complexas. Corrigido via otimização de índices no banco de dados.",
+      "severity": "medium"
+    },
+    {
+      "date": "2026-09-28",
+      "title": "Falha intermitente na geração de PDF",
+      "status": "resolved",
+      "duration": "1h 12min",
+      "description": "Timeout em requisições ao serviço de geração de PDF. Aumentado limite de tempo e implementado retry automático.",
+      "severity": "low"
+    },
+    {
+      "date": "2026-09-15",
+      "title": "Instabilidade na API de IA",
+      "status": "resolved",
+      "duration": "45min",
+      "description": "Sobrecarga no serviço de geração de cardápios com IA. Implementado rate limiting e cache de respostas comuns.",
+      "severity": "high"
+    }
+  ],
+  "uptime_history": [
+    { "date": "2026-10-08", "uptime": 100 },
+    { "date": "2026-10-07", "uptime": 100 },
+    { "date": "2026-10-06", "uptime": 100 },
+    { "date": "2026-10-05", "uptime": 98.4 },
+    { "date": "2026-10-04", "uptime": 100 },
+    { "date": "2026-10-03", "uptime": 100 },
+    { "date": "2026-10-02", "uptime": 100 },
+    { "date": "2026-10-01", "uptime": 100 },
+    { "date": "2026-09-30", "uptime": 100 },
+    { "date": "2026-09-29", "uptime": 100 },
+    { "date": "2026-09-28", "uptime": 99.2 },
+    { "date": "2026-09-27", "uptime": 100 },
+    { "date": "2026-09-26", "uptime": 100 },
+    { "date": "2026-09-25", "uptime": 100 },
+    { "date": "2026-09-24", "uptime": 100 },
+    { "date": "2026-09-23", "uptime": 100 },
+    { "date": "2026-09-22", "uptime": 100 },
+    { "date": "2026-09-21", "uptime": 100 },
+    { "date": "2026-09-20", "uptime": 100 },
+    { "date": "2026-09-19", "uptime": 100 },
+    { "date": "2026-09-18", "uptime": 100 },
+    { "date": "2026-09-17", "uptime": 100 },
+    { "date": "2026-09-16", "uptime": 100 },
+    { "date": "2026-09-15", "uptime": 98.9 },
+    { "date": "2026-09-14", "uptime": 100 },
+    { "date": "2026-09-13", "uptime": 100 },
+    { "date": "2026-09-12", "uptime": 100 },
+    { "date": "2026-09-11", "uptime": 100 },
+    { "date": "2026-09-10", "uptime": 100 },
+    { "date": "2026-09-09", "uptime": 100 }
+  ],
+  "last_updated": "2026-10-08T14:30:00-03:00"
+}

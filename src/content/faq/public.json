@@ -1,0 +1,149 @@
+{
+  "categories": [
+    {
+      "id": "getting-started",
+      "title": "Primeiros Passos",
+      "icon": "Rocket",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "Como criar minha conta?",
+          "answer": "Para criar sua conta no NutriFlow, clique no botão 'Começar Grátis' no topo da página. Preencha seus dados (nome, email, CRN) e confirme seu email. Pronto! Você terá 14 dias de teste grátis com acesso completo a todas as funcionalidades."
+        },
+        {
+          "id": "q2",
+          "question": "Preciso de cartão de crédito para o teste grátis?",
+          "answer": "Não! O período de teste de 14 dias é completamente gratuito e não requer cartão de crédito. Você só precisará cadastrar um método de pagamento se decidir continuar após o período de teste."
+        },
+        {
+          "id": "q3",
+          "question": "Quais são os requisitos técnicos?",
+          "answer": "O NutriFlow funciona 100% online. Você precisa apenas de um navegador atualizado (Chrome, Firefox, Safari ou Edge) e conexão com a internet. Também temos versão otimizada para tablets e smartphones."
+        },
+        {
+          "id": "q4",
+          "question": "Posso importar meus dados de outro sistema?",
+          "answer": "Sim! Durante o cadastro, você pode importar pacientes via planilha Excel/CSV. Também oferecemos suporte para migração de outros sistemas populares. Entre em contato com nossa equipe para assistência personalizada."
+        }
+      ]
+    },
+    {
+      "id": "meal-plans",
+      "title": "Cardápios",
+      "icon": "UtensilsCrossed",
+      "questions": [
+        {
+          "id": "q5",
+          "question": "Como funciona a geração de cardápios com IA?",
+          "answer": "Nossa IA analisa os dados do paciente (objetivo, calorias, macros, restrições) e gera cardápios completos em segundos usando a base TACO. Você pode revisar, ajustar e personalizar antes de enviar ao paciente."
+        },
+        {
+          "id": "q6",
+          "question": "Posso personalizar os cardápios gerados?",
+          "answer": "Sim! Todos os cardápios são 100% editáveis. Você pode substituir alimentos, ajustar porções, adicionar receitas personalizadas e incluir observações específicas para cada refeição."
+        },
+        {
+          "id": "q7",
+          "question": "Quantos alimentos estão disponíveis?",
+          "answer": "Temos a base TACO completa com mais de 3.000 alimentos brasileiros, além de receitas preparadas e opções de alimentos industrializados com informações nutricionais verificadas."
+        },
+        {
+          "id": "q8",
+          "question": "Como exportar os cardápios?",
+          "answer": "Você pode exportar cardápios em PDF profissional com sua logo e identidade visual, ou enviar diretamente por email/WhatsApp para o paciente. Também é possível gerar listas de compras automáticas."
+        },
+        {
+          "id": "q9",
+          "question": "Posso criar templates de cardápios?",
+          "answer": "Sim! Crie templates para objetivos comuns (emagrecimento, hipertrofia, vegetariano) e reutilize com ajustes rápidos. Economize tempo mantendo sua qualidade profissional."
+        }
+      ]
+    },
+    {
+      "id": "patients",
+      "title": "Pacientes",
+      "icon": "Users",
+      "questions": [
+        {
+          "id": "q10",
+          "question": "Quantos pacientes posso cadastrar?",
+          "answer": "No plano Gratuito: até 5 pacientes. No plano Pro: até 50 pacientes. No plano Enterprise: ilimitado. Você pode fazer upgrade a qualquer momento conforme sua prática cresce."
+        },
+        {
+          "id": "q11",
+          "question": "Como funciona o prontuário digital?",
+          "answer": "Cada paciente tem um prontuário completo com histórico de consultas, medidas antropométricas, exames, cardápios prescritos e evolução. Tudo organizado e acessível em um clique."
+        },
+        {
+          "id": "q12",
+          "question": "Posso compartilhar dados com o paciente?",
+          "answer": "Sim! Pacientes podem ter acesso opcional a um app/portal onde visualizam seus cardápios, acompanham evolução e recebem lembretes. Você controla o que cada paciente pode ver."
+        },
+        {
+          "id": "q13",
+          "question": "Como agendar consultas?",
+          "answer": "O sistema de agenda permite criar, editar e cancelar consultas. Você pode enviar lembretes automáticos por WhatsApp/email para reduzir faltas. A agenda sincroniza com Google Calendar."
+        }
+      ]
+    },
+    {
+      "id": "pricing",
+      "title": "Planos e Pagamento",
+      "icon": "CreditCard",
+      "questions": [
+        {
+          "id": "q14",
+          "question": "Quais são os planos disponíveis?",
+          "answer": "Oferecemos 3 planos: Gratuito (até 5 pacientes, funcionalidades básicas), Pro (R$ 97/mês, até 50 pacientes, IA completa), Enterprise (R$ 197/mês, ilimitado, suporte prioritário). Veja a comparação completa na página de preços."
+        },
+        {
+          "id": "q15",
+          "question": "Posso cancelar a qualquer momento?",
+          "answer": "Sim! Não há fidelidade ou multa por cancelamento. Você pode cancelar a qualquer momento e continuará tendo acesso até o fim do período pago."
+        },
+        {
+          "id": "q16",
+          "question": "Quais formas de pagamento são aceitas?",
+          "answer": "Aceitamos cartão de crédito (Visa, Mastercard, Elo, Amex), PIX e boleto bancário. Pagamentos recorrentes são processados automaticamente no cartão."
+        },
+        {
+          "id": "q17",
+          "question": "Existe desconto para pagamento anual?",
+          "answer": "Sim! Pagamento anual à vista tem 20% de desconto. Plano Pro anual: R$ 932 (equivalente a R$ 77,67/mês). Plano Enterprise anual: R$ 1.892 (equivalente a R$ 157,67/mês)."
+        },
+        {
+          "id": "q18",
+          "question": "Posso fazer upgrade/downgrade do plano?",
+          "answer": "Sim! Você pode alterar seu plano a qualquer momento. No upgrade, cobramos a diferença proporcional. No downgrade, o crédito é aplicado na próxima fatura."
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Segurança",
+      "icon": "Shield",
+      "questions": [
+        {
+          "id": "q19",
+          "question": "Meus dados estão seguros?",
+          "answer": "Sim! Usamos criptografia de ponta a ponta, servidores seguros (AWS), backup diário automático e conformidade com LGPD. Seus dados nunca são compartilhados com terceiros."
+        },
+        {
+          "id": "q20",
+          "question": "O sistema é compatível com LGPD?",
+          "answer": "Totalmente! Temos certificação LGPD, termo de consentimento integrado, controle de acesso granular e ferramentas para pacientes exercerem seus direitos (acesso, exclusão, portabilidade)."
+        },
+        {
+          "id": "q21",
+          "question": "Como funciona o backup dos dados?",
+          "answer": "Realizamos backup automático diário de todos os dados. Você também pode exportar seus dados a qualquer momento em formato JSON ou PDF para ter uma cópia local."
+        },
+        {
+          "id": "q22",
+          "question": "Quem tem acesso aos meus pacientes?",
+          "answer": "Somente você! Os dados dos seus pacientes são privados e isolados. Nossa equipe técnica só acessa mediante autorização explícita sua para suporte. Você pode adicionar assistentes com permissões limitadas."
+        }
+      ]
+    }
+  ]
+}

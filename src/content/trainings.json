@@ -1,0 +1,427 @@
+{
+  "courses": [
+    {
+      "id": "nutri-101",
+      "title": "Fundamentos da Nutrição Clínica",
+      "description": "Curso completo para nutricionistas iniciantes. Aprenda desde conceitos básicos até técnicas avançadas de prescrição dietética, avaliação nutricional e conduta clínica.",
+      "instructor": {
+        "name": "Dra. Ana Costa",
+        "bio": "PhD em Nutrição pela USP, 15 anos de experiência em nutrição clínica, professora universitária e consultora de clínicas nutricionais",
+        "image": "/images/instructors/ana-costa.jpg"
+      },
+      "thumbnail": "/images/courses/nutri-101.jpg",
+      "duration": "3h 45min",
+      "level": "Iniciante",
+      "premium": false,
+      "modules": [
+        {
+          "id": "m1",
+          "title": "Introdução à Nutrição Clínica",
+          "videos": [
+            {
+              "id": "v1",
+              "title": "Bem-vindo ao Curso",
+              "duration": "5:23",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": true,
+              "description": "Visão geral do curso, objetivos de aprendizagem e como aproveitar ao máximo o conteúdo"
+            },
+            {
+              "id": "v2",
+              "title": "O que é Nutrição Clínica?",
+              "duration": "12:45",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Definição, áreas de atuação e diferenças entre nutrição clínica e outras especialidades"
+            },
+            {
+              "id": "v3",
+              "title": "Ética e Legislação Profissional",
+              "duration": "18:30",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Código de ética do nutricionista, legislação CRN e responsabilidades profissionais"
+            }
+          ]
+        },
+        {
+          "id": "m2",
+          "title": "Avaliação Nutricional",
+          "videos": [
+            {
+              "id": "v4",
+              "title": "Anamnese Completa",
+              "duration": "22:15",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Como conduzir uma anamnese nutricional eficiente e completa"
+            },
+            {
+              "id": "v5",
+              "title": "Antropometria na Prática",
+              "duration": "28:40",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Técnicas de medição: peso, altura, circunferências e dobras cutâneas"
+            },
+            {
+              "id": "v6",
+              "title": "Bioimpedância: Interpretação de Resultados",
+              "duration": "19:50",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Como interpretar laudos de bioimpedância e usar dados na prescrição"
+            }
+          ]
+        },
+        {
+          "id": "m3",
+          "title": "Prescrição Dietética Básica",
+          "videos": [
+            {
+              "id": "v7",
+              "title": "Cálculo de Necessidades Energéticas",
+              "duration": "25:10",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Equações de predição e ajustes para diferentes objetivos"
+            },
+            {
+              "id": "v8",
+              "title": "Distribuição de Macronutrientes",
+              "duration": "20:35",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Como definir proteínas, carboidratos e lipídeos para cada caso"
+            },
+            {
+              "id": "v9",
+              "title": "Montando Seu Primeiro Cardápio",
+              "duration": "32:20",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Passo a passo prático: do cálculo à entrega do cardápio"
+            }
+          ]
+        },
+        {
+          "id": "m4",
+          "title": "Casos Clínicos Práticos",
+          "videos": [
+            {
+              "id": "v10",
+              "title": "Caso 1: Emagrecimento Saudável",
+              "duration": "18:45",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Paciente feminina, 35 anos, meta: -8kg em 3 meses"
+            },
+            {
+              "id": "v11",
+              "title": "Caso 2: Ganho de Massa Muscular",
+              "duration": "21:15",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Paciente masculino, 28 anos, praticante de musculação"
+            },
+            {
+              "id": "v12",
+              "title": "Encerramento e Certificado",
+              "duration": "8:30",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Revisão dos principais pontos e orientações finais"
+            }
+          ]
+        }
+      ],
+      "certificate": {
+        "enabled": true,
+        "issuer": "NutriFlow Academy",
+        "hours": 3.75
+      }
+    },
+    {
+      "id": "prescricao-avancada",
+      "title": "Prescrição Dietética Avançada",
+      "description": "Domine técnicas avançadas de prescrição: nutrição esportiva, patologias crônicas, suplementação, ajustes finos e estratégias para casos complexos.",
+      "instructor": {
+        "name": "Dr. Carlos Mendes",
+        "bio": "Mestre em Ciências da Nutrição, especialista em nutrição esportiva e clínica funcional, atende atletas de alto rendimento",
+        "image": "/images/instructors/carlos-mendes.jpg"
+      },
+      "thumbnail": "/images/courses/prescricao-avancada.jpg",
+      "duration": "5h 20min",
+      "level": "Avançado",
+      "premium": true,
+      "modules": [
+        {
+          "id": "m1",
+          "title": "Nutrição Esportiva Aplicada",
+          "videos": [
+            {
+              "id": "v1",
+              "title": "Periodização Nutricional",
+              "duration": "28:15",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Como ajustar macros conforme fase do treino (base, intensivo, competição)"
+            },
+            {
+              "id": "v2",
+              "title": "Timing Nutricional: Pré, Intra e Pós-Treino",
+              "duration": "32:40",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Estratégias de nutrição ao redor do treino para maximizar resultados"
+            },
+            {
+              "id": "v3",
+              "title": "Suplementação Baseada em Evidências",
+              "duration": "35:20",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Creatina, whey, cafeína, beta-alanina: o que funciona e o que é marketing"
+            }
+          ]
+        },
+        {
+          "id": "m2",
+          "title": "Patologias Crônicas",
+          "videos": [
+            {
+              "id": "v4",
+              "title": "Diabetes Mellitus Tipo 2",
+              "duration": "30:15",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Controle glicêmico, contagem de carboidratos e estratégias práticas"
+            },
+            {
+              "id": "v5",
+              "title": "Hipertensão e Dislipidemia",
+              "duration": "26:50",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "DASH, redução de sódio, gorduras saudáveis e impacto nos lipídeos"
+            },
+            {
+              "id": "v6",
+              "title": "Síndrome do Intestino Irritável",
+              "duration": "24:30",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Dieta low FODMAP, reintrodução de alimentos e manejo prático"
+            }
+          ]
+        },
+        {
+          "id": "m3",
+          "title": "Estratégias Avançadas",
+          "videos": [
+            {
+              "id": "v7",
+              "title": "Jejum Intermitente: Protocolos e Aplicações",
+              "duration": "29:40",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "16/8, 5:2, ADF: quando usar e para quem indicar"
+            },
+            {
+              "id": "v8",
+              "title": "Dieta Cetogênica Terapêutica",
+              "duration": "33:20",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Indicações, contraindicações, transição e manutenção de cetose"
+            },
+            {
+              "id": "v9",
+              "title": "Ciclagem de Carboidratos",
+              "duration": "25:15",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "High carb days vs low carb days: estratégia para composição corporal"
+            }
+          ]
+        },
+        {
+          "id": "m4",
+          "title": "Casos Complexos",
+          "videos": [
+            {
+              "id": "v10",
+              "title": "Caso: Atleta com Diabetes Tipo 1",
+              "duration": "27:30",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Ajuste de insulina, timing nutricional e prevenção de hipoglicemia"
+            },
+            {
+              "id": "v11",
+              "title": "Caso: Emagrecimento Pós-Bariátrica",
+              "duration": "23:45",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Desafios, deficiências nutricionais e estratégias de aderência"
+            },
+            {
+              "id": "v12",
+              "title": "Caso: Hipertrofia em Vegetariano",
+              "duration": "26:10",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Atingir alta proteína sem alimentos de origem animal"
+            }
+          ]
+        }
+      ],
+      "certificate": {
+        "enabled": true,
+        "issuer": "NutriFlow Academy",
+        "hours": 5.33
+      }
+    },
+    {
+      "id": "gestao-consultorio",
+      "title": "Gestão de Consultório Nutricional",
+      "description": "Transforme seu consultório em um negócio lucrativo e organizado. Aprenda gestão financeira, marketing digital, automação e estratégias de crescimento.",
+      "instructor": {
+        "name": "Dra. Beatriz Almeida",
+        "bio": "Nutricionista, empresária e consultora de negócios. Fundadora de 3 clínicas de sucesso e mentora de centenas de nutricionistas empreendedores",
+        "image": "/images/instructors/beatriz-almeida.jpg"
+      },
+      "thumbnail": "/images/courses/gestao-consultorio.jpg",
+      "duration": "4h 15min",
+      "level": "Intermediário",
+      "premium": true,
+      "modules": [
+        {
+          "id": "m1",
+          "title": "Fundamentos de Gestão",
+          "videos": [
+            {
+              "id": "v1",
+              "title": "Mentalidade Empreendedora",
+              "duration": "18:30",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Diferença entre ser nutricionista e ser empreendedor da nutrição"
+            },
+            {
+              "id": "v2",
+              "title": "Definindo Seu Posicionamento",
+              "duration": "22:15",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Nicho, público-alvo e proposta de valor única"
+            },
+            {
+              "id": "v3",
+              "title": "Precificação Estratégica",
+              "duration": "25:40",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Como definir preços que reflitam seu valor e garantam lucratividade"
+            }
+          ]
+        },
+        {
+          "id": "m2",
+          "title": "Gestão Financeira",
+          "videos": [
+            {
+              "id": "v4",
+              "title": "Controle de Receitas e Despesas",
+              "duration": "28:20",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Fluxo de caixa, DRE simplificado e KPIs financeiros essenciais"
+            },
+            {
+              "id": "v5",
+              "title": "Inadimplência: Como Prevenir e Cobrar",
+              "duration": "19:45",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Estratégias para reduzir faltas e recuperar pagamentos atrasados"
+            },
+            {
+              "id": "v6",
+              "title": "Planejamento Tributário para Nutricionistas",
+              "duration": "24:10",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "MEI, Simples Nacional, Lucro Presumido: qual escolher?"
+            }
+          ]
+        },
+        {
+          "id": "m3",
+          "title": "Marketing Digital",
+          "videos": [
+            {
+              "id": "v7",
+              "title": "Instagram para Nutricionistas",
+              "duration": "32:15",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Estratégia de conteúdo, engajamento e conversão de seguidores em pacientes"
+            },
+            {
+              "id": "v8",
+              "title": "Google Meu Negócio e SEO Local",
+              "duration": "21:30",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Aparecer nas buscas locais e atrair pacientes da sua região"
+            },
+            {
+              "id": "v9",
+              "title": "Funil de Vendas e Conversão",
+              "duration": "26:40",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Da atração ao fechamento: estratégias para aumentar taxa de conversão"
+            }
+          ]
+        },
+        {
+          "id": "m4",
+          "title": "Automação e Escala",
+          "videos": [
+            {
+              "id": "v10",
+              "title": "Automatizando Tarefas Repetitivas",
+              "duration": "23:50",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Agendamento, lembretes, follow-up: ganhe 10+ horas/semana"
+            },
+            {
+              "id": "v11",
+              "title": "Contratando Sua Primeira Assistente",
+              "duration": "20:15",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Quando contratar, o que delegar e como treinar"
+            },
+            {
+              "id": "v12",
+              "title": "Escalando: Atendimento Online e Produtos Digitais",
+              "duration": "27:30",
+              "youtube_id": "dQw4w9WgXcQ",
+              "free_preview": false,
+              "description": "Consultas remotas, e-books, cursos: diversificando renda"
+            }
+          ]
+        }
+      ],
+      "certificate": {
+        "enabled": true,
+        "issuer": "NutriFlow Academy",
+        "hours": 4.25
+      }
+    }
+  ]
+}
