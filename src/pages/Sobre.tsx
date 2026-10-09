@@ -264,11 +264,11 @@ export default function Sobre() {
               <Link to="/sobre" className="text-muted-foreground hover:text-foreground transition-colors">
                 Sobre Nós
               </Link>
-              <Link to="/privacidade" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/suporte/privacidade" className="text-muted-foreground hover:text-foreground transition-colors">
                 Privacidade
               </Link>
-              <a 
-                href="mailto:contato@flowtechgroup.com.br" 
+              <a
+                href="mailto:contato@flowtechgroup.com.br"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Contato

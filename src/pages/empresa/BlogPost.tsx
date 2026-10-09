@@ -229,7 +229,7 @@ function BlogPostAuthContent({ post }: { post: BlogPost }) {
   );
 }
 
-export function BlogPost() {
+export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
 

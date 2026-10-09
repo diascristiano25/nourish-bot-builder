@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { List, X } from '@phosphor-icons/react';
 import { useState } from 'react';
+import logoImg from '@/assets/logo.png';
 
 export function StickyNav(): JSX.Element {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,7 +30,8 @@ export function StickyNav(): JSX.Element {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex items-center gap-2">
+              <img src={logoImg} alt="NutriFlow" className="w-10 h-10 object-contain" />
               <span className="text-xl font-bold text-emerald-600">NutriFlow</span>
             </div>
 

@@ -15,6 +15,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useRef } from 'react';
+import logoImg from '@/assets/logo.png';
 
 export default function LandingPageNew() {
   const heroRef = useRef<HTMLElement>(null);
@@ -113,9 +114,7 @@ export default function LandingPageNew() {
       >
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 py-4 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
+            <img src={logoImg} alt="NutriFlow" className="w-9 h-9 object-contain" />
             <span className="text-xl font-semibold tracking-tight">NutriFlow</span>
           </Link>
 

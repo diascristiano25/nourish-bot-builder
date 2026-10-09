@@ -56,7 +56,7 @@ function BlogAuthContent() {
   );
 }
 
-export function Blog() {
+export default function Blog() {
   return (
     <HybridPage
       title="Blog"

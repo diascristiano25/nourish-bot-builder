@@ -322,11 +322,11 @@ export default function Auth() {
         {/* Footer Links */}
         <div className="text-center mt-6 space-y-2">
           <div className="flex justify-center gap-4 text-xs">
-            <Link to="/termos" className="text-muted-foreground hover:text-primary transition-colors">
+            <Link to="/suporte/termos" className="text-muted-foreground hover:text-primary transition-colors">
               Termos de Uso
             </Link>
             <span className="text-muted-foreground">•</span>
-            <Link to="/privacidade" className="text-muted-foreground hover:text-primary transition-colors">
+            <Link to="/suporte/privacidade" className="text-muted-foreground hover:text-primary transition-colors">
               Privacidade
             </Link>
           </div>

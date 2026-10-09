@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { StickyNav } from '@/components/landing/StickyNav';
 import { HeroWithScreenshot } from '@/components/landing/HeroWithScreenshot';
 import { FeatureTabsSection } from '@/components/landing/FeatureTabsSection';
@@ -60,33 +61,31 @@ function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Recursos</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white">Atendimento</a></li>
-              <li><a href="#" className="hover:text-white">Prescrição</a></li>
-              <li><a href="#" className="hover:text-white">Gestão</a></li>
+              <li><Link to="/recursos/atendimento" className="hover:text-white">Atendimento ao Paciente</Link></li>
+              <li><Link to="/recursos/prescricao" className="hover:text-white">Prescrição Nutricional</Link></li>
+              <li><Link to="/recursos/gestao" className="hover:text-white">Gestão de Consultório</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="text-white font-semibold mb-4">Empresa</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white">Sobre</a></li>
-              <li><a href="#" className="hover:text-white">Blog</a></li>
-              <li><a href="#" className="hover:text-white">Contato</a></li>
+              <li><Link to="/empresa/sobre" className="hover:text-white">Sobre Nós</Link></li>
+              <li><Link to="/empresa/blog" className="hover:text-white">Blog</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="text-white font-semibold mb-4">Suporte</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white">Central de Ajuda</a></li>
-              <li><a href="#" className="hover:text-white">Treinamentos</a></li>
-              <li><a href="#" className="hover:text-white">Status</a></li>
+              <li><Link to="/suporte/contato" className="hover:text-white">Contato</Link></li>
+              <li><Link to="/suporte/ajuda" className="hover:text-white">Central de Ajuda</Link></li>
+              <li><Link to="/suporte/status" className="hover:text-white">Status</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="text-white font-semibold mb-4">Legal</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white">Privacidade</a></li>
-              <li><a href="#" className="hover:text-white">Termos</a></li>
-              <li><a href="#" className="hover:text-white">LGPD</a></li>
+              <li><Link to="/suporte/privacidade" className="hover:text-white">Privacidade</Link></li>
+              <li><Link to="/suporte/termos" className="hover:text-white">Termos</Link></li>
             </ul>
           </div>
         </div>

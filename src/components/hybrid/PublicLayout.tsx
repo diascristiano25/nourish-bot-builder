@@ -50,13 +50,13 @@ export function PublicLayout({ children }: PublicLayoutProps) {
             </div>
 
             <div className="flex gap-8 text-sm text-[#C4764A]">
-              <Link to="/privacy" className="hover:text-[#518C5B] transition">
+              <Link to="/suporte/privacidade" className="hover:text-[#518C5B] transition">
                 Privacidade
               </Link>
-              <Link to="/terms" className="hover:text-[#518C5B] transition">
+              <Link to="/suporte/termos" className="hover:text-[#518C5B] transition">
                 Termos
               </Link>
-              <Link to="/support" className="hover:text-[#518C5B] transition">
+              <Link to="/suporte" className="hover:text-[#518C5B] transition">
                 Suporte
               </Link>
             </div>

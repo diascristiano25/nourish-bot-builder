@@ -213,10 +213,10 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
 
         {!isCollapsed && (
           <div className="pt-3 mt-2 border-t border-border flex flex-wrap gap-x-3 gap-y-1 px-1">
-            <Link to="/termos" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+            <Link to="/suporte/termos" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
               <FileText className="w-3 h-3" /> Termos
             </Link>
-            <Link to="/privacidade" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+            <Link to="/suporte/privacidade" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
               <Shield className="w-3 h-3" /> Privacidade
             </Link>
           </div>

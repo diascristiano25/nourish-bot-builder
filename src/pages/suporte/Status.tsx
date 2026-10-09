@@ -52,22 +52,22 @@ export default function Status() {
           <h2 className="text-2xl font-bold text-slate-900">Serviços</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {data.services.map((service) => (
-              <Card key={service.name} className="p-6">
+              <Card key={service.name} className="p-6 bg-card">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">
+                      <h3 className="font-semibold text-foreground mb-1">
                         {service.name}
                       </h3>
                       {service.description && (
-                        <p className="text-sm text-slate-600">
+                        <p className="text-sm text-muted-foreground">
                           {service.description}
                         </p>
                       )}
                     </div>
                     <StatusIndicator service={service} />
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span className="font-medium">Latência:</span>
                     <span>{service.latency}</span>
                   </div>
@@ -162,22 +162,22 @@ export default function Status() {
           <h2 className="text-2xl font-bold text-slate-900">Serviços</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {data.services.map((service) => (
-              <Card key={service.name} className="p-6">
+              <Card key={service.name} className="p-6 bg-card">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">
+                      <h3 className="font-semibold text-foreground mb-1">
                         {service.name}
                       </h3>
                       {service.description && (
-                        <p className="text-sm text-slate-600">
+                        <p className="text-sm text-muted-foreground">
                           {service.description}
                         </p>
                       )}
                     </div>
                     <StatusIndicator service={service} />
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span className="font-medium">Latência:</span>
                     <span>{service.latency}</span>
                   </div>

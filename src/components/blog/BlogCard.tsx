@@ -16,9 +16,9 @@ export function BlogCard({ post, showPreview = true }: BlogCardProps) {
     : post.excerpt;
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow bg-card">
       {showPreview && (
-        <div className="relative h-48 overflow-hidden">
+        <div className="relative h-48 overflow-hidden bg-muted">
           <img
             src={post.featuredImage}
             alt={post.title}

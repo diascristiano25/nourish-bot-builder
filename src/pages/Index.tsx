@@ -327,7 +327,7 @@ export default function Index() {
             </div>
             <p className="text-sm text-muted-foreground">© 2026 NutriFlow. Todos os direitos reservados.</p>
             <div className="flex items-center gap-6">
-              <a href="/privacidade" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacidade</a>
+              <a href="/suporte/privacidade" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacidade</a>
               <a href="/sobre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Sobre</a>
             </div>
           </div>

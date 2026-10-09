@@ -60,7 +60,7 @@ export default function Prescricao() {
 
             <div className="space-y-6">
               {/* Breakfast */}
-              <div className="border-l-4 border-[#518C5B] pl-4">
+              <div className="pl-4">
                 <h4 className="font-bold text-[#518C5B] mb-2">Café da Manhã (07:00)</h4>
                 <ul className="space-y-1 text-[#C4764A]/80">
                   <li>• 3 ovos mexidos com espinafre</li>
@@ -74,7 +74,7 @@ export default function Prescricao() {
               </div>
 
               {/* Snack */}
-              <div className="border-l-4 border-[#C4764A] pl-4">
+              <div className="pl-4">
                 <h4 className="font-bold text-[#518C5B] mb-2">Lanche da Manhã (10:00)</h4>
                 <ul className="space-y-1 text-[#C4764A]/80">
                   <li>• 1 iogurte grego natural (170g)</li>
@@ -87,7 +87,7 @@ export default function Prescricao() {
               </div>
 
               {/* Lunch */}
-              <div className="border-l-4 border-[#518C5B] pl-4">
+              <div className="pl-4">
                 <h4 className="font-bold text-[#518C5B] mb-2">Almoço (12:30)</h4>
                 <ul className="space-y-1 text-[#C4764A]/80">
                   <li>• 150g de frango grelhado</li>
@@ -121,7 +121,7 @@ export default function Prescricao() {
             Recursos de Prescrição
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="p-6 border-[#518C5B]/20 flex items-start gap-4">
+            <Card className="p-6 bg-card border-[#518C5B]/20 flex items-start gap-4">
               <div className="w-10 h-10 bg-[#518C5B]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Sparkles className="w-5 h-5 text-[#518C5B]" />
               </div>
@@ -133,7 +133,7 @@ export default function Prescricao() {
               </div>
             </Card>
 
-            <Card className="p-6 border-[#518C5B]/20 flex items-start gap-4">
+            <Card className="p-6 bg-card border-[#518C5B]/20 flex items-start gap-4">
               <div className="w-10 h-10 bg-[#C4764A]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Utensils className="w-5 h-5 text-[#C4764A]" />
               </div>
@@ -145,7 +145,7 @@ export default function Prescricao() {
               </div>
             </Card>
 
-            <Card className="p-6 border-[#518C5B]/20 flex items-start gap-4">
+            <Card className="p-6 bg-card border-[#518C5B]/20 flex items-start gap-4">
               <div className="w-10 h-10 bg-[#518C5B]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                 <FileText className="w-5 h-5 text-[#518C5B]" />
               </div>
@@ -157,7 +157,7 @@ export default function Prescricao() {
               </div>
             </Card>
 
-            <Card className="p-6 border-[#518C5B]/20 flex items-start gap-4">
+            <Card className="p-6 bg-card border-[#518C5B]/20 flex items-start gap-4">
               <div className="w-10 h-10 bg-[#C4764A]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Database className="w-5 h-5 text-[#C4764A]" />
               </div>
@@ -169,7 +169,7 @@ export default function Prescricao() {
               </div>
             </Card>
 
-            <Card className="p-6 border-[#518C5B]/20 flex items-start gap-4">
+            <Card className="p-6 bg-card border-[#518C5B]/20 flex items-start gap-4">
               <div className="w-10 h-10 bg-[#518C5B]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Zap className="w-5 h-5 text-[#518C5B]" />
               </div>

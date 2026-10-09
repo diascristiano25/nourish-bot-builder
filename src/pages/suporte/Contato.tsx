@@ -4,7 +4,7 @@ import { TicketForm } from '@/components/support/TicketForm';
 import { TicketHistory } from '@/components/support/TicketHistory';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -46,7 +46,7 @@ export default function Contato() {
   };
 
   const contactCards = (
-    <div className="grid md:grid-cols-3 gap-6 mt-8">
+    <div className="grid md:grid-cols-2 gap-6 mt-8 max-w-2xl mx-auto">
       <Card className="p-6 text-center">
         <div className="flex justify-center mb-4">
           <div className="w-12 h-12 rounded-full bg-[#518C5B]/10 flex items-center justify-center">
@@ -59,24 +59,19 @@ export default function Contato() {
 
       <Card className="p-6 text-center">
         <div className="flex justify-center mb-4">
-          <div className="w-12 h-12 rounded-full bg-[#C4764A]/10 flex items-center justify-center">
-            <Phone className="w-6 h-6 text-[#C4764A]" />
+          <div className="w-12 h-12 rounded-full bg-[#25D366]/10 flex items-center justify-center">
+            <Phone className="w-6 h-6 text-[#25D366]" />
           </div>
         </div>
-        <h3 className="font-semibold mb-2">Telefone</h3>
-        <p className="text-sm text-muted-foreground">(11) 3456-7890</p>
-      </Card>
-
-      <Card className="p-6 text-center">
-        <div className="flex justify-center mb-4">
-          <div className="w-12 h-12 rounded-full bg-[#518C5B]/10 flex items-center justify-center">
-            <MapPin className="w-6 h-6 text-[#518C5B]" />
-          </div>
-        </div>
-        <h3 className="font-semibold mb-2">Endereço</h3>
-        <p className="text-sm text-muted-foreground">
-          Av. Paulista, 1000 - São Paulo, SP
-        </p>
+        <h3 className="font-semibold mb-2">WhatsApp</h3>
+        <a
+          href="https://wa.me/5513978113923"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-[#25D366] hover:underline"
+        >
+          (13) 97811-3923
+        </a>
       </Card>
     </div>
   );

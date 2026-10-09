@@ -37,14 +37,20 @@ const AccessDenied = lazy(() => import("./pages/AccessDenied"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Admin = lazy(() => import("./pages/Admin"));
 const SubscriptionExpired = lazy(() => import("./pages/SubscriptionExpired"));
-const Termos = lazy(() => import("./pages/Termos"));
-const Privacidade = lazy(() => import("./pages/Privacidade"));
 const Sobre = lazy(() => import("./pages/Sobre"));
+const TermosSuporte = lazy(() => import("./pages/suporte/Termos"));
+const PrivacidadeSuporte = lazy(() => import("./pages/suporte/Privacidade"));
 const ConsultationMealPlanEditor = lazy(() => import("./pages/Consultation"));
 const PaidTrafficAgent = lazy(() => import("./pages/PaidTrafficAgent"));
-const Blog = lazy(() => import("./pages/empresa/Blog").then(m => ({ default: m.Blog })));
-const BlogPost = lazy(() => import("./pages/empresa/BlogPost").then(m => ({ default: m.BlogPost })));
-const CentralAjuda = lazy(() => import("./pages/suporte/CentralAjuda").then(m => ({ default: m.CentralAjuda })));
+const Recursos = lazy(() => import("./pages/empresa/Recursos"));
+const Atendimento = lazy(() => import("./pages/recursos/Atendimento"));
+const Prescricao = lazy(() => import("./pages/recursos/Prescricao"));
+const Gestao = lazy(() => import("./pages/recursos/Gestao"));
+const Blog = lazy(() => import("./pages/empresa/Blog"));
+const BlogPost = lazy(() => import("./pages/empresa/BlogPost"));
+const SobreEmpresa = lazy(() => import("./pages/empresa/Sobre"));
+const Contato = lazy(() => import("./pages/suporte/Contato"));
+const CentralAjuda = lazy(() => import("./pages/suporte/CentralAjuda"));
 const Status = lazy(() => import("./pages/suporte/Status"));
 
 function PageLoader() {
@@ -129,11 +135,17 @@ function App() {
                       <Route path="/admin" element={<AccountStatusGuard><Admin /></AccountStatusGuard>} />
                       <Route path="/subscription-expired" element={<SubscriptionExpired />} />
                       <Route path="/portal/:patientId" element={<PublicPatientPortal />} />
-                      <Route path="/termos" element={<Termos />} />
-                      <Route path="/privacidade" element={<Privacidade />} />
+                      <Route path="/suporte/termos" element={<TermosSuporte />} />
+                      <Route path="/suporte/privacidade" element={<PrivacidadeSuporte />} />
                       <Route path="/sobre" element={<Sobre />} />
+                      <Route path="/empresa/recursos" element={<Recursos />} />
+                      <Route path="/recursos/atendimento" element={<Atendimento />} />
+                      <Route path="/recursos/prescricao" element={<Prescricao />} />
+                      <Route path="/recursos/gestao" element={<Gestao />} />
                       <Route path="/empresa/blog" element={<Blog />} />
                       <Route path="/empresa/blog/:slug" element={<BlogPost />} />
+                      <Route path="/empresa/sobre" element={<SobreEmpresa />} />
+                      <Route path="/suporte/contato" element={<Contato />} />
                       <Route path="/suporte/ajuda" element={<CentralAjuda />} />
                       <Route path="/suporte/status" element={<Status />} />
                       <Route path="/acesso-negado" element={<AccessDenied />} />

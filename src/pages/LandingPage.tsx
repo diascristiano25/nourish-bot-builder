@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Check, Zap, Users, TrendingUp, ArrowRight } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 export default function LandingPage() {
   const plans = [
@@ -62,7 +63,7 @@ export default function LandingPage() {
       <header className="border-b border-[#293447] sticky top-0 z-50 bg-[#0F1419]/95 backdrop-blur">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#1CBFA5] to-[#0E9B8A] rounded-lg" />
+            <img src={logoImg} alt="NutriFlow" className="w-8 h-8 object-contain" />
             <span className="font-serif text-2xl font-bold">NutriFlow</span>
           </Link>
           <nav className="hidden md:flex gap-8">

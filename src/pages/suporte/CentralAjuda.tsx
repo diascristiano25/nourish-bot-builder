@@ -93,7 +93,7 @@ function CentralAjudaAuthContent() {
   );
 }
 
-export function CentralAjuda() {
+export default function CentralAjuda() {
   return (
     <HybridPage
       title="Central de Ajuda"
