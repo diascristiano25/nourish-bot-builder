@@ -79,6 +79,15 @@ serve(async (req) => {
     let rawBody;
     try {
       rawBody = await req.json();
+      console.log('Request body keys:', Object.keys(rawBody));
+      console.log('Request body sample:', {
+        name: rawBody.name,
+        hasAge: !!rawBody.age,
+        hasWeight: !!rawBody.weight,
+        hasTargetCalories: !!rawBody.targetCalories,
+        allergiesCount: rawBody.allergies?.length || 0,
+        restrictionsCount: rawBody.dietaryRestrictions?.length || 0
+      });
     } catch {
       return new Response(
         JSON.stringify({ error: 'Invalid JSON in request body' }),
@@ -103,6 +112,21 @@ serve(async (req) => {
     }
 
     const patientData = validationResult.data;
+
+    console.log('Validated patient data:', {
+      name: patientData.name,
+      age: patientData.age,
+      gender: patientData.gender,
+      weight: patientData.weight,
+      height: patientData.height,
+      targetCalories: patientData.targetCalories,
+      goal: patientData.goal,
+      activityLevel: patientData.activityLevel,
+      allergiesCount: patientData.allergies.length,
+      restrictionsCount: patientData.dietaryRestrictions.length,
+      hasMedicalConditions: !!patientData.medicalConditions,
+      hasAdditionalNotes: !!patientData.additionalNotes
+    });
 
     // Sanitize text fields to prevent prompt injection
     patientData.additionalNotes = sanitizeText(patientData.additionalNotes);
@@ -209,20 +233,51 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
+      let errorDetail;
+      try {
+        errorDetail = JSON.parse(errorText);
+      } catch {
+        errorDetail = errorText;
+      }
+
+      console.error('OpenAI API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        errorDetail: errorDetail
+      });
 
       if (response.status === 429) {
+        console.error('Rate limit hit - check OpenAI usage dashboard');
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again in a few moments.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      throw new Error(`AI request failed: ${response.status} - ${errorText}`);
+      if (response.status === 401) {
+        console.error('OpenAI authentication failed - verify API key');
+        return new Response(
+          JSON.stringify({ error: 'AI service authentication failed. Please contact support.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      throw new Error(`OpenAI API failed: ${response.status} - ${JSON.stringify(errorDetail)}`);
     }
 
     const aiResponse = await response.json();
     console.log('AI response received');
+    console.log('OpenAI response structure:', {
+      hasChoices: !!aiResponse.choices,
+      choicesLength: aiResponse.choices?.length,
+      hasMessage: !!aiResponse.choices?.[0]?.message,
+      hasContent: !!aiResponse.choices?.[0]?.message?.content,
+      contentLength: aiResponse.choices?.[0]?.message?.content?.length,
+      finishReason: aiResponse.choices?.[0]?.finish_reason,
+      model: aiResponse.model,
+      usage: aiResponse.usage
+    });
 
     // Extract content from OpenAI response format
     const content = aiResponse.choices?.[0]?.message?.content;
@@ -258,10 +313,19 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
     );
 
   } catch (error) {
-    console.error('Error in generate-meal-plan:', error);
+    const timestamp = new Date().toISOString();
+    console.error('Error in generate-meal-plan:', {
+      timestamp,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      errorType: error?.constructor?.name,
+      errorDetails: error
+    });
+
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Failed to generate meal plan' 
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'Failed to generate meal plan',
+        timestamp
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
