@@ -45,6 +45,7 @@ const PaidTrafficAgent = lazy(() => import("./pages/PaidTrafficAgent"));
 const Blog = lazy(() => import("./pages/empresa/Blog").then(m => ({ default: m.Blog })));
 const BlogPost = lazy(() => import("./pages/empresa/BlogPost").then(m => ({ default: m.BlogPost })));
 const CentralAjuda = lazy(() => import("./pages/suporte/CentralAjuda").then(m => ({ default: m.CentralAjuda })));
+const Status = lazy(() => import("./pages/suporte/Status"));
 
 function PageLoader() {
   return (
@@ -134,6 +135,7 @@ function App() {
                       <Route path="/empresa/blog" element={<Blog />} />
                       <Route path="/empresa/blog/:slug" element={<BlogPost />} />
                       <Route path="/suporte/ajuda" element={<CentralAjuda />} />
+                      <Route path="/suporte/status" element={<Status />} />
                       <Route path="/acesso-negado" element={<AccessDenied />} />
                       <Route path="*" element={<NotFound />} />
                     </>
