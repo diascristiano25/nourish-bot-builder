@@ -44,6 +44,7 @@ const ConsultationMealPlanEditor = lazy(() => import("./pages/Consultation"));
 const PaidTrafficAgent = lazy(() => import("./pages/PaidTrafficAgent"));
 const Blog = lazy(() => import("./pages/empresa/Blog").then(m => ({ default: m.Blog })));
 const BlogPost = lazy(() => import("./pages/empresa/BlogPost").then(m => ({ default: m.BlogPost })));
+const FAQ = lazy(() => import("./pages/empresa/FAQ").then(m => ({ default: m.FAQ })));
 
 function PageLoader() {
   return (
@@ -132,6 +133,7 @@ function App() {
                       <Route path="/sobre" element={<Sobre />} />
                       <Route path="/empresa/blog" element={<Blog />} />
                       <Route path="/empresa/blog/:slug" element={<BlogPost />} />
+                      <Route path="/empresa/faq" element={<FAQ />} />
                       <Route path="/acesso-negado" element={<AccessDenied />} />
                       <Route path="*" element={<NotFound />} />
                     </>
