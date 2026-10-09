@@ -235,11 +235,27 @@ export default function GenerateMealPlan() {
       navigate(`/cardapio/${savedPlan.id}`);
     } catch (error: any) {
       console.error('Error generating meal plan:', error);
-      toast({
-        title: "Erro ao gerar cardápio",
-        description: error.message || "Tente novamente mais tarde.",
-        variant: "destructive",
-      });
+
+      // Check if it's a rate limit error (429)
+      const isRateLimitError = error?.message?.includes('Rate limit') ||
+                               error?.message?.includes('429') ||
+                               error?.status === 429;
+
+      const isFunctionError = error?.context?.status === 429;
+
+      if (isRateLimitError || isFunctionError) {
+        toast({
+          title: "Limite de requisições atingido",
+          description: "A API da OpenAI está temporariamente indisponível. Por favor, aguarde alguns minutos e tente novamente.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro ao gerar cardápio",
+          description: error.message || "Tente novamente mais tarde.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setGenerating(false);
     }
