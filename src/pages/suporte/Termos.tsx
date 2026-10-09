@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FileText, CheckCircle, AlertCircle, CreditCard, Shield, Ban } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 export default function Termos() {
   return (
@@ -9,12 +10,7 @@ export default function Termos() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-2">
-              <img
-                src="/logo.png"
-                alt="NutriFlow"
-                className="w-8 h-8"
-              />
-              <span className="text-xl font-bold text-white">NutriFlow</span>
+              <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
             </Link>
             <div className="flex items-center space-x-4">
               <Link to="/auth" className="text-orange-400 hover:text-orange-300 font-medium">
@@ -323,12 +319,7 @@ export default function Termos() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-2">
-              <img
-                src="/logo.png"
-                alt="NutriFlow"
-                className="w-8 h-8"
-              />
-              <span className="text-white font-bold">NutriFlow</span>
+              <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
             </div>
             <div className="flex items-center space-x-6">
               <Link to="/suporte/privacidade" className="hover:text-white transition-colors">

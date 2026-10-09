@@ -63,7 +63,7 @@ export default function LandingPage() {
       <header className="border-b border-[#293447] sticky top-0 z-50 bg-[#0F1419]/95 backdrop-blur">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logoImg} alt="NutriFlow" className="w-8 h-8 object-contain" />
+            <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
             <span className="font-serif text-2xl font-bold">NutriFlow</span>
           </Link>
           <nav className="hidden md:flex gap-8">

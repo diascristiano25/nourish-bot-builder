@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   ArrowRight, Loader2, Check, Brain, Shield, Clock, Users, Star, Crown, Rocket, Sun, Moon, Leaf, Heart, Apple
 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
@@ -64,7 +64,7 @@ export default function Index() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoImg} alt="NutriFlow" className="w-10 h-10 object-contain" />
+            <img src={logoImg} alt="NutriFlow" className="h-10 w-auto" />
             <span className="font-serif font-semibold text-xl text-foreground tracking-tight">
               Nutri<span className="text-primary">Flow</span>
             </span>
@@ -322,7 +322,7 @@ export default function Index() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <img src={logoImg} alt="NutriFlow" className="w-8 h-8 object-contain" />
+              <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
               <span className="font-serif font-semibold text-foreground">NutriFlow</span>
             </div>
             <p className="text-sm text-muted-foreground">© 2026 NutriFlow. Todos os direitos reservados.</p>

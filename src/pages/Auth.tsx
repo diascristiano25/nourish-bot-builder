@@ -8,9 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Terminal, Sparkles } from 'lucide-react';
 import { z } from 'zod';
-import logoImg from '@/assets/logo.png';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { ParticleField } from '@/components/ui/ParticleField';
+import logoImg from '@/assets/logo.png';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -155,7 +155,7 @@ export default function Auth() {
         <div className="text-center mb-8">
           <div className="relative inline-block">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyber-lime/20 to-electric-violet/20 flex items-center justify-center mx-auto mb-4 border border-border backdrop-blur-sm">
-              <img src={logoImg} alt="NutriFlow" className="w-12 h-12 object-contain" />
+              <img src={logoImg} alt="NutriFlow" className="h-12 w-auto" />
             </div>
             <div className="absolute -inset-2 bg-gradient-to-r from-cyber-lime/20 to-electric-violet/20 rounded-3xl blur-xl -z-10" />
           </div>

@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import logoImg from '@/assets/logo.png';
 import {
   Clock,
   Brain,
@@ -15,7 +16,6 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useRef } from 'react';
-import logoImg from '@/assets/logo.png';
 
 export default function LandingPageNew() {
   const heroRef = useRef<HTMLElement>(null);
@@ -114,7 +114,7 @@ export default function LandingPageNew() {
       >
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 py-4 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
-            <img src={logoImg} alt="NutriFlow" className="w-9 h-9 object-contain" />
+            <img src={logoImg} alt="NutriFlow" className="h-9 w-auto" />
             <span className="text-xl font-semibold tracking-tight">NutriFlow</span>
           </Link>
 
