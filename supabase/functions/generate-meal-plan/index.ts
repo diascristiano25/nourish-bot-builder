@@ -204,32 +204,36 @@ ${patientData.additionalNotes ? `INSTRUÇÕES ADICIONAIS: ${patientData.addition
 
 Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS o JSON, sem texto adicional.`;
 
-    // Try OpenAI (most reliable)
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    // Use Anthropic Claude API
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
 
-    if (!OPENAI_API_KEY) {
-      throw new Error('OpenAI API key not configured');
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error('Anthropic API key not configured');
     }
 
-    console.log('Calling OpenAI API...');
+    console.log('Calling Anthropic Claude API...');
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 4096,
+        system: systemPrompt,
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        response_format: { type: "json_object" }
+          {
+            role: 'user',
+            content: userPrompt
+          }
+        ]
       }),
     });
 
-    console.log('OpenAI response status:', response.status);
+    console.log('Anthropic response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -240,7 +244,7 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
         errorDetail = errorText;
       }
 
-      console.error('OpenAI API error:', {
+      console.error('Anthropic API error:', {
         status: response.status,
         statusText: response.statusText,
         headers: Object.fromEntries(response.headers.entries()),
@@ -248,7 +252,7 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
       });
 
       if (response.status === 429) {
-        console.error('Rate limit hit - check OpenAI usage dashboard');
+        console.error('Rate limit hit - check Anthropic usage dashboard');
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again in a few moments.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -256,35 +260,35 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
       }
 
       if (response.status === 401) {
-        console.error('OpenAI authentication failed - verify API key');
+        console.error('Anthropic authentication failed - verify API key');
         return new Response(
           JSON.stringify({ error: 'AI service authentication failed. Please contact support.' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      throw new Error(`OpenAI API failed: ${response.status} - ${JSON.stringify(errorDetail)}`);
+      throw new Error(`Anthropic API failed: ${response.status} - ${JSON.stringify(errorDetail)}`);
     }
 
     const aiResponse = await response.json();
     console.log('AI response received');
-    console.log('OpenAI response structure:', {
-      hasChoices: !!aiResponse.choices,
-      choicesLength: aiResponse.choices?.length,
-      hasMessage: !!aiResponse.choices?.[0]?.message,
-      hasContent: !!aiResponse.choices?.[0]?.message?.content,
-      contentLength: aiResponse.choices?.[0]?.message?.content?.length,
-      finishReason: aiResponse.choices?.[0]?.finish_reason,
+    console.log('Anthropic response structure:', {
+      hasContent: !!aiResponse.content,
+      contentLength: aiResponse.content?.length,
+      contentType: aiResponse.content?.[0]?.type,
+      hasText: !!aiResponse.content?.[0]?.text,
+      textLength: aiResponse.content?.[0]?.text?.length,
+      stopReason: aiResponse.stop_reason,
       model: aiResponse.model,
       usage: aiResponse.usage
     });
 
-    // Extract content from OpenAI response format
-    const content = aiResponse.choices?.[0]?.message?.content;
+    // Extract content from Anthropic response format
+    const content = aiResponse.content?.[0]?.text;
 
     if (!content) {
-      console.error('Unexpected OpenAI response:', JSON.stringify(aiResponse));
-      throw new Error('No content in OpenAI response');
+      console.error('Unexpected Anthropic response:', JSON.stringify(aiResponse));
+      throw new Error('No content in Anthropic response');
     }
 
     // Parse the JSON from the response
