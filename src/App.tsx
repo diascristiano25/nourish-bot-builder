@@ -42,6 +42,8 @@ const Privacidade = lazy(() => import("./pages/Privacidade"));
 const Sobre = lazy(() => import("./pages/Sobre"));
 const ConsultationMealPlanEditor = lazy(() => import("./pages/Consultation"));
 const PaidTrafficAgent = lazy(() => import("./pages/PaidTrafficAgent"));
+const Blog = lazy(() => import("./pages/empresa/Blog").then(m => ({ default: m.Blog })));
+const BlogPost = lazy(() => import("./pages/empresa/BlogPost").then(m => ({ default: m.BlogPost })));
 
 function PageLoader() {
   return (
@@ -128,6 +130,8 @@ function App() {
                       <Route path="/termos" element={<Termos />} />
                       <Route path="/privacidade" element={<Privacidade />} />
                       <Route path="/sobre" element={<Sobre />} />
+                      <Route path="/empresa/blog" element={<Blog />} />
+                      <Route path="/empresa/blog/:slug" element={<BlogPost />} />
                       <Route path="/acesso-negado" element={<AccessDenied />} />
                       <Route path="*" element={<NotFound />} />
                     </>
