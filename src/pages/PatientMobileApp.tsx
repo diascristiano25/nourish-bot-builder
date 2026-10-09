@@ -145,7 +145,7 @@ export default function PatientMobileApp() {
       const { data: waterData } = await supabase
         .from('water_logs')
         .select('amount_ml')
-        .eq('user_id', patientData.id)
+        .eq('patient_id', patientData.id)
         .eq('logged_at', today)
         .maybeSingle();
 
@@ -188,9 +188,8 @@ export default function PatientMobileApp() {
         await supabase
           .from('water_logs')
           .insert({
-            user_id: patient.id,
+            patient_id: patient.id,
             amount_ml: newAmount,
-            goal_ml: waterLog.goalMl,
             logged_at: today,
           });
       }

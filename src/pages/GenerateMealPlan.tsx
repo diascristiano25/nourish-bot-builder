@@ -174,7 +174,7 @@ export default function GenerateMealPlan() {
       };
 
       const { data, error } = await supabase.functions.invoke('generate-meal-plan', {
-        body: { patientData }
+        body: patientData
       });
 
       if (error) throw error;
