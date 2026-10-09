@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { FAQ } from '../FAQ';
+import { CentralAjuda } from '../CentralAjuda';
 
 // Mock the auth hook
 vi.mock('@/hooks/useAuth', () => ({
@@ -23,8 +23,8 @@ vi.mock('@/content/faq/public.json', () => ({
         questions: [
           {
             id: 'q1',
-            question: 'Como criar minha conta?',
-            answer: 'Para criar sua conta...',
+            q: 'Como criar minha conta?',
+            a: 'Para criar sua conta...',
           },
         ],
       },
@@ -42,8 +42,8 @@ vi.mock('@/content/faq/auth.json', () => ({
         questions: [
           {
             id: 'q1',
-            question: 'Como criar minha conta?',
-            answer: 'Para criar sua conta...',
+            q: 'Como criar minha conta?',
+            a: 'Para criar sua conta...',
           },
         ],
       },
@@ -51,38 +51,44 @@ vi.mock('@/content/faq/auth.json', () => ({
   },
 }));
 
-describe('FAQ', () => {
+describe('CentralAjuda', () => {
   it('renders page title', () => {
-    render(<FAQ />);
-    expect(screen.getByText('Perguntas Frequentes')).toBeInTheDocument();
+    render(<CentralAjuda />);
+    expect(screen.getByText('Central de Ajuda')).toBeInTheDocument();
   });
 
-  it('renders page description', () => {
-    render(<FAQ />);
+  it('renders page description for public users', () => {
+    render(<CentralAjuda />);
     expect(
       screen.getByText('Encontre respostas para as dúvidas mais comuns sobre o NutriFlow')
     ).toBeInTheDocument();
   });
 
   it('renders FAQ categories', () => {
-    render(<FAQ />);
+    render(<CentralAjuda />);
     expect(screen.getByText('Primeiros Passos')).toBeInTheDocument();
   });
 
-  it('renders contact CTA', () => {
-    render(<FAQ />);
-    expect(screen.getByText('Não encontrou o que procurava?')).toBeInTheDocument();
-    expect(screen.getByText('Falar com Suporte')).toBeInTheDocument();
+  it('renders search bar', () => {
+    render(<CentralAjuda />);
+    expect(screen.getByPlaceholderText('Buscar pergunta...')).toBeInTheDocument();
   });
 
-  it('contact CTA links to correct page', () => {
-    render(<FAQ />);
-    const link = screen.getByText('Falar com Suporte').closest('a');
-    expect(link).toHaveAttribute('href', '/empresa/contato');
+  it('renders public CTA with correct text', () => {
+    render(<CentralAjuda />);
+    expect(screen.getByText('Precisa de mais ajuda?')).toBeInTheDocument();
+    const ctaButton = screen.getByRole('link', { name: 'Cadastre-se' });
+    expect(ctaButton).toBeInTheDocument();
+  });
+
+  it('CTA button links to auth page', () => {
+    render(<CentralAjuda />);
+    const link = screen.getByRole('link', { name: 'Cadastre-se' });
+    expect(link).toHaveAttribute('href', '/auth');
   });
 
   it('renders questions from data', () => {
-    render(<FAQ />);
+    render(<CentralAjuda />);
     expect(screen.getByText('Como criar minha conta?')).toBeInTheDocument();
   });
 });

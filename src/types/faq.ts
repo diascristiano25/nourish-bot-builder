@@ -1,7 +1,7 @@
 export interface FAQQuestion {
-  id: string;
-  question: string;
-  answer: string;
+  id?: string;
+  q: string;
+  a: string;
 }
 
 export interface FAQCategory {
@@ -9,8 +9,4 @@ export interface FAQCategory {
   title: string;
   icon: string;
   questions: FAQQuestion[];
-}
-
-export interface FAQData {
-  categories: FAQCategory[];
 }
