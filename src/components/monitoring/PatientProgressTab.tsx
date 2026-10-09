@@ -70,7 +70,7 @@ export function PatientProgressTab({ patientId }: PatientProgressTabProps) {
       const { data: water, error: waterError } = await supabase
         .from('water_logs')
         .select('id, amount_ml, logged_at')
-        .eq('user_id', patientId)
+        .eq('patient_id', patientId)
         .eq('logged_at', today)
         .maybeSingle();
 
