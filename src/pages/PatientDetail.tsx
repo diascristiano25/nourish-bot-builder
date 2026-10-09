@@ -518,9 +518,30 @@ export default function PatientDetail() {
   const latestHeight = anthropometrics.find(a => a.height_cm !== null)?.height_cm || null;
   const displayWeight = latestWeight ?? latestAnthropometric?.weight_kg ?? null;
   
-  const age = patient?.birth_date 
-    ? differenceInYears(new Date(), new Date(patient.birth_date))
-    : null;
+  const calculateAge = (birthDate: string | null): number | null => {
+    if (!birthDate) return null;
+
+    const birth = new Date(birthDate);
+    const today = new Date();
+
+    // Check if birth_date is in the future
+    if (birth > today) {
+      console.warn('Birth date is in the future:', birthDate);
+      return null;
+    }
+
+    const age = differenceInYears(today, birth);
+
+    // Validate age range
+    if (age < 0 || age > 150) {
+      console.warn('Invalid age calculated:', age, 'from birth_date:', birthDate);
+      return null;
+    }
+
+    return age;
+  };
+
+  const age = calculateAge(patient?.birth_date ?? null);
 
   const calculateBMI = () => {
     if (displayWeight && latestHeight) {

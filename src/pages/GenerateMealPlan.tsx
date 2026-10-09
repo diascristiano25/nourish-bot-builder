@@ -112,8 +112,23 @@ export default function GenerateMealPlan() {
     if (!anthropometric?.weight_kg || !anthropometric?.height_cm || !patient?.birth_date) {
       return null;
     }
-    const age = differenceInYears(new Date(), new Date(patient.birth_date));
-    if (!Number.isFinite(age) || age < 0 || age > 150) return null;
+
+    const birth = new Date(patient.birth_date);
+    const today = new Date();
+
+    // Validate birth_date is not in the future
+    if (birth > today) {
+      console.warn('Birth date is in the future:', patient.birth_date);
+      return null;
+    }
+
+    const age = differenceInYears(today, birth);
+
+    // Validate age range
+    if (!Number.isFinite(age) || age < 0 || age > 150) {
+      console.warn('Invalid age for BMR calculation:', age);
+      return null;
+    }
 
     const weight = anthropometric.weight_kg;
     const height = anthropometric.height_cm;
@@ -147,7 +162,24 @@ export default function GenerateMealPlan() {
     setGenerating(true);
 
     try {
-      const age = patient.birth_date ? differenceInYears(new Date(), new Date(patient.birth_date)) : null;
+      let age: number | null = null;
+      if (patient.birth_date) {
+        const birth = new Date(patient.birth_date);
+        const today = new Date();
+
+        // Validate birth_date is not in the future
+        if (birth <= today) {
+          const calculatedAge = differenceInYears(today, birth);
+          // Validate age range
+          if (calculatedAge >= 0 && calculatedAge <= 150) {
+            age = calculatedAge;
+          } else {
+            console.warn('Invalid age calculated:', calculatedAge);
+          }
+        } else {
+          console.warn('Birth date is in the future:', patient.birth_date);
+        }
+      }
       let calculatedCalories: number | null = null;
       if (targetCalories && targetCalories.trim() !== '') {
         const parsed = parseInt(targetCalories, 10);
@@ -225,7 +257,25 @@ export default function GenerateMealPlan() {
 
   if (!patient) return null;
 
-  const age = patient.birth_date ? differenceInYears(new Date(), new Date(patient.birth_date)) : null;
+  let age: number | null = null;
+  if (patient.birth_date) {
+    const birth = new Date(patient.birth_date);
+    const today = new Date();
+
+    // Validate birth_date is not in the future
+    if (birth <= today) {
+      const calculatedAge = differenceInYears(today, birth);
+      // Validate age range
+      if (calculatedAge >= 0 && calculatedAge <= 150) {
+        age = calculatedAge;
+      } else {
+        console.warn('Invalid age calculated for display:', calculatedAge);
+      }
+    } else {
+      console.warn('Birth date is in the future for display:', patient.birth_date);
+    }
+  }
+
   const bmr = calculateBMR();
   const tdee = calculateTDEE();
   const hasBasicData = anthropometric?.weight_kg && anthropometric?.height_cm;
