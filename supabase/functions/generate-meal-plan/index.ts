@@ -214,7 +214,7 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20240620',
+        model: 'claude-haiku-5-5',
         max_tokens: 4096,
         system: systemPrompt,
         messages: [
@@ -240,7 +240,6 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
       console.error('Anthropic API error:', {
         status: response.status,
         statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
         errorDetail: errorDetail
       });
 
@@ -265,19 +264,9 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
 
     const aiResponse = await response.json();
     console.log('AI response received');
-    console.log('Anthropic response structure:', {
-      hasContent: !!aiResponse.content,
-      contentLength: aiResponse.content?.length,
-      contentType: aiResponse.content?.[0]?.type,
-      hasText: !!aiResponse.content?.[0]?.text,
-      textLength: aiResponse.content?.[0]?.text?.length,
-      stopReason: aiResponse.stop_reason,
-      model: aiResponse.model,
-      usage: aiResponse.usage
-    });
 
     // Extract content from Anthropic response format
-    const content = aiResponse.content?.[0]?.text;
+    const content = aiResponse.content?.find((c: any) => c.type === 'text')?.text;
 
     if (!content) {
       console.error('Unexpected Anthropic response:', JSON.stringify(aiResponse));
