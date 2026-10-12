@@ -57,7 +57,7 @@ const MEAL_COLORS = {
   breakfast: 'from-amber-500 to-orange-600',
   lunch: 'from-emerald-500 to-teal-600',
   dinner: 'from-blue-500 to-indigo-600',
-  snack: 'from-purple-500 to-pink-600'
+  snack: 'from-[#C4764A] to-[#a8573a]' // Terracotta (brand secondary color)
 };
 
 export function MealPlanBuilder() {
