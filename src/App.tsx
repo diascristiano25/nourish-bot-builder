@@ -59,6 +59,9 @@ const SobreEmpresa = lazy(() => import("./pages/empresa/Sobre"));
 const Contato = lazy(() => import("./pages/suporte/Contato"));
 const CentralAjuda = lazy(() => import("./pages/suporte/CentralAjuda"));
 const Status = lazy(() => import("./pages/suporte/Status"));
+const PatientProgress = lazy(() => import("./pages/PatientProgress"));
+const PatientProfile = lazy(() => import("./pages/PatientProfile"));
+const Suporte = lazy(() => import("./pages/Suporte"));
 
 function PageLoader() {
   return (
@@ -183,6 +186,9 @@ function App() {
                       <Route path="/suporte/contato" element={<Contato />} />
                       <Route path="/suporte/ajuda" element={<CentralAjuda />} />
                       <Route path="/suporte/status" element={<Status />} />
+                      <Route path="/patient-progress" element={<AccountStatusGuard><PatientProgress /></AccountStatusGuard>} />
+                      <Route path="/patient-profile" element={<AccountStatusGuard><PatientProfile /></AccountStatusGuard>} />
+                      <Route path="/support" element={<AccountStatusGuard><Suporte /></AccountStatusGuard>} />
                       <Route path="/acesso-negado" element={<AccessDenied />} />
                       <Route path="*" element={<NotFound />} />
                     </>
