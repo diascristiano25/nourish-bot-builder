@@ -1,6 +1,6 @@
 /**
- * RevenueChart - Revenue data visualization with Recharts AreaChart
- * Shows 12 months of revenue data with smooth curve and animations
+ * RevenueChart - Financial revenue visualization with Recharts AreaChart
+ * Shows 12 months of revenue data with smooth curve
  */
 
 import { motion } from 'framer-motion';
@@ -17,7 +17,7 @@ import {
 import { TrendingUp } from 'lucide-react';
 
 export interface RevenueChartProps {
-  data?: Array<{
+  data: Array<{
     month: string;
     revenue: number;
   }>;
@@ -40,21 +40,6 @@ export function RevenueChart({ data, isLoading = false }: RevenueChartProps) {
     );
   }
 
-  const chartData = data || [
-    { month: 'Jan', revenue: 0 },
-    { month: 'Fev', revenue: 0 },
-    { month: 'Mar', revenue: 0 },
-    { month: 'Abr', revenue: 0 },
-    { month: 'Mai', revenue: 0 },
-    { month: 'Jun', revenue: 0 },
-    { month: 'Jul', revenue: 0 },
-    { month: 'Ago', revenue: 0 },
-    { month: 'Set', revenue: 0 },
-    { month: 'Out', revenue: 0 },
-    { month: 'Nov', revenue: 0 },
-    { month: 'Dez', revenue: 0 },
-  ];
-
   return (
     <motion.div
       initial="hidden"
@@ -64,16 +49,16 @@ export function RevenueChart({ data, isLoading = false }: RevenueChartProps) {
     >
       <div className="flex items-center gap-2 mb-6">
         <TrendingUp className="w-5 h-5 text-emerald-600" />
-        <h3 className="text-base font-semibold text-slate-900">Faturamento</h3>
+        <h3 className="text-base font-semibold text-slate-900">Evolução de Receita</h3>
         <span className="text-xs font-medium text-slate-500 ml-auto">
           Últimos 12 meses
         </span>
       </div>
 
-      {chartData && chartData.length > 0 && chartData.some(d => d.revenue > 0) ? (
+      {data && data.length > 0 ? (
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -89,7 +74,7 @@ export function RevenueChart({ data, isLoading = false }: RevenueChartProps) {
               <YAxis
                 stroke="#64748b"
                 style={{ fontSize: '12px' }}
-                formatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
               />
               <Tooltip
                 formatter={(value: number) =>
@@ -112,15 +97,13 @@ export function RevenueChart({ data, isLoading = false }: RevenueChartProps) {
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorRevenue)"
-                isAnimationActive={true}
-                animationDuration={1000}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       ) : (
         <div className="h-80 flex items-center justify-center text-slate-500">
-          <p className="text-sm">Nenhum dado de faturamento disponível</p>
+          <p className="text-sm">Nenhum dado de receita disponível</p>
         </div>
       )}
     </motion.div>
