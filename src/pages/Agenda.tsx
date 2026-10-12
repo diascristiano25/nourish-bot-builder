@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { AppLayout } from '@/components/AppLayout';
+import { ModernLayout } from '@/components/layout/ModernLayout';
 import { Button } from '@/components/ui/button';
 import { NewAppointmentDialog } from '@/components/NewAppointmentDialog';
 import { Calendar as CalendarIcon, Plus } from 'lucide-react';
@@ -157,7 +157,7 @@ export default function Agenda() {
   const appointmentDates = appointments.map(apt => new Date(apt.scheduled_at));
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <PageTour tourKey="agenda" steps={agendaTourSteps} run />
       <div className="p-6 md:p-8">
         {/* Header */}
@@ -206,6 +206,6 @@ export default function Agenda() {
         selectedDate={selectedDate}
         onSuccess={fetchAppointments}
       />
-    </AppLayout>
+    </ModernLayout>
   );
 }
