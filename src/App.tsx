@@ -24,9 +24,6 @@ const ModernDashboard = lazy(() => import("./pages/ModernDashboard"));
 const MealPlanBuilderPage = lazy(() => import("./pages/MealPlanBuilderPage"));
 const DashboardComparison = lazy(() => import("./pages/DashboardComparison"));
 const DesignShowcase = lazy(() => import("./pages/DesignShowcase"));
-const DemoModernDashboard = lazy(() => import("./pages/DemoModernDashboard"));
-const DemoAgenda = lazy(() => import("./pages/demo/DemoAgenda"));
-const DemoPacientes = lazy(() => import("./pages/demo/DemoPacientes"));
 const Patients = lazy(() => import("./pages/Patients"));
 const PatientDetail = lazy(() => import("./pages/PatientDetail"));
 const NewPatient = lazy(() => import("./pages/NewPatient"));
@@ -155,9 +152,6 @@ function App() {
                         }
                       />
                       <Route path="/design-showcase" element={<DesignShowcase />} />
-                      <Route path="/demo-modern" element={<DemoModernDashboard />} />
-                      <Route path="/demo-agenda" element={<DemoAgenda />} />
-                      <Route path="/demo-pacientes" element={<DemoPacientes />} />
                       <Route path="/pacientes" element={<AccountStatusGuard><Patients /></AccountStatusGuard>} />
                       <Route path="/pacientes/:id" element={<AccountStatusGuard><PatientDetail /></AccountStatusGuard>} />
                       <Route path="/novo-paciente" element={<AccountStatusGuard><NewPatient /></AccountStatusGuard>} />
