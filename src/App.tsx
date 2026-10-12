@@ -61,6 +61,7 @@ const CentralAjuda = lazy(() => import("./pages/suporte/CentralAjuda"));
 const Status = lazy(() => import("./pages/suporte/Status"));
 const PatientProgress = lazy(() => import("./pages/PatientProgress"));
 const PatientProfile = lazy(() => import("./pages/PatientProfile"));
+const PatientMealPlan = lazy(() => import("./pages/PatientMealPlan"));
 const Suporte = lazy(() => import("./pages/Suporte"));
 
 function PageLoader() {
@@ -173,6 +174,7 @@ function App() {
                       <Route path="/admin" element={<AccountStatusGuard><Admin /></AccountStatusGuard>} />
                       <Route path="/subscription-expired" element={<SubscriptionExpired />} />
                       <Route path="/portal/:patientId" element={<PublicPatientPortal />} />
+                      <Route path="/patient-portal" element={<AccountStatusGuard><PatientPortal /></AccountStatusGuard>} />
                       <Route path="/suporte/termos" element={<TermosSuporte />} />
                       <Route path="/suporte/privacidade" element={<PrivacidadeSuporte />} />
                       <Route path="/sobre" element={<Sobre />} />
@@ -188,6 +190,7 @@ function App() {
                       <Route path="/suporte/status" element={<Status />} />
                       <Route path="/patient-progress" element={<AccountStatusGuard><PatientProgress /></AccountStatusGuard>} />
                       <Route path="/patient-profile" element={<AccountStatusGuard><PatientProfile /></AccountStatusGuard>} />
+                      <Route path="/patient-meal-plan" element={<AccountStatusGuard><PatientMealPlan /></AccountStatusGuard>} />
                       <Route path="/support" element={<AccountStatusGuard><Suporte /></AccountStatusGuard>} />
                       <Route path="/acesso-negado" element={<AccessDenied />} />
                       <Route path="*" element={<NotFound />} />
