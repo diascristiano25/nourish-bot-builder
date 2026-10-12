@@ -198,7 +198,17 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-2">
               {profile && <SupportDialog nutritionistId={profile.id} />}
-              
+
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate('/dashboard-comparison')}
+                className="rounded-xl gap-2 h-9 px-4 text-sm font-medium bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span className="hidden sm:inline">Ver Novo Design</span>
+              </Button>
+
               <Button
                 variant={zenMode ? "default" : "outline"}
                 size="sm"
