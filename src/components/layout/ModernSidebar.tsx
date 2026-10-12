@@ -19,14 +19,14 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Agenda', path: '/agenda', icon: Calendar },
-  { name: 'Pacientes', path: '/patients', icon: Users },
+  { name: 'Pacientes', path: '/pacientes', icon: Users },
   { name: 'Cardápios', path: '/biblioteca', icon: FileText },
   { name: 'Financeiro', path: '/financeiro', icon: DollarSign },
 ];
 
 const secondaryItems: NavItem[] = [
-  { name: 'Configurações', path: '/profile', icon: Settings },
-  { name: 'Suporte', path: '/support', icon: HelpCircle },
+  { name: 'Configurações', path: '/perfil', icon: Settings },
+  { name: 'Suporte', path: '/suporte/ajuda', icon: HelpCircle },
 ];
 
 export function ModernSidebar() {
