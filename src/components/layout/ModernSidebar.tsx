@@ -17,16 +17,16 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Dashboard', path: '/modern-dashboard', icon: LayoutDashboard },
-  { name: 'Agenda', path: '/demo-agenda', icon: Calendar },
-  { name: 'Pacientes', path: '/demo-pacientes', icon: Users },
-  { name: 'Cardápios', path: '/meal-plan-builder', icon: FileText },
+  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { name: 'Agenda', path: '/agenda', icon: Calendar },
+  { name: 'Pacientes', path: '/patients', icon: Users },
+  { name: 'Cardápios', path: '/biblioteca', icon: FileText },
   { name: 'Financeiro', path: '/financeiro', icon: DollarSign },
 ];
 
 const secondaryItems: NavItem[] = [
-  { name: 'Configurações', path: '/perfil', icon: Settings },
-  { name: 'Suporte', path: '#support', icon: HelpCircle },
+  { name: 'Configurações', path: '/profile', icon: Settings },
+  { name: 'Suporte', path: '/support', icon: HelpCircle },
 ];
 
 export function ModernSidebar() {
