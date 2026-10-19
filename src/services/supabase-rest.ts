@@ -1,13 +1,7 @@
 // Simple REST API calls directly to Supabase (no proxy, no JS Client)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
-
-// Debug: log environment variables (remove after testing)
-console.log('Environment check:', {
-  url: SUPABASE_URL,
-  keyPrefix: SUPABASE_KEY.substring(0, 20) + '...',
-  keyLength: SUPABASE_KEY.length
-});
+// Hardcoded credentials (public anon key - safe for client-side)
+const SUPABASE_URL = 'https://nwenbxqmfpyspxpibgwp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZW5ieHFtZnB5c3B4cGliZ3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NjA0MjgsImV4cCI6MjEwNjUzNjQyOH0.W6LxzVqjiE9edLvNryO2QOudjxqQOHroCIu31e2UDf4';
 
 interface AuthResponse {
   access_token?: string;
@@ -60,7 +54,6 @@ export async function restSignIn(email: string, password: string): Promise<AuthR
     });
 
     const data = await response.json();
-    console.log('Supabase login response:', data);
     return data;
   } catch (error) {
     console.error('Login error:', error);
