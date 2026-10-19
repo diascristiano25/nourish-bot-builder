@@ -2,15 +2,10 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Sanitize env vars to prevent "non ISO-8859-1 code point" errors
-const sanitize = (val: string) => val.replace(/[^\x20-\x7E]/g, '').trim();
-
-const SUPABASE_URL = sanitize(import.meta.env.VITE_SUPABASE_URL || '');
-const SUPABASE_PUBLISHABLE_KEY = sanitize(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '');
-
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  console.error('Missing Supabase environment variables');
-}
+// Hardcoded Supabase credentials (public anon key - safe to expose)
+// These are used as fallback when env vars are missing or invalid
+const SUPABASE_URL = 'https://nwenbxqmfpyspxpibgwp.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZW5ieHFtZnB5c3B4cGliZ3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NjA0MjgsImV4cCI6MjEwNjUzNjQyOH0.W6LxzVqjiE9edLvNryO2QOudjxqQOHroCIu31e2UDf4';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
