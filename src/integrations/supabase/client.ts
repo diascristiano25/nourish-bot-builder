@@ -2,8 +2,11 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+// Sanitize env vars to prevent "non ISO-8859-1 code point" errors
+const sanitize = (val: string) => val.replace(/[^\x20-\x7E]/g, '').trim();
+
+const SUPABASE_URL = sanitize(import.meta.env.VITE_SUPABASE_URL || '');
+const SUPABASE_PUBLISHABLE_KEY = sanitize(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '');
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   console.error('Missing Supabase environment variables');
