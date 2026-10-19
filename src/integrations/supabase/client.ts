@@ -2,14 +2,43 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Hardcoded Supabase credentials (public anon key - safe to expose)
-// These are used as fallback when env vars are missing or invalid
+// Hardcoded Supabase credentials (public anon key - safe for client-side)
 const SUPABASE_URL = 'https://nwenbxqmfpyspxpibgwp.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZW5ieHFtZnB5c3B4cGliZ3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NjA0MjgsImV4cCI6MjEwNjUzNjQyOH0.W6LxzVqjiE9edLvNryO2QOudjxqQOHroCIu31e2UDf4';
 
+// Clean corrupted session data from localStorage before initializing Supabase client
+// This prevents "String contains non ISO-8859-1 code point" errors from stale tokens
+if (typeof window !== 'undefined') {
+  try {
+    const storageKey = 'nutriflow_session';
+    const stored = localStorage.getItem(storageKey);
+    if (stored) {
+      // Check if stored data contains non-ASCII characters that would break fetch headers
+      const hasInvalidChars = /[^\x20-\x7E]/.test(stored);
+      if (hasInvalidChars) {
+        console.warn('Detected corrupted session data in localStorage, clearing...');
+        localStorage.removeItem(storageKey);
+      } else {
+        // Also validate that the stored JSON is parseable and has valid structure
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed?.access_token && /[^\x20-\x7E]/.test(parsed.access_token)) {
+            console.warn('Detected invalid characters in access token, clearing session...');
+            localStorage.removeItem(storageKey);
+          }
+        } catch {
+          console.warn('Detected malformed session JSON, clearing...');
+          localStorage.removeItem(storageKey);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Error checking localStorage session:', e);
+  }
+}
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
-
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     autoRefreshToken: true,
