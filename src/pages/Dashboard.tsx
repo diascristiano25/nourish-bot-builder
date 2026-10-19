@@ -4,7 +4,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { LoadingState } from '@/components/shared/LoadingState';
-import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { StatsCards } from '@/components/nutritionist/dashboard/StatsCards';
 import { AppointmentsPanel } from '@/components/nutritionist/dashboard/AppointmentsPanel';
 import { RevenueChart } from '@/components/nutritionist/dashboard/RevenueChart';
@@ -41,84 +40,90 @@ interface WeeklyData {
   consultations: number;
 }
 
+// Mock data generator
+const getMockData = (userName?: string) => ({
+  profile: { id: 'mock-id', full_name: userName || 'Nutricionista' },
+  patients: [] as Patient[],
+  totalPatients: 0,
+  appointments: [] as Appointment[],
+  monthlyRevenue: [
+    { month: 'Mai', revenue: 3200 },
+    { month: 'Jun', revenue: 4100 },
+    { month: 'Jul', revenue: 3800 },
+    { month: 'Ago', revenue: 4500 },
+    { month: 'Set', revenue: 5200 },
+    { month: 'Out', revenue: 4800 },
+  ],
+  weeklyConsultations: [
+    { day: 'Seg', consultations: 3 },
+    { day: 'Ter', consultations: 5 },
+    { day: 'Qua', consultations: 4 },
+    { day: 'Qui', consultations: 6 },
+    { day: 'Sex', consultations: 4 },
+    { day: 'Sab', consultations: 2 },
+    { day: 'Dom', consultations: 1 },
+  ],
+});
+
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [profile, setProfile] = useState<NutritionistProfile | null>(null);
-  const [totalPatients, setTotalPatients] = useState(0);
-  const [monthlyRevenue, setMonthlyRevenue] = useState<RevenueData[]>([]);
-  const [weeklyConsultations, setWeeklyConsultations] = useState<WeeklyData[]>([]);
+
+  const [data, setData] = useState(getMockData(user?.user_metadata?.full_name));
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user) fetchData();
+    if (user) {
+      fetchData();
+    }
   }, [user]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      setError(null);
 
-      // Fetch nutritionist profile
+      // Try to fetch real data from Supabase
+      // If ANY step fails, we catch it and use mock data
+
+      // 1. Fetch Profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('id, full_name')
         .eq('user_id', user!.id)
         .maybeSingle();
 
-      // If tables don't exist, use mock data
-      if (profileError) {
-        console.warn('Supabase tables not configured, using mock data:', profileError);
-        useMockData();
-        return;
-      }
+      if (profileError) throw profileError;
 
-      if (!profileData) {
+      let nutritionistId = profileData?.id;
+      let profile = profileData;
+
+      if (!nutritionistId) {
+        // Try to create profile if it doesn't exist
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
           .insert({ user_id: user!.id, full_name: user!.user_metadata?.full_name || 'Nutricionista' })
           .select('id, full_name')
           .single();
-        if (createError) {
-          console.warn('Cannot create profile, using mock data:', createError);
-          useMockData();
-          return;
-        }
-        setProfile(newProfile);
-      } else {
-        setProfile(profileData);
+
+        if (createError) throw createError;
+        nutritionistId = newProfile.id;
+        profile = newProfile;
       }
 
-      const nutritionistId = profileData?.id;
-      if (!nutritionistId) {
-        console.warn('No nutritionist ID, using mock data');
-        useMockData();
-        return;
-      }
-
-      // Fetch patients
+      // 2. Fetch Patients
       const { data: patientsData, error: patientsError } = await supabase
         .from('patients')
         .select('id, full_name, email')
         .eq('nutritionist_id', nutritionistId)
         .order('created_at', { ascending: false });
 
-      if (patientsError) {
-        console.warn('Cannot fetch patients, using mock data:', patientsError);
-        useMockData();
-        return;
-      }
-      setPatients(patientsData || []);
-      setTotalPatients(patientsData?.length || 0);
+      if (patientsError) throw patientsError;
 
-      // Fetch appointments
+      // 3. Fetch Appointments
       const { data: appointmentsData, error: appointmentsError } = await supabase
         .from('appointments')
         .select(`id, scheduled_at, patient:patients(id, full_name), status`)
@@ -127,22 +132,17 @@ export default function Dashboard() {
         .order('scheduled_at')
         .limit(5);
 
-      if (appointmentsError) {
-        console.warn('Cannot fetch appointments, using mock data:', appointmentsError);
-        useMockData();
-        return;
-      }
+      if (appointmentsError) throw appointmentsError;
 
       const formattedAppointments = (appointmentsData || []).map((item: any) => ({
         ...item,
         patient: Array.isArray(item.patient) ? item.patient[0] : item.patient,
       }));
-      setAppointments(formattedAppointments);
 
-      // Fetch monthly revenue (last 6 months)
+      // 4. Fetch Revenue (Last 6 Months)
       const now = new Date();
       const revenueMonths: RevenueData[] = [];
-      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
       for (let i = 5; i >= 0; i--) {
         const targetMonth = subMonths(now, i);
@@ -157,11 +157,7 @@ export default function Dashboard() {
           .gte('record_date', mStart)
           .lte('record_date', mEnd);
 
-        if (revenueError) {
-          console.warn('Cannot fetch financial records, using mock data:', revenueError);
-          useMockData();
-          return;
-        }
+        if (revenueError) throw revenueError;
 
         const total = revenueData?.reduce((sum, r) => sum + r.amount, 0) || 0;
         revenueMonths.push({
@@ -169,9 +165,8 @@ export default function Dashboard() {
           revenue: total,
         });
       }
-      setMonthlyRevenue(revenueMonths);
 
-      // Fetch weekly consultations
+      // 5. Fetch Weekly Consultations
       const weeklyData: WeeklyData[] = [];
       const dayNames = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'];
       const today = new Date();
@@ -194,51 +189,31 @@ export default function Dashboard() {
           .gte('scheduled_at', dayStart.toISOString())
           .lte('scheduled_at', dayEnd.toISOString());
 
-        if (countError) {
-          console.warn('Cannot fetch weekly appointments, using mock data:', countError);
-          useMockData();
-          return;
-        }
+        if (countError) throw countError;
 
         weeklyData.push({
           day: dayNames[i],
           consultations: count || 0,
         });
       }
-      setWeeklyConsultations(weeklyData);
+
+      // If we got here, everything succeeded
+      setData({
+        profile: profile || { id: 'unknown', full_name: 'Nutricionista' },
+        patients: patientsData || [],
+        totalPatients: patientsData?.length || 0,
+        appointments: formattedAppointments,
+        monthlyRevenue: revenueMonths,
+        weeklyConsultations: weeklyData,
+      });
+
     } catch (err) {
-      console.error('Error fetching dashboard data:', err);
-      useMockData();
+      console.warn('Supabase fetch failed, using mock data:', err);
+      // Fallback to mock data on ANY error
+      setData(getMockData(user?.user_metadata?.full_name));
     } finally {
       setLoading(false);
     }
-  };
-
-  const useMockData = () => {
-    console.log('Using mock data for dashboard');
-    setProfile({ id: 'mock-id', full_name: user?.user_metadata?.full_name || 'Nutricionista' });
-    setPatients([]);
-    setTotalPatients(0);
-    setAppointments([]);
-    setMonthlyRevenue([
-      { month: 'Mai', revenue: 3200 },
-      { month: 'Jun', revenue: 4100 },
-      { month: 'Jul', revenue: 3800 },
-      { month: 'Ago', revenue: 4500 },
-      { month: 'Set', revenue: 5200 },
-      { month: 'Out', revenue: 4800 },
-    ]);
-    setWeeklyConsultations([
-      { day: 'Seg', consultations: 3 },
-      { day: 'Ter', consultations: 5 },
-      { day: 'Qua', consultations: 4 },
-      { day: 'Qui', consultations: 6 },
-      { day: 'Sex', consultations: 4 },
-      { day: 'Sab', consultations: 2 },
-      { day: 'Dom', consultations: 1 },
-    ]);
-    setError(null);
-    setLoading(false);
   };
 
   if (authLoading || loading) {
@@ -253,31 +228,16 @@ export default function Dashboard() {
     );
   }
 
-  if (error) {
-    return (
-      <ModernLayout>
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <ErrorBoundary>
-            <div className="rounded-lg border border-red-200 bg-red-50 p-6 max-w-md">
-              <h3 className="font-semibold text-red-900 mb-2">Erro ao carregar dashboard</h3>
-              <p className="text-sm text-red-700">{error.message}</p>
-            </div>
-          </ErrorBoundary>
-        </div>
-      </ModernLayout>
-    );
-  }
-
   const stats = [
     {
       icon: <Users className="w-6 h-6 text-emerald-600" />,
-      value: totalPatients,
+      value: data.totalPatients,
       label: 'Total Pacientes',
       trend: { value: 12, direction: 'up' as const },
     },
     {
       icon: <Calendar className="w-6 h-6 text-blue-600" />,
-      value: appointments.length,
+      value: data.appointments.length,
       label: 'Consultas do Mês',
       trend: { value: 8, direction: 'up' as const },
     },
@@ -289,13 +249,13 @@ export default function Dashboard() {
     },
     {
       icon: <DollarSign className="w-6 h-6 text-emerald-600" />,
-      value: `R$ ${(monthlyRevenue.reduce((sum, m) => sum + m.revenue, 0) / 1000).toFixed(1)}k`,
+      value: `R$ ${(data.monthlyRevenue.reduce((sum, m) => sum + m.revenue, 0) / 1000).toFixed(1)}k`,
       label: 'Faturamento',
       trend: { value: 15, direction: 'up' as const },
     },
   ];
 
-  const appointmentData = appointments.map((apt) => ({
+  const appointmentData = data.appointments.map((apt) => ({
     id: apt.id,
     patientName: apt.patient?.full_name || 'Paciente',
     time: format(new Date(apt.scheduled_at), 'HH:mm'),
@@ -310,7 +270,7 @@ export default function Dashboard() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-slate-900 mb-2">Dashboard</h1>
-            <p className="text-slate-600">Bem-vindo de volta, {profile?.full_name?.split(' ')[0]}</p>
+            <p className="text-slate-600">Bem-vindo de volta, {data.profile?.full_name?.split(' ')[0]}</p>
           </div>
 
           {/* Stats Cards */}
@@ -319,13 +279,13 @@ export default function Dashboard() {
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <RevenueChart data={monthlyRevenue} />
+              <RevenueChart data={data.monthlyRevenue} />
             </div>
             <AppointmentsPanel appointments={appointmentData} />
           </div>
 
           {/* Weekly Chart */}
-          <WeeklyChart data={weeklyConsultations} />
+          <WeeklyChart data={data.weeklyConsultations} />
         </div>
       </div>
     </ModernLayout>
