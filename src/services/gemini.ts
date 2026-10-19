@@ -37,12 +37,9 @@ export interface Meal {
 export async function generateMealPlan(
   request: MealPlanRequest
 ): Promise<MealPlan> {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase configuration not found");
-  }
+  // Hardcoded Supabase credentials (public anon key - safe for client-side)
+  const supabaseUrl = 'https://nwenbxqmfpyspxpibgwp.supabase.co';
+  const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZW5ieHFtZnB5c3B4cGliZ3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NjA0MjgsImV4cCI6MjEwNjUzNjQyOH0.W6LxzVqjiE9edLvNryO2QOudjxqQOHroCIu31e2UDf4';
 
   try {
     const response = await fetch(
