@@ -22,11 +22,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Meu Dashboard', path: '/patient/dashboard', icon: LayoutDashboard },
-  { name: 'Plano Alimentar', path: '/patient/meal-plan', icon: Utensils },
-  { name: 'Meu Progresso', path: '/patient/progress', icon: TrendingUp },
-  { name: 'Meu Perfil', path: '/patient/profile', icon: User },
-  { name: 'Chat com Nutriólogo', path: '/patient/chat', icon: MessageCircle },
+  { name: 'Meu Dashboard', path: '/patient-portal', icon: LayoutDashboard },
+  { name: 'Plano Alimentar', path: '/patient-meal-plan', icon: Utensils },
+  { name: 'Meu Progresso', path: '/patient-progress', icon: TrendingUp },
+  { name: 'Meu Perfil', path: '/patient-profile', icon: User },
+  { name: 'Chat com Nutriólogo', path: '/patient-portal', icon: MessageCircle },
 ];
 
 export function PatientSidebar({ collapsed = false, onToggleCollapse }: PatientSidebarProps) {
