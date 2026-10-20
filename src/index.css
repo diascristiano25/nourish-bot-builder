@@ -91,6 +91,15 @@
     --sidebar-accent-foreground: 143 25% 35%;
     --sidebar-border: 35 18% 88%;
     --sidebar-ring: 143 25% 42%;
+
+    /* NutriFlow Launch LP Tokens */
+    --nf-bg-primary: 40 20% 98%;       /* #FAFAF9 */
+    --nf-bg-secondary: 38 18% 96%;     /* #F5F4F1 */
+    --nf-text-primary: 222 25% 14%;    /* #1A1F2E */
+    --nf-text-secondary: 220 9% 46%;   /* #6B7280 */
+    --nf-accent-teal: 168 65% 43%;     /* #1CBFA5 */
+    --nf-accent-coral: 12 80% 67%;     /* #EF7B66 */
+    --nf-border: 35 15% 90%;           /* #E8E6E1 */
   }
 
   /* ========================================
@@ -428,6 +437,126 @@ html, body {
 ::selection {
   background: hsl(var(--primary) / 0.2);
   color: hsl(var(--primary));
+}
+
+/* ========================================
+   SCROLL-DRIVEN MOTION SYSTEM (Approach A)
+   ======================================== */
+
+@supports (animation-timeline: view()) {
+  .scroll-fade-up {
+    animation: nfFadeUp linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+
+  .scroll-slide-left {
+    animation: nfSlideLeft linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 50%;
+  }
+
+  .scroll-slide-right {
+    animation: nfSlideRight linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 50%;
+  }
+
+  .scroll-scale-in {
+    animation: nfScaleIn linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+
+  .scroll-parallax-y {
+    animation: nfParallaxY linear both;
+    animation-timeline: scroll();
+    animation-range: 0% 100%;
+  }
+
+  .scroll-line-grow {
+    animation: nfLineGrow linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 50%;
+  }
+}
+
+/* Fallback for browsers without scroll-timeline support */
+@supports not (animation-timeline: view()) {
+  .scroll-fade-up,
+  .scroll-slide-left,
+  .scroll-slide-right,
+  .scroll-scale-in {
+    opacity: 1;
+    transform: none;
+  }
+  .scroll-parallax-y {
+    transform: none;
+  }
+  .scroll-line-grow {
+    height: 100%;
+  }
+}
+
+@keyframes nfFadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes nfSlideLeft {
+  from { opacity: 0; transform: translateX(-60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes nfSlideRight {
+  from { opacity: 0; transform: translateX(60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes nfScaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes nfParallaxY {
+  from { transform: translateY(-30px); }
+  to { transform: translateY(30px); }
+}
+
+@keyframes nfLineGrow {
+  from { height: 0%; }
+  to { height: 100%; }
+}
+
+@keyframes nfPulseBadge {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 hsl(var(--nf-accent-teal) / 0.4); }
+  50% { opacity: 0.9; box-shadow: 0 0 0 8px hsl(var(--nf-accent-teal) / 0); }
+}
+
+.animate-pulse-badge {
+  animation: nfPulseBadge 2s ease-in-out infinite;
+}
+
+/* Stagger delays for sequential reveals */
+.scroll-stagger-1 { animation-delay: 0ms; }
+.scroll-stagger-2 { animation-delay: 150ms; }
+.scroll-stagger-3 { animation-delay: 300ms; }
+
+/* Reduced motion: disable ALL animations */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-fade-up,
+  .scroll-slide-left,
+  .scroll-slide-right,
+  .scroll-scale-in,
+  .scroll-parallax-y,
+  .scroll-line-grow,
+  .animate-pulse-badge,
+  .animate-float,
+  .animate-shimmer {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* Mobile Responsive */

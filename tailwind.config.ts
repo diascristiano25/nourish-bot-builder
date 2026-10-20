@@ -19,6 +19,15 @@ export default {
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
+        nf: {
+          bg: "hsl(var(--nf-bg-primary))",
+          "bg-alt": "hsl(var(--nf-bg-secondary))",
+          text: "hsl(var(--nf-text-primary))",
+          "text-muted": "hsl(var(--nf-text-secondary))",
+          teal: "hsl(var(--nf-accent-teal))",
+          coral: "hsl(var(--nf-accent-coral))",
+          border: "hsl(var(--nf-border))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
