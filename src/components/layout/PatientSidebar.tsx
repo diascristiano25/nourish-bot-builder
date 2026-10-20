@@ -2,13 +2,14 @@ import { motion } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Utensils, TrendingUp, User, MessageCircle,
-  LogOut, Leaf, ChevronRight
+  LogOut, ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import logoImg from '@/assets/logo.png';
 
 interface PatientSidebarProps {
   collapsed?: boolean;
@@ -62,8 +63,8 @@ export function PatientSidebar({ collapsed = false, onToggleCollapse }: PatientS
           transition={{ delay: 0.1 }}
           className="flex items-center gap-3"
         >
-          <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
-            <Leaf className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center overflow-hidden border border-white/10">
+            <img src={logoImg} alt="NutriFlow" className="w-8 h-8 object-contain" />
           </div>
           <span className="text-xl font-bold text-white tracking-tight">NutriFlow</span>
         </motion.div>

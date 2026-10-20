@@ -21,6 +21,7 @@ const PatientApp = lazy(() => import("./pages/PatientApp"));
 const PatientMobileApp = lazy(() => import("./pages/PatientMobileApp"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ModernDashboard = lazy(() => import("./pages/ModernDashboard"));
+const Evolucao = lazy(() => import("./pages/Evolucao"));
 const MealPlanBuilderPage = lazy(() => import("./pages/MealPlanBuilderPage"));
 const DashboardComparison = lazy(() => import("./pages/DashboardComparison"));
 const DesignShowcase = lazy(() => import("./pages/DesignShowcase"));
@@ -132,6 +133,14 @@ function App() {
                         element={
                           <AccountStatusGuard>
                             <ModernDashboard />
+                          </AccountStatusGuard>
+                        }
+                      />
+                      <Route
+                        path="/evolucao"
+                        element={
+                          <AccountStatusGuard>
+                            <Evolucao />
                           </AccountStatusGuard>
                         }
                       />

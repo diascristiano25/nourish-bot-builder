@@ -2,6 +2,7 @@ import { Home, UtensilsCrossed, Plus, TrendingUp, User } from 'lucide-react';
 import { TabType } from '@/pages/PatientMobileApp';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import logoImg from '@/assets/logo.png';
 
 interface PatientBottomNavProps {
   activeTab: TabType;
@@ -39,11 +40,11 @@ export function PatientBottomNav({ activeTab, onTabChange }: PatientBottomNavPro
                 className="relative -mt-6"
               >
                 <div className={cn(
-                  "w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300",
+                  "w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 overflow-hidden border-2 border-white",
                   "bg-gradient-to-br from-[#518C5B] to-[#3d7047]",
                   isActive && "scale-110 shadow-emerald-500/40"
                 )}>
-                  <Icon className="w-6 h-6 text-white" />
+                  <img src={logoImg} alt="NutriFlow" className="w-9 h-9 object-contain" />
                 </div>
               </motion.button>
             );

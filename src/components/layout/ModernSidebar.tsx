@@ -2,12 +2,13 @@ import { motion } from 'framer-motion';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Calendar, Users, FileText, DollarSign,
-  Settings, HelpCircle, LogOut, Leaf, Send, Grid3X3, Info
+  Settings, HelpCircle, LogOut, Send, Grid3X3, Info, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import logoImg from '@/assets/logo.png';
 
 interface NavItem {
   name: string;
@@ -18,7 +19,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { name: 'Evolução', path: '/dashboard', icon: FileText },
+  { name: 'Evolução', path: '/evolucao', icon: TrendingUp },
   { name: 'Mensagens', path: '/suporte/ajuda', icon: Send, badge: 5 },
   { name: 'Agenda', path: '/agenda', icon: Calendar },
   { name: 'Pacientes', path: '/pacientes', icon: Grid3X3 },
@@ -61,8 +62,8 @@ export function ModernSidebar() {
         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
         className="mb-8"
       >
-        <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-inner">
-          <Leaf className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-inner overflow-hidden">
+          <img src={logoImg} alt="NutriFlow" className="w-10 h-10 object-contain" />
         </div>
       </motion.div>
 

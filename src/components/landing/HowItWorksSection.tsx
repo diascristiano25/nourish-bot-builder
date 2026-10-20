@@ -1,4 +1,4 @@
-import { UserPlus, Sparkles, BarChart3, ArrowRight } from 'lucide-react';
+import { UserPlus, Sparkles, BarChart3, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 const stages = [
   {
@@ -6,7 +6,7 @@ const stages = [
     icon: UserPlus,
     title: 'Cadastre o perfil do paciente',
     description: 'Anamnese inteligente que coleta dados essenciais em minutos. Histórico, objetivos, restrições e preferências — tudo estruturado automaticamente.',
-    features: ['Anamnese digital', 'Importação de dados', 'Perfis personalizados'],
+    features: ['Anamnese digital', 'Importação de exames', 'Perfis personalizados'],
     color: 'teal',
   },
   {
@@ -29,15 +29,14 @@ const stages = [
 
 export default function HowItWorksSection() {
   return (
-    <section id="como-funciona" className="relative bg-nf-bg py-24 md:py-36 overflow-hidden">
-      {/* Background elements */}
+    <section id="como-funciona" className="relative bg-nf-bg-alt py-24 md:py-36 overflow-hidden">
+      {/* Transition from previous section */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-nf-border to-transparent" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-nf-teal/2 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
         <div className="text-center mb-20 scroll-fade-up">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-nf-coral/10 text-nf-coral text-xs font-semibold uppercase tracking-wider mb-4">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-nf-coral/10 text-nf-coral text-xs font-semibold uppercase tracking-wider mb-4 border border-nf-coral/20">
             Como Funciona
           </span>
           <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-nf-text mb-6">
@@ -49,7 +48,7 @@ export default function HowItWorksSection() {
           </p>
         </div>
 
-        {/* Timeline */}
+        {/* Timeline Container */}
         <div className="relative max-w-5xl mx-auto">
           {/* Vertical line with gradient */}
           <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 md:-translate-x-px overflow-hidden">
@@ -61,7 +60,6 @@ export default function HowItWorksSection() {
             {stages.map((stage, i) => {
               const isEven = i % 2 === 0;
               const Icon = stage.icon;
-
               return (
                 <div
                   key={stage.number}
@@ -113,7 +111,7 @@ export default function HowItWorksSection() {
                                 : 'bg-nf-coral/10 text-nf-coral border border-nf-coral/20'
                             }`}
                           >
-                            <ArrowRight className="w-3 h-3" />
+                            <CheckCircle2 className="w-3 h-3" />
                             {feature}
                           </span>
                         ))}
@@ -129,6 +127,9 @@ export default function HowItWorksSection() {
           </div>
         </div>
       </div>
+
+      {/* Transition to next section */}
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-nf-border to-transparent" />
     </section>
   );
 }
