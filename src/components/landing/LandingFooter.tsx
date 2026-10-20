@@ -15,10 +15,8 @@ export default function LandingFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand column */}
           <div className="md:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-nf-teal to-nf-teal/70 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
+            <Link to="/" className="flex items-center gap-3 group">
+              <img src={logoImg} alt="NutriFlow" className="h-10 w-auto group-hover:scale-110 transition-transform" />
               <span className="font-serif text-2xl font-bold text-nf-text">NutriFlow</span>
             </Link>
             <p className="text-nf-text-muted leading-relaxed max-w-md">
