@@ -104,6 +104,15 @@
         ],
         "createdAt": "2026-10-20T09:51:19.171Z",
         "reason": "sanctioned exception: intentional gradient text for premium launch LP heading design"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "nutriflow-motion.html"
+        ],
+        "createdAt": "2026-10-20T23:03:41.943Z",
+        "reason": "opacity raised from 0.04 to 0.12 in this session; white cross pattern over green gradient is intentional subtle texture, visible on screen"
       }
     ]
   }

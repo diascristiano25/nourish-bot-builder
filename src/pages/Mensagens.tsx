@@ -5,13 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { RichCard } from '@/components/shared/RichCard';
-import { MessageCircle, Search, Clock, CheckCheck } from 'lucide-react';
+import { MessageCircle, Search, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { NutritionistChat } from '@/components/NutritionistChat';
 
 interface Conversation {
   patient_id: string;
@@ -28,6 +29,7 @@ export default function Mensagens() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [nutritionistId, setNutritionistId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
@@ -35,6 +37,7 @@ export default function Mensagens() {
 
   useEffect(() => {
     if (user) fetchConversations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchConversations = async () => {
@@ -45,8 +48,8 @@ export default function Mensagens() {
         .select('id')
         .eq('user_id', user!.id)
         .single();
-
       if (!profileData) throw new Error('No profile');
+      setNutritionistId(profileData.id);
 
       // Buscar últimas mensagens agrupadas por paciente
       const { data: messages, error } = await supabase
@@ -85,27 +88,13 @@ export default function Mensagens() {
           conv.unread_count++;
         }
       });
-
       setConversations(Array.from(grouped.values()));
+      if (!selectedConversation && grouped.size > 0) {
+        setSelectedConversation(Array.from(grouped.keys())[0]);
+      }
     } catch (err) {
       console.warn('Failed to fetch conversations:', err);
-      // Mock data para demonstração
-      setConversations([
-        {
-          patient_id: '1',
-          patient_name: 'Maria Silva',
-          last_message: 'Olá, tenho uma dúvida sobre meu cardápio...',
-          last_message_at: new Date().toISOString(),
-          unread_count: 2,
-        },
-        {
-          patient_id: '2',
-          patient_name: 'João Santos',
-          last_message: 'Obrigado pela consulta de hoje!',
-          last_message_at: new Date(Date.now() - 3600000).toISOString(),
-          unread_count: 0,
-        },
-      ]);
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -124,13 +113,14 @@ export default function Mensagens() {
   );
 
   const totalUnread = conversations.reduce((sum, conv) => sum + conv.unread_count, 0);
+  const selectedConv = conversations.find(c => c.patient_id === selectedConversation) || null;
 
   return (
     <ModernLayout>
       <div className="space-y-8">
         <PageHeader
           title="Mensagens"
-          subtitle={`${totalUnread > 0 ? `${totalUnread} mensagem(ns) não lida(s)` : 'Todas as mensagens lidas'}`}
+          subtitle={totalUnread > 0 ? `${totalUnread} mensagem(ns) não lida(s)` : 'Todas as mensagens lidas'}
           icon={<MessageCircle className="w-7 h-7 text-white" />}
           gradient="from-[#518C5B] via-[#4a7d52] to-[#2d5a37]"
         />
@@ -147,14 +137,12 @@ export default function Mensagens() {
                 </span>
               )}
             </div>
-
             <Input
               placeholder="Buscar conversas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="mb-4"
             />
-
             <ScrollArea className="h-[500px]">
               {loading ? (
                 <div className="space-y-3">
@@ -166,6 +154,9 @@ export default function Mensagens() {
                 <div className="text-center py-12">
                   <MessageCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                   <p className="text-slate-500">Nenhuma conversa encontrada</p>
+                  <p className="text-sm text-slate-400 mt-1">
+                    As conversas aparecem aqui quando seus pacientes enviarem mensagens pelo portal.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -214,18 +205,15 @@ export default function Mensagens() {
             </ScrollArea>
           </RichCard>
 
-          {/* Área de Chat (placeholder por enquanto) */}
+          {/* Área de Chat real */}
           <RichCard delay={0.2} padding="lg" className="lg:col-span-2">
-            {selectedConversation ? (
-              <div className="h-[500px] flex items-center justify-center text-center">
-                <div>
-                  <MessageCircle className="w-16 h-16 text-[#518C5B]/30 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-slate-800 mb-2">Chat em desenvolvimento</h3>
-                  <p className="text-slate-500 max-w-md">
-                    A funcionalidade completa de chat estará disponível em breve.
-                    Por enquanto, você pode visualizar suas conversas na lista ao lado.
-                  </p>
-                </div>
+            {selectedConv && nutritionistId ? (
+              <div className="h-[500px]">
+                <NutritionistChat
+                  patientId={selectedConv.patient_id}
+                  patientName={selectedConv.patient_name}
+                  nutritionistId={nutritionistId}
+                />
               </div>
             ) : (
               <div className="h-[500px] flex items-center justify-center text-center">
@@ -233,7 +221,7 @@ export default function Mensagens() {
                   <MessageCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-slate-800 mb-2">Selecione uma conversa</h3>
                   <p className="text-slate-500">
-                    Escolha um paciente na lista para visualizar as mensagens
+                    Escolha um paciente na lista para visualizar e responder as mensagens
                   </p>
                 </div>
               </div>

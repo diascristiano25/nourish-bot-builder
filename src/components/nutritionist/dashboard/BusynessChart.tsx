@@ -9,10 +9,10 @@ interface BusynessChartProps {
 }
 
 export function BusynessChart({
-  consultations = 25,
-  analyzes = 10,
-  meetings = 3,
-  busynessPercent = 95,
+  consultations = 0,
+  analyzes = 0,
+  meetings = 0,
+  busynessPercent = 0,
 }: BusynessChartProps) {
   const data = [
     { name: 'Consultations', value: consultations, color: '#518C5B' },

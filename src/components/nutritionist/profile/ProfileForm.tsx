@@ -1,22 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Save } from 'lucide-react';
-import { fadeInUp, staggerContainer, staggerItem } from '@/lib/motion-variants';
+import { Loader2, Save, Upload, Mail } from 'lucide-react';
 
 interface NutritionistProfile {
   id: string;
   full_name: string;
   crn: string | null;
   phone: string | null;
-  bio: string | null;
-  specialties: string[] | null;
-  photo_url: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
+  secondary_color: string | null;
+  email_signature: string | null;
 }
 
 interface ProfileFormProps {
@@ -27,30 +26,34 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState(profile?.full_name || '');
-  const [email, setEmail] = useState(profile?.id || '');
+  const [crn, setCrn] = useState(profile?.crn || '');
   const [phone, setPhone] = useState(profile?.phone || '');
-  const [bio, setBio] = useState(profile?.bio || '');
-  const [specialties, setSpecialties] = useState(profile?.specialties || []);
+  const [logoUrl, setLogoUrl] = useState(profile?.logo_url || '');
+  const [emailSignature, setEmailSignature] = useState(profile?.email_signature || '');
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [photoUrl, setPhotoUrl] = useState(profile?.photo_url || '');
+  const [userEmail, setUserEmail] = useState('');
 
-  const availableSpecialties = [
-    'Emagrecimento',
-    'Ganho de Massa',
-    'Nutrição Esportiva',
-    'Nutrição Clínica',
-    'Nutrição Preventiva',
-    'Gestacional',
-    'Pediatria',
-  ];
+  // Buscar o email real do usuário autenticado
+  useEffect(() => {
+    const fetchEmail = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    };
+    fetchEmail();
+  }, []);
 
-  const toggleSpecialty = (specialty: string) => {
-    setSpecialties(prev =>
-      prev.includes(specialty)
-        ? prev.filter(s => s !== specialty)
-        : [...prev, specialty]
-    );
-  };
+  // Sincronizar com props quando o profile mudar
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || '');
+      setCrn(profile.crn || '');
+      setPhone(profile.phone || '');
+      setLogoUrl(profile.logo_url || '');
+      setEmailSignature(profile.email_signature || '');
+    }
+  }, [profile]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,22 +70,47 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
     setUploadingPhoto(true);
     try {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        setPhotoUrl(base64);
+      // Upload para o Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${profile?.id}/logo-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName);
+
+      if (urlData?.publicUrl) {
+        setLogoUrl(urlData.publicUrl);
         toast({
-          title: 'Foto carregada!',
+          title: 'Logo carregada!',
           description: 'Clique em Salvar para confirmar.',
         });
-      };
-      reader.readAsDataURL(file);
+      }
     } catch (error: any) {
-      toast({
-        title: 'Erro ao carregar',
-        description: error.message,
-        variant: 'destructive'
-      });
+      // Fallback: converter para base64 se o storage falhar
+      try {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = event.target?.result as string;
+          setLogoUrl(base64);
+          toast({
+            title: 'Logo carregada (local)',
+            description: 'Clique em Salvar para confirmar.',
+          });
+        };
+        reader.readAsDataURL(file);
+      } catch {
+        toast({
+          title: 'Erro ao carregar',
+          description: error.message,
+          variant: 'destructive'
+        });
+      }
     } finally {
       setUploadingPhoto(false);
     }
@@ -97,10 +125,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         .from('profiles')
         .update({
           full_name: fullName.trim(),
+          crn: crn.trim() || null,
           phone: phone.trim() || null,
-          bio: bio.trim() || null,
-          specialties: specialties,
-          photo_url: photoUrl || null,
+          logo_url: logoUrl || null,
+          email_signature: emailSignature.trim() || null,
         })
         .eq('id', profile.id);
 
@@ -147,10 +175,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
+      onSubmit={(e) => e.preventDefault()}
     >
-      {/* Name */}
+      {/* Nome Completo */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label htmlFor="fullName" className="text-sm font-medium">
+        <Label htmlFor="fullName" className="text-sm font-medium text-slate-700">
           Nome Completo
         </Label>
         <Input
@@ -158,26 +187,44 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           placeholder="Dr(a). Nome Sobrenome"
-          className="rounded-xl"
+          className="rounded-xl border-slate-200 focus:border-[#518C5B] focus:ring-[#518C5B]/20"
         />
       </motion.div>
 
-      {/* Email (disabled) */}
+      {/* Email (somente leitura) */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label htmlFor="email" className="text-sm font-medium">
+        <Label htmlFor="email" className="text-sm font-medium text-slate-700">
           Email
         </Label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            id="email"
+            value={userEmail || 'Carregando...'}
+            disabled
+            className="rounded-xl bg-slate-50 pl-10 text-slate-500"
+          />
+        </div>
+        <p className="text-xs text-slate-400">O email não pode ser alterado.</p>
+      </motion.div>
+
+      {/* CRN */}
+      <motion.div className="space-y-2" variants={itemVariants}>
+        <Label htmlFor="crn" className="text-sm font-medium text-slate-700">
+          CRN (Conselho Regional de Nutrição)
+        </Label>
         <Input
-          id="email"
-          value={email}
-          disabled
-          className="rounded-xl bg-muted"
+          id="crn"
+          value={crn}
+          onChange={(e) => setCrn(e.target.value)}
+          placeholder="Ex: 12345"
+          className="rounded-xl border-slate-200 focus:border-[#518C5B] focus:ring-[#518C5B]/20"
         />
       </motion.div>
 
-      {/* Phone */}
+      {/* Telefone */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label htmlFor="phone" className="text-sm font-medium">
+        <Label htmlFor="phone" className="text-sm font-medium text-slate-700">
           Telefone
         </Label>
         <Input
@@ -185,93 +232,79 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="(11) 99999-9999"
-          className="rounded-xl"
+          className="rounded-xl border-slate-200 focus:border-[#518C5B] focus:ring-[#518C5B]/20"
         />
       </motion.div>
 
-      {/* Bio */}
+      {/* Logo / Foto */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label htmlFor="bio" className="text-sm font-medium">
-          Biografia
-        </Label>
-        <Textarea
-          id="bio"
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          placeholder="Conte um pouco sobre você e sua experiência..."
-          rows={4}
-          className="rounded-xl"
-        />
-      </motion.div>
-
-      {/* Specialties */}
-      <motion.div className="space-y-3" variants={itemVariants}>
-        <Label className="text-sm font-medium">Especialidades</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {availableSpecialties.map(specialty => (
-            <button
-              key={specialty}
-              type="button"
-              onClick={() => toggleSpecialty(specialty)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                specialties.includes(specialty)
-                  ? 'bg-primary text-white'
-                  : 'bg-muted text-foreground hover:bg-muted/80'
-              }`}
-            >
-              {specialty}
-            </button>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Photo Upload */}
-      <motion.div className="space-y-2" variants={itemVariants}>
-        <Label className="text-sm font-medium">Foto de Perfil</Label>
-        <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors cursor-pointer">
-          <input
-            type="file"
-            id="photo-upload"
-            accept="image/*"
-            className="hidden"
-            onChange={handlePhotoUpload}
-            disabled={uploadingPhoto}
-          />
-          <label htmlFor="photo-upload" className="cursor-pointer block">
-            {uploadingPhoto ? (
-              <Loader2 className="w-8 h-8 mx-auto text-muted-foreground animate-spin" />
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  Clique para selecionar uma foto
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  PNG, JPG (máx. 2MB)
-                </p>
-              </>
+        <Label className="text-sm font-medium text-slate-700">Logo / Foto de Perfil</Label>
+        <div className="flex items-start gap-4">
+          {logoUrl && (
+            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-200 shrink-0">
+              <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <div className="flex-1">
+            <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-[#518C5B]/50 transition-colors cursor-pointer">
+              <input
+                type="file"
+                id="photo-upload"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoUpload}
+                disabled={uploadingPhoto}
+              />
+              <label htmlFor="photo-upload" className="cursor-pointer block">
+                {uploadingPhoto ? (
+                  <Loader2 className="w-6 h-6 mx-auto text-slate-400 animate-spin" />
+                ) : (
+                  <>
+                    <Upload className="w-6 h-6 mx-auto text-slate-400 mb-1" />
+                    <p className="text-sm text-slate-500">
+                      Clique para selecionar
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      PNG, JPG (máx. 2MB)
+                    </p>
+                  </>
+                )}
+              </label>
+            </div>
+            {logoUrl && (
+              <button
+                type="button"
+                onClick={() => setLogoUrl('')}
+                className="text-xs text-red-500 hover:underline mt-2"
+              >
+                Remover foto
+              </button>
             )}
-          </label>
-        </div>
-        {photoUrl && (
-          <div className="p-3 bg-muted rounded-lg flex items-center justify-between">
-            <p className="text-sm text-foreground">Foto carregada</p>
-            <button
-              type="button"
-              onClick={() => setPhotoUrl('')}
-              className="text-xs text-destructive hover:underline"
-            >
-              Remover
-            </button>
           </div>
-        )}
+        </div>
       </motion.div>
 
-      {/* Submit Button */}
+      {/* Assinatura de Email */}
+      <motion.div className="space-y-2" variants={itemVariants}>
+        <Label htmlFor="emailSignature" className="text-sm font-medium text-slate-700">
+          Assinatura de Email
+        </Label>
+        <Input
+          id="emailSignature"
+          value={emailSignature}
+          onChange={(e) => setEmailSignature(e.target.value)}
+          placeholder="Ex: Atenciosamente, Dra. Maria - CRN 12345"
+          className="rounded-xl border-slate-200 focus:border-[#518C5B] focus:ring-[#518C5B]/20"
+        />
+        <p className="text-xs text-slate-400">Usada em emails enviados aos pacientes.</p>
+      </motion.div>
+
+      {/* Botão Salvar */}
       <motion.div className="pt-4" variants={itemVariants}>
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="w-full rounded-xl gap-2"
+          className="w-full rounded-xl gap-2 bg-gradient-to-r from-[#518C5B] to-[#3d7047] hover:opacity-90 text-white"
           size="lg"
         >
           {saving ? (

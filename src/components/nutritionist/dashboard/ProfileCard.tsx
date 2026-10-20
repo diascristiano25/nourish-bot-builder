@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { MapPin, Pencil, Cake, Droplet, Clock } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ProfileCardProps {
   name: string;
@@ -8,6 +8,7 @@ interface ProfileCardProps {
   location?: string;
   crn?: string;
   workingHours?: string;
+  logoUrl?: string | null;
 }
 
 export function ProfileCard({
@@ -16,6 +17,7 @@ export function ProfileCard({
   location = 'Brasil',
   crn = '—',
   workingHours = '9h - 18h',
+  logoUrl,
 }: ProfileCardProps) {
   const initials = name?.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase() || 'N';
 
@@ -48,6 +50,7 @@ export function ProfileCard({
             transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
           >
             <Avatar className="w-16 h-16 ring-4 ring-[#518C5B]/10">
+              {logoUrl && <AvatarImage src={logoUrl} alt={name} className="object-cover" />}
               <AvatarFallback className="bg-gradient-to-br from-[#518C5B] to-[#3d7047] text-white text-lg font-bold">
                 {initials}
               </AvatarFallback>

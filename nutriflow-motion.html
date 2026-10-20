@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>NutriFlow — Apresentação da Plataforma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --nf-bg: #FAF8F5;
+    --nf-teal: #2A8C7A;
+    --nf-teal-dark: #1E6B5D;
+    --nf-coral: #E8734A;
+    --nf-text: #1A2332;
+    --nf-text-muted: #6B7280;
+    --nf-card: #FFFFFF;
+    --nf-border: #E8E4DE;
+    --nf-sidebar: #F5F1EC;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Outfit', sans-serif;
+  }
+
+  body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: var(--nf-bg);
+    font-family: var(--font-body);
+    color: var(--nf-text);
+    position: relative;
+  }
+
+  /* ── Slide System ── */
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  /* ── SLIDE 1: Hero / Landing ── */
+  .slide-hero {
+    background: linear-gradient(135deg, #FAF8F5 0%, #F0EDE8 50%, #E8F5F2 100%);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(42, 140, 122, 0.08);
+    border: 1px solid rgba(42, 140, 122, 0.15);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--nf-teal);
+    margin-bottom: 32px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--nf-text);
+    max-width: 900px;
+    margin-bottom: 24px;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .hero-title span { color: var(--nf-teal); }
+  .hero-subtitle {
+    font-size: 22px;
+    line-height: 1.6;
+    color: var(--nf-text-muted);
+    max-width: 700px;
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .hero-cta-row {
+    display: flex;
+    gap: 16px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .btn-primary {
+    background: var(--nf-teal);
+    color: #fff;
+    border: none;
+    padding: 16px 40px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--nf-text);
+    border: 2px solid var(--nf-border);
+    padding: 16px 40px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+  }
+  .hero-mockup {
+    margin-top: 60px;
+    width: 1200px;
+    height: 500px;
+    background: var(--nf-card);
+    border-radius: 20px;
+    border: 1px solid var(--nf-border);
+    box-shadow: 0 25px 80px rgba(0,0,0,0.08), 0 4px 20px rgba(0,0,0,0.04);
+    opacity: 0;
+    transform: translateY(40px) scale(0.97);
+    overflow: hidden;
+    position: relative;
+  }
+  .mockup-sidebar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--nf-sidebar);
+    border-right: 1px solid var(--nf-border);
+    padding: 24px 16px;
+  }
+  .mockup-sidebar-logo {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--nf-teal);
+    margin-bottom: 32px;
+    padding-left: 8px;
+  }
+  .mockup-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--nf-text-muted);
+    margin-bottom: 4px;
+  }
+  .mockup-nav-item.active {
+    background: rgba(42, 140, 122, 0.08);
+    color: var(--nf-teal);
+    font-weight: 500;
+  }
+  .mockup-nav-icon {
+    width: 20px; height: 20px;
+    border-radius: 5px;
+    background: currentColor;
+    opacity: 0.2;
+  }
+  .mockup-nav-item.active .mockup-nav-icon { opacity: 0.6; }
+  .mockup-content {
+    position: absolute;
+    left: 240px; top: 0; right: 0; bottom: 0;
+    padding: 32px;
+  }
+  .mockup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .mockup-greeting h2 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 600;
+  }
+  .mockup-greeting p {
+    font-size: 14px;
+    color: var(--nf-text-muted);
+    margin-top: 4px;
+  }
+  .mockup-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .mockup-stat-card {
+    background: var(--nf-card);
+    border: 1px solid var(--nf-border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .stat-label { font-size: 12px; color: var(--nf-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-size: 32px; font-weight: 700; margin-top: 6px; font-family: var(--font-display); }
+  .stat-trend { font-size: 12px; margin-top: 4px; }
+  .trend-up { color: var(--nf-teal); }
+  .trend-down { color: var(--nf-coral); }
+  .mockup-chart-area {
+    background: var(--nf-card);
+    border: 1px solid var(--nf-border);
+    border-radius: 14px;
+    padding: 24px;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 140px;
+    padding-top: 20px;
+  }
+  .chart-bar {
+    flex: 1;
+    border-radius: 6px 6px 0 0;
+    min-height: 10px;
+  }
+
+  /* ── SLIDE 2: Dashboard ── */
+  .slide-dashboard {
+    background: var(--nf-bg);
+  }
+  .dash-sidebar {
+    width: 260px;
+    background: var(--nf-sidebar);
+    border-right: 1px solid var(--nf-border);
+    padding: 28px 16px;
+    flex-shrink: 0;
+  }
+  .dash-logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--nf-teal);
+    margin-bottom: 40px;
+    padding-left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .dash-logo-leaf {
+    width: 28px; height: 28px;
+    background: var(--nf-teal);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dash-nav-section {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--nf-text-muted);
+    padding: 0 12px;
+    margin-bottom: 8px;
+    margin-top: 24px;
+  }
+  .dash-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--nf-text-muted);
+    margin-bottom: 2px;
+    transition: all 0.2s;
+  }
+  .dash-nav-item.active {
+    background: rgba(42, 140, 122, 0.1);
+    color: var(--nf-teal-dark);
+    font-weight: 600;
+  }
+  .dash-nav-icon {
+    width: 20px; height: 20px;
+    border-radius: 5px;
+    opacity: 0.3;
+  }
+  .dash-main {
+    flex: 1;
+    padding: 32px 40px;
+    overflow: hidden;
+  }
+  .dash-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .dash-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--nf-card);
+    border: 1px solid var(--nf-border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    width: 320px;
+    font-size: 14px;
+    color: var(--nf-text-muted);
+  }
+  .dash-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--nf-teal), var(--nf-coral));
+  }
+  .dash-hero-card {
+    background: linear-gradient(135deg, #518C5B 0%, #4a7d52 50%, #2d5a37 100%);
+    border-radius: 24px;
+    padding: 36px 40px;
+    color: #fff;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  .dash-hero-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.12;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .dash-hero-content { position: relative; z-index: 1; }
+  .dash-hero-greeting { font-size: 16px; opacity: 0.8; margin-bottom: 4px; }
+  .dash-hero-name { font-family: var(--font-display); font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  .dash-hero-date { font-size: 14px; opacity: 0.7; }
+  .dash-hero-icons {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 16px;
+  }
+  .dash-hero-icon {
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  .dash-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .dash-stat-card {
+    background: var(--nf-card);
+    border: 1px solid var(--nf-border);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .dash-stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .dash-stat-title { font-size: 13px; color: var(--nf-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .dash-stat-value { font-size: 36px; font-weight: 700; font-family: var(--font-display); }
+  .dash-stat-label { font-size: 13px; color: var(--nf-text-muted); margin-top: 4px; }
+  .dash-stat-trend { font-size: 12px; font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .dash-stat-sparkline {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 50px;
+    opacity: 0.15;
+  }
+  .dash-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .dash-panel {
+    background: var(--nf-card);
+    border: 1px solid var(--nf-border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .dash-panel-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .appointment-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--nf-border);
+  }
+  .appointment-row:last-child { border-bottom: none; }
+  .appt-time {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--nf-teal);
+    min-width: 50px;
+  }
+  .appt-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--nf-sidebar);
+  }
+  .appt-info { flex: 1; }
+  .appt-name { font-size: 14px; font-weight: 500; }
+  .appt-type { font-size: 12px; color: var(--nf-text-muted); }
+  .appt-status {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  .status-confirmed { background: rgba(42, 140, 122, 0.1); color: var(--nf-teal); }
+  .status-pending { background: rgba(232, 115, 74, 0.1); color: var(--nf-coral); }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .progress-label { font-size: 13px; min-width: 100px; }
+  .progress-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: var(--nf-sidebar);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .progress-bar-fill { height: 100%; border-radius: 100px; }
+  .progress-pct { font-size: 13px; font-weight: 600; min-width: 40px; text-align: right; }
+
+  /* ── SLIDE 3: Pacientes ── */
+  .slide-patients {
+    background: var(--nf-bg);
+  }
+  .patients-main {
+    flex: 1;
+    padding: 32px 40px;
+  }
+  .patients-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .patients-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .patients-actions { display: flex; gap: 12px; }
+  .btn-sm {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid var(--nf-border);
+    background: var(--nf-card);
+    color: var(--nf-text);
+    font-family: var(--font-body);
+  }
+  .btn-sm-primary {
+    background: var(--nf-teal);
+    color: #fff;
+    border-color: var(--nf-teal);
+  }
+  .patients-table {
+    background: var(--nf-card);
+    border: 1px solid var(--nf-border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .table-header {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr 1fr 0.8fr;
+    padding: 16px 24px;
+    background: var(--nf-sidebar);
+    border-bottom: 1px solid var(--nf-border);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--nf-text-muted);
+    font-weight: 600;
+  }
+  .table-row {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr 1fr 0.8fr;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--nf-border);
+    align-items: center;
+    font-size: 14px;
+  }
+  .table-row:last-child { border-bottom: none; }
+  .patient-cell-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+  }
+  .patient-avatar-sm {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--nf-teal), #7BC4A8);
+  }
+  .tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-active { background: rgba(42, 140, 122, 0.1); color: var(--nf-teal); }
+  .tag-new { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+  .tag-review { background: rgba(232, 115, 74, 0.1); color: var(--nf-coral); }
+
+  /* ── SLIDE 4: Cardápio ── */
+  .slide-mealplan {
+    background: var(--nf-bg);
+  }
+  .mealplan-main {
+    flex: 1;
+    padding: 32px 40px;
+  }
+  .mealplan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .mealplan-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .mealplan-patient {
+    font-size: 14px;
+    color: var(--nf-text-muted);
+    margin-top: 4px;
+  }
+  .meal-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .meal-card {
+    background: var(--nf-card);
+    border: 1px solid var(--nf-border);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .meal-card-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+  .meal-time {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--nf-text-muted);
+    margin-bottom: 8px;
+    margin-top: 8px;
+  }
+  .meal-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .meal-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--nf-text-muted);
+  }
+  .meal-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .meal-macros {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--nf-border);
+  }
+  .macro-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: var(--nf-sidebar);
+  }
+
+  /* ── SLIDE 5: Mensagens ── */
+  .slide-messages {
+    background: var(--nf-bg);
+  }
+  .messages-main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  .messages-list {
+    width: 360px;
+    border-right: 1px solid var(--nf-border);
+    background: var(--nf-card);
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .msg-contact {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+  .msg-contact.active { background: rgba(42, 140, 122, 0.06); }
+  .msg-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .msg-contact-info { flex: 1; min-width: 0; }
+  .msg-contact-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .msg-contact-preview { font-size: 13px; color: var(--nf-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg-contact-time { font-size: 11px; color: var(--nf-text-muted); flex-shrink: 0; }
+  .msg-unread-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--nf-coral);
+    flex-shrink: 0;
+  }
+  .messages-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--nf-bg);
+  }
+  .chat-header {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--nf-border);
+    background: var(--nf-card);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .chat-header-name { font-weight: 600; font-size: 16px; }
+  .chat-header-status { font-size: 12px; color: var(--nf-teal); }
+  .chat-body {
+    flex: 1;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .chat-bubble {
+    max-width: 500px;
+    padding: 14px 20px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .bubble-received {
+    background: var(--nf-card);
+    border: 1px solid var(--nf-border);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+  .bubble-sent {
+    background: var(--nf-teal);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-input-area {
+    padding: 16px 28px;
+    border-top: 1px solid var(--nf-border);
+    background: var(--nf-card);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .chat-input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 1px solid var(--nf-border);
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: var(--font-body);
+    color: var(--nf-text-muted);
+  }
+  .chat-send {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--nf-teal);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── SLIDE 6: CTA Final ── */
+  .slide-cta {
+    background: linear-gradient(135deg, #1A2332 0%, #2A3A4E 50%, #1E3A35 100%);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    padding: 80px;
+  }
+  .cta-logo {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .cta-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.15;
+    max-width: 900px;
+    margin-bottom: 24px;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .cta-subtitle {
+    font-size: 20px;
+    opacity: 0.7;
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .cta-btn {
+    background: var(--nf-coral);
+    color: #fff;
+    border: none;
+    padding: 20px 56px;
+    border-radius: 14px;
+    font-size: 19px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .cta-features {
+    display: flex;
+    gap: 40px;
+    margin-top: 60px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .cta-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    opacity: 0.7;
+  }
+  .cta-check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(42, 140, 122, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Progress Bar ── */
+  .progress-indicator {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--nf-teal);
+    transform-origin: left;
+    transform: scaleX(0.1666);
+    transition: transform 0.6s ease;
+    z-index: 100;
+  }
+
+  /* ── Slide Number ── */
+  .slide-counter {
+    position: absolute;
+    bottom: 24px;
+    right: 32px;
+    font-size: 13px;
+    color: var(--nf-text-muted);
+    font-weight: 500;
+    z-index: 100;
+    opacity: 0.5;
+  }
+  .slide-cta .slide-counter { color: rgba(255,255,255,0.4); }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideRight {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .slide.active .hero-badge { animation: fadeUp 0.6s 0.2s forwards; }
+  .slide.active .hero-title { animation: fadeUp 0.7s 0.4s forwards; }
+  .slide.active .hero-subtitle { animation: fadeUp 0.6s 0.6s forwards; }
+  .slide.active .hero-cta-row { animation: fadeUp 0.6s 0.8s forwards; }
+  .slide.active .hero-mockup { animation: scaleIn 0.8s 1.0s forwards; }
+
+  .slide.active .dash-sidebar { animation: slideRight 0.5s 0.1s both; }
+  .slide.active .dash-hero-card { animation: fadeUp 0.6s 0.3s both; }
+  .slide.active .dash-stat-card:nth-child(1) { animation: fadeUp 0.5s 0.5s both; }
+  .slide.active .dash-stat-card:nth-child(2) { animation: fadeUp 0.5s 0.6s both; }
+  .slide.active .dash-stat-card:nth-child(3) { animation: fadeUp 0.5s 0.7s both; }
+  .slide.active .dash-panel:nth-child(1) { animation: fadeUp 0.5s 0.8s both; }
+  .slide.active .dash-panel:nth-child(2) { animation: fadeUp 0.5s 0.9s both; }
+
+  .slide.active .patients-main { animation: fadeIn 0.5s 0.2s both; }
+  .slide.active .table-row:nth-child(1) { animation: fadeUp 0.4s 0.3s both; }
+  .slide.active .table-row:nth-child(2) { animation: fadeUp 0.4s 0.4s both; }
+  .slide.active .table-row:nth-child(3) { animation: fadeUp 0.4s 0.5s both; }
+  .slide.active .table-row:nth-child(4) { animation: fadeUp 0.4s 0.6s both; }
+  .slide.active .table-row:nth-child(5) { animation: fadeUp 0.4s 0.7s both; }
+
+  .slide.active .meal-card:nth-child(1) { animation: fadeUp 0.5s 0.3s both; }
+  .slide.active .meal-card:nth-child(2) { animation: fadeUp 0.5s 0.45s both; }
+  .slide.active .meal-card:nth-child(3) { animation: fadeUp 0.5s 0.6s both; }
+  .slide.active .meal-card:nth-child(4) { animation: fadeUp 0.5s 0.75s both; }
+
+  .slide.active .messages-list { animation: slideRight 0.5s 0.2s both; }
+  .slide.active .chat-body { animation: fadeIn 0.6s 0.4s both; }
+
+  .slide.active .cta-logo { animation: fadeUp 0.6s 0.2s forwards; }
+  .slide.active .cta-title { animation: fadeUp 0.7s 0.4s forwards; }
+  .slide.active .cta-subtitle { animation: fadeUp 0.6s 0.6s forwards; }
+  .slide.active .cta-btn { animation: fadeUp 0.6s 0.8s forwards; }
+  .slide.active .cta-features { animation: fadeUp 0.6s 1.0s forwards; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SLIDE 1: HERO ═══════════ -->
+<div class="slide slide-hero active" data-slide="1">
+  <div class="hero-badge">🌿 Plataforma para Nutricionistas</div>
+  <h1 class="hero-title">Gestão completa da sua<br><span>clínica de nutrição</span></h1>
+  <p class="hero-subtitle">Agenda, prontuário, cardápios personalizados, mensagens e financeiro — tudo em um só lugar, com inteligência artificial.</p>
+  <div class="hero-cta-row">
+    <button class="btn-primary">Começar Gratuitamente</button>
+    <button class="btn-secondary">Ver Demonstração</button>
+  </div>
+  <div class="hero-mockup">
+    <div class="mockup-sidebar">
+      <div class="mockup-sidebar-logo">🍃 NutriFlow</div>
+      <div class="mockup-nav-item active"><div class="mockup-nav-icon"></div>Dashboard</div>
+      <div class="mockup-nav-item"><div class="mockup-nav-icon"></div>Pacientes</div>
+      <div class="mockup-nav-item"><div class="mockup-nav-icon"></div>Agenda</div>
+      <div class="mockup-nav-item"><div class="mockup-nav-icon"></div>Cardápios</div>
+      <div class="mockup-nav-item"><div class="mockup-nav-icon"></div>Mensagens</div>
+      <div class="mockup-nav-item"><div class="mockup-nav-icon"></div>Financeiro</div>
+    </div>
+    <div class="mockup-content">
+      <div class="mockup-header">
+        <div class="mockup-greeting">
+          <h2>Bom dia, Dra. Ana 👋</h2>
+          <p>Terça-feira, 21 de Outubro</p>
+        </div>
+      </div>
+      <div class="mockup-stats">
+        <div class="mockup-stat-card">
+          <div class="stat-label">Consultas Hoje</div>
+          <div class="stat-value" style="color: var(--nf-teal)">8</div>
+          <div class="stat-trend trend-up">↑ 12% vs semana passada</div>
+        </div>
+        <div class="mockup-stat-card">
+          <div class="stat-label">Pacientes Ativos</div>
+          <div class="stat-value" style="color: var(--nf-coral)">142</div>
+          <div class="stat-trend trend-up">↑ 8 novos este mês</div>
+        </div>
+        <div class="mockup-stat-card">
+          <div class="stat-label">Receita Mensal</div>
+          <div class="stat-value" style="color: #6366f1">R$ 18.4k</div>
+          <div class="stat-trend trend-up">↑ 15% vs mês anterior</div>
+        </div>
+      </div>
+      <div class="mockup-chart-area">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;">Atendimento Semanal</div>
+        <div class="chart-bars">
+          <div class="chart-bar" style="height:45%;background:var(--nf-teal);opacity:0.7"></div>
+          <div class="chart-bar" style="height:70%;background:var(--nf-teal);opacity:0.8"></div>
+          <div class="chart-bar" style="height:55%;background:var(--nf-teal);opacity:0.7"></div>
+          <div class="chart-bar" style="height:85%;background:var(--nf-teal)"></div>
+          <div class="chart-bar" style="height:65%;background:var(--nf-teal);opacity:0.8"></div>
+          <div class="chart-bar" style="height:40%;background:var(--nf-coral);opacity:0.6"></div>
+          <div class="chart-bar" style="height:30%;background:var(--nf-coral);opacity:0.5"></div>
+          <div class="chart-bar" style="height:75%;background:var(--nf-teal);opacity:0.8"></div>
+          <div class="chart-bar" style="height:90%;background:var(--nf-teal)"></div>
+          <div class="chart-bar" style="height:60%;background:var(--nf-teal);opacity:0.7"></div>
+          <div class="chart-bar" style="height:50%;background:var(--nf-teal);opacity:0.6"></div>
+          <div class="chart-bar" style="height:80%;background:var(--nf-teal);opacity:0.9"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SLIDE 2: DASHBOARD ═══════════ -->
+<div class="slide slide-dashboard" data-slide="2">
+  <div class="dash-sidebar">
+    <div class="dash-logo">
+      <div class="dash-logo-leaf">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      </div>
+      NutriFlow
+    </div>
+    <div class="dash-nav-item active"><div class="dash-nav-icon" style="background:var(--nf-teal)"></div>Dashboard</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Pacientes</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Agenda</div>
+    <div class="dash-nav-section">Clínica</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Cardápios</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Mensagens</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Biblioteca</div>
+    <div class="dash-nav-section">Gestão</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Financeiro</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Perfil</div>
+  </div>
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div class="dash-search">🔍 Buscar paciente, consulta...</div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--nf-border)"></div>
+        <div class="dash-avatar"></div>
+      </div>
+    </div>
+    <div class="dash-hero-card">
+      <div class="dash-hero-pattern"></div>
+      <div class="dash-hero-content">
+        <div class="dash-hero-greeting">Boa tarde 👋</div>
+        <div class="dash-hero-name">Dra. Ana Carolina</div>
+        <div class="dash-hero-date">Terça-feira, 21 de Outubro de 2026</div>
+      </div>
+      <div class="dash-hero-icons">
+        <div class="dash-hero-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <div class="dash-hero-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="dash-hero-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+      </div>
+    </div>
+    <div class="dash-stats-grid">
+      <div class="dash-stat-card">
+        <div class="dash-stat-header">
+          <div>
+            <div class="dash-stat-title">Atendimentos Presenciais</div>
+            <div class="dash-stat-value" style="color:#C4764A">24</div>
+            <div class="dash-stat-label">este mês</div>
+          </div>
+        </div>
+        <div class="dash-stat-trend trend-down">↓ 5% vs mês anterior</div>
+        <div class="dash-stat-sparkline" style="background:linear-gradient(to top, rgba(196,118,74,0.15), transparent)"></div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="dash-stat-header">
+          <div>
+            <div class="dash-stat-title">Teleconsultas</div>
+            <div class="dash-stat-value" style="color:#518C5B">38</div>
+            <div class="dash-stat-label">este mês</div>
+          </div>
+        </div>
+        <div class="dash-stat-trend trend-up">↑ 18% vs mês anterior</div>
+        <div class="dash-stat-sparkline" style="background:linear-gradient(to top, rgba(81,140,91,0.15), transparent)"></div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="dash-stat-header">
+          <div>
+            <div class="dash-stat-title">Exames Analisados</div>
+            <div class="dash-stat-value" style="color:#6366f1">12</div>
+            <div class="dash-stat-label">este mês</div>
+          </div>
+        </div>
+        <div class="dash-stat-trend" style="color:var(--nf-text-muted)">→ estável</div>
+        <div class="dash-stat-sparkline" style="background:linear-gradient(to top, rgba(99,102,241,0.12), transparent)"></div>
+      </div>
+    </div>
+    <div class="dash-bottom-grid">
+      <div class="dash-panel">
+        <div class="dash-panel-title">Próximas Consultas</div>
+        <div class="appointment-row">
+          <div class="appt-time">09:00</div>
+          <div class="appt-avatar" style="background:linear-gradient(135deg,#7BC4A8,#518C5B)"></div>
+          <div class="appt-info"><div class="appt-name">Maria Silva</div><div class="appt-type">Primeira Consulta</div></div>
+          <div class="appt-status status-confirmed">Confirmada</div>
+        </div>
+        <div class="appointment-row">
+          <div class="appt-time">10:30</div>
+          <div class="appt-avatar" style="background:linear-gradient(135deg,#E8734A,#C4764A)"></div>
+          <div class="appt-info"><div class="appt-name">João Santos</div><div class="appt-type">Retorno Mensal</div></div>
+          <div class="appt-status status-confirmed">Confirmada</div>
+        </div>
+        <div class="appointment-row">
+          <div class="appt-time">14:00</div>
+          <div class="appt-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8)"></div>
+          <div class="appt-info"><div class="appt-name">Carla Oliveira</div><div class="appt-type">Avaliação Corporal</div></div>
+          <div class="appt-status status-pending">Pendente</div>
+        </div>
+        <div class="appointment-row">
+          <div class="appt-time">15:30</div>
+          <div class="appt-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)"></div>
+          <div class="appt-info"><div class="appt-name">Pedro Costa</div><div class="appt-type">Teleconsulta</div></div>
+          <div class="appt-status status-confirmed">Confirmada</div>
+        </div>
+      </div>
+      <div class="dash-panel">
+        <div class="dash-panel-title">Progresso dos Planos</div>
+        <div class="progress-row">
+          <div class="progress-label">Cardápios</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:78%;background:var(--nf-teal)"></div></div>
+          <div class="progress-pct" style="color:var(--nf-teal)">78%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Evoluções</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:62%;background:var(--nf-coral)"></div></div>
+          <div class="progress-pct" style="color:var(--nf-coral)">62%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Exames</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:45%;background:#6366f1"></div></div>
+          <div class="progress-pct" style="color:#6366f1">45%</div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label">Metas Atingidas</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:85%;background:#10b981"></div></div>
+          <div class="progress-pct" style="color:#10b981">85%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SLIDE 3: PACIENTES ═══════════ -->
+<div class="slide slide-patients" data-slide="3">
+  <div class="dash-sidebar">
+    <div class="dash-logo">
+      <div class="dash-logo-leaf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
+      NutriFlow
+    </div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Dashboard</div>
+    <div class="dash-nav-item active"><div class="dash-nav-icon" style="background:var(--nf-teal)"></div>Pacientes</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Agenda</div>
+    <div class="dash-nav-section">Clínica</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Cardápios</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Mensagens</div>
+    <div class="dash-nav-section">Gestão</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Financeiro</div>
+  </div>
+  <div class="patients-main">
+    <div class="patients-header">
+      <div>
+        <div class="patients-title">Meus Pacientes</div>
+        <div style="font-size:14px;color:var(--nf-text-muted);margin-top:4px;">142 pacientes ativos</div>
+      </div>
+      <div class="patients-actions">
+        <button class="btn-sm">Filtrar</button>
+        <button class="btn-sm">Exportar</button>
+        <button class="btn-sm btn-sm-primary">+ Novo Paciente</button>
+      </div>
+    </div>
+    <div class="patients-table">
+      <div class="table-header">
+        <div>Paciente</div>
+        <div>Última Consulta</div>
+        <div>Status</div>
+        <div>Plano</div>
+        <div>Ações</div>
+      </div>
+      <div class="table-row">
+        <div class="patient-cell-name"><div class="patient-avatar-sm" style="background:linear-gradient(135deg,#7BC4A8,#518C5B)"></div>Maria Silva</div>
+        <div>18 Out 2026</div>
+        <div><span class="tag tag-active">Ativo</span></div>
+        <div style="font-size:13px;color:var(--nf-text-muted)">Emagrecimento</div>
+        <div style="color:var(--nf-teal);cursor:pointer">Ver →</div>
+      </div>
+      <div class="table-row">
+        <div class="patient-cell-name"><div class="patient-avatar-sm" style="background:linear-gradient(135deg,#E8734A,#C4764A)"></div>João Santos</div>
+        <div>15 Out 2026</div>
+        <div><span class="tag tag-active">Ativo</span></div>
+        <div style="font-size:13px;color:var(--nf-text-muted)">Hipertrofia</div>
+        <div style="color:var(--nf-teal);cursor:pointer">Ver →</div>
+      </div>
+      <div class="table-row">
+        <div class="patient-cell-name"><div class="patient-avatar-sm" style="background:linear-gradient(135deg,#6366f1,#818cf8)"></div>Carla Oliveira</div>
+        <div>—</div>
+        <div><span class="tag tag-new">Novo</span></div>
+        <div style="font-size:13px;color:var(--nf-text-muted)">Reeducação</div>
+        <div style="color:var(--nf-teal);cursor:pointer">Ver →</div>
+      </div>
+      <div class="table-row">
+        <div class="patient-cell-name"><div class="patient-avatar-sm" style="background:linear-gradient(135deg,#f59e0b,#d97706)"></div>Pedro Costa</div>
+        <div>10 Out 2026</div>
+        <div><span class="tag tag-review">Revisão</span></div>
+        <div style="font-size:13px;color:var(--nf-text-muted)">Diabetes Tipo 2</div>
+        <div style="color:var(--nf-teal);cursor:pointer">Ver →</div>
+      </div>
+      <div class="table-row">
+        <div class="patient-cell-name"><div class="patient-avatar-sm" style="background:linear-gradient(135deg,#ec4899,#db2777)"></div>Fernanda Lima</div>
+        <div>08 Out 2026</div>
+        <div><span class="tag tag-active">Ativo</span></div>
+        <div style="font-size:13px;color:var(--nf-text-muted)">Gestacional</div>
+        <div style="color:var(--nf-teal);cursor:pointer">Ver →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SLIDE 4: CARDÁPIO ═══════════ -->
+<div class="slide slide-mealplan" data-slide="4">
+  <div class="dash-sidebar">
+    <div class="dash-logo">
+      <div class="dash-logo-leaf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
+      NutriFlow
+    </div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Dashboard</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Pacientes</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Agenda</div>
+    <div class="dash-nav-section">Clínica</div>
+    <div class="dash-nav-item active"><div class="dash-nav-icon" style="background:var(--nf-teal)"></div>Cardápios</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Mensagens</div>
+    <div class="dash-nav-section">Gestão</div>
+    <div class="dash-nav-item"><div class="dash-nav-icon" style="background:var(--nf-text-muted)"></div>Financeiro</div>
+  </div>
+  <div class="mealplan-main">
+    <div class="mealplan-header">
+      <div>
+        <div class="mealplan-title">Plano Alimentar Personalizado</div>
+        <div class="mealplan-patient">Maria Silva · 1.680 kcal/dia · Emagrecimento</div>
+      </div>
+      <div class="patients-actions">
+        <button class="btn-sm">Gerar PDF</button>
+        <button class="btn-sm btn-sm-primary">Editar Cardápio</button>
+      </div>
+    </div>
+    <div class="meal-grid">
+      <div class="meal-card">
+        <div class="meal-card-accent" style="background:var(--nf-teal)"></div>
+        <div class="meal-time">☀️ Café da Manhã</div>
+        <div class="meal-name">Bowl Proteico</div>
+        <div class="meal-item"><div class="meal-dot" style="background:var(--nf-teal)"></div>Ovos mexidos (2 unid.)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:var(--nf-teal)"></div>Pão integral (1 fatia)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:var(--nf-teal)"></div>Mamão papaia (½ unid.)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:var(--nf-teal)"></div>Café sem açúcar</div>
+        <div class="meal-macros">
+          <div class="macro-pill" style="color:var(--nf-teal)">P: 22g</div>
+          <div class="macro-pill" style="color:var(--nf-coral)">C: 28g</div>
+          <div class="macro-pill" style="color:#6366f1">G: 12g</div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-card-accent" style="background:var(--nf-coral)"></div>
+        <div class="meal-time">🌤️ Almoço</div>
+        <div class="meal-name">Prato Equilibrado</div>
+        <div class="meal-item"><div class="meal-dot" style="background:var(--nf-coral)"></div>Frango grelhado (120g)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:var(--nf-coral)"></div>Arroz integral (3 col.)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:var(--nf-coral)"></div>Feijão carioca (2 col.)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:var(--nf-coral)"></div>Salada verde à vontade</div>
+        <div class="meal-macros">
+          <div class="macro-pill" style="color:var(--nf-teal)">P: 35g</div>
+          <div class="macro-pill" style="color:var(--nf-coral)">C: 42g</div>
+          <div class="macro-pill" style="color:#6366f1">G: 10g</div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-card-accent" style="background:#6366f1"></div>
+        <div class="meal-time">🍎 Lanche da Tarde</div>
+        <div class="meal-name">Snack Funcional</div>
+        <div class="meal-item"><div class="meal-dot" style="background:#6366f1"></div>Iogurte natural (1 pote)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:#6366f1"></div>Granola sem açúcar (2 col.)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:#6366f1"></div>Mel (1 colher chá)</div>
+        <div class="meal-macros">
+          <div class="macro-pill" style="color:var(--nf-teal)">P: 12g</div>
+          <div class="macro-pill" style="color:var(--nf-coral)">C: 24g</div>
+          <div class="macro-pill" style="color:#6366f1">G: 6g</div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-card-accent" style="background:#10b981"></div>
+        <div class="meal-time">🌙 Jantar</div>
+        <div class="meal-name">Leve & Nutritivo</div>
+        <div class="meal-item"><div class="meal-dot" style="background:#10b981"></div>Salmão assado (100g)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:#10b981"></div>Batata doce (2 col.)</div>
+        <div class="meal-item"><div class="meal-dot" style="background:#10b981"></div>Brócolis no vapor</div>
+        <div class="meal-item"><div class="meal-dot" style="background:#10b981"></div>Azeite extra virgem (1 fio)</div>
+        <div class="meal-macros">
+          <div class="macro-pill" style="color:var(--nf-teal)">P: 28g</div>
+          <div class="macro-pill" style="color:var(--nf-coral)">C: 22g</div>
+          <div class="macro-pill" style="color:#6366f1">G: 14g</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SLIDE 5: MENSAGENS ═══════════ -->
+<div class="slide slide-messages" data-slide="5">
+  <div class="dash-sidebar" style="width:220px;padding:24px 12px;">
+    <div class="dash-logo" style="font-size:18px;margin-bottom:32px;">
+      <div class="dash-logo-leaf" style="width:24px;height:24px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
+      NutriFlow
+    </div>
+    <div class="dash-nav-item" style="font-size:13px;padding:9px 10px;"><div class="dash-nav-icon" style="background:var(--nf-text-muted);width:16px;height:16px;"></div>Dashboard</div>
+    <div class="dash-nav-item" style="font-size:13px;padding:9px 10px;"><div class="dash-nav-icon" style="background:var(--nf-text-muted);width:16px;height:16px;"></div>Pacientes</div>
+    <div class="dash-nav-item active" style="font-size:13px;padding:9px 10px;"><div class="dash-nav-icon" style="background:var(--nf-teal);width:16px;height:16px;"></div>Mensagens</div>
+    <div class="dash-nav-item" style="font-size:13px;padding:9px 10px;"><div class="dash-nav-icon" style="background:var(--nf-text-muted);width:16px;height:16px;"></div>Financeiro</div>
+  </div>
+  <div class="messages-main">
+    <div class="messages-list">
+      <div style="font-family:var(--font-display);font-size:20px;font-weight:600;margin-bottom:16px;padding:0 4px;">Conversas</div>
+      <div class="msg-contact active">
+        <div class="msg-avatar" style="background:linear-gradient(135deg,#7BC4A8,#518C5B)"></div>
+        <div class="msg-contact-info">
+          <div class="msg-contact-name">Maria Silva</div>
+          <div class="msg-contact-preview">Dra., adorei o novo cardápio! 🥗</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <div class="msg-contact-time">10:32</div>
+          <div class="msg-unread-dot"></div>
+        </div>
+      </div>
+      <div class="msg-contact">
+        <div class="msg-avatar" style="background:linear-gradient(135deg,#E8734A,#C4764A)"></div>
+        <div class="msg-contact-info">
+          <div class="msg-contact-name">João Santos</div>
+          <div class="msg-contact-preview">Posso substituir o frango?</div>
+        </div>
+        <div class="msg-contact-time">Ontem</div>
+      </div>
+      <div class="msg-contact">
+        <div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8)"></div>
+        <div class="msg-contact-info">
+          <div class="msg-contact-name">Carla Oliveira</div>
+          <div class="msg-contact-preview">Obrigada pelas orientações!</div>
+        </div>
+        <div class="msg-contact-time">19 Out</div>
+      </div>
+      <div class="msg-contact">
+        <div class="msg-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)"></div>
+        <div class="msg-contact-info">
+          <div class="msg-contact-name">Pedro Costa</div>
+          <div class="msg-contact-preview">Enviei os exames em anexo</div>
+        </div>
+        <div class="msg-contact-time">18 Out</div>
+      </div>
+      <div class="msg-contact">
+        <div class="msg-avatar" style="background:linear-gradient(135deg,#ec4899,#db2777)"></div>
+        <div class="msg-contact-info">
+          <div class="msg-contact-name">Fernanda Lima</div>
+          <div class="msg-contact-preview">Quando é o próximo retorno?</div>
+        </div>
+        <div class="msg-contact-time">17 Out</div>
+      </div>
+    </div>
+    <div class="messages-chat">
+      <div class="chat-header">
+        <div class="msg-avatar" style="background:linear-gradient(135deg,#7BC4A8,#518C5B);width:40px;height:40px;"></div>
+        <div>
+          <div class="chat-header-name">Maria Silva</div>
+          <div class="chat-header-status">● Online agora</div>
+        </div>
+      </div>
+      <div class="chat-body">
+        <div class="chat-bubble bubble-received">Bom dia, Dra.! Tudo bem? 😊</div>
+        <div class="chat-bubble bubble-sent">Bom dia, Maria! Tudo ótimo. Como está se sentindo com o novo plano?</div>
+        <div class="chat-bubble bubble-received">Estou adorando! As receitas são deliciosas e práticas de preparar. Já perdi 2kg essa semana! 🎉</div>
+        <div class="chat-bubble bubble-sent">Que maravilhoso! Continue assim. Lembre-se de hidratar bastante e manter a caminhada diária.</div>
+        <div class="chat-bubble bubble-received">Dra., adorei o novo cardápio! 🥗 Posso trocar o salmão por atum no jantar?</div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-input">Escreva uma mensagem...</div>
+        <button class="chat-send"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SLIDE 6: CTA FINAL ═══════════ -->
+<div class="slide slide-cta" data-slide="6">
+  <div class="cta-logo">🍃 NutriFlow</div>
+  <h2 class="cta-title">Transforme a gestão da<br>sua clínica de nutrição</h2>
+  <p class="cta-subtitle">Junte-se a mais de 2.000 nutricionistas que já usam o NutriFlow para atender melhor, organizar mais e crescer com inteligência.</p>
+  <button class="cta-btn">Começar Agora — É Grátis</button>
+  <div class="cta-features">
+    <div class="cta-feature"><div class="cta-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#518C5B" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>14 dias grátis</div>
+    <div class="cta-feature"><div class="cta-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#518C5B" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>Sem cartão de crédito</div>
+    <div class="cta-feature"><div class="cta-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#518C5B" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>LGPD Compliant</div>
+  </div>
+</div>
+
+<!-- Progress & Counter -->
+<div class="progress-indicator" id="progressBar" style="transform:scaleX(0.1666)"></div>
+<div class="slide-counter" id="slideCounter">1 / 6</div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  let currentSlide = 0;
+  const SLIDE_DURATION = 5000; // 5 seconds per slide
+
+  function showSlide(index) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[index].classList.add('active');
+    document.getElementById('progressBar').style.transform = 'scaleX(' + ((index + 1) / totalSlides) + ')';
+    document.getElementById('slideCounter').textContent = (index + 1) + ' / ' + totalSlides;
+
+    // Update counter color for dark slide
+    const counter = document.getElementById('slideCounter');
+    if (index === totalSlides - 1) {
+      counter.style.color = 'rgba(255,255,255,0.4)';
+    } else {
+      counter.style.color = '';
+    }
+  }
+
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    showSlide(currentSlide);
+  }
+
+  // Auto-advance
+  let timer = setInterval(nextSlide, SLIDE_DURATION);
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      clearInterval(timer);
+      currentSlide = Math.min(currentSlide + 1, totalSlides - 1);
+      showSlide(currentSlide);
+      timer = setInterval(nextSlide, SLIDE_DURATION);
+    } else if (e.key === 'ArrowLeft') {
+      clearInterval(timer);
+      currentSlide = Math.max(currentSlide - 1, 0);
+      showSlide(currentSlide);
+      timer = setInterval(nextSlide, SLIDE_DURATION);
+    } else if (e.key === 'p' || e.key === 'P') {
+      // Pause/resume
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      } else {
+        timer = setInterval(nextSlide, SLIDE_DURATION);
+      }
+    }
+  });
+
+  // Click navigation
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('button')) return; // Don't advance on button clicks
+    const rect = document.body.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    clearInterval(timer);
+    if (x > rect.width / 2) {
+      currentSlide = Math.min(currentSlide + 1, totalSlides - 1);
+    } else {
+      currentSlide = Math.max(currentSlide - 1, 0);
+    }
+    showSlide(currentSlide);
+    timer = setInterval(nextSlide, SLIDE_DURATION);
+  });
+})();
+</script>
+</body>
+</html>

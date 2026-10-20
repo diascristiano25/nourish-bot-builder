@@ -123,7 +123,7 @@ const staticActions: CommandAction[] = useMemo(() => [
 { id: 'financeiro', label: 'Financeiro', icon: DollarSign, action: () => navigate('/financeiro'), keywords: ['dinheiro', 'receita', 'despesa'], group: 'navigation' },
 { id: 'profile', label: 'Perfil', icon: User, action: () => navigate('/perfil'), keywords: ['conta', 'configurações'], group: 'navigation' },
 { id: 'new-patient', label: 'Novo Paciente', icon: Plus, action: () => navigate('/novo-paciente'), keywords: ['adicionar', 'cadastrar', 'criar'], group: 'actions' },
-{ id: 'new-meal-plan', label: 'Gerar Cardápio com IA', icon: Sparkles, action: () => navigate('/gerar-cardapio'), keywords: ['dieta', 'plano', 'alimentar', 'inteligência artificial'], group: 'actions' },
+{ id: 'new-meal-plan', label: 'Gerar Cardápio com IA', icon: Sparkles, action: () => navigate('/pacientes'), keywords: ['dieta', 'plano', 'alimentar', 'inteligência artificial'], group: 'actions' },
 { id: 'help', label: 'Suporte', icon: HelpCircle, action: () => navigate('/suporte/ajuda'), keywords: ['ajuda', 'contato', 'faq'], group: 'settings' },
 { id: 'logout', label: 'Sair', icon: LogOut, action: () => signOut(), keywords: ['deslogar', 'logout'], group: 'settings' },
 ], [navigate, signOut]);

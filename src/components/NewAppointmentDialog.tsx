@@ -84,7 +84,7 @@ export function NewAppointmentDialog({
         .from('profiles')
         .select('id')
         .eq('user_id', user!.id)
-        .single();
+        .maybeSingle();
 
       if (nutritionist) {
         const { data, error } = await supabase
@@ -119,7 +119,7 @@ export function NewAppointmentDialog({
         .from('profiles')
         .select('id')
         .eq('user_id', user!.id)
-        .single();
+        .maybeSingle();
 
       if (!nutritionist) throw new Error('Perfil não encontrado');
 
@@ -135,9 +135,16 @@ export function NewAppointmentDialog({
           scheduled_at: dateTime.toISOString(),
           notes: notes || null,
           status: 'scheduled',
+          type: 'consultation',
         });
 
-      if (error) throw error;
+      if (error) {
+        // Tratar erro RLS com mensagem amigável
+        if (error.message?.includes('row-level security')) {
+          throw new Error('Permissão insuficiente para criar agendamento. Verifique as políticas de segurança do banco de dados.');
+        }
+        throw error;
+      }
 
       toast({
         title: 'Agendamento criado',

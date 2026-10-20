@@ -220,7 +220,7 @@ export default function PatientDetail() {
         .from('profiles')
         .select('*')
         .eq('user_id', user!.id)
-        .single();
+        .maybeSingle();
       
       if (nutriData) {
         setNutritionistName(nutriData.full_name);
@@ -232,7 +232,7 @@ export default function PatientDetail() {
         .from('patients')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (patientError) throw patientError;
       setPatient(patientData);
@@ -375,11 +375,22 @@ export default function PatientDetail() {
       fetchPatientData();
     } catch (error: any) {
       console.error('Error generating access:', error);
-      toast({
-        title: "Erro ao gerar acesso",
-        description: error.message || "Não foi possível liberar o acesso. Tente novamente.",
-        variant: "destructive",
-      });
+      // Fallback: a Edge Function de email pode não estar deployada — copia o link
+      // do portal para a área de transferência para que o acesso ainda possa ser liberado.
+      const portalLink = `${window.location.origin}/paciente/${patient.id}`;
+      try {
+        await navigator.clipboard.writeText(portalLink);
+        toast({
+          title: "Link copiado! 📋",
+          description: "O envio automático de email não está disponível agora. O link de acesso do paciente foi copiado para a área de transferência — envie-o por WhatsApp ou email.",
+        });
+      } catch {
+        toast({
+          title: "Erro ao gerar acesso",
+          description: `Não foi possível enviar o email automaticamente. Link do portal: ${portalLink}`,
+          variant: "destructive",
+        });
+      }
     } finally {
       setSendingMagicLink(false);
     }

@@ -12,9 +12,9 @@ interface PlansProgressProps {
 }
 
 const defaultPlans: PlanItem[] = [
-  { label: 'Consultas', percent: 64, color: 'bg-[#518C5B]' },
-  { label: 'Análises', percent: 50, color: 'bg-[#C4764A]' },
-  { label: 'Reuniões', percent: 33, color: 'bg-pink-500' },
+  { label: "Consultas", percent: 0, color: "bg-[#518C5B]" },
+  { label: "Pacientes", percent: 0, color: "bg-[#C4764A]" },
+  { label: "Planos", percent: 0, color: "bg-pink-500" },
 ];
 
 export function PlansProgress({ plans = defaultPlans }: PlansProgressProps) {

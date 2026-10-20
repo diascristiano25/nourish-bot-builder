@@ -15,13 +15,7 @@ interface MiniCalendarProps {
   events?: CalendarEvent[];
 }
 
-const defaultEvents: CalendarEvent[] = [
-  { time: '14:00', title: 'Consulta com Dra. Marina', color: 'bg-pink-500' },
-  { time: '14:30', title: 'Avaliação Sr. Carlos', color: 'bg-blue-500' },
-  { time: '15:00', title: 'Retorno Sra. Ana', color: 'bg-emerald-500' },
-  { time: '15:50', title: 'Plano alimentar João', color: 'bg-purple-500' },
-  { time: '16:10', title: 'Reunião equipe', color: 'bg-amber-500' },
-];
+const defaultEvents: CalendarEvent[] = [];
 
 export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
   const today = new Date();
@@ -101,7 +95,11 @@ export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
         </div>
 
         <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-          {events.map((event, i) => (
+          {events.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-sm text-slate-400">Nenhuma consulta agendada para este dia</p>
+              </div>
+            ) : events.map((event, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -10 }}

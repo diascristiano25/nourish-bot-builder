@@ -21,6 +21,7 @@ interface NutritionistProfile {
   id: string;
   full_name: string;
   crn: string | null;
+  logo_url: string | null;
 }
 
 interface Appointment {
@@ -47,6 +48,8 @@ export default function ModernDashboard() {
   const [onlineWork, setOnlineWork] = useState(0);
   const [labWork, setLabWork] = useState(0);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [monthAppointments, setMonthAppointments] = useState(0);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
@@ -61,7 +64,7 @@ export default function ModernDashboard() {
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, crn')
+        .select('id, full_name, crn, logo_url')
         .eq('user_id', user!.id)
         .maybeSingle();
 
@@ -76,7 +79,7 @@ export default function ModernDashboard() {
             full_name: user!.user_metadata?.full_name || 'Nutricionista'
           })
           .select('id, full_name, crn')
-          .single();
+          .maybeSingle();
         if (createError) throw createError;
         currentProfile = newProfile;
       }
@@ -122,15 +125,6 @@ export default function ModernDashboard() {
         };
       });
 
-      if (events.length === 0) {
-        events.push(
-          { time: '09:00', title: 'Consulta com Dra. Marina', color: 'bg-pink-500' },
-          { time: '10:30', title: 'Avaliação Sr. Carlos', color: 'bg-blue-500' },
-          { time: '14:00', title: 'Retorno Sra. Ana', color: 'bg-emerald-500' },
-          { time: '15:30', title: 'Plano alimentar João', color: 'bg-purple-500' },
-          { time: '16:00', title: 'Reunião equipe', color: 'bg-amber-500' },
-        );
-      }
       setCalendarEvents(events);
 
       // Monthly stats for lab work (meal plans generated)
@@ -149,16 +143,10 @@ export default function ModernDashboard() {
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
       // Use mock data on error
-      setOfflineWork(27);
-      setOnlineWork(9);
-      setLabWork(19);
-      setCalendarEvents([
-        { time: '14:00', title: 'Consulta com Dra. Marina', color: 'bg-pink-500' },
-        { time: '14:30', title: 'Avaliação Sr. Carlos', color: 'bg-blue-500' },
-        { time: '15:00', title: 'Retorno Sra. Ana', color: 'bg-emerald-500' },
-        { time: '15:50', title: 'Plano alimentar João', color: 'bg-purple-500' },
-        { time: '16:10', title: 'Reunião equipe', color: 'bg-amber-500' },
-      ]);
+      setOfflineWork(0);
+      setOnlineWork(0);
+      setLabWork(0);
+      setCalendarEvents([]);
     } finally {
       setLoading(false);
     }
@@ -202,7 +190,9 @@ export default function ModernDashboard() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/mensagens')}
               className="w-12 h-12 rounded-2xl bg-white border border-slate-200/60 shadow-soft flex items-center justify-center hover:bg-slate-50 transition-colors relative"
+              title="Notificações / Mensagens"
             >
               <Bell className="w-5 h-5 text-muted-foreground" />
               <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
@@ -210,7 +200,9 @@ export default function ModernDashboard() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/perfil')}
               className="w-12 h-12 rounded-2xl bg-white border border-slate-200/60 shadow-soft flex items-center justify-center hover:bg-slate-50 transition-colors"
+              title="Configurações do Perfil"
             >
               <Settings className="w-5 h-5 text-muted-foreground" />
             </motion.button>
@@ -229,7 +221,7 @@ export default function ModernDashboard() {
               { id: 'new-patient', label: 'Novo Paciente', icon: <UserPlus className="w-4 h-4" />, onClick: () => navigate('/novo-paciente'), color: 'sage' },
               { id: 'new-appointment', label: 'Agendar Consulta', icon: <CalendarPlus className="w-4 h-4" />, onClick: () => navigate('/agenda'), color: 'terracotta' },
               { id: 'new-plan', label: 'Criar Plano', icon: <Utensils className="w-4 h-4" />, onClick: () => navigate('/biblioteca'), color: 'indigo' },
-              { id: 'generate-meal', label: 'Gerar Cardápio', icon: <FileText className="w-4 h-4" />, onClick: () => navigate('/pacientes'), color: 'amber' },
+              { id: 'generate-meal', label: 'Gerar Cardápio', icon: <FileText className="w-4 h-4" />, onClick: () => navigate('/biblioteca'), color: 'amber' },
             ]} />
 
             {/* Work Stats Row */}
@@ -263,12 +255,16 @@ export default function ModernDashboard() {
             {/* Bottom Row - Events & Plans */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <BusynessChart
-                consultations={offlineWork + onlineWork || 25}
-                analyzes={labWork || 10}
-                meetings={3}
-                busynessPercent={Math.min(95, Math.round(((offlineWork + onlineWork) / 30) * 100) || 95)}
+                consultations={offlineWork + onlineWork}
+                analyzes={labWork}
+                meetings={0}
+                busynessPercent={Math.min(100, Math.round(((offlineWork + onlineWork) / 8) * 100))}
               />
-              <PlansProgress />
+              <PlansProgress plans={[
+                { label: 'Consultas', percent: monthAppointments > 0 ? Math.min(100, Math.round((monthAppointments / 30) * 100)) : 0, color: 'bg-[#518C5B]' },
+                { label: 'Pacientes', percent: totalPatients > 0 ? Math.min(100, Math.round((totalPatients / 50) * 100)) : 0, color: 'bg-[#C4764A]' },
+                { label: 'Planos', percent: labWork > 0 ? Math.min(100, Math.round((labWork / 20) * 100)) : 0, color: 'bg-pink-500' },
+              ]} />
             </div>
           </div>
 
@@ -280,6 +276,7 @@ export default function ModernDashboard() {
               location="Brasil"
               crn={profile?.crn || '—'}
               workingHours="9h - 18h"
+              logoUrl={profile?.logo_url}
             />
             <MiniCalendar events={calendarEvents} />
           </div>

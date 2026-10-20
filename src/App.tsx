@@ -114,6 +114,7 @@ function App() {
                       <Route path="/meu-app" element={<PatientMobileApp />} />
                       <Route path="/patient-auth" element={<PatientAuth />} />
                       <Route path="/portal/:patientId" element={<PatientPortal />} />
+                      <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
                       <Route path="*" element={<PatientMobileApp />} />
                     </>
                   ) : (
@@ -192,6 +193,7 @@ function App() {
                       <Route path="/admin" element={<AccountStatusGuard><Admin /></AccountStatusGuard>} />
                       <Route path="/subscription-expired" element={<SubscriptionExpired />} />
                       <Route path="/portal/:patientId" element={<PublicPatientPortal />} />
+                      <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
                       <Route path="/patient-portal" element={<AccountStatusGuard><PatientPortal /></AccountStatusGuard>} />
                       <Route path="/suporte/termos" element={<TermosSuporte />} />
                       <Route path="/suporte/privacidade" element={<PrivacidadeSuporte />} />
