@@ -62,7 +62,7 @@ const Patients = () => {
 
   return (
     <ModernLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <PageHeader
           title="Meus Pacientes"
           subtitle={`${(patients || []).length} pacientes cadastrados · ${activeCount} ativos`}

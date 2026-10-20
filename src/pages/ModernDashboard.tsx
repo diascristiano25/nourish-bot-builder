@@ -183,7 +183,7 @@ export default function ModernDashboard() {
 
   return (
     <ModernLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Top Bar - Search & Actions */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -218,9 +218,9 @@ export default function ModernDashboard() {
         </motion.div>
 
         {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column (2/3 width) */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
             {/* Hero Banner */}
             <DashboardHero name={profile?.full_name || 'Nutricionista'} />
 
@@ -261,7 +261,7 @@ export default function ModernDashboard() {
             </div>
 
             {/* Bottom Row - Events & Plans */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <BusynessChart
                 consultations={offlineWork + onlineWork || 25}
                 analyzes={labWork || 10}
@@ -273,7 +273,7 @@ export default function ModernDashboard() {
           </div>
 
           {/* Right Column (1/3 width) */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <ProfileCard
               name={profile?.full_name || 'Nutricionista'}
               specialty="NUTRICIONISTA"

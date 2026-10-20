@@ -49,7 +49,10 @@ export function ModernSidebar() {
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 25 }}
-      className="fixed left-4 top-4 bottom-4 w-[88px] bg-gradient-to-b from-[#518C5B] to-[#3d7047] rounded-[2rem] flex flex-col items-center py-6 z-50 shadow-2xl shadow-emerald-900/20"
+      className="fixed left-4 top-4 bottom-4 w-[88px] bg-gradient-to-b from-[#518C5B] via-[#4a7d52] to-[#2d5a37] rounded-[2rem] flex flex-col items-center py-6 z-50"
+      style={{
+        boxShadow: '0 25px 50px -12px rgba(45, 90, 55, 0.35), inset 0 1px 0 rgba(255,255,255,0.1)'
+      }}
     >
       {/* Logo */}
       <motion.div
@@ -58,7 +61,7 @@ export function ModernSidebar() {
         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
         className="mb-8"
       >
-        <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-inner">
           <Leaf className="w-6 h-6 text-white" />
         </div>
       </motion.div>
@@ -81,7 +84,7 @@ export function ModernSidebar() {
                 cn(
                   "relative flex items-center justify-center w-full h-12 rounded-2xl transition-all duration-300 group",
                   isActive
-                    ? "bg-white/20 shadow-lg shadow-black/10"
+                    ? "shadow-lg"
                     : "hover:bg-white/10"
                 )
               }
@@ -91,31 +94,38 @@ export function ModernSidebar() {
                   {isActive && (
                     <motion.div
                       layoutId="sidebar-active"
-                      className="absolute inset-0 bg-white/20 rounded-2xl"
+                      className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/10"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      style={{
+                        boxShadow: '0 0 20px rgba(255,255,255,0.15), inset 0 1px 0 rgba(255,255,255,0.2)'
+                      }}
                     />
                   )}
                   <item.icon className={cn(
-                    "w-5 h-5 relative z-10 transition-colors",
-                    isActive ? "text-white" : "text-white/70 group-hover:text-white"
+                    "w-5 h-5 relative z-10 transition-all duration-300",
+                    isActive ? "text-white scale-110" : "text-white/60 group-hover:text-white group-hover:scale-105"
                   )} />
-
                   {/* Badge */}
                   {item.badge && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center z-20 border-2 border-[#518C5B]">
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.5, type: "spring" }}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center z-20 border-2 border-[#518C5B] shadow-lg"
+                    >
                       {item.badge}
-                    </span>
+                    </motion.span>
                   )}
-
                   {/* Tooltip */}
                   {hoveredItem === item.name && (
                     <motion.div
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none"
+                      exit={{ opacity: 0, x: -10 }}
+                      className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
                     >
                       {item.name}
-                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900/95" />
                     </motion.div>
                   )}
                 </>
@@ -128,10 +138,10 @@ export function ModernSidebar() {
       {/* Bottom Actions */}
       <div className="flex flex-col items-center gap-2 w-full px-2 mt-auto">
         <motion.button
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
           whileTap={{ scale: 0.95 }}
           onClick={handleSignOut}
-          className="w-full h-12 rounded-2xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
+          className="w-full h-12 rounded-2xl flex items-center justify-center text-white/60 hover:text-white transition-all"
         >
           <LogOut className="w-5 h-5" />
         </motion.button>

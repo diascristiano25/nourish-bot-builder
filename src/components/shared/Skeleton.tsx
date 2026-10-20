@@ -18,17 +18,22 @@ const variantStyles = {
 
 export function Skeleton({ className, variant = 'text', width, height }: SkeletonProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0.4 }}
-      animate={{ opacity: [0.4, 0.7, 0.4] }}
-      transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+    <div
       className={cn(
-        'bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%]',
+        'relative overflow-hidden rounded-md bg-slate-200/60',
         variantStyles[variant],
         className
       )}
       style={{ width, height }}
-    />
+    >
+      {/* Shimmer effect */}
+      <motion.div
+        initial={{ x: '-100%' }}
+        animate={{ x: '100%' }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+      />
+    </div>
   );
 }
 
@@ -80,16 +85,22 @@ export function SkeletonTable({ rows = 5 }: { rows?: number }) {
 
 export function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Hero skeleton */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="h-40 rounded-3xl bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%]"
-        style={{ animation: 'pulse 1.5s ease-in-out infinite' }}
-      />
+        className="relative h-44 rounded-[2rem] overflow-hidden bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200"
+      >
+        <motion.div
+          initial={{ x: '-100%' }}
+          animate={{ x: '100%' }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+        />
+      </motion.div>
       {/* Stats row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <SkeletonCard delay={0.1} />
         <SkeletonCard delay={0.2} />
         <SkeletonCard delay={0.3} />

@@ -88,7 +88,7 @@ export default function Profile() {
 
   return (
     <ModernLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <PageHeader
           title="Meu Perfil"
           subtitle="Personalize suas informações e identidade visual"

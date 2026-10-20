@@ -126,7 +126,7 @@ export default function Agenda() {
   return (
     <ModernLayout>
       <PageTour tourKey="agenda" steps={agendaTourSteps} run />
-      <div className="space-y-6">
+      <div className="space-y-8">
         <PageHeader
           title="Agenda"
           subtitle={format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
@@ -202,7 +202,7 @@ export default function Agenda() {
         </div>
 
         {/* Calendar + Appointments in rich cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <RichCard delay={0.4} padding="lg">
             <Calendar
               selectedDate={selectedDate}

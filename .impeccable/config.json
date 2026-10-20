@@ -68,6 +68,15 @@
         ],
         "createdAt": "2026-10-20T02:08:06.517Z",
         "reason": "false positive: HSL variable declarations in :root block, not rendered text"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/components/nutritionist/dashboard/DashboardHero.tsx"
+        ],
+        "createdAt": "2026-10-20T02:38:36.536Z",
+        "reason": "user confirmed: explicitly requested all 7 visual improvements including gradient text on the greeting name as a premium design touch"
       }
     ]
   }

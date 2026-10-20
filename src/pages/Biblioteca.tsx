@@ -98,7 +98,7 @@ export default function Biblioteca() {
 
   return (
     <ModernLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <PageHeader
           title="Biblioteca de Planos"
           subtitle="Gerencie e organize seus planos de refeição predefinidos"

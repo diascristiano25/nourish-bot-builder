@@ -1,70 +1,128 @@
+import { UserPlus, Sparkles, BarChart3, ArrowRight } from 'lucide-react';
+
 const stages = [
   {
     number: 1,
+    icon: UserPlus,
     title: 'Cadastre o perfil do paciente',
-    description: 'Anamnese inteligente que coleta dados essenciais em minutos.',
+    description: 'Anamnese inteligente que coleta dados essenciais em minutos. Histórico, objetivos, restrições e preferências — tudo estruturado automaticamente.',
+    features: ['Anamnese digital', 'Importação de dados', 'Perfis personalizados'],
+    color: 'teal',
   },
   {
     number: 2,
+    icon: Sparkles,
     title: 'IA gera o cardápio personalizado',
-    description: 'Baseado em objetivos, restrições e preferências alimentares.',
+    description: 'Baseado em objetivos, restrições e preferências alimentares. Gemini 2.5 cria planos equilibrados com precisão nutricional clínica.',
+    features: ['Geração em < 30s', 'Balanceamento automático', 'Substituições inteligentes'],
+    color: 'coral',
   },
   {
     number: 3,
+    icon: BarChart3,
     title: 'Acompanhe resultados em tempo real',
-    description: 'Dashboard de evolução com métricas que importam.',
+    description: 'Dashboard de evolução com métricas que importam. Visualize progresso, ajuste planos e impressione pacientes com dados visuais.',
+    features: ['Analytics em tempo real', 'Relatórios automáticos', 'Alertas inteligentes'],
+    color: 'teal',
   },
 ];
 
 export default function HowItWorksSection() {
   return (
-    <section id="como-funciona" className="bg-nf-bg py-24 md:py-32">
-      <div className="max-w-4xl mx-auto px-6">
-        <h2 className="font-serif text-3xl md:text-5xl font-bold text-nf-text mb-16 text-center">
-          Como funciona
-        </h2>
+    <section id="como-funciona" className="relative bg-nf-bg py-24 md:py-36 overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-nf-border to-transparent" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-nf-teal/2 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative">
-          {/* Vertical timeline line */}
-          <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-0.5 bg-nf-teal/30 md:-translate-x-px">
-            <div className="absolute inset-0 bg-nf-teal scroll-line-grow origin-top" />
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Section header */}
+        <div className="text-center mb-20 scroll-fade-up">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-nf-coral/10 text-nf-coral text-xs font-semibold uppercase tracking-wider mb-4">
+            Como Funciona
+          </span>
+          <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-nf-text mb-6">
+            Três passos para a{' '}
+            <span className="gradient-text">transformação</span>
+          </h2>
+          <p className="text-lg text-nf-text-muted max-w-2xl mx-auto leading-relaxed">
+            Do cadastro ao resultado mensurável — um fluxo intuitivo powered by IA.
+          </p>
+        </div>
+
+        {/* Timeline */}
+        <div className="relative max-w-5xl mx-auto">
+          {/* Vertical line with gradient */}
+          <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 md:-translate-x-px overflow-hidden">
+            <div className="absolute inset-0 bg-nf-border/30" />
+            <div className="absolute inset-0 bg-gradient-to-b from-nf-teal via-nf-coral to-nf-teal scroll-line-grow origin-top" />
           </div>
 
-          <div className="space-y-16">
+          <div className="space-y-20 md:space-y-32">
             {stages.map((stage, i) => {
               const isEven = i % 2 === 0;
+              const Icon = stage.icon;
+
               return (
                 <div
                   key={stage.number}
-                  className={`relative flex items-start gap-8 ${
+                  className={`relative flex flex-col md:flex-row items-start gap-8 md:gap-16 ${
                     isEven ? 'md:flex-row' : 'md:flex-row-reverse'
                   }`}
                 >
-                  {/* Number circle */}
-                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-nf-teal text-white flex items-center justify-center font-bold text-lg z-10 shadow-lg">
-                    {stage.number}
+                  {/* Number circle with glow */}
+                  <div className="absolute left-8 md:left-1/2 -translate-x-1/2 z-20">
+                    <div className={`relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl ${
+                      stage.color === 'teal'
+                        ? 'bg-gradient-to-br from-nf-teal to-nf-teal/80 glow-teal'
+                        : 'bg-gradient-to-br from-nf-coral to-nf-coral/80 glow-coral'
+                    }`}>
+                      <Icon className="w-7 h-7 text-white" />
+                      {/* Pulse ring */}
+                      <div className={`absolute inset-0 rounded-2xl ${
+                        stage.color === 'teal' ? 'bg-nf-teal/20' : 'bg-nf-coral/20'
+                      } animate-ping opacity-20`} style={{ animationDuration: '3s' }} />
+                    </div>
+                    {/* Step number badge */}
+                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-nf-bg border-2 border-nf-border flex items-center justify-center text-xs font-bold text-nf-text shadow-sm">
+                      {stage.number}
+                    </div>
                   </div>
 
                   {/* Content card */}
                   <div
-                    className={`ml-20 md:ml-0 md:w-[calc(50%-3rem)] ${
-                      isEven
-                        ? 'md:pr-0 md:text-right scroll-slide-left'
-                        : 'md:pl-0 md:text-left scroll-slide-right'
+                    className={`ml-24 md:ml-0 md:w-[calc(50%-4rem)] ${
+                      isEven ? 'scroll-slide-left' : 'scroll-slide-right'
                     }`}
                   >
-                    <div className="bg-nf-bg-alt border border-nf-border rounded-xl p-6">
-                      <h3 className="font-serif text-xl font-bold text-nf-text mb-2">
+                    <div className="glass-card rounded-3xl p-8 hover-lift card-shine group">
+                      <h3 className="font-serif text-2xl md:text-3xl font-bold text-nf-text mb-4 group-hover:gradient-text transition-all duration-300">
                         {stage.title}
                       </h3>
-                      <p className="text-nf-text-muted leading-relaxed">
+                      <p className="text-nf-text-muted leading-relaxed mb-6">
                         {stage.description}
                       </p>
+
+                      {/* Feature pills */}
+                      <div className="flex flex-wrap gap-2">
+                        {stage.features.map((feature) => (
+                          <span
+                            key={feature}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                              stage.color === 'teal'
+                                ? 'bg-nf-teal/10 text-nf-teal border border-nf-teal/20'
+                                : 'bg-nf-coral/10 text-nf-coral border border-nf-coral/20'
+                            }`}
+                          >
+                            <ArrowRight className="w-3 h-3" />
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
                   {/* Spacer for alternating layout */}
-                  <div className="hidden md:block md:w-[calc(50%-3rem)]" />
+                  <div className="hidden md:block md:w-[calc(50%-4rem)]" />
                 </div>
               );
             })}

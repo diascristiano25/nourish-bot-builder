@@ -148,7 +148,7 @@ export default function Financeiro() {
 
   return (
     <ModernLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <PageHeader
           title="Financeiro"
           subtitle="Acompanhe suas receitas, pagamentos e transações"

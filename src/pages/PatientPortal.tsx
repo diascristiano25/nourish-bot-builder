@@ -59,7 +59,7 @@ const firstName = patientData?.full_name?.split(' ')[0] || 'Paciente';
 
 return (
 <PatientLayout>
-<div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
+<div className="space-y-8 p-4 md:p-6 max-w-7xl mx-auto">
 <PageHeader
 title={`Bem-vindo, ${firstName}!`}
 subtitle="Acompanhe sua evolução e cuide da sua saúde"

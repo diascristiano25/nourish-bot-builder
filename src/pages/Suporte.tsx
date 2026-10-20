@@ -32,7 +32,7 @@ export default function Suporte() {
 
   return (
     <ModernLayout>
-      <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="space-y-8 max-w-4xl mx-auto">
         <PageHeader
           title="Centro de Suporte"
           subtitle="Encontre respostas para suas dúvidas sobre o NutriFlow"
