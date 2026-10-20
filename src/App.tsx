@@ -13,6 +13,9 @@ import { Loader2 } from "lucide-react";
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LandingPageNew = lazy(() => import("./pages/LandingPageNew"));
 const LandingPageProfessional = lazy(() => import("./pages/LandingPageProfessional"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const LgpdPage = lazy(() => import("./pages/LgpdPage"));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const PatientAuth = lazy(() => import("./pages/PatientAuth"));
@@ -120,6 +123,9 @@ function App() {
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/patient-auth" element={<PatientAuth />} />
                       <Route path="/meu-app" element={<PatientMobileApp />} />
+                      <Route path="/terms" element={<TermsPage />} />
+                      <Route path="/privacy" element={<PrivacyPage />} />
+                      <Route path="/lgpd" element={<LgpdPage />} />
                       <Route
                         path="/dashboard"
                         element={
