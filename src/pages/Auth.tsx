@@ -170,32 +170,35 @@ export default function Auth() {
               ))}
             </div>
 
-            {/* Mini dashboard preview */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 shadow-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4" />
-                  <span className="text-sm font-semibold">Painel Clínico</span>
-                </div>
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Ao vivo</span>
-              </div>
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                {[
-                  { label: 'Pacientes', value: '48' },
-                  { label: 'Cardápios', value: '126' },
-                  { label: 'Adesão', value: '94%' },
-                ].map((stat) => (
-                  <div key={stat.label} className="bg-white/10 rounded-xl p-3 border border-white/10">
-                    <div className="text-[10px] text-white/70 uppercase tracking-wide">{stat.label}</div>
-                    <div className="text-lg font-bold mt-1">{stat.value}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-end gap-1.5 h-12">
-                {[40, 70, 45, 90, 60, 85, 50].map((h, i) => (
-                  <div key={i} className="flex-1 bg-white/30 rounded-t-sm" style={{ height: `${h}%` }} />
-                ))}
-              </div>
+            {/* Medical Illustration - Flat Design Style */}
+            <div className="relative w-full max-w-sm mx-auto mt-4 animate-float-slow">
+              <svg viewBox="0 0 400 320" className="w-full h-auto drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Background decorative circle */}
+                <circle cx="200" cy="160" r="130" fill="white" fillOpacity="0.1" />
+                <circle cx="200" cy="160" r="90" fill="white" fillOpacity="0.1" />
+
+                {/* Stethoscope */}
+                <path d="M140 100 C140 60, 260 60, 260 100 L260 180 C260 220, 220 240, 200 240 C180 240, 160 220, 160 200"
+                      stroke="white" strokeWidth="12" strokeLinecap="round" fill="none" opacity="0.9"/>
+                <circle cx="160" cy="200" r="24" fill="white" opacity="0.9"/>
+                <circle cx="160" cy="200" r="12" fill="#1CBFA5" opacity="0.8"/>
+                <rect x="130" y="90" width="20" height="30" rx="4" fill="white" opacity="0.9"/>
+                <rect x="250" y="90" width="20" height="30" rx="4" fill="white" opacity="0.9"/>
+
+                {/* Heartbeat line */}
+                <path d="M80 160 L120 160 L140 120 L170 200 L200 140 L220 160 L320 160"
+                      stroke="#EF7B66" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.9"/>
+
+                {/* Medical cross */}
+                <rect x="280" y="80" width="40" height="12" rx="3" fill="white" opacity="0.8"/>
+                <rect x="294" y="66" width="12" height="40" rx="3" fill="white" opacity="0.8"/>
+
+                {/* Decorative dots */}
+                <circle cx="100" cy="100" r="6" fill="white" opacity="0.5"/>
+                <circle cx="300" cy="220" r="8" fill="white" opacity="0.5"/>
+                <circle cx="120" cy="240" r="5" fill="white" opacity="0.5"/>
+                <circle cx="280" cy="140" r="4" fill="white" opacity="0.5"/>
+              </svg>
             </div>
           </div>
 
@@ -290,7 +293,7 @@ export default function Auth() {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-nf-coral hover:bg-nf-coral/90 text-white font-semibold rounded-xl shadow-lg shadow-nf-coral/20 transition-all hover:shadow-xl group"
+                  className="w-full h-12 bg-nf-teal hover:bg-nf-teal/90 text-white font-semibold rounded-xl shadow-lg shadow-nf-teal/20 transition-all hover:shadow-xl group"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -386,7 +389,7 @@ export default function Auth() {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-nf-coral hover:bg-nf-coral/90 text-white font-semibold rounded-xl shadow-lg shadow-nf-coral/20 transition-all hover:shadow-xl group"
+                  className="w-full h-12 bg-nf-teal hover:bg-nf-teal/90 text-white font-semibold rounded-xl shadow-lg shadow-nf-teal/20 transition-all hover:shadow-xl group"
                   disabled={isLoading}
                 >
                   {isLoading ? (

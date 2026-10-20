@@ -14,6 +14,7 @@ import { NeonText } from '@/components/ui/NeonText';
 import { NutritionistChat } from '@/components/NutritionistChat';
 import { PatientPreviewModal } from '@/components/PatientPreviewModal';
 import { useNotifications } from '@/hooks/useNotifications';
+import { ModernLayout } from '@/components/layout/ModernLayout';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { 
@@ -567,18 +568,18 @@ export default function PatientDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Cyber Header */}
-      <header className="sticky top-0 z-50 glass border-b border-border/50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+    <ModernLayout>
+      <div className="space-y-6">
+        {/* Header do Paciente */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => navigate('/dashboard')}
-              className="hover:bg-primary/10"
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/pacientes')}
+              className="hover:bg-[#518C5B]/10 rounded-xl"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 text-slate-600" />
             </Button>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center glow-primary">
@@ -1038,5 +1039,6 @@ export default function PatientDetail() {
         patientName={patient.full_name}
       />
     </div>
+    </ModernLayout>
   );
 }
