@@ -6,11 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Terminal, Sparkles } from 'lucide-react';
+import { Loader2, Mail, Lock, User, ArrowRight, Sparkles, Activity, Users, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { z } from 'zod';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { ParticleField } from '@/components/ui/ParticleField';
-import logoImg from '@/assets/logo.png';
+import logoImg from '@/assets/logo-nutriflow.png';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -39,7 +37,6 @@ export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Read URL parameters for pre-filled email and name
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode');
@@ -65,31 +62,23 @@ export default function Auth() {
 
     try {
       loginSchema.parse({ email: loginEmail, password: loginPassword });
-      
       const { error } = await signIn(loginEmail, loginPassword);
-      
+
       if (error) {
         toast({
           title: "Erro ao entrar",
-          description: error.message === 'Invalid login credentials' 
-            ? 'Email ou senha incorretos' 
+          description: error.message === 'Invalid login credentials'
+            ? 'Email ou senha incorretos'
             : error.message,
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Bem-vindo!",
-          description: "Login realizado com sucesso.",
-        });
+        toast({ title: "Bem-vindo!", description: "Login realizado com sucesso." });
         navigate('/dashboard');
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
-        toast({
-          title: "Dados inválidos",
-          description: err.errors[0].message,
-          variant: "destructive",
-        });
+        toast({ title: "Dados inválidos", description: err.errors[0].message, variant: "destructive" });
       }
     } finally {
       setIsLoading(false);
@@ -115,25 +104,14 @@ export default function Auth() {
         if (error.message.includes('already registered')) {
           message = 'Este email já está cadastrado';
         }
-        toast({
-          title: "Erro no cadastro",
-          description: message,
-          variant: "destructive",
-        });
+        toast({ title: "Erro no cadastro", description: message, variant: "destructive" });
       } else {
-        toast({
-          title: "Conta criada!",
-          description: "Bem-vindo ao NutriFlow.",
-        });
+        toast({ title: "Conta criada!", description: "Bem-vindo ao NutriFlow." });
         navigate('/dashboard');
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
-        toast({
-          title: "Dados inválidos",
-          description: err.errors[0].message,
-          variant: "destructive",
-        });
+        toast({ title: "Dados inválidos", description: err.errors[0].message, variant: "destructive" });
       }
     } finally {
       setIsLoading(false);
@@ -141,59 +119,140 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Effects */}
-      <ParticleField />
-      <div className="absolute inset-0 cyber-grid opacity-30" />
-      
-      {/* Gradient Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyber-lime/10 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-electric-violet/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '-2s' }} />
-      
-      <div className="w-full max-w-md animate-scale-in relative z-10">
-        {/* Logo Section */}
-        <div className="text-center mb-8">
-          <div className="relative inline-block">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyber-lime/20 to-electric-violet/20 flex items-center justify-center mx-auto mb-4 border border-border backdrop-blur-sm">
-              <img src={logoImg} alt="NutriFlow" className="h-12 w-auto" />
+    <div className="min-h-screen flex bg-nf-bg">
+      {/* LEFT PANEL - Visual / Brand side */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-nf-teal via-nf-teal/90 to-nf-coral/80">
+        {/* Decorative blobs */}
+        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl animate-float-slow" />
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-white/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-2xl animate-morph-blob" />
+
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.07]" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+          backgroundSize: '32px 32px'
+        }} />
+
+        <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full text-white">
+          {/* Top: Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+              <img src={logoImg} alt="NutriFlow" className="h-8 w-auto brightness-0 invert" />
             </div>
-            <div className="absolute -inset-2 bg-gradient-to-r from-cyber-lime/20 to-electric-violet/20 rounded-3xl blur-xl -z-10" />
+            <span className="font-serif text-2xl font-bold tracking-tight">NutriFlow</span>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyber-lime via-foreground to-electric-violet bg-clip-text text-transparent">
-            NutriFlow
-          </h1>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Plataforma para Nutricionistas
-          </p>
+
+          {/* Middle: Hero content */}
+          <div className="space-y-8 max-w-lg">
+            <div>
+              <h1 className="font-serif text-4xl xl:text-5xl font-bold leading-tight mb-4">
+                Nutrição de precisão, potencializada por IA.
+              </h1>
+              <p className="text-white/85 text-lg leading-relaxed">
+                Gere cardápios personalizados em segundos e gestione sua clínica inteira em uma plataforma unificada.
+              </p>
+            </div>
+
+            {/* Feature highlights */}
+            <div className="space-y-4">
+              {[
+                { icon: Sparkles, text: 'Cardápios gerados por IA em menos de 30 segundos' },
+                { icon: Users, text: 'Gestão completa de pacientes e agendamentos' },
+                { icon: TrendingUp, text: 'Analytics de evolução em tempo real' },
+                { icon: CheckCircle2, text: '14 dias grátis, sem cartão de crédito' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-3 group">
+                  <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/20 group-hover:bg-white/25 transition-colors">
+                    <item.icon className="w-4 h-4" />
+                  </div>
+                  <span className="text-white/90 pt-1.5 text-sm leading-relaxed">{item.text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Mini dashboard preview */}
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4" />
+                  <span className="text-sm font-semibold">Painel Clínico</span>
+                </div>
+                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Ao vivo</span>
+              </div>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                {[
+                  { label: 'Pacientes', value: '48' },
+                  { label: 'Cardápios', value: '126' },
+                  { label: 'Adesão', value: '94%' },
+                ].map((stat) => (
+                  <div key={stat.label} className="bg-white/10 rounded-xl p-3 border border-white/10">
+                    <div className="text-[10px] text-white/70 uppercase tracking-wide">{stat.label}</div>
+                    <div className="text-lg font-bold mt-1">{stat.value}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-end gap-1.5 h-12">
+                {[40, 70, 45, 90, 60, 85, 50].map((h, i) => (
+                  <div key={i} className="flex-1 bg-white/30 rounded-t-sm" style={{ height: `${h}%` }} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom: copyright */}
+          <div className="text-white/60 text-xs">
+            © 2026 NutriFlow. Inovação em nutrição.
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT PANEL - Form side */}
+      <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
+        {/* Mobile logo (shown only on small screens) */}
+        <div className="lg:hidden absolute top-6 left-6 flex items-center gap-2">
+          <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
+          <span className="font-serif text-xl font-bold text-nf-text">NutriFlow</span>
         </div>
 
-        <GlassCard variant="strong" glow="lime" className="p-0 overflow-hidden">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            {/* Tabs Header */}
-            <div className="p-6 pb-0">
-              <TabsList className="grid w-full grid-cols-2 glass rounded-xl p-1 h-12">
-                <TabsTrigger
-                  value="login"
-                  className="rounded-lg data-[state=active]:bg-cyber-lime/20 data-[state=active]:text-cyber-lime font-medium"
-                >
-                  Entrar
-                </TabsTrigger>
-                <TabsTrigger
-                  value="signup"
-                  className="rounded-lg data-[state=active]:bg-electric-violet/20 data-[state=active]:text-electric-violet font-medium"
-                >
-                  Cadastrar
-                </TabsTrigger>
-              </TabsList>
-            </div>
+        <div className="w-full max-w-md space-y-8">
+          {/* Header */}
+          <div className="space-y-2">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-nf-text">
+              {activeTab === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta'}
+            </h2>
+            <p className="text-nf-text-muted">
+              {activeTab === 'login'
+                ? 'Entre para acessar sua plataforma clínica'
+                : 'Comece gratuitamente e transforme sua prática'}
+            </p>
+          </div>
 
-            <div className="p-6 pt-4">
-              <TabsContent value="login" className="mt-0">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                      Email
-                    </Label>
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-nf-bg-alt p-1 h-12 rounded-xl">
+              <TabsTrigger
+                value="login"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-nf-teal data-[state=active]:shadow-sm font-medium transition-all"
+              >
+                Entrar
+              </TabsTrigger>
+              <TabsTrigger
+                value="signup"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-nf-coral data-[state=active]:shadow-sm font-medium transition-all"
+              >
+                Cadastrar
+              </TabsTrigger>
+            </TabsList>
+
+            {/* LOGIN FORM */}
+            <TabsContent value="login" className="mt-6">
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="login-email" className="text-sm font-medium text-nf-text">
+                    Email profissional
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
                     <Input
                       id="login-email"
                       type="email"
@@ -201,13 +260,22 @@ export default function Auth() {
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
-                      className="glass border-white/10 focus:border-cyber-lime/50 h-11"
+                      className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-teal focus:ring-nf-teal/20 rounded-xl"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="login-password" className="text-sm font-medium text-nf-text">
                       Senha
                     </Label>
+                    <Link to="/forgot-password" className="text-xs text-nf-teal hover:underline font-medium">
+                      Esqueceu a senha?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
                     <Input
                       id="login-password"
                       type="password"
@@ -215,49 +283,58 @@ export default function Auth() {
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
-                      className="glass border-white/10 focus:border-cyber-lime/50 h-11"
+                      className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-teal focus:ring-nf-teal/20 rounded-xl"
                     />
                   </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-cyber-lime to-electric-violet hover:opacity-90 text-background font-semibold rounded-xl mt-2" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Conectando...
-                      </>
-                    ) : (
-                      <>
-                        <Terminal className="mr-2 h-4 w-4" />
-                        Acessar Sistema
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </TabsContent>
+                </div>
 
-              <TabsContent value="signup" className="mt-0">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name" className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                      Nome completo
-                    </Label>
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-nf-coral hover:bg-nf-coral/90 text-white font-semibold rounded-xl shadow-lg shadow-nf-coral/20 transition-all hover:shadow-xl group"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Conectando...
+                    </>
+                  ) : (
+                    <>
+                      Entrar na plataforma
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
+
+            {/* SIGNUP FORM */}
+            <TabsContent value="signup" className="mt-6">
+              <form onSubmit={handleSignup} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name" className="text-sm font-medium text-nf-text">
+                    Nome completo
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
                     <Input
                       id="signup-name"
                       type="text"
-                      placeholder="Dr. João Silva"
+                      placeholder="Dra. Maria Silva"
                       value={signupFullName}
                       onChange={(e) => setSignupFullName(e.target.value)}
                       required
-                      className="glass border-white/10 focus:border-electric-violet/50 h-11"
+                      className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-coral focus:ring-nf-coral/20 rounded-xl"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                      Email
-                    </Label>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email" className="text-sm font-medium text-nf-text">
+                    Email profissional
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
                     <Input
                       id="signup-email"
                       type="email"
@@ -265,74 +342,83 @@ export default function Auth() {
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
                       required
-                      className="glass border-white/10 focus:border-electric-violet/50 h-11"
+                      className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-coral focus:ring-nf-coral/20 rounded-xl"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                    <Label htmlFor="signup-password" className="text-sm font-medium text-nf-text">
                       Senha
                     </Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      required
-                      className="glass border-white/10 focus:border-electric-violet/50 h-11"
-                    />
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        required
+                        className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-coral focus:ring-nf-coral/20 rounded-xl"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-confirm" className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                      Confirmar senha
+                    <Label htmlFor="signup-confirm" className="text-sm font-medium text-nf-text">
+                      Confirmar
                     </Label>
-                    <Input
-                      id="signup-confirm"
-                      type="password"
-                      placeholder="••••••••"
-                      value={signupConfirmPassword}
-                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                      required
-                      className="glass border-white/10 focus:border-electric-violet/50 h-11"
-                    />
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
+                      <Input
+                        id="signup-confirm"
+                        type="password"
+                        placeholder="••••••••"
+                        value={signupConfirmPassword}
+                        onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                        required
+                        className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-coral focus:ring-nf-coral/20 rounded-xl"
+                      />
+                    </div>
                   </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-electric-violet to-cyber-lime hover:opacity-90 text-background font-semibold rounded-xl mt-2" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Criando conta...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Criar conta
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </TabsContent>
-            </div>
-          </Tabs>
-        </GlassCard>
+                </div>
 
-        {/* Footer Links */}
-        <div className="text-center mt-6 space-y-2">
-          <div className="flex justify-center gap-4 text-xs">
-            <Link to="/suporte/termos" className="text-muted-foreground hover:text-primary transition-colors">
-              Termos de Uso
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-nf-coral hover:bg-nf-coral/90 text-white font-semibold rounded-xl shadow-lg shadow-nf-coral/20 transition-all hover:shadow-xl group"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Criando conta...
+                    </>
+                  ) : (
+                    <>
+                      Criar conta gratuita
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </Button>
+
+                <p className="text-xs text-nf-text-muted text-center leading-relaxed">
+                  Ao criar uma conta, você concorda com nossos{' '}
+                  <Link to="/terms" className="text-nf-teal hover:underline font-medium">Termos</Link>
+                  {' '}e{' '}
+                  <Link to="/privacy" className="text-nf-teal hover:underline font-medium">Privacidade</Link>.
+                </p>
+              </form>
+            </TabsContent>
+          </Tabs>
+
+          {/* Footer */}
+          <div className="pt-6 border-t border-nf-border/50 flex items-center justify-between text-xs text-nf-text-muted">
+            <Link to="/" className="hover:text-nf-teal transition-colors">
+              ← Voltar ao site
             </Link>
-            <span className="text-muted-foreground">•</span>
-            <Link to="/suporte/privacidade" className="text-muted-foreground hover:text-primary transition-colors">
-              Privacidade
-            </Link>
+            <span>© 2026 NutriFlow</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            FlowTech Group © 2026
-          </p>
         </div>
       </div>
     </div>
