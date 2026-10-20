@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
-import logoImg from '@/assets/logo.png';
+import logoImg from '@/assets/logo-nutriflow.png';
 
 export default function LandingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
