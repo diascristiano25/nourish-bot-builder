@@ -19,14 +19,6 @@ export default function FinalCTASection() {
       }} />
 
       <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-        {/* Badge */}
-        <div className="inline-flex mb-8 scroll-fade-up">
-          <span className="animate-pulse-badge inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-sm text-nf-teal text-sm font-semibold border border-nf-teal/20 shadow-lg">
-            <Sparkles className="w-4 h-4" />
-            Oferta de Lançamento
-          </span>
-        </div>
-
         {/* Headline */}
         <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold text-nf-text mb-6 leading-tight scroll-fade-up scroll-stagger-1">
           Pronto para transformar{' '}

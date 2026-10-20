@@ -20,7 +20,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Evolução', path: '/evolucao', icon: TrendingUp },
-  { name: 'Mensagens', path: '/suporte/ajuda', icon: Send, badge: 5 },
+  { name: 'Mensagens', path: '/mensagens', icon: Send, badge: 5 },
   { name: 'Agenda', path: '/agenda', icon: Calendar },
   { name: 'Pacientes', path: '/pacientes', icon: Grid3X3 },
   { name: 'Info', path: '/perfil', icon: Info },

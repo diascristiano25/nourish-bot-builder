@@ -13,7 +13,7 @@ const stages = [
     number: 2,
     icon: Sparkles,
     title: 'IA gera o cardápio personalizado',
-    description: 'Baseado em objetivos, restrições e preferências alimentares. Gemini 2.5 cria planos equilibrados com precisão nutricional clínica.',
+    description: 'Baseado em objetivos, restrições e preferências alimentares. Nossa IA cria planos equilibrados com precisão nutricional clínica.',
     features: ['Geração em < 30s', 'Balanceamento automático', 'Substituições inteligentes'],
     color: 'coral',
   },
@@ -56,7 +56,7 @@ export default function HowItWorksSection() {
             <div className="absolute inset-0 bg-gradient-to-b from-nf-teal via-nf-coral to-nf-teal scroll-line-grow origin-top" />
           </div>
 
-          <div className="space-y-20 md:space-y-32">
+          <div className="space-y-12 md:space-y-16">
             {stages.map((stage, i) => {
               const isEven = i % 2 === 0;
               const Icon = stage.icon;

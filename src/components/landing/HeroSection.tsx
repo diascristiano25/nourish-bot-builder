@@ -20,17 +20,8 @@ export default function HeroSection() {
 
           {/* --- LEFT COLUMN: COPY --- */}
           <div className="space-y-8 text-center lg:text-left">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-nf-teal/10 border border-nf-teal/20 backdrop-blur-sm scroll-fade-up">
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-nf-teal opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-nf-teal"></span>
-              </span>
-              <span className="text-sm font-semibold text-nf-teal tracking-wide uppercase">Lançamento Exclusivo 2026</span>
-            </div>
-
             {/* Headline - Larger, tighter tracking */}
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-nf-text leading-[1.1] scroll-fade-up scroll-stagger-1">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-nf-text leading-[1.1] scroll-fade-up">
               Nutrição de precisão,{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-nf-teal to-nf-coral">
                 potencializada por IA.
@@ -38,7 +29,7 @@ export default function HeroSection() {
             </h1>
 
             {/* Subheadline */}
-            <p className="text-xl md:text-2xl text-nf-text-muted max-w-2xl mx-auto lg:mx-0 leading-relaxed scroll-fade-up scroll-stagger-2">
+            <p className="text-xl md:text-2xl text-nf-text-muted max-w-2xl mx-auto lg:mx-0 leading-relaxed scroll-fade-up scroll-stagger-1">
               Esqueça planilhas. O NutriFlow gera cardápios personalizados em segundos e gestiona sua clínica inteira em uma plataforma unificada.
             </p>
 
@@ -90,33 +81,51 @@ export default function HeroSection() {
 
               {/* Content Mockup */}
               <div className="space-y-4">
-                {/* Stat Row */}
-                <div className="grid grid-cols-3 gap-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-20 rounded-2xl bg-nf-bg-alt/50 border border-nf-border/30 p-3 flex flex-col justify-between">
-                      <div className="h-2 w-8 bg-nf-border rounded-full" />
-                      <div className="h-4 w-12 bg-nf-teal/20 rounded-full" />
+                {/* Stat Row - Real data */}
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: 'Pacientes', value: '48', trend: '+12%' },
+                    { label: 'Cardápios', value: '126', trend: '+34%' },
+                    { label: 'Adesão', value: '94%', trend: '+8%' },
+                  ].map((stat) => (
+                    <div key={stat.label} className="rounded-2xl bg-nf-bg-alt/50 border border-nf-border/30 p-3 flex flex-col justify-between">
+                      <div className="text-[10px] text-nf-text-muted font-medium uppercase tracking-wide">{stat.label}</div>
+                      <div>
+                        <div className="text-lg font-bold text-nf-text leading-none">{stat.value}</div>
+                        <div className="text-[10px] text-nf-teal font-semibold mt-1">{stat.trend}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Chart Area */}
-                <div className="h-32 rounded-2xl bg-gradient-to-b from-nf-teal/5 to-transparent border border-nf-border/30 p-4 relative overflow-hidden">
-                  <div className="absolute bottom-0 left-0 right-0 h-16 flex items-end justify-between gap-1 px-2">
+                {/* Chart Area - With labels */}
+                <div className="rounded-2xl bg-gradient-to-b from-nf-teal/5 to-transparent border border-nf-border/30 p-4 relative overflow-hidden">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-xs font-semibold text-nf-text">Evolução semanal</span>
+                    <span className="text-[10px] text-nf-teal font-bold">-3.2 kg</span>
+                  </div>
+                  <div className="h-20 flex items-end justify-between gap-1.5 px-1">
                     {[40, 70, 45, 90, 60, 85, 50].map((h, i) => (
-                      <div key={i} className="w-full bg-nf-teal/20 rounded-t-sm hover:bg-nf-teal/40 transition-colors" style={{ height: `${h}%` }} />
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                        <div className="w-full bg-gradient-to-t from-nf-teal/40 to-nf-teal/20 rounded-t-sm hover:from-nf-teal/60 transition-colors" style={{ height: `${h}%` }} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between text-[9px] text-nf-text-muted mt-1.5 px-1">
+                    {['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((d, i) => (
+                      <span key={i} className="flex-1 text-center">{d}</span>
                     ))}
                   </div>
                 </div>
 
-                {/* List Item */}
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-nf-bg-alt/30 border border-nf-border/30">
-                  <div className="h-10 w-10 rounded-full bg-nf-coral/10" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-2 w-24 bg-nf-border rounded-full" />
-                    <div className="h-2 w-16 bg-nf-border/50 rounded-full" />
+                {/* Patient List Item - Real data */}
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-nf-bg-alt/30 border border-nf-border/30">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nf-coral/20 to-nf-teal/20 flex items-center justify-center text-xs font-bold text-nf-text">MS</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-nf-text truncate">Maria Silva</div>
+                    <div className="text-[11px] text-nf-text-muted">Plano low-carb • 1.650 kcal</div>
                   </div>
-                  <div className="h-6 w-16 rounded-full bg-nf-teal/10" />
+                  <div className="px-2 py-1 rounded-full bg-nf-teal/10 text-nf-teal text-[10px] font-bold">Ativa</div>
                 </div>
               </div>
             </div>

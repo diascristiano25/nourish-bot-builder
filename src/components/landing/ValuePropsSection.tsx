@@ -38,7 +38,7 @@ export default function ValuePropsSection() {
                 </div>
                 <h3 className="font-serif text-3xl font-bold text-nf-text mb-4">IA Generativa Clínica</h3>
                 <p className="text-lg text-nf-text-muted leading-relaxed max-w-md">
-                  Gemini 2.5 analisa anamnese, exames e preferências para gerar cardápios completos em segundos. Não é template — é nutrição de precisão personalizada.
+                  Nossa IA analisa anamnese, exames e preferências para gerar cardápios completos em segundos. Não é template, é nutrição de precisão personalizada.
                 </p>
               </div>
 
@@ -122,14 +122,17 @@ export default function ValuePropsSection() {
              </div>
           </div>
 
-          {/* Card 5: CTA / Integration */}
-          <div className="md:col-span-1 lg:col-span-1 bg-nf-text rounded-3xl p-8 text-white flex flex-col justify-between hover-lift scroll-scale-in scroll-stagger-4 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-nf-teal/20 to-nf-coral/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          {/* Card 5: Integration - Light theme matching others */}
+          <div className="md:col-span-1 lg:col-span-1 glass-card rounded-3xl p-8 flex flex-col justify-between hover-lift card-shine scroll-scale-in scroll-stagger-4 relative overflow-hidden group border-nf-teal/30">
+            <div className="absolute -right-10 -top-10 w-32 h-32 bg-nf-teal/10 rounded-full blur-2xl group-hover:bg-nf-teal/20 transition-colors" />
 
             <div className="relative z-10">
-              <h3 className="font-serif text-2xl font-bold mb-2">Integração Total</h3>
-              <p className="text-white/70 text-sm leading-relaxed">
-                Conecte com WhatsApp, Google Calendar e laboratórios. Sem fricção.
+              <div className="w-12 h-12 rounded-xl bg-nf-teal/10 flex items-center justify-center text-nf-teal mb-6 border border-nf-teal/20">
+                <Zap className="w-6 h-6" />
+              </div>
+              <h3 className="font-serif text-2xl font-bold text-nf-text mb-3">Integração Total</h3>
+              <p className="text-nf-text-muted text-sm leading-relaxed">
+                Conecte com WhatsApp, Google Calendar e laboratórios. Sem fricção, sem configuração complexa.
               </p>
             </div>
 
