@@ -77,6 +77,15 @@
         ],
         "createdAt": "2026-10-20T02:38:36.536Z",
         "reason": "user confirmed: explicitly requested all 7 visual improvements including gradient text on the greeting name as a premium design touch"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/components/landing/HeroSection.tsx"
+        ],
+        "createdAt": "2026-10-20T02:44:38.853Z",
+        "reason": "user confirmed: intentional gradient text for premium launch LP headline design"
       }
     ]
   }

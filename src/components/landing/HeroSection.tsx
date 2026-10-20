@@ -1,204 +1,158 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Play, Sparkles, Zap, Shield } from 'lucide-react';
+import { ArrowRight, Play, Sparkles, Zap, ShieldCheck, Activity } from 'lucide-react';
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-nf-bg pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden min-h-screen flex items-center">
-      {/* Animated gradient mesh background */}
+    <section className="relative bg-nf-bg pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden min-h-[90vh] flex items-center">
+      {/* --- BACKGROUND FX --- */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Morphing blob 1 - teal */}
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-nf-teal/8 rounded-full blur-3xl animate-morph-blob" />
-        {/* Morphing blob 2 - coral */}
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-nf-coral/6 rounded-full blur-3xl animate-morph-blob" style={{ animationDelay: '-4s' }} />
-        {/* Morphing blob 3 - center accent */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-nf-teal/4 rounded-full blur-3xl animate-float-slow" />
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--nf-text-primary)) 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }} />
+        {/* Gradient Mesh - More intense */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-nf-teal/20 blur-[120px] animate-pulse-slow" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-nf-coral/20 blur-[120px] animate-pulse-slow delay-1000" />
+
+        {/* Grid Pattern - Subtle */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
       </div>
 
-      {/* Noise texture */}
-      <div className="noise-overlay" />
-
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left column - Text content */}
-          <div className="space-y-8">
-            {/* Animated Badge */}
-            <div className="inline-flex scroll-fade-up">
-              <span className="animate-pulse-badge inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-nf-teal/10 text-nf-teal text-sm font-semibold border border-nf-teal/20 backdrop-blur-sm">
-                <Sparkles className="w-4 h-4" />
-                Lançamento Exclusivo 2026
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+
+          {/* --- LEFT COLUMN: COPY --- */}
+          <div className="space-y-8 text-center lg:text-left">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-nf-teal/10 border border-nf-teal/20 backdrop-blur-sm scroll-fade-up">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-nf-teal opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-nf-teal"></span>
               </span>
+              <span className="text-sm font-semibold text-nf-teal tracking-wide uppercase">Lançamento Exclusivo 2026</span>
             </div>
 
-            {/* Headline with gradient text */}
-            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-nf-text leading-[1.1] scroll-fade-up scroll-stagger-1">
-              Cardápios inteligentes que se{' '}
-              <span className="gradient-text">adaptam a cada paciente</span>
+            {/* Headline - Larger, tighter tracking */}
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-nf-text leading-[1.1] scroll-fade-up scroll-stagger-1">
+              Nutrição de precisão,{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-nf-teal to-nf-coral">
+                potencializada por IA.
+              </span>
             </h1>
 
             {/* Subheadline */}
-            <p className="text-lg md:text-xl text-nf-text-muted max-w-xl leading-relaxed scroll-fade-up scroll-stagger-2">
-              IA generativa + gestão clínica em uma plataforma unificada.
-              O futuro da nutrição chegou — e está disponível agora.
+            <p className="text-xl md:text-2xl text-nf-text-muted max-w-2xl mx-auto lg:mx-0 leading-relaxed scroll-fade-up scroll-stagger-2">
+              Esqueça planilhas. O NutriFlow gera cardápios personalizados em segundos e gestiona sua clínica inteira em uma plataforma unificada.
             </p>
 
-            {/* Trust indicators */}
-            <div className="flex flex-wrap gap-6 text-sm text-nf-text-muted scroll-fade-up scroll-stagger-2">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-nf-teal" />
-                <span>Geração em segundos</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-nf-teal" />
-                <span>LGPD compliant</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-nf-teal" />
-                <span>IA Gemini 2.5</span>
-              </div>
-            </div>
-
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 scroll-fade-up scroll-stagger-3">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start scroll-fade-up scroll-stagger-3">
               <Link to="/auth">
-                <Button className="bg-nf-coral hover:bg-nf-coral/90 text-white font-semibold px-8 py-7 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover-lift w-full sm:w-auto group">
-                  Começar Grátis por 14 Dias
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <Button size="lg" className="h-14 px-8 text-lg bg-nf-coral hover:bg-nf-coral/90 text-white shadow-lg shadow-nf-coral/25 transition-all hover:scale-105 group">
+                  Começar Grátis Agora
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button variant="outline" className="border-2 border-nf-teal/30 text-nf-text hover:bg-nf-teal/5 px-8 py-7 text-lg rounded-xl backdrop-blur-sm w-full sm:w-auto group">
-                <Play className="mr-2 w-5 h-5 text-nf-teal group-hover:scale-110 transition-transform" />
-                Ver Demo
+              <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-2 border-nf-border hover:border-nf-teal hover:text-nf-teal transition-colors bg-white/50 backdrop-blur-sm">
+                <Play className="mr-2 h-5 w-5" />
+                Ver Demonstração
               </Button>
             </div>
 
-            {/* Social proof alternative - launch stats */}
-            <div className="flex gap-8 pt-4 scroll-fade-up scroll-stagger-4">
-              <div>
-                <div className="text-2xl font-bold text-nf-text">14 dias</div>
-                <div className="text-sm text-nf-text-muted">Grátis, sem cartão</div>
+            {/* Trust Indicators - Minimal */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4 text-sm text-nf-text-muted scroll-fade-up scroll-stagger-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-nf-teal" />
+                <span>LGPD Compliant</span>
               </div>
-              <div className="w-px bg-nf-border" />
-              <div>
-                <div className="text-2xl font-bold text-nf-text">&lt; 30s</div>
-                <div className="text-sm text-nf-text-muted">Por cardápio gerado</div>
-              </div>
-              <div className="w-px bg-nf-border" />
-              <div>
-                <div className="text-2xl font-bold text-nf-text">100%</div>
-                <div className="text-sm text-nf-text-muted">Personalizado</div>
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-nf-teal" />
+                <span>Sem cartão de crédito</span>
               </div>
             </div>
           </div>
 
-          {/* Right column - Interactive mockup */}
-          <div className="relative scroll-blur-in scroll-stagger-2">
-            {/* Floating decorative elements */}
-            <div className="absolute -top-8 -right-8 w-24 h-24 bg-nf-coral/10 rounded-2xl rotate-12 animate-float blur-sm" />
-            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-nf-teal/10 rounded-full animate-float-delay blur-sm" />
+          {/* --- RIGHT COLUMN: VISUAL --- */}
+          <div className="relative lg:h-[600px] flex items-center justify-center scroll-blur-in scroll-stagger-2">
 
-            {/* Main mockup card with glass effect */}
-            <div className="relative glass-card rounded-3xl p-6 md:p-8 glow-teal">
-              {/* Mockup header */}
-              <div className="flex items-center justify-between mb-6">
+            {/* Main Dashboard Card - Glassmorphism */}
+            <div className="relative w-full max-w-lg aspect-[4/3] bg-white/70 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-6 transform rotate-1 hover:rotate-0 transition-transform duration-500 z-10">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-6 border-b border-nf-border/50 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-nf-teal to-nf-teal/70 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-nf-teal to-nf-teal/70 flex items-center justify-center text-white shadow-lg shadow-nf-teal/20">
+                    <Activity className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="font-semibold text-nf-text text-sm">NutriFlow AI</div>
-                    <div className="text-xs text-nf-text-muted">Gerando cardápio...</div>
+                    <div className="font-bold text-nf-text">Painel Clínico</div>
+                    <div className="text-xs text-nf-text-muted">Atualizado agora</div>
                   </div>
                 </div>
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-nf-coral/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-nf-teal/60" />
-                </div>
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
               </div>
 
-              {/* Mockup content - simulated dashboard */}
+              {/* Content Mockup */}
               <div className="space-y-4">
-                {/* Patient info bar */}
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-nf-bg-alt/50 border border-nf-border/50">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-nf-teal/20 to-nf-coral/20" />
-                  <div className="flex-1">
-                    <div className="h-3 w-24 bg-nf-text/10 rounded" />
-                    <div className="h-2 w-16 bg-nf-text/5 rounded mt-1.5" />
-                  </div>
-                  <div className="px-3 py-1 rounded-full bg-nf-teal/10 text-nf-teal text-xs font-medium">
-                    Ativo
-                  </div>
-                </div>
-
-                {/* Meal plan cards */}
-                <div className="grid grid-cols-3 gap-3">
-                  {['Café', 'Almoço', 'Jantar'].map((meal, i) => (
-                    <div key={meal} className="p-3 rounded-xl bg-white/60 border border-nf-border/40 space-y-2">
-                      <div className="text-xs font-medium text-nf-text-muted">{meal}</div>
-                      <div className="h-16 rounded-lg bg-gradient-to-br from-nf-teal/5 to-nf-coral/5 border border-nf-border/30" />
-                      <div className="h-2 w-3/4 bg-nf-text/5 rounded" />
+                {/* Stat Row */}
+                <div className="grid grid-cols-3 gap-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-20 rounded-2xl bg-nf-bg-alt/50 border border-nf-border/30 p-3 flex flex-col justify-between">
+                      <div className="h-2 w-8 bg-nf-border rounded-full" />
+                      <div className="h-4 w-12 bg-nf-teal/20 rounded-full" />
                     </div>
                   ))}
                 </div>
 
-                {/* Progress bar */}
-                <div className="p-4 rounded-xl bg-gradient-to-r from-nf-teal/5 to-nf-coral/5 border border-nf-border/40">
-                  <div className="flex justify-between text-xs mb-2">
-                    <span className="text-nf-text-muted">Progresso semanal</span>
-                    <span className="text-nf-teal font-semibold">78%</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-nf-border/50 overflow-hidden">
-                    <div className="h-full w-[78%] rounded-full bg-gradient-to-r from-nf-teal to-nf-coral animate-shimmer relative">
-                      <div className="absolute inset-0 bg-white/20 animate-shimmer" />
-                    </div>
+                {/* Chart Area */}
+                <div className="h-32 rounded-2xl bg-gradient-to-b from-nf-teal/5 to-transparent border border-nf-border/30 p-4 relative overflow-hidden">
+                  <div className="absolute bottom-0 left-0 right-0 h-16 flex items-end justify-between gap-1 px-2">
+                    {[40, 70, 45, 90, 60, 85, 50].map((h, i) => (
+                      <div key={i} className="w-full bg-nf-teal/20 rounded-t-sm hover:bg-nf-teal/40 transition-colors" style={{ height: `${h}%` }} />
+                    ))}
                   </div>
                 </div>
 
-                {/* AI suggestion */}
-                <div className="p-3 rounded-xl bg-nf-teal/5 border border-nf-teal/20 flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-nf-teal/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Zap className="w-3.5 h-3.5 text-nf-teal" />
+                {/* List Item */}
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-nf-bg-alt/30 border border-nf-border/30">
+                  <div className="h-10 w-10 rounded-full bg-nf-coral/10" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-2 w-24 bg-nf-border rounded-full" />
+                    <div className="h-2 w-16 bg-nf-border/50 rounded-full" />
                   </div>
-                  <div>
-                    <div className="text-xs font-medium text-nf-teal mb-0.5">Sugestão IA</div>
-                    <div className="text-xs text-nf-text-muted leading-relaxed">
-                      Aumentar proteína em 15% baseado na evolução do paciente
-                    </div>
-                  </div>
+                  <div className="h-6 w-16 rounded-full bg-nf-teal/10" />
                 </div>
               </div>
             </div>
 
-            {/* Floating notification card */}
-            <div className="absolute -bottom-4 -right-4 md:-right-8 glass-card rounded-2xl p-4 animate-float shadow-xl max-w-[200px]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-xs font-medium text-nf-text">Cardápio gerado!</span>
+            {/* Floating Element 1 - AI Generation */}
+            <div className="absolute -top-6 -left-6 md:-left-12 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-nf-border/50 animate-float z-20 max-w-[200px]">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-8 w-8 rounded-lg bg-nf-coral/10 flex items-center justify-center text-nf-coral">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <span className="text-xs font-bold text-nf-text">IA Generativa</span>
               </div>
-              <div className="text-xs text-nf-text-muted">
-                Plano de 7 dias pronto em 23s
+              <div className="text-xs text-nf-text-muted leading-relaxed">
+                Gerando plano de 7 dias para paciente diabético...
+              </div>
+              <div className="mt-2 h-1 w-full bg-nf-border rounded-full overflow-hidden">
+                <div className="h-full bg-nf-coral w-2/3 animate-pulse" />
               </div>
             </div>
 
-            {/* Floating stat card */}
-            <div className="absolute -top-4 -left-4 md:-left-8 glass-card rounded-2xl p-4 animate-float-delay shadow-xl">
-              <div className="text-2xl font-bold gradient-text">98%</div>
-              <div className="text-xs text-nf-text-muted">Precisão nutricional</div>
+            {/* Floating Element 2 - Success Notification */}
+            <div className="absolute -bottom-6 -right-6 md:-right-12 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-nf-border/50 animate-float-delay z-20">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-nf-text">Cardápio Aprovado</div>
+                  <div className="text-xs text-nf-text-muted">Precisão nutricional 98%</div>
+                </div>
+              </div>
             </div>
+
+            {/* Decorative Blobs behind card */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-nf-teal/10 to-nf-coral/10 rounded-full blur-3xl -z-10 animate-morph-blob" />
           </div>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 scroll-fade-up scroll-stagger-4">
-        <div className="w-6 h-10 rounded-full border-2 border-nf-border flex justify-center pt-2">
-          <div className="w-1.5 h-3 rounded-full bg-nf-teal animate-bounce" />
         </div>
       </div>
     </section>
