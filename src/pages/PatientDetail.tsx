@@ -622,9 +622,7 @@ export default function PatientDetail() {
             </Button>
           </div>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Critical Tags */}
         {patient.critical_tags && patient.critical_tags.length > 0 && (
           <GlassCard className="p-4 border-destructive/30 bg-destructive/5">
@@ -1012,7 +1010,6 @@ export default function PatientDetail() {
             )}
           </TabsContent>
         </Tabs>
-      </main>
 
       {/* Hidden PDF Report */}
       <div className="absolute left-[-9999px] top-0">

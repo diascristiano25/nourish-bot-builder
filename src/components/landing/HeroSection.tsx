@@ -4,7 +4,7 @@ import { ArrowRight, Play, Sparkles, Zap, ShieldCheck, Activity } from 'lucide-r
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-nf-bg pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden min-h-[90vh] flex items-center">
+    <section className="relative bg-nf-bg pt-24 pb-12 sm:pt-28 sm:pb-16 md:pt-48 md:pb-32 overflow-hidden min-h-[90vh] flex items-center">
       {/* --- BACKGROUND FX --- */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Gradient Mesh - More intense */}
@@ -20,8 +20,8 @@ export default function HeroSection() {
 
           {/* --- LEFT COLUMN: COPY --- */}
           <div className="space-y-8 text-center lg:text-left">
-            {/* Headline - Larger, tighter tracking */}
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-nf-text leading-[1.1] scroll-fade-up">
+            {/* Headline - Responsive sizing */}
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-nf-text leading-[1.1] scroll-fade-up text-center lg:text-left">
               Nutrição de precisão,{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-nf-teal to-nf-coral">
                 potencializada por IA.
@@ -29,20 +29,20 @@ export default function HeroSection() {
             </h1>
 
             {/* Subheadline */}
-            <p className="text-xl md:text-2xl text-nf-text-muted max-w-2xl mx-auto lg:mx-0 leading-relaxed scroll-fade-up scroll-stagger-1">
+            <p className="text-base sm:text-lg md:text-xl text-nf-text-muted max-w-2xl mx-auto lg:mx-0 leading-relaxed scroll-fade-up scroll-stagger-1 text-center lg:text-left">
               Esqueça planilhas. O NutriFlow gera cardápios personalizados em segundos e gestiona sua clínica inteira em uma plataforma unificada.
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start scroll-fade-up scroll-stagger-3">
-              <Link to="/auth">
-                <Button size="lg" className="h-14 px-8 text-lg bg-nf-coral hover:bg-nf-coral/90 text-white shadow-lg shadow-nf-coral/25 transition-all hover:scale-105 group">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start scroll-fade-up scroll-stagger-3">
+              <Link to="/auth" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg bg-nf-teal hover:bg-nf-teal/90 text-white shadow-lg shadow-nf-teal/25 transition-all hover:scale-105 group">
                   Começar Grátis Agora
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-2 border-nf-border hover:border-nf-teal hover:text-nf-teal transition-colors bg-white/50 backdrop-blur-sm">
-                <Play className="mr-2 h-5 w-5" />
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg border-2 border-nf-border hover:border-nf-teal hover:text-nf-teal transition-colors bg-white/50 backdrop-blur-sm">
+                <Play className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
                 Ver Demonstração
               </Button>
             </div>

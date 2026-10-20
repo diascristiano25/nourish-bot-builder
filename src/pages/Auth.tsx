@@ -209,21 +209,42 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* RIGHT PANEL - Form side */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
-        {/* Mobile logo (shown only on small screens) */}
-        <div className="lg:hidden absolute top-6 left-6 flex items-center gap-2">
-          <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
-          <span className="font-serif text-xl font-bold text-nf-text">NutriFlow</span>
-        </div>
+      {/* RIGHT PANEL - Form side (responsive) */}
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-12 py-6 md:py-12 relative overflow-y-auto">
+        <div className="w-full max-w-md space-y-5 md:space-y-8 my-auto">
+          {/* Mobile brand header with illustration */}
+          <div className="lg:hidden space-y-4">
+            <div className="flex items-center justify-center gap-2">
+              <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
+              <span className="font-serif text-xl font-bold text-nf-text">NutriFlow</span>
+            </div>
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-nf-teal via-nf-teal/90 to-nf-teal/70 px-5 pt-5 pb-3 text-center">
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-white/10 rounded-full blur-2xl" />
+              <h1 className="relative font-serif text-base sm:text-lg font-bold text-white leading-snug">
+                Nutrição de precisão, potencializada por IA.
+              </h1>
+              <svg viewBox="0 0 400 320" className="relative w-32 sm:w-36 mx-auto mt-1 animate-float-slow" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="200" cy="160" r="130" fill="white" fillOpacity="0.1" />
+                <circle cx="200" cy="160" r="90" fill="white" fillOpacity="0.1" />
+                <path d="M140 100 C140 60, 260 60, 260 100 L260 180 C260 220, 220 240, 200 240 C180 240, 160 220, 160 200" stroke="white" strokeWidth="12" strokeLinecap="round" fill="none" opacity="0.9" />
+                <circle cx="160" cy="200" r="24" fill="white" opacity="0.9" />
+                <circle cx="160" cy="200" r="12" fill="#1CBFA5" opacity="0.8" />
+                <rect x="130" y="90" width="20" height="30" rx="4" fill="white" opacity="0.9" />
+                <rect x="250" y="90" width="20" height="30" rx="4" fill="white" opacity="0.9" />
+                <path d="M80 160 L120 160 L140 120 L170 200 L200 140 L220 160 L320 160" stroke="#EF7B66" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.9" />
+                <rect x="280" y="80" width="40" height="12" rx="3" fill="white" opacity="0.8" />
+                <rect x="294" y="66" width="12" height="40" rx="3" fill="white" opacity="0.8" />
+              </svg>
+            </div>
+          </div>
 
-        <div className="w-full max-w-md space-y-8">
           {/* Header */}
-          <div className="space-y-2">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-nf-text">
+          <div className="space-y-2 text-center lg:text-left">
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-nf-text">
               {activeTab === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta'}
             </h2>
-            <p className="text-nf-text-muted">
+            <p className="text-sm md:text-base text-nf-text-muted">
               {activeTab === 'login'
                 ? 'Entre para acessar sua plataforma clínica'
                 : 'Comece gratuitamente e transforme sua prática'}
