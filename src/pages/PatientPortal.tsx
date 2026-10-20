@@ -1,8 +1,7 @@
 /**
- * PatientPortal - Patient dashboard main entry point
- * Shows progress summary, today's meals, and quick actions
- */
-
+* PatientPortal - Patient dashboard main entry point
+* Redesigned with NutriFlow sage/terracotta palette and motion design
+*/
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,80 +12,158 @@ import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { ProgressCard } from '@/components/patient/dashboard/ProgressCard';
 import { TodaysMeals } from '@/components/patient/dashboard/TodaysMeals';
 import { ChatWidget } from '@/components/patient/dashboard/ChatWidget';
-import { StatCard } from '@/components/shared/StatCard';
-import { Target, Calendar, Activity } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { RichCard } from '@/components/shared/RichCard';
+import { Target, Calendar, Activity, Heart, Leaf } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { staggerContainer, staggerItem } from '@/lib/motion-variants';
 
 export default function PatientPortal() {
-  const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const { patient, mealPlan, progress, isLoading, error } = usePatientData(user?.id || '');
+const { user, loading: authLoading } = useAuth();
+const navigate = useNavigate();
+const { patient, mealPlan, progress, isLoading, error } = usePatientData(user?.id || '');
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
+useEffect(() => {
+if (!authLoading && !user) {
+navigate('/auth');
+}
+}, [user, authLoading, navigate]);
 
-  if (authLoading || isLoading) {
-    return (
-      <PatientLayout>
-        <LoadingState />
-      </PatientLayout>
-    );
-  }
+if (authLoading || isLoading) {
+return (
+<PatientLayout>
+<div className="min-h-screen flex items-center justify-center">
+<motion.div
+initial={{ opacity: 0, scale: 0.9 }}
+animate={{ opacity: 1, scale: 1 }}
+className="text-center"
+>
+<div className="w-16 h-16 bg-gradient-to-br from-[#518C5B] to-[#3d7047] rounded-3xl animate-pulse mx-auto mb-4" />
+<p className="text-sm text-muted-foreground">Carregando seu portal...</p>
+</motion.div>
+</div>
+</PatientLayout>
+);
+}
 
-  if (error) {
-    return (
-      <PatientLayout>
-        <ErrorBoundary error={error} />
-      </PatientLayout>
-    );
-  }
+if (error) {
+return (
+<PatientLayout>
+<ErrorBoundary error={error} />
+</PatientLayout>
+);
+}
 
-  const patientData = patient.data;
-  const mealPlanData = mealPlan.data;
+const patientData = patient.data;
+const mealPlanData = mealPlan.data;
+const firstName = patientData?.full_name?.split(' ')[0] || 'Paciente';
 
-  return (
-    <PatientLayout>
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
-        className="space-y-6 p-6 max-w-7xl mx-auto"
-      >
-        <motion.h1 variants={staggerItem} className="text-3xl font-bold text-slate-900">
-          Bem-vindo, {patientData?.full_name?.split(' ')[0] || 'Paciente'}!
-        </motion.h1>
+return (
+<PatientLayout>
+<div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
+<PageHeader
+title={`Bem-vindo, ${firstName}!`}
+subtitle="Acompanhe sua evolução e cuide da sua saúde"
+icon={<Heart className="w-7 h-7 text-white" />}
+gradient="from-[#518C5B] via-[#4a7d52] to-[#3d7047]"
+/>
 
-        <motion.div
-          variants={staggerItem}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-        >
-          <ProgressCard progress={progress} />
+{/* Quick stats */}
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+<RichCard delay={0.1}>
+<div className="flex items-center gap-3">
+<div className="w-12 h-12 rounded-2xl bg-[#518C5B]/10 flex items-center justify-center">
+<Target className="w-6 h-6 text-[#518C5B]" />
+</div>
+<div className="flex-1 min-w-0">
+<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Seu Objetivo</p>
+<motion.p
+initial={{ opacity: 0, scale: 0.8 }}
+animate={{ opacity: 1, scale: 1 }}
+transition={{ delay: 0.2, type: 'spring' }}
+className="text-lg font-bold text-slate-800 leading-tight truncate"
+>
+{patientData?.goal || 'Não definido'}
+</motion.p>
+</div>
+</div>
+</RichCard>
 
-          <StatCard
-            icon={<Target className="w-8 h-8" />}
-            value={patientData?.goal || 'Não definido'}
-            label="Seu Objetivo"
-          />
+<RichCard delay={0.2}>
+<div className="flex items-center gap-3">
+<div className="w-12 h-12 rounded-2xl bg-[#C4764A]/10 flex items-center justify-center">
+<Calendar className="w-6 h-6 text-[#C4764A]" />
+</div>
+<div>
+<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Refeições/Dia</p>
+<motion.p
+initial={{ opacity: 0, scale: 0.8 }}
+animate={{ opacity: 1, scale: 1 }}
+transition={{ delay: 0.3, type: 'spring' }}
+className="text-2xl font-bold text-slate-800 leading-tight"
+>
+{mealPlanData?.mealsPerDay || '4'}
+</motion.p>
+</div>
+</div>
+</RichCard>
 
-          <StatCard
-            icon={<Calendar className="w-8 h-8" />}
-            value={mealPlanData?.mealsPerDay || '4'}
-            label="Refeições/Dia"
-          />
-        </motion.div>
+<RichCard delay={0.3}>
+<div className="flex items-center gap-3">
+<div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
+<Activity className="w-6 h-6 text-indigo-500" />
+</div>
+<div>
+<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Progresso</p>
+<motion.p
+initial={{ opacity: 0, scale: 0.8 }}
+animate={{ opacity: 1, scale: 1 }}
+transition={{ delay: 0.4, type: 'spring' }}
+className="text-2xl font-bold text-slate-800 leading-tight"
+>
+{progress?.percentage || 0}%
+</motion.p>
+</div>
+</div>
+</RichCard>
+</div>
 
-        <motion.div variants={staggerItem}>
-          <TodaysMeals mealPlan={mealPlan} />
-        </motion.div>
+{/* Progress Card */}
+<motion.div
+initial={{ opacity: 0, y: 20 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ delay: 0.4, duration: 0.5 }}
+>
+<RichCard delay={0.4} padding="lg">
+<ProgressCard progress={progress} />
+</RichCard>
+</motion.div>
 
-        <motion.div variants={staggerItem}>
-          <ChatWidget />
-        </motion.div>
-      </motion.div>
-    </PatientLayout>
-  );
+{/* Today's Meals */}
+<motion.div
+initial={{ opacity: 0, y: 20 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ delay: 0.5, duration: 0.5 }}
+>
+<RichCard delay={0.5} padding="lg">
+<div className="flex items-center gap-2 mb-4">
+<div className="w-9 h-9 rounded-xl bg-[#518C5B]/10 flex items-center justify-center">
+<Leaf className="w-5 h-5 text-[#518C5B]" />
+</div>
+<h2 className="text-lg font-bold text-slate-800">Refeições de Hoje</h2>
+</div>
+<TodaysMeals mealPlan={mealPlan} />
+</RichCard>
+</motion.div>
+
+{/* Chat Widget */}
+<motion.div
+initial={{ opacity: 0, y: 20 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ delay: 0.6, duration: 0.5 }}
+>
+<ChatWidget />
+</motion.div>
+</div>
+</PatientLayout>
+);
 }

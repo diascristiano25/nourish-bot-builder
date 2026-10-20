@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriFlow Reels V2 - Creative</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg: #0A0A0F;
+--text: #F4F1EC;
+--green: #22C55E;
+--blue: #3B82F6;
+--leaf: #BCE396;
+--arrow: #8FD3F4;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; }
+body { display: flex; align-items: center; justify-content: center; cursor: none; }
+body.paused { cursor: default; }
+
+/* Stage 1080x1920 scaled to fit */
+#stage {
+position: relative;
+width: 1080px;
+height: 1920px;
+background: var(--bg);
+transform-origin: center center;
+overflow: hidden;
+box-shadow: 0 0 100px rgba(0,0,0,0.5);
+}
+
+/* Background Effects */
+.grid-bg {
+position: absolute; inset: 0; z-index: 0; opacity: 0.05;
+background-image: linear-gradient(var(--green) 1px, transparent 1px), linear-gradient(90deg, var(--green) 1px, transparent 1px);
+background-size: 80px 80px;
+transform: perspective(500px) rotateX(60deg) translateY(-100px) scale(2);
+transform-origin: top center;
+}
+.glow-orb {
+position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.4; z-index: 1;
+mix-blend-mode: screen; pointer-events: none;
+}
+.orb-1 { width: 600px; height: 600px; background: var(--green); top: -10%; left: -10%; }
+.orb-2 { width: 500px; height: 500px; background: var(--blue); bottom: 10%; right: -10%; }
+.particles { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.particle {
+position: absolute; background: var(--green); border-radius: 50%; opacity: 0;
+box-shadow: 0 0 10px var(--green);
+}
+
+/* Content Layer */
+#content {
+position: absolute; inset: 0; z-index: 10;
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+perspective: 1000px;
+}
+
+/* Scenes */
+.scene {
+position: absolute; inset: 0;
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+padding: 280px 70px 670px 70px; /* Safe Area */
+opacity: 0; visibility: hidden;
+transform-style: preserve-3d;
+}
+
+/* Typography */
+.kinetic-text {
+font-family: 'Space Grotesk', sans-serif;
+font-weight: 700;
+color: var(--text);
+text-align: center;
+line-height: 1.1;
+letter-spacing: -0.02em;
+transform-style: preserve-3d;
+}
+.word {
+display: inline-block;
+opacity: 0;
+transform: translateY(50px) rotateX(-45deg);
+transform-origin: center bottom;
+margin: 0 8px;
+will-change: transform, opacity;
+}
+.highlight { color: var(--green); text-shadow: 0 0 20px rgba(34, 197, 94, 0.4); }
+
+/* Visual Elements */
+.logo-container {
+width: 300px; height: 300px; margin-bottom: 60px;
+opacity: 0; transform: scale(0.5) rotateY(90deg);
+will-change: transform, opacity;
+filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+}
+.feature-stack {
+display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 900px; margin-top: 60px;
+}
+.feature-card {
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,255,255,0.1);
+backdrop-filter: blur(10px);
+border-radius: 24px;
+padding: 40px;
+display: flex; align-items: center; gap: 30px;
+opacity: 0; transform: translateX(-100px);
+will-change: transform, opacity;
+}
+.f-icon {
+width: 80px; height: 80px; border-radius: 20px;
+background: linear-gradient(135deg, var(--green), var(--blue));
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0;
+box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2);
+}
+.f-text { font-size: 36px; font-weight: 600; color: var(--text); }
+.counter-row { display: flex; gap: 60px; margin-top: 80px; }
+.counter-box { text-align: center; opacity: 0; transform: scale(0); }
+.c-num { font-family: 'Space Grotesk'; font-size: 140px; font-weight: 700; line-height: 1; }
+.c-label { font-size: 32px; color: rgba(244, 241, 236, 0.6); margin-top: 10px; }
+.cta-mega {
+font-family: 'Space Grotesk'; font-size: 220px; font-weight: 700; color: var(--green);
+text-shadow: 0 0 50px rgba(34, 197, 94, 0.6);
+opacity: 0; transform: scale(0.8) rotateZ(-5deg);
+}
+.url-glow {
+font-family: 'Space Grotesk'; font-size: 64px; color: var(--text); margin-top: 40px;
+opacity: 0; transform: translateY(30px); letter-spacing: 2px;
+}
+.url-glow span { color: var(--green); }
+
+/* Overlays */
+#start-screen, #countdown-screen {
+position: absolute; inset: 0; z-index: 100; background: var(--bg);
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+#start-screen h1 { font-family: 'Space Grotesk'; font-size: 80px; color: var(--text); margin-top: 40px; }
+#start-screen p { font-size: 32px; color: rgba(244, 241, 236, 0.5); margin-top: 20px; animation: pulse 2s infinite; }
+#countdown-screen { display: none; }
+#cd-num { font-family: 'Space Grotesk'; font-size: 400px; font-weight: 700; color: var(--green); opacity: 0; transform: scale(0.5); }
+#flash { position: absolute; inset: 0; z-index: 50; background: #fff; opacity: 0; pointer-events: none; mix-blend-mode: overlay; }
+#debug { position: absolute; top: 20px; right: 20px; z-index: 200; color: var(--green); font-family: monospace; font-size: 24px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; display: none; }
+
+@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+</style>
+</head>
+<body class="paused">
+<div id="stage">
+<!-- Background -->
+<div class="grid-bg"></div>
+<div class="glow-orb orb-1" id="orb1"></div>
+<div class="glow-orb orb-2" id="orb2"></div>
+<div class="particles" id="particles"></div>
+<div id="flash"></div>
+
+<!-- Start Screen -->
+<div id="start-screen">
+<!-- SVG Logo Inline -->
+<svg width="200" height="200" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M50 15 C50 15 75 45 65 70 C60 80 50 85 50 85 C50 85 40 80 35 70 C25 45 50 15 50 15Z" fill="#BCE396"/>
+<path d="M25 45 C25 45 45 55 45 75 C45 85 35 85 35 85 C35 85 15 75 25 45Z" fill="#BCE396"/>
+<path d="M50 85 Q45 65 50 45" stroke="#0A0A0F" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+<path d="M35 85 Q35 70 40 60" stroke="#0A0A0F" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+<path d="M20 75 C45 95 85 85 85 50 C85 40 80 30 75 25" stroke="#8FD3F4" stroke-width="9" stroke-linecap="round" fill="none"/>
+<path d="M68 32 L78 22 L85 32" stroke="#8FD3F4" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+<h1>NutriFlow</h1>
+<p>Clique ou ESPAÇO para começar</p>
+</div>
+
+<!-- Countdown -->
+<div id="countdown-screen"><div id="cd-num">3</div></div>
+
+<!-- Main Content -->
+<div id="content">
+<!-- Scene 1: Problem -->
+<div class="scene" id="scene1">
+<div class="kinetic-text" style="font-size: 90px;" id="s1-text"></div>
+</div>
+
+<!-- Scene 2: Solution (Logo) -->
+<div class="scene" id="scene2">
+<div class="logo-container" id="s2-logo">
+<svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M50 15 C50 15 75 45 65 70 C60 80 50 85 50 85 C50 85 40 80 35 70 C25 45 50 15 50 15Z" fill="#BCE396"/>
+<path d="M25 45 C25 45 45 55 45 75 C45 85 35 85 35 85 C35 85 15 75 25 45Z" fill="#BCE396"/>
+<path d="M50 85 Q45 65 50 45" stroke="#0A0A0F" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+<path d="M35 85 Q35 70 40 60" stroke="#0A0A0F" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+<path d="M20 75 C45 95 85 85 85 50 C85 40 80 30 75 25" stroke="#8FD3F4" stroke-width="9" stroke-linecap="round" fill="none"/>
+<path d="M68 32 L78 22 L85 32" stroke="#8FD3F4" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+</div>
+<div class="kinetic-text" style="font-size: 80px;" id="s2-text"></div>
+</div>
+
+<!-- Scene 3: Features -->
+<div class="scene" id="scene3">
+<div class="kinetic-text" style="font-size: 70px;" id="s3-text"></div>
+<div class="feature-stack">
+<div class="feature-card">
+<div class="f-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+<div class="f-text">Gestão de Pacientes</div>
+</div>
+<div class="feature-card">
+<div class="f-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+<div class="f-text">Planos Inteligentes</div>
+</div>
+<div class="feature-card">
+<div class="f-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+<div class="f-text">Resultados Reais</div>
+</div>
+</div>
+</div>
+
+<!-- Scene 4: Comparison -->
+<div class="scene" id="scene4">
+<div class="kinetic-text" style="font-size: 90px;" id="s4-text"></div>
+<div class="counter-row">
+<div class="counter-box">
+<div class="c-num" style="color: #ff5555;" id="c-old">0</div>
+<div class="c-label">Dias Antes</div>
+</div>
+<div class="counter-box">
+<div class="c-num" style="color: var(--green);" id="c-new">0</div>
+<div class="c-label">Minutos Agora</div>
+</div>
+</div>
+</div>
+
+<!-- Scene 5: Benefit -->
+<div class="scene" id="scene5">
+<div class="kinetic-text" style="font-size: 85px;" id="s5-text"></div>
+</div>
+
+<!-- Scene 6: CTA -->
+<div class="scene" id="scene6">
+<div class="cta-mega" id="s6-cta">COMECE</div>
+<div class="url-glow" id="s6-url">nutriflow<span>.</span>inf<span>.</span>br</div>
+</div>
+</div>
+
+<div id="debug">0.00s</div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+// --- Config ---
+const SCENES = [
+{ id: 1, start: 0, end: 3.5, text: "Você ainda perde horas organizando planos?", highlight: ["horas", "planos"] },
+{ id: 2, start: 4.0, end: 9.0, text: "Conheça o NutriFlow feito para nutricionistas", highlight: ["NutriFlow", "nutricionistas"] },
+{ id: 3, start: 9.5, end: 16.0, text: "Tudo que você precisa em um só lugar", highlight: ["precisa", "lugar"] },
+{ id: 4, start: 16.5, end: 22.0, text: "De dias para minutos", highlight: ["dias", "minutos"] },
+{ id: 5, start: 22.5, end: 28.0, text: "Mais tempo para cuidar dos seus pacientes", highlight: ["tempo", "cuidar"] },
+{ id: 6, start: 28.5, end: 35.0, text: "", highlight: [] }
+];
+const TOTAL_DURATION = 35.0;
+
+// --- State ---
+let state = 'idle'; // idle, countdown, playing, paused, ended
+let startTime = 0;
+let pauseTime = 0;
+let elapsed = 0;
+let cdStart = 0;
+let rafId = null;
+let showDebug = false;
+
+// --- DOM ---
+const stage = document.getElementById('stage');
+const startScreen = document.getElementById('start-screen');
+const cdScreen = document.getElementById('countdown-screen');
+const cdNum = document.getElementById('cd-num');
+const flash = document.getElementById('flash');
+const debug = document.getElementById('debug');
+const orb1 = document.getElementById('orb1');
+const orb2 = document.getElementById('orb2');
+const particlesContainer = document.getElementById('particles');
+
+// --- Easing ---
+const easeOutExpo = (t) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+const easeOutBack = (t) => { const c1 = 1.70158; const c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v) => Math.max(0, Math.min(1, v));
+
+// --- Init Particles ---
+const particles = [];
+for(let i=0; i<40; i++) {
+const p = document.createElement('div');
+p.className = 'particle';
+const size = Math.random() * 6 + 2;
+p.style.width = size + 'px';
+p.style.height = size + 'px';
+p.style.left = Math.random() * 100 + '%';
+p.style.top = Math.random() * 100 + '%';
+particlesContainer.appendChild(p);
+particles.push({ el: p, speed: Math.random() * 0.5 + 0.2, offset: Math.random() * 100 });
+}
+
+// --- Build Text ---
+SCENES.forEach(sc => {
+if (!sc.text) return;
+const container = document.getElementById(`s${sc.id}-text`);
+if (!container) return;
+container.innerHTML = '';
+const words = sc.text.split(' ');
+const duration = sc.end - sc.start;
+const wordDur = duration / (words.length + 1); // +1 for buffer
+words.forEach((w, i) => {
+const span = document.createElement('span');
+span.className = 'word';
+const clean = w.replace(/[^a-zA-ZÀ-ɏ0-9]/g, '');
+if (sc.highlight.includes(clean)) span.classList.add('highlight');
+span.textContent = w + ' ';
+span.dataset.delay = (i * wordDur).toFixed(3);
+span.dataset.dur = '0.6';
+container.appendChild(span);
+});
+});
+
+// --- Scaling ---
+function fitStage() {
+const scale = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+stage.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', fitStage);
+fitStage();
+
+// --- Render Loop ---
+function render(t) {
+// Global Zoom
+const zoom = 1 + (t * 0.002);
+document.getElementById('content').style.transform = `scale(${zoom})`;
+
+// Background Movement
+const bt = t * 0.5;
+orb1.style.transform = `translate(${Math.sin(bt)*50}px, ${Math.cos(bt*0.8)*50}px)`;
+orb2.style.transform = `translate(${Math.cos(bt*0.6)*60}px, ${Math.sin(bt*0.9)*40}px)`;
+
+// Particles
+particles.forEach(p => {
+const y = (t * 50 * p.speed + p.offset) % 1920;
+p.el.style.transform = `translateY(${-y}px)`;
+p.el.style.opacity = 0.3 + Math.sin(t + p.offset) * 0.2;
+});
+
+// Scene Logic
+let activeIdx = -1;
+SCENES.forEach((sc, i) => {
+if (t >= sc.start && t <= sc.end) activeIdx = i;
+});
+
+SCENES.forEach((sc, i) => {
+const el = document.getElementById(`scene${sc.id}`);
+const localT = t - sc.start;
+const dur = sc.end - sc.start;
+
+if (i === activeIdx) {
+// Enter
+el.style.visibility = 'visible';
+const progress = clamp(localT / 0.5); // 0.5s fade in
+const ease = easeOutExpo(progress);
+el.style.opacity = ease;
+el.style.transform = `scale(${lerp(0.9, 1, ease)}) translateZ(${lerp(-100, 0, ease)}px)`;
+
+// Words
+const words = el.querySelectorAll('.word');
+words.forEach(w => {
+const delay = parseFloat(w.dataset.delay);
+const wdur = parseFloat(w.dataset.dur);
+const wp = clamp((localT - delay) / wdur);
+const we = easeOutBack(wp);
+w.style.opacity = clamp(we);
+w.style.transform = `translateY(${lerp(50, 0, we)}px) rotateX(${lerp(-45, 0, we)}deg)`;
+});
+
+// Specific Visuals
+renderVisuals(sc.id, localT);
+
+} else if (t > sc.end && t < sc.end + 0.5) {
+// Exit
+const exitP = clamp((t - sc.end) / 0.5);
+el.style.opacity = 1 - easeOutExpo(exitP);
+el.style.transform = `scale(${lerp(1, 1.1, exitP)}) translateZ(${lerp(0, 100, exitP)}px)`;
+} else {
+el.style.opacity = 0;
+el.style.visibility = 'hidden';
+}
+});
+
+// Flash on scene change
+let flashOpacity = 0;
+SCENES.forEach(sc => {
+const diff = Math.abs(t - sc.start);
+if (diff < 0.1) flashOpacity = Math.max(flashOpacity, (1 - diff/0.1) * 0.3);
+});
+flash.style.opacity = flashOpacity;
+
+if (showDebug) debug.textContent = t.toFixed(2) + 's';
+}
+
+function renderVisuals(id, lt) {
+if (id === 2) {
+const logo = document.getElementById('s2-logo');
+const p = clamp(lt / 0.8);
+const e = easeOutBack(p);
+logo.style.opacity = clamp(e);
+logo.style.transform = `scale(${lerp(0.5, 1, e)}) rotateY(${lerp(90, 0, e)}deg)`;
+}
+if (id === 3) {
+const cards = document.querySelectorAll('.feature-card');
+cards.forEach((card, i) => {
+const delay = 0.5 + (i * 0.2);
+const p = clamp((lt - delay) / 0.6);
+const e = easeOutExpo(p);
+card.style.opacity = clamp(e);
+card.style.transform = `translateX(${lerp(-100, 0, e)}px)`;
+});
+}
+if (id === 4) {
+const boxes = document.querySelectorAll('.counter-box');
+boxes.forEach((box, i) => {
+const delay = 0.5 + (i * 0.2);
+const p = clamp((lt - delay) / 0.6);
+const e = easeOutBack(p);
+box.style.opacity = clamp(e);
+box.style.transform = `scale(${lerp(0, 1, e)})`;
+});
+// Counters
+const p1 = clamp((lt - 1) / 2);
+const p2 = clamp((lt - 1.2) / 2);
+document.getElementById('c-old').textContent = Math.round(lerp(0, 3, easeOutExpo(p1)));
+document.getElementById('c-new').textContent = Math.round(lerp(0, 5, easeOutExpo(p2)));
+}
+if (id === 6) {
+const cta = document.getElementById('s6-cta');
+const url = document.getElementById('s6-url');
+const p1 = clamp(lt / 0.8);
+const e1 = easeOutBack(p1);
+cta.style.opacity = clamp(e1);
+cta.style.transform = `scale(${lerp(0.8, 1, e1)}) rotateZ(${lerp(-5, 0, e1)}deg)`;
+const p2 = clamp((lt - 1) / 0.6);
+const e2 = easeOutExpo(p2);
+url.style.opacity = clamp(e2);
+url.style.transform = `translateY(${lerp(30, 0, e2)}px)`;
+}
+}
+
+function renderCountdown(num, frac) {
+cdNum.textContent = num;
+const e = easeOutBack(clamp(frac / 0.5));
+cdNum.style.opacity = clamp(e);
+cdNum.style.transform = `scale(${lerp(0.5, 1, e)})`;
+if (frac > 0.8) cdNum.style.opacity = 1 - clamp((frac - 0.8) / 0.2);
+}
+
+function tick(now) {
+if (state === 'countdown') {
+const cdElapsed = (now - cdStart) / 1000;
+const num = 3 - Math.floor(cdElapsed);
+const frac = cdElapsed % 1;
+if (num <= 0) {
+state = 'playing';
+cdScreen.style.display = 'none';
+startTime = now;
+elapsed = 0;
+rafId = requestAnimationFrame(tick);
+return;
+}
+renderCountdown(num, frac);
+rafId = requestAnimationFrame(tick);
+return;
+}
+
+if (state === 'playing') {
+elapsed = (now - startTime) / 1000;
+if (elapsed >= TOTAL_DURATION) {
+elapsed = TOTAL_DURATION;
+state = 'ended';
+render(elapsed);
+document.body.classList.add('paused');
+return;
+}
+render(elapsed);
+rafId = requestAnimationFrame(tick);
+return;
+}
+}
+
+// --- Controls ---
+function start() {
+state = 'countdown';
+startScreen.style.display = 'none';
+cdScreen.style.display = 'flex';
+cdStart = performance.now();
+document.body.classList.remove('paused');
+rafId = requestAnimationFrame(tick);
+}
+
+function togglePause() {
+if (state === 'idle') { start(); return; }
+if (state === 'ended') return;
+if (state === 'playing') {
+state = 'paused';
+pauseTime = performance.now();
+cancelAnimationFrame(rafId);
+document.body.classList.add('paused');
+} else if (state === 'paused') {
+const pausedDuration = performance.now() - pauseTime;
+startTime += pausedDuration;
+state = 'playing';
+document.body.classList.remove('paused');
+rafId = requestAnimationFrame(tick);
+}
+}
+
+function restart() {
+cancelAnimationFrame(rafId);
+state = 'idle';
+elapsed = 0;
+startScreen.style.display = 'flex';
+cdScreen.style.display = 'none';
+document.body.classList.add('paused');
+render(0);
+}
+
+function jump(dir) {
+if (state !== 'playing' && state !== 'paused') return;
+let current = -1;
+SCENES.forEach((sc, i) => { if (elapsed >= sc.start && elapsed <= sc.end) current = i; });
+let target = current + dir;
+if (target < 0) target = 0;
+if (target >= SCENES.length) target = SCENES.length - 1;
+elapsed = SCENES[target].start + 0.01;
+startTime = performance.now() - (elapsed * 1000);
+if (state === 'paused') render(elapsed);
+}
+
+document.addEventListener('keydown', (e) => {
+if (e.code === 'Space') { e.preventDefault(); togglePause(); }
+if (e.code === 'KeyR') restart();
+if (e.code === 'ArrowRight') jump(1);
+if (e.code === 'ArrowLeft') jump(-1);
+if (e.code === 'KeyT') { showDebug = !showDebug; debug.style.display = showDebug ? 'block' : 'none'; }
+});
+
+document.addEventListener('click', () => { if (state === 'idle') start(); });
+
+// Initial Render
+render(0);
+
+})();
+</script>
+</body>
+</html>

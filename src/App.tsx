@@ -113,8 +113,8 @@ function App() {
                     </>
                   ) : (
                     <>
-                      <Route path="/" element={<LandingPageProfessional />} />
-                      <Route path="/old" element={<LandingPage />} />
+                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/old" element={<LandingPageProfessional />} />
                       <Route path="/new" element={<LandingPageNew />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/patient-auth" element={<PatientAuth />} />
@@ -123,7 +123,7 @@ function App() {
                         path="/dashboard"
                         element={
                           <AccountStatusGuard>
-                            <Dashboard />
+                            <ModernDashboard />
                           </AccountStatusGuard>
                         }
                       />

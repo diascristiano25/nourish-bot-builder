@@ -1,37 +1,34 @@
 import { motion } from 'framer-motion';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Calendar, Users, FileText, DollarSign,
-  Settings, HelpCircle, LogOut, Leaf, ChevronRight
+  Settings, HelpCircle, LogOut, Leaf, Send, Grid3X3, Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 interface NavItem {
   name: string;
   path: string;
   icon: React.ElementType;
+  badge?: number;
 }
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { name: 'Evolução', path: '/dashboard', icon: FileText },
+  { name: 'Mensagens', path: '/suporte/ajuda', icon: Send, badge: 5 },
   { name: 'Agenda', path: '/agenda', icon: Calendar },
-  { name: 'Pacientes', path: '/pacientes', icon: Users },
-  { name: 'Cardápios', path: '/biblioteca', icon: FileText },
-  { name: 'Financeiro', path: '/financeiro', icon: DollarSign },
-];
-
-const secondaryItems: NavItem[] = [
-  { name: 'Configurações', path: '/perfil', icon: Settings },
-  { name: 'Suporte', path: '/suporte/ajuda', icon: HelpCircle },
+  { name: 'Pacientes', path: '/pacientes', icon: Grid3X3 },
+  { name: 'Info', path: '/perfil', icon: Info },
 ];
 
 export function ModernSidebar() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     try {
@@ -49,43 +46,43 @@ export function ModernSidebar() {
 
   return (
     <motion.aside
-      initial={{ x: -280 }}
-      animate={{ x: 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="fixed left-0 top-0 h-screen w-[280px] bg-gradient-to-b from-[#518C5B] to-[#3d7047] border-r border-border/10 flex flex-col z-50"
+      initial={{ x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 25 }}
+      className="fixed left-4 top-4 bottom-4 w-[88px] bg-gradient-to-b from-[#518C5B] to-[#3d7047] rounded-[2rem] flex flex-col items-center py-6 z-50 shadow-2xl shadow-emerald-900/20"
     >
-      {/* Logo / Brand */}
-      <div className="p-6 pb-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex items-center gap-3"
-        >
-          <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-            <Leaf className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-xl font-bold text-white tracking-tight">NutriFlow</span>
-        </motion.div>
-      </div>
+      {/* Logo */}
+      <motion.div
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+        className="mb-8"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
+          <Leaf className="w-6 h-6 text-white" />
+        </div>
+      </motion.div>
 
-      {/* Main Navigation */}
-      <nav className="flex-1 px-3 space-y-1">
+      {/* Navigation */}
+      <nav className="flex-1 flex flex-col items-center gap-2 w-full px-2">
         {navItems.map((item, index) => (
           <motion.div
-            key={item.path}
+            key={item.path + item.name}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 + index * 0.05 }}
+            className="relative w-full"
+            onMouseEnter={() => setHoveredItem(item.name)}
+            onMouseLeave={() => setHoveredItem(null)}
           >
             <NavLink
               to={item.path}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden",
+                  "relative flex items-center justify-center w-full h-12 rounded-2xl transition-all duration-300 group",
                   isActive
-                    ? "bg-white/15 backdrop-blur-sm text-white shadow-lg"
-                    : "text-white/70 hover:text-white hover:bg-white/10"
+                    ? "bg-white/20 shadow-lg shadow-black/10"
+                    : "hover:bg-white/10"
                 )
               }
             >
@@ -93,15 +90,33 @@ export function ModernSidebar() {
                 <>
                   {isActive && (
                     <motion.div
-                      layoutId="activeNav"
-                      className="absolute inset-0 bg-white/15 backdrop-blur-sm rounded-xl"
+                      layoutId="sidebar-active"
+                      className="absolute inset-0 bg-white/20 rounded-2xl"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
-                  <item.icon className="w-5 h-5 relative z-10" />
-                  <span className="text-sm font-medium relative z-10">{item.name}</span>
-                  {isActive && (
-                    <ChevronRight className="w-4 h-4 ml-auto relative z-10" />
+                  <item.icon className={cn(
+                    "w-5 h-5 relative z-10 transition-colors",
+                    isActive ? "text-white" : "text-white/70 group-hover:text-white"
+                  )} />
+
+                  {/* Badge */}
+                  {item.badge && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center z-20 border-2 border-[#518C5B]">
+                      {item.badge}
+                    </span>
+                  )}
+
+                  {/* Tooltip */}
+                  {hoveredItem === item.name && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none"
+                    >
+                      {item.name}
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
+                    </motion.div>
                   )}
                 </>
               )}
@@ -110,27 +125,16 @@ export function ModernSidebar() {
         ))}
       </nav>
 
-      {/* Secondary Items */}
-      <div className="px-3 py-4 border-t border-white/10">
-        {secondaryItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm font-medium"
-          >
-            <item.icon className="w-5 h-5" />
-            <span>{item.name}</span>
-          </NavLink>
-        ))}
-
-        <Button
-          variant="ghost"
+      {/* Bottom Actions */}
+      <div className="flex flex-col items-center gap-2 w-full px-2 mt-auto">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handleSignOut}
-          className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 mt-1 h-auto font-medium text-sm"
+          className="w-full h-12 rounded-2xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
         >
           <LogOut className="w-5 h-5" />
-          Sair
-        </Button>
+        </motion.button>
       </div>
     </motion.aside>
   );

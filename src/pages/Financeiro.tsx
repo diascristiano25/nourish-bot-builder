@@ -1,8 +1,7 @@
 /**
  * Financeiro - Financial dashboard page
- * Modern financial overview with revenue charts and transaction list
+ * Premium financial overview with NutriFlow palette and motion design
  */
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,30 +12,27 @@ import { FinancialDashboard } from '@/components/nutritionist/financial/Financia
 import { RevenueChart } from '@/components/nutritionist/financial/RevenueChart';
 import { TransactionList, Transaction } from '@/components/nutritionist/financial/TransactionList';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { RichCard } from '@/components/shared/RichCard';
+import { DollarSign, TrendingUp, Clock, Receipt } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface RevenueData {
   month: string;
   revenue: number;
 }
 
-// Mock data generator
 const getMockData = () => ({
   totalRevenue: 4800,
   pendingPayments: 1200,
   avgConsultationCost: 150,
   totalTransactions: 32,
   monthlyRevenue: [
-    { month: 'Nov', revenue: 2800 },
-    { month: 'Dez', revenue: 3200 },
-    { month: 'Jan', revenue: 3600 },
-    { month: 'Fev', revenue: 4100 },
-    { month: 'Mar', revenue: 3900 },
-    { month: 'Abr', revenue: 4500 },
-    { month: 'Mai', revenue: 4200 },
-    { month: 'Jun', revenue: 4800 },
-    { month: 'Jul', revenue: 5100 },
-    { month: 'Ago', revenue: 4900 },
-    { month: 'Set', revenue: 5300 },
+    { month: 'Mai', revenue: 3200 },
+    { month: 'Jun', revenue: 4100 },
+    { month: 'Jul', revenue: 3800 },
+    { month: 'Ago', revenue: 4500 },
+    { month: 'Set', revenue: 5200 },
     { month: 'Out', revenue: 4800 },
   ] as RevenueData[],
   transactions: [
@@ -65,42 +61,33 @@ export default function Financeiro() {
   const fetchData = async () => {
     try {
       setLoading(true);
-
-      // Try to fetch real data from Supabase
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('id')
         .eq('user_id', user!.id)
         .maybeSingle();
-
       if (profileError) throw profileError;
-
       const nutritionistId = profileData?.id;
       if (!nutritionistId) throw new Error('No profile');
 
-      // Fetch financial records
       const { data: financialData, error: financialError } = await supabase
         .from('financial_records')
         .select('id, amount, transaction_type, status, description, created_at, patient:patient_id(id, full_name)')
         .eq('user_id', user!.id)
         .order('created_at', { ascending: false });
-
       if (financialError) throw financialError;
 
       const now = new Date();
       const monthStart = startOfMonth(now);
       const monthEnd = endOfMonth(now);
-
       const currentMonthRecords = (financialData || []).filter((r: any) => {
         const recordDate = new Date(r.created_at);
         return recordDate >= monthStart && recordDate <= monthEnd && r.status === 'completed';
       });
-
       const totalRev = currentMonthRecords.reduce((sum: number, r: any) => sum + r.amount, 0);
       const pending = (financialData || [])
         .filter((r: any) => r.status === 'pending')
         .reduce((sum: number, r: any) => sum + r.amount, 0);
-
       const consultationRecords = (financialData || []).filter(
         (r: any) => r.transaction_type === 'consultation' && r.status === 'completed'
       );
@@ -108,28 +95,20 @@ export default function Financeiro() {
         ? consultationRecords.reduce((sum: number, r: any) => sum + r.amount, 0) / consultationRecords.length
         : 0;
 
-      // Monthly revenue (last 12 months)
       const revenueMonths: RevenueData[] = [];
       const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-
       for (let i = 11; i >= 0; i--) {
         const targetMonth = subMonths(now, i);
         const mStart = startOfMonth(targetMonth);
         const mEnd = endOfMonth(targetMonth);
-
         const monthRecords = (financialData || []).filter((r: any) => {
           const recordDate = new Date(r.created_at);
           return recordDate >= mStart && recordDate <= mEnd && r.status === 'completed';
         });
-
         const total = monthRecords.reduce((sum: number, r: any) => sum + r.amount, 0);
-        revenueMonths.push({
-          month: monthNames[targetMonth.getMonth()],
-          revenue: total / 100,
-        });
+        revenueMonths.push({ month: monthNames[targetMonth.getMonth()], revenue: total / 100 });
       }
 
-      // Transactions list
       const transactionsList: Transaction[] = (financialData || []).slice(0, 20).map((record: any) => ({
         id: record.id,
         patientName: record.patient?.full_name || 'Paciente',
@@ -147,7 +126,6 @@ export default function Financeiro() {
         monthlyRevenue: revenueMonths,
         transactions: transactionsList,
       });
-
     } catch (err) {
       console.warn('Supabase fetch failed for Financeiro, using mock data:', err);
       setData(getMockData());
@@ -170,24 +148,99 @@ export default function Financeiro() {
 
   return (
     <ModernLayout>
-      <div className="min-h-screen bg-[#FAF8F5] p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Financeiro</h1>
-            <p className="text-slate-600">Acompanhe suas receitas e transações</p>
-          </div>
+      <div className="space-y-6">
+        <PageHeader
+          title="Financeiro"
+          subtitle="Acompanhe suas receitas, pagamentos e transações"
+          icon={<DollarSign className="w-7 h-7 text-white" />}
+          gradient="from-[#C4764A] via-[#b56a42] to-[#9d5a38]"
+        />
 
-          <FinancialDashboard
-            totalRevenue={data.totalRevenue}
-            pendingPayments={data.pendingPayments}
-            avgConsultationCost={data.avgConsultationCost}
-            totalTransactions={data.totalTransactions}
-          />
-
-          <RevenueChart data={data.monthlyRevenue} />
-
-          <TransactionList transactions={data.transactions} />
+        {/* KPI tiles */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <RichCard delay={0.1}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#518C5B]/10 flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-[#518C5B]" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Receita do Mês</p>
+                <motion.p
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2, type: 'spring' }}
+                  className="text-2xl font-bold text-slate-800 leading-tight"
+                >
+                  R$ {data.totalRevenue.toLocaleString('pt-BR')}
+                </motion.p>
+              </div>
+            </div>
+          </RichCard>
+          <RichCard delay={0.2}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pendentes</p>
+                <motion.p
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3, type: 'spring' }}
+                  className="text-2xl font-bold text-slate-800 leading-tight"
+                >
+                  R$ {data.pendingPayments.toLocaleString('pt-BR')}
+                </motion.p>
+              </div>
+            </div>
+          </RichCard>
+          <RichCard delay={0.3}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-indigo-500" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ticket Médio</p>
+                <motion.p
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4, type: 'spring' }}
+                  className="text-2xl font-bold text-slate-800 leading-tight"
+                >
+                  R$ {data.avgConsultationCost.toLocaleString('pt-BR')}
+                </motion.p>
+              </div>
+            </div>
+          </RichCard>
+          <RichCard delay={0.4}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#C4764A]/10 flex items-center justify-center">
+                <Receipt className="w-6 h-6 text-[#C4764A]" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Transações</p>
+                <motion.p
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5, type: 'spring' }}
+                  className="text-2xl font-bold text-slate-800 leading-tight"
+                >
+                  {data.totalTransactions}
+                </motion.p>
+              </div>
+            </div>
+          </RichCard>
         </div>
+
+        {/* Revenue chart in rich card */}
+        <RichCard delay={0.5} padding="lg">
+          <RevenueChart data={data.monthlyRevenue} />
+        </RichCard>
+
+        {/* Transactions in rich card */}
+        <RichCard delay={0.6} padding="lg">
+          <TransactionList transactions={data.transactions} />
+        </RichCard>
       </div>
     </ModernLayout>
   );

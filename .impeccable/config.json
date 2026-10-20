@@ -1,0 +1,74 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "space grotesk",
+        "createdAt": "2026-10-19T05:00:22.246Z",
+        "reason": "user specified in brief: Fontes (Google Fonts): títulos [Space Grotesk]"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-19T05:00:38.220Z",
+        "reason": "user specified in brief: Fontes (Google Fonts): textos [Inter]"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "nutriflow-reels.html"
+        ],
+        "createdAt": "2026-10-19T10:42:53.816Z",
+        "reason": "sanctioned exception: grain at 0.12 opacity with mix-blend-mode overlay is intentional texture per user brief 'granulado sutil', visible and not buried"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "nutriflow-reels-v2.html"
+        ],
+        "createdAt": "2026-10-19T16:32:25.720Z",
+        "reason": "user confirmed: brief requests 'brilho' (glow) and 'manchas de luz' (light spots) for video reel aesthetic"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "nutriflow-reels-v2.html"
+        ],
+        "createdAt": "2026-10-19T16:37:16.834Z",
+        "reason": "sanctioned exception: subtle grid/particles at low opacity are intentional 'live background' texture per user brief"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "nutriflow-reels-v3.html"
+        ],
+        "createdAt": "2026-10-19T19:43:07.017Z",
+        "reason": "user confirmed: brief requests 'brilho' (glow) and light effects for video reel aesthetic"
+      },
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          ".impeccable/dashboard-preview.html"
+        ],
+        "createdAt": "2026-10-19T20:58:07.070Z",
+        "reason": "agent decided: throwaway static visual-verification fixture mirroring the reference design; inner tinted rounded boxes are chart thumbnails, avatar and day cells, not semantic cards; flattening would break mock fidelity"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/index.css"
+        ],
+        "createdAt": "2026-10-20T02:08:06.517Z",
+        "reason": "false positive: HSL variable declarations in :root block, not rendered text"
+      }
+    ]
+  }
+}

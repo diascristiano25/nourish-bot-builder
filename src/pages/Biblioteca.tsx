@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { PlanLibrary, MealPlan } from '@/components/nutritionist/plans/PlanLibrary';
-import { PlanCard } from '@/components/nutritionist/plans/PlanCard';
 import { PlanEditor } from '@/components/nutritionist/plans/PlanEditor';
-import { Loader2 } from 'lucide-react';
+import { Loader2, BookOpen, Plus, FileText } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { RichCard } from '@/components/shared/RichCard';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 export default function Biblioteca() {
   const { user } = useAuth();
@@ -13,7 +16,6 @@ export default function Biblioteca() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch meal plans on component mount
   useEffect(() => {
     const fetchMealPlans = async () => {
       try {
@@ -21,11 +23,7 @@ export default function Biblioteca() {
           setIsLoading(false);
           return;
         }
-
-        // Simulate API call to fetch plans from Supabase
         await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Mock data for demonstration
         const mockPlans: MealPlan[] = [
           {
             id: '1',
@@ -42,7 +40,7 @@ export default function Biblioteca() {
           {
             id: '2',
             name: 'Plano Ganho de Massa',
-            description: 'Plano de hipercalórico para ganho de massa muscular',
+            description: 'Plano hipercalórico para ganho de massa muscular',
             calories: 3500,
             protein: 200,
             carbs: 450,
@@ -64,7 +62,6 @@ export default function Biblioteca() {
             updatedAt: new Date().toISOString(),
           },
         ];
-
         setPlans(mockPlans);
       } catch (error) {
         console.error('Error fetching meal plans:', error);
@@ -72,16 +69,13 @@ export default function Biblioteca() {
         setIsLoading(false);
       }
     };
-
     fetchMealPlans();
   }, [user?.id]);
 
   const handleSavePlan = (plan: MealPlan) => {
     if (selectedPlan) {
-      // Update existing plan
       setPlans(plans.map((p) => (p.id === plan.id ? plan : p)));
     } else {
-      // Add new plan
       setPlans([...plans, plan]);
     }
     setIsEditorOpen(false);
@@ -98,50 +92,107 @@ export default function Biblioteca() {
     setIsEditorOpen(true);
   };
 
-  const handleDuplicatePlan = (plan: MealPlan) => {
-    const duplicatedPlan: MealPlan = {
-      ...plan,
-      id: Date.now().toString(),
-      name: `${plan.name} (Cópia)`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setPlans([...plans, duplicatedPlan]);
-  };
-
-  const handleDeletePlan = (planId: string) => {
-    setPlans(plans.filter((p) => p.id !== planId));
-  };
+  const totalCaloriesAvg = plans.length > 0
+    ? Math.round(plans.reduce((s, p) => s + p.calories, 0) / plans.length)
+    : 0;
 
   return (
     <ModernLayout>
-      <div className="space-y-6 p-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Biblioteca de Planos</h1>
-          <p className="text-gray-600 mt-2">
-            Gerencie e organize seus planos de refeição predefinidos
-          </p>
+      <div className="space-y-6">
+        <PageHeader
+          title="Biblioteca de Planos"
+          subtitle="Gerencie e organize seus planos de refeição predefinidos"
+          icon={<BookOpen className="w-7 h-7 text-white" />}
+          actions={
+            <Button
+              onClick={handleCreateNew}
+              className="gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white border border-white/20 rounded-2xl font-semibold px-5 h-11 shadow-lg"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Plano
+            </Button>
+          }
+        />
+
+        {/* Quick stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <RichCard delay={0.1}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#518C5B]/10 flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-[#518C5B]" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Planos</p>
+                <motion.p
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2, type: 'spring' }}
+                  className="text-2xl font-bold text-slate-800 leading-tight"
+                >
+                  {plans.length}
+                </motion.p>
+              </div>
+            </div>
+          </RichCard>
+          <RichCard delay={0.2}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#C4764A]/10 flex items-center justify-center">
+                <FileText className="w-6 h-6 text-[#C4764A]" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Calorias Médias</p>
+                <motion.p
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3, type: 'spring' }}
+                  className="text-2xl font-bold text-slate-800 leading-tight"
+                >
+                  {totalCaloriesAvg} kcal
+                </motion.p>
+              </div>
+            </div>
+          </RichCard>
+          <RichCard delay={0.3}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
+                <div className="w-3 h-3 rounded-full bg-indigo-500 animate-pulse" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Prontos para Uso</p>
+                <motion.p
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4, type: 'spring' }}
+                  className="text-2xl font-bold text-slate-800 leading-tight"
+                >
+                  {plans.length}
+                </motion.p>
+              </div>
+            </div>
+          </RichCard>
         </div>
 
-        {/* Loading State */}
+        {/* Plans library in rich card */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-orange-500 mx-auto mb-3" />
-              <p className="text-gray-600 font-medium">Carregando planos...</p>
+          <RichCard delay={0.4} padding="lg">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Loader2 className="w-8 h-8 animate-spin text-[#518C5B] mx-auto mb-3" />
+                <p className="text-slate-600 font-medium">Carregando planos...</p>
+              </div>
             </div>
-          </div>
+          </RichCard>
         ) : (
-          <PlanLibrary
-            plans={plans}
-            onSelectPlan={handleSelectPlan}
-            onCreateNew={handleCreateNew}
-            isLoading={isLoading}
-          />
+          <RichCard delay={0.4} padding="lg">
+            <PlanLibrary
+              plans={plans}
+              onSelectPlan={handleSelectPlan}
+              onCreateNew={handleCreateNew}
+              isLoading={isLoading}
+            />
+          </RichCard>
         )}
 
-        {/* Editor Modal */}
         {isEditorOpen && (
           <PlanEditor
             plan={selectedPlan}

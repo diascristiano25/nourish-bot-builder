@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { fadeInUp } from '@/lib/motion-variants';
 import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { SkeletonTable } from '@/components/shared/Skeleton';
+import { EmptyPatients } from '@/components/shared/EmptyState';
 
 interface Patient {
   id: string;
@@ -61,23 +63,11 @@ export function PatientTable({
   };
 
   if (isLoading) {
-    return (
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-16 bg-slate-100 rounded-lg animate-pulse" />
-          ))}
-        </div>
-      </div>
-    );
+    return <SkeletonTable rows={5} />;
   }
 
   if (patients.length === 0) {
-    return (
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-12 text-center">
-        <p className="text-slate-500 text-lg">Nenhum paciente encontrado</p>
-      </div>
-    );
+    return <EmptyPatients onAction={() => window.location.href = '/novo-paciente'} />;
   }
 
   return (
