@@ -246,8 +246,8 @@ export default function Financeiro() {
           </RichCard>
           <RichCard delay={0.4}>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#C4764A]/10 flex items-center justify-center">
-                <Receipt className="w-6 h-6 text-[#C4764A]" />
+              <div className="w-12 h-12 rounded-2xl bg-[#518C5B]/10 flex items-center justify-center">
+                <Receipt className="w-6 h-6 text-[#518C5B]" />
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Transações</p>
