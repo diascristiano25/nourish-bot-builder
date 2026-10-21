@@ -3,940 +3,708 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NutriFlow - Meta Ads Reels</title>
+<title>NutriFlow — Meta Ads Reels 30s</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Inter',sans-serif}
+body.playing{cursor:none}
+body.paused{cursor:default}
+
+/* ── Stage container ── */
+#stage-wrap{
+  width:100vw;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  background:#000;
+}
+#stage{
+  width:1080px;height:1920px;
+  position:relative;overflow:hidden;
+  background:#0A0A0F;
+  transform-origin:center center;
+  /* scale set by JS */
 }
 
-body {
-  background: #000;
-  overflow: hidden;
-  font-family: 'Inter', sans-serif;
-  cursor: none;
+/* ── Fundo vivo: blobs ── */
+.blob{position:absolute;border-radius:50%;pointer-events:none;will-change:transform}
+.blob-a{width:700px;height:700px;background:radial-gradient(circle,rgba(34,197,94,.35),transparent 70%);filter:blur(100px);top:-250px;left:-200px}
+.blob-b{width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,.30),transparent 70%);filter:blur(100px);bottom:-200px;right:-180px}
+.blob-c{width:500px;height:500px;background:radial-gradient(circle,rgba(34,197,94,.20),transparent 70%);filter:blur(90px);top:45%;left:55%}
+
+/* ── Granulado ── */
+.grain{
+  position:absolute;inset:0;pointer-events:none;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:256px 256px;
 }
 
-body.paused {
-  cursor: default;
+/* ── Vinheta ── */
+.vignette{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.55) 100%);
 }
 
-#stage-container {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000;
+/* ── Overlay de transição (flash/zoom-blur) ── */
+#trans-overlay{
+  position:absolute;inset:0;pointer-events:none;z-index:800;
+  background:#0A0A0F;opacity:0;
+  will-change:opacity,filter;
 }
 
-#stage {
-  width: 1080px;
-  height: 1920px;
-  background: #0A0A0F;
-  position: relative;
-  overflow: hidden;
-  transform-origin: center center;
+/* ── Telas de controle ── */
+.ctrl-screen{
+  position:absolute;inset:0;z-index:900;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  background:#0A0A0F;
+}
+.ctrl-screen.hidden{display:none}
+#start-screen .label{
+  font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:600;
+  color:#F4F1EC;text-align:center;padding:0 80px;line-height:1.5;
+}
+#start-screen .sub{
+  font-family:'Inter',sans-serif;font-size:36px;color:rgba(244,241,236,.5);
+  margin-top:30px;
+}
+#countdown-screen .num{
+  font-family:'Space Grotesk',sans-serif;font-size:260px;font-weight:700;
+  color:#22C55E;
 }
 
-/* Fundo vivo */
-.bg-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.3;
-  pointer-events: none;
+/* ── Debug timer ── */
+#debug{
+  position:absolute;top:20px;left:20px;z-index:950;
+  font-family:'Inter',monospace;font-size:28px;color:#22C55E;
+  background:rgba(0,0,0,.75);padding:10px 22px;border-radius:10px;
+  display:none;
+}
+#debug.on{display:block}
+
+/* ── Logo ── */
+#logo{
+  position:absolute;top:100px;left:50%;
+  width:130px;height:130px;
+  transform:translateX(-50%);
+  opacity:0;will-change:opacity,transform;
+  z-index:100;
+}
+#logo img{width:100%;height:100%;object-fit:contain}
+
+/* ── Scenes ── */
+.scene{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;
+  /* Área segura: top 280px, bottom 1250px → conteúdo entre y=280 e y=1250 */
+  padding:280px 70px 0 70px;
+  opacity:0;pointer-events:none;
+  will-change:opacity,transform,filter;
 }
 
-.blob-1 {
-  width: 600px;
-  height: 600px;
-  background: #22C55E;
-  top: -200px;
-  left: -200px;
+/* ── Word containers ── */
+.words{
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:16px 22px;
+  max-width:940px;
+}
+.w{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:96px;font-weight:700;
+  color:#F4F1EC;line-height:1.15;
+  opacity:0;
+  will-change:opacity,transform,filter;
+}
+.w.hl{color:#22C55E}
+.w.hl2{color:#3B82F6}
+
+/* ── Cena 1: badge ATENÇÃO ── */
+#badge{
+  font-family:'Space Grotesk',sans-serif;font-size:52px;font-weight:700;
+  background:#22C55E;color:#0A0A0F;
+  padding:18px 48px;border-radius:14px;
+  margin-bottom:36px;
+  opacity:0;will-change:opacity,transform;
 }
 
-.blob-2 {
-  width: 500px;
-  height: 500px;
-  background: #3B82F6;
-  bottom: -150px;
-  right: -150px;
+/* ── Cena 2: visuais de dor ── */
+#pain-vis{
+  position:relative;width:700px;height:380px;margin-top:30px;
 }
-
-.blob-3 {
-  width: 400px;
-  height: 400px;
-  background: #22C55E;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.sheet{
+  position:absolute;width:180px;height:180px;opacity:0;
+  will-change:opacity,transform;
 }
-
-/* Granulado */
-.grain {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.03;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+.sheet svg{width:100%;height:100%}
+#clock-vis{
+  position:absolute;top:50%;left:50%;
+  width:260px;height:260px;
+  transform:translate(-50%,-50%);
+  opacity:0;will-change:opacity,transform;
 }
+#clock-vis svg{width:100%;height:100%}
 
-/* Vinheta */
-.vignette {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+/* ── Cena 3: screenshots ── */
+#shots{
+  display:flex;gap:24px;margin-top:30px;
+  perspective:1200px;
 }
-
-/* Telas de controle */
-.screen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  z-index: 1000;
-  background: #0A0A0F;
+.shot{
+  width:270px;height:480px;
+  border-radius:22px;overflow:hidden;
+  border:3px solid rgba(34,197,94,.6);
+  box-shadow:0 16px 48px rgba(0,0,0,.6);
+  opacity:0;will-change:opacity,transform;
 }
+.shot img{width:100%;height:100%;object-fit:cover;display:block}
 
-.screen.hidden {
-  display: none;
+/* ── Cena 4: benefício ── */
+#benefit-vis{
+  position:relative;width:800px;height:360px;margin-top:30px;
 }
-
-.start-text {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 60px;
-  color: #F4F1EC;
-  text-align: center;
-  padding: 0 70px;
-  line-height: 1.4;
+#chart{
+  position:absolute;left:0;bottom:0;
+  width:380px;height:300px;
+  display:flex;align-items:flex-end;gap:18px;
+  opacity:0;will-change:opacity;
 }
-
-.countdown-text {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 200px;
-  font-weight: 700;
-  color: #22C55E;
+.bar{
+  width:65px;border-radius:10px 10px 0 0;
+  background:linear-gradient(to top,#22C55E,#3B82F6);
+  transform-origin:bottom;
+  will-change:transform;
 }
-
-/* Debug timer */
-#debug-timer {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  font-family: 'Inter', monospace;
-  font-size: 24px;
-  color: #22C55E;
-  background: rgba(0,0,0,0.7);
-  padding: 10px 20px;
-  border-radius: 8px;
-  z-index: 999;
-  display: none;
+#notifs{
+  position:absolute;right:0;top:50%;
+  transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:22px;
 }
-
-#debug-timer.visible {
-  display: block;
+.notif{
+  width:110px;height:110px;
+  border-radius:50%;
+  background:rgba(34,197,94,.15);
+  border:2.5px solid #22C55E;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;will-change:opacity,transform;
 }
+.notif svg{width:52px;height:52px;fill:#22C55E}
 
-/* Conteúdo das cenas */
-.scene {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0 70px;
-  opacity: 0;
-  pointer-events: none;
+/* ── Cena 5: CTA ── */
+#cta-big{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:170px;font-weight:700;
+  color:#22C55E;text-align:center;
+  margin-bottom:40px;
+  opacity:0;will-change:opacity,transform;
+  position:relative;overflow:hidden;
 }
-
-.scene.active {
-  opacity: 1;
-  pointer-events: auto;
+/* Shine sweep — driven by JS, not CSS animation */
+#cta-shine{
+  position:absolute;top:0;left:-120%;
+  width:80%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  pointer-events:none;
+  will-change:transform;
 }
-
-/* Texto palavra por palavra */
-.word-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 60px;
+#comment-bar{
+  width:820px;height:76px;
+  background:rgba(255,255,255,.08);
+  border:2.5px solid #3B82F6;
+  border-radius:38px;
+  display:flex;align-items:center;
+  padding:0 28px;gap:12px;
+  opacity:0;will-change:opacity,transform;
 }
-
-.word {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 90px;
-  font-weight: 700;
-  color: #F4F1EC;
-  opacity: 0;
-  transform: translateY(40px);
-  filter: blur(10px);
-  line-height: 1.2;
+#comment-txt{
+  font-family:'Inter',sans-serif;font-size:42px;
+  color:#F4F1EC;flex:1;
 }
-
-.word.highlight {
-  color: #22C55E;
+#comment-cursor{
+  width:3px;height:48px;background:#22C55E;
+  opacity:1;will-change:opacity;
 }
-
-.word.visible {
-  opacity: 1;
-  transform: translateY(0);
-  filter: blur(0);
-}
-
-/* Cena 1 - Gancho */
-.alert-badge {
-  background: #22C55E;
-  color: #0A0A0F;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 48px;
-  font-weight: 700;
-  padding: 20px 40px;
-  border-radius: 12px;
-  margin-bottom: 40px;
-  opacity: 0;
-  transform: scale(0.8);
-}
-
-.alert-badge.visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Cena 2 - Dor */
-.pain-visual {
-  position: relative;
-  width: 600px;
-  height: 400px;
-  margin-top: 40px;
-}
-
-.spreadsheet-icon {
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  opacity: 0;
-}
-
-.spreadsheet-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.clock-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 300px;
-  height: 300px;
-  opacity: 0;
-}
-
-.clock-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-/* Cena 3 - Solução */
-.screenshots-container {
-  display: flex;
-  gap: 30px;
-  margin-top: 40px;
-  perspective: 1000px;
-}
-
-.screenshot {
-  width: 280px;
-  height: 500px;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(34, 197, 94, 0.3);
-  opacity: 0;
-  transform: translateY(100px) rotateY(-15deg);
-  border: 3px solid #22C55E;
-}
-
-.screenshot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.screenshot.visible {
-  opacity: 1;
-  transform: translateY(0) rotateY(0);
-}
-
-/* Cena 4 - Benefício */
-.benefit-visual {
-  position: relative;
-  width: 700px;
-  height: 400px;
-  margin-top: 40px;
-}
-
-.chart-container {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 350px;
-  height: 300px;
-  opacity: 0;
-}
-
-.chart-bar {
-  position: absolute;
-  bottom: 0;
-  width: 60px;
-  background: linear-gradient(to top, #22C55E, #3B82F6);
-  border-radius: 8px 8px 0 0;
-  transform-origin: bottom;
-  transform: scaleY(0);
-}
-
-.notification-icons {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.notification {
-  width: 120px;
-  height: 120px;
-  background: rgba(34, 197, 94, 0.2);
-  border: 2px solid #22C55E;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: scale(0.5);
-}
-
-.notification svg {
-  width: 60px;
-  height: 60px;
-  fill: #22C55E;
-}
-
-/* Cena 5 - CTA */
-.cta-word {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 180px;
-  font-weight: 700;
-  color: #22C55E;
-  text-align: center;
-  margin-bottom: 60px;
-  opacity: 0;
-  transform: scale(0.8);
-  position: relative;
-  overflow: hidden;
-}
-
-.cta-word::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
-  animation: shine 2s infinite;
-}
-
-@keyframes shine {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-.cta-word.visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.comment-bar {
-  width: 800px;
-  height: 80px;
-  background: rgba(255,255,255,0.1);
-  border: 2px solid #3B82F6;
-  border-radius: 40px;
-  display: flex;
-  align-items: center;
-  padding: 0 30px;
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-.comment-bar.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.comment-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 40px;
-  color: #F4F1EC;
-  flex: 1;
-}
-
-.comment-cursor {
-  width: 3px;
-  height: 50px;
-  background: #22C55E;
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-.know-more-button {
-  margin-top: 40px;
-  background: #22C55E;
-  color: #0A0A0F;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 48px;
-  font-weight: 700;
-  padding: 30px 80px;
-  border-radius: 16px;
-  opacity: 0;
-  transform: scale(0.8);
-  box-shadow: 0 10px 40px rgba(34, 197, 94, 0.5);
-}
-
-.know-more-button.visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Logo */
-.logo {
-  position: absolute;
-  top: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 120px;
-  opacity: 0;
-}
-
-.logo.visible {
-  opacity: 1;
-}
-
-.logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* Transições */
-.transition-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #0A0A0F;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 500;
+#saiba-mais{
+  margin-top:36px;
+  font-family:'Space Grotesk',sans-serif;font-size:50px;font-weight:700;
+  background:#22C55E;color:#0A0A0F;
+  padding:28px 80px;border-radius:18px;
+  box-shadow:0 8px 32px rgba(34,197,94,.45);
+  opacity:0;will-change:opacity,transform;
 }
 </style>
 </head>
 <body class="paused">
 
-<div id="stage-container">
-  <div id="stage">
-    <!-- Fundo vivo -->
-    <div class="bg-blob blob-1"></div>
-    <div class="bg-blob blob-2"></div>
-    <div class="bg-blob blob-3"></div>
-    <div class="grain"></div>
-    <div class="vignette"></div>
+<div id="stage-wrap">
+<div id="stage">
 
-    <!-- Debug timer -->
-    <div id="debug-timer">0.00s</div>
+  <!-- Fundo vivo -->
+  <div class="blob blob-a" id="blobA"></div>
+  <div class="blob blob-b" id="blobB"></div>
+  <div class="blob blob-c" id="blobC"></div>
+  <div class="grain"></div>
+  <div class="vignette"></div>
 
-    <!-- Tela inicial -->
-    <div id="start-screen" class="screen">
-      <div class="start-text">Clique ou aperte ESPAÇO para começar</div>
-    </div>
+  <!-- Transição -->
+  <div id="trans-overlay"></div>
 
-    <!-- Tela de contagem -->
-    <div id="countdown-screen" class="screen hidden">
-      <div class="countdown-text" id="countdown-number">3</div>
-    </div>
+  <!-- Debug -->
+  <div id="debug">0.00s</div>
 
-    <!-- Logo -->
-    <div class="logo" id="logo">
-      <img src="logo-nutriflow.png" alt="NutriFlow Logo">
-    </div>
-
-    <!-- Cena 1 - Gancho -->
-    <div class="scene" id="scene-1">
-      <div class="alert-badge" id="alert-badge">ATENÇÃO</div>
-      <div class="word-container" id="words-1"></div>
-    </div>
-
-    <!-- Cena 2 - Dor -->
-    <div class="scene" id="scene-2">
-      <div class="word-container" id="words-2"></div>
-      <div class="pain-visual">
-        <div class="spreadsheet-icon" id="spreadsheet-1" style="left: 50px; top: 50px;">
-          <svg viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" fill="none" stroke="#F4F1EC" stroke-width="3"/><line x1="10" y1="30" x2="90" y2="30" stroke="#F4F1EC" stroke-width="2"/><line x1="10" y1="50" x2="90" y2="50" stroke="#F4F1EC" stroke-width="2"/><line x1="10" y1="70" x2="90" y2="70" stroke="#F4F1EC" stroke-width="2"/><line x1="35" y1="10" x2="35" y2="90" stroke="#F4F1EC" stroke-width="2"/><line x1="65" y1="10" x2="65" y2="90" stroke="#F4F1EC" stroke-width="2"/></svg>
-        </div>
-        <div class="spreadsheet-icon" id="spreadsheet-2" style="right: 50px; top: 100px;">
-          <svg viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" fill="none" stroke="#F4F1EC" stroke-width="3"/><line x1="10" y1="30" x2="90" y2="30" stroke="#F4F1EC" stroke-width="2"/><line x1="10" y1="50" x2="90" y2="50" stroke="#F4F1EC" stroke-width="2"/><line x1="10" y1="70" x2="90" y2="70" stroke="#F4F1EC" stroke-width="2"/><line x1="35" y1="10" x2="35" y2="90" stroke="#F4F1EC" stroke-width="2"/><line x1="65" y1="10" x2="65" y2="90" stroke="#F4F1EC" stroke-width="2"/></svg>
-        </div>
-        <div class="clock-icon" id="clock-icon">
-          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#22C55E" stroke-width="4"/><line x1="50" y1="50" x2="50" y2="20" stroke="#22C55E" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="50" x2="70" y2="50" stroke="#22C55E" stroke-width="4" stroke-linecap="round"/></svg>
-        </div>
-      </div>
-    </div>
-
-    <!-- Cena 3 - Solução -->
-    <div class="scene" id="scene-3">
-      <div class="word-container" id="words-3"></div>
-      <div class="screenshots-container">
-        <div class="screenshot" id="screenshot-1">
-          <img src="https://via.placeholder.com/800x1000/111/22C55E?text=Print+Real+da+Ferramenta+1" alt="Screenshot 1">
-        </div>
-        <div class="screenshot" id="screenshot-2">
-          <img src="https://via.placeholder.com/800x1000/111/3B82F6?text=Print+Real+da+Ferramenta+2" alt="Screenshot 2">
-        </div>
-        <div class="screenshot" id="screenshot-3">
-          <img src="https://via.placeholder.com/800x1000/111/22C55E?text=Print+Real+da+Ferramenta+3" alt="Screenshot 3">
-        </div>
-      </div>
-    </div>
-
-    <!-- Cena 4 - Benefício -->
-    <div class="scene" id="scene-4">
-      <div class="word-container" id="words-4"></div>
-      <div class="benefit-visual">
-        <div class="chart-container" id="chart-container">
-          <div class="chart-bar" style="left: 0; height: 100px;"></div>
-          <div class="chart-bar" style="left: 80px; height: 150px;"></div>
-          <div class="chart-bar" style="left: 160px; height: 200px;"></div>
-          <div class="chart-bar" style="left: 240px; height: 280px;"></div>
-        </div>
-        <div class="notification-icons">
-          <div class="notification" id="notif-1">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-          </div>
-          <div class="notification" id="notif-2">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-          </div>
-          <div class="notification" id="notif-3">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Cena 5 - CTA -->
-    <div class="scene" id="scene-5">
-      <div class="word-container" id="words-5"></div>
-      <div class="cta-word" id="cta-word">EU QUERO</div>
-      <div class="comment-bar" id="comment-bar">
-        <div class="comment-text" id="comment-text"></div>
-        <div class="comment-cursor"></div>
-      </div>
-      <div class="know-more-button" id="know-more-btn">SAIBA MAIS</div>
-    </div>
-
-    <!-- Overlay de transição -->
-    <div class="transition-overlay" id="transition-overlay"></div>
+  <!-- Tela inicial -->
+  <div class="ctrl-screen" id="start-screen">
+    <div class="label">Clique ou aperte ESPAÇO<br>para começar</div>
+    <div class="sub">NutriFlow — Meta Ads 30 s</div>
   </div>
+
+  <!-- Contagem -->
+  <div class="ctrl-screen hidden" id="countdown-screen">
+    <div class="num" id="cd-num">3</div>
+  </div>
+
+  <!-- Logo -->
+  <div id="logo"><img src="logo-nutriflow.png" alt="NutriFlow"></div>
+
+  <!-- Cena 1 — Gancho [0 – 4 s] -->
+  <div class="scene" id="sc1">
+    <div id="badge">⚡ ATENÇÃO</div>
+    <div class="words" id="w1"></div>
+  </div>
+
+  <!-- Cena 2 — Dor [4.5 – 9 s] -->
+  <div class="scene" id="sc2">
+    <div class="words" id="w2"></div>
+    <div id="pain-vis">
+      <div class="sheet" id="sh1" style="left:30px;top:20px">
+        <svg viewBox="0 0 100 100"><rect x="8" y="8" width="84" height="84" rx="6" fill="none" stroke="#F4F1EC" stroke-width="2.5"/><line x1="8" y1="28" x2="92" y2="28" stroke="#F4F1EC" stroke-width="1.5"/><line x1="8" y1="48" x2="92" y2="48" stroke="#F4F1EC" stroke-width="1.5"/><line x1="8" y1="68" x2="92" y2="68" stroke="#F4F1EC" stroke-width="1.5"/><line x1="36" y1="8" x2="36" y2="92" stroke="#F4F1EC" stroke-width="1.5"/><line x1="64" y1="8" x2="64" y2="92" stroke="#F4F1EC" stroke-width="1.5"/></svg>
+      </div>
+      <div class="sheet" id="sh2" style="right:30px;top:80px">
+        <svg viewBox="0 0 100 100"><rect x="8" y="8" width="84" height="84" rx="6" fill="none" stroke="#F4F1EC" stroke-width="2.5"/><line x1="8" y1="28" x2="92" y2="28" stroke="#F4F1EC" stroke-width="1.5"/><line x1="8" y1="48" x2="92" y2="48" stroke="#F4F1EC" stroke-width="1.5"/><line x1="8" y1="68" x2="92" y2="68" stroke="#F4F1EC" stroke-width="1.5"/><line x1="36" y1="8" x2="36" y2="92" stroke="#F4F1EC" stroke-width="1.5"/><line x1="64" y1="8" x2="64" y2="92" stroke="#F4F1EC" stroke-width="1.5"/></svg>
+      </div>
+      <div id="clock-vis">
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="#22C55E" stroke-width="3.5"/><line x1="50" y1="50" x2="50" y2="18" stroke="#22C55E" stroke-width="3.5" stroke-linecap="round"/><line x1="50" y1="50" x2="72" y2="50" stroke="#3B82F6" stroke-width="3.5" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cena 3 — Solução [9.5 – 16.5 s] -->
+  <div class="scene" id="sc3">
+    <div class="words" id="w3"></div>
+    <div id="shots">
+      <div class="shot" id="s1"><img src="https://via.placeholder.com/800x1000/111111/22C55E?text=Print+Real+1" alt="Screenshot 1"></div>
+      <div class="shot" id="s2"><img src="https://via.placeholder.com/800x1000/111111/3B82F6?text=Print+Real+2" alt="Screenshot 2"></div>
+      <div class="shot" id="s3"><img src="https://via.placeholder.com/800x1000/111111/22C55E?text=Print+Real+3" alt="Screenshot 3"></div>
+    </div>
+  </div>
+
+  <!-- Cena 4 — Benefício [17 – 23 s] -->
+  <div class="scene" id="sc4">
+    <div class="words" id="w4"></div>
+    <div id="benefit-vis">
+      <div id="chart">
+        <div class="bar" style="height:80px"></div>
+        <div class="bar" style="height:140px"></div>
+        <div class="bar" style="height:210px"></div>
+        <div class="bar" style="height:290px"></div>
+      </div>
+      <div id="notifs">
+        <div class="notif" id="n1"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+        <div class="notif" id="n2"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+        <div class="notif" id="n3"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cena 5 — CTA [23.5 – 30 s] -->
+  <div class="scene" id="sc5">
+    <div class="words" id="w5"></div>
+    <div id="cta-big">EU QUERO<div id="cta-shine"></div></div>
+    <div id="comment-bar">
+      <span id="comment-txt"></span>
+      <div id="comment-cursor"></div>
+    </div>
+    <div id="saiba-mais">SAIBA MAIS</div>
+  </div>
+
+</div>
 </div>
 
 <script>
-// Configuração
-const TOTAL_DURATION = 30;
+/* ================================================================
+   NutriFlow Meta Ads Reels — 30 s
+   Single-clock render(t) architecture. No loose CSS animations.
+   ================================================================ */
+
+// ── Config ──
+const DUR = 30;
 const SCENES = [
-  { start: 0, end: 4, text: "Atenção, Nutricionista! Estamos selecionando profissionais para testar uma nova ferramenta exclusiva.", highlights: ["Atenção", "exclusiva"] },
-  { start: 4.5, end: 9, text: "Chega de perder horas montando planos alimentares em planilhas.", highlights: ["Chega", "horas"] },
-  { start: 9.5, end: 16.5, text: "Conheça o NutriFlow. Automatize seus atendimentos e entregue tudo em minutos.", highlights: ["NutriFlow", "minutos"] },
-  { start: 17, end: 23, text: "Ganhe tempo livre e tenha pacientes muito mais engajados.", highlights: ["tempo livre", "engajados"] },
-  { start: 23.5, end: 30, text: "Vagas limitadas para o teste. Comente EU QUERO que te envio o acesso agora.", highlights: ["limitadas", "EU QUERO"] }
+  { id:'sc1', wId:'w1', start:0,    end:4,
+    text:"Atenção, Nutricionista! Estamos selecionando profissionais para testar uma nova ferramenta exclusiva.",
+    hl:["Atenção,"], hl2:["exclusiva."] },
+  { id:'sc2', wId:'w2', start:4.5,  end:9,
+    text:"Chega de perder horas montando planos alimentares em planilhas.",
+    hl:["Chega"], hl2:["horas"] },
+  { id:'sc3', wId:'w3', start:9.5,  end:16.5,
+    text:"Conheça o NutriFlow. Automatize seus atendimentos e entregue tudo em minutos.",
+    hl:["NutriFlow."], hl2:["minutos."] },
+  { id:'sc4', wId:'w4', start:17,   end:23,
+    text:"Ganhe tempo livre e tenha pacientes muito mais engajados.",
+    hl:["tempo","livre"], hl2:["engajados."] },
+  { id:'sc5', wId:'w5', start:23.5, end:30,
+    text:"Vagas limitadas para o teste. Comente EU QUERO que te envio o acesso agora.",
+    hl:["limitadas"], hl2:["EU","QUERO"] }
 ];
 
-// Estado
-let currentTime = 0;
-let isPlaying = false;
-let isCountingDown = false;
-let countdownValue = 3;
-let animationFrame = null;
-let lastTimestamp = null;
-let showDebug = false;
+// ── State ──
+let t = 0, playing = false, counting = false, cdVal = 3;
+let raf = null, lastTs = null, debugOn = false;
+let baseScale = 1;
 
-// Elementos
-const stage = document.getElementById('stage');
-const startScreen = document.getElementById('start-screen');
-const countdownScreen = document.getElementById('countdown-screen');
-const countdownNumber = document.getElementById('countdown-number');
-const debugTimer = document.getElementById('debug-timer');
-const transitionOverlay = document.getElementById('transition-overlay');
-const logo = document.getElementById('logo');
+// ── DOM refs ──
+const stage      = document.getElementById('stage');
+const startScr   = document.getElementById('start-screen');
+const cdScr      = document.getElementById('countdown-screen');
+const cdNum      = document.getElementById('cd-num');
+const dbg        = document.getElementById('debug');
+const transOv    = document.getElementById('trans-overlay');
+const logoEl     = document.getElementById('logo');
+const blobA      = document.getElementById('blobA');
+const blobB      = document.getElementById('blobB');
+const blobC      = document.getElementById('blobC');
 
-// Escala do palco
-function scaleStage() {
-  const containerWidth = window.innerWidth;
-  const containerHeight = window.innerHeight;
-  const scaleX = containerWidth / 1080;
-  const scaleY = containerHeight / 1920;
-  const scale = Math.min(scaleX, scaleY);
-  stage.style.transform = `scale(${scale})`;
+// ── Scale stage to fit viewport ──
+function fitStage(){
+  const sx = window.innerWidth / 1080;
+  const sy = window.innerHeight / 1920;
+  baseScale = Math.min(sx, sy);
+  applyTransform(0);
 }
+function applyTransform(zoomExtra){
+  const s = baseScale * (1 + zoomExtra);
+  stage.style.transform = 'scale('+s+')';
+}
+fitStage();
+window.addEventListener('resize', fitStage);
 
-scaleStage();
-window.addEventListener('resize', scaleStage);
+// ── Easing ──
+function easeOut(t){ return t>=1?1:1-Math.pow(2,-10*t); }
+function clamp01(v){ return v<0?0:v>1?1:v; }
+function lerp(a,b,p){ return a+(b-a)*p; }
 
-// Inicializar palavras
-function initWords() {
-  SCENES.forEach((scene, index) => {
-    const container = document.getElementById(`words-${index + 1}`);
-    const words = scene.text.split(' ');
-    words.forEach(word => {
-      const span = document.createElement('span');
-      span.className = 'word';
-      if (scene.highlights.some(h => word.includes(h))) {
-        span.classList.add('highlight');
-      }
-      span.textContent = word;
-      container.appendChild(span);
-    });
+// ── Build word spans ──
+SCENES.forEach(sc=>{
+  const c = document.getElementById(sc.wId);
+  sc.text.split(' ').forEach(word=>{
+    const sp = document.createElement('span');
+    sp.className = 'w';
+    if(sc.hl.some(h=>word===h)) sp.classList.add('hl');
+    else if(sc.hl2.some(h=>word===h)) sp.classList.add('hl2');
+    sp.textContent = word;
+    c.appendChild(sp);
   });
-}
+});
 
-initWords();
+// ── RENDER(t) — the single clock ──
+function render(t){
+  if(debugOn) dbg.textContent = t.toFixed(2)+'s';
 
-// Ease out exponencial
-function easeOutExpo(t) {
-  return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-}
+  // Continuous slow zoom (0 → 5% over 30s)
+  const zoom = (t/DUR)*0.05;
+  applyTransform(zoom);
 
-// Render função principal
-function render(t) {
-  // Atualizar debug
-  if (showDebug) {
-    debugTimer.textContent = t.toFixed(2) + 's';
+  // Blobs drift
+  blobA.style.transform = 'translate('+Math.sin(t*0.28)*55+'px,'+Math.cos(t*0.19)*45+'px)';
+  blobB.style.transform = 'translate('+Math.cos(t*0.22)*65+'px,'+Math.sin(t*0.31)*55+'px)';
+  blobC.style.transform = 'translate('+Math.sin(t*0.35)*40+'px,'+Math.cos(t*0.26)*35+'px)';
+
+  // Logo fade in
+  const logoP = clamp01(t/0.8);
+  logoEl.style.opacity = easeOut(logoP);
+  logoEl.style.transform = 'translateX(-50%) translateY('+lerp(20,0,easeOut(logoP))+'px)';
+
+  // Determine active scene
+  let activeIdx = -1;
+  for(let i=0;i<SCENES.length;i++){
+    if(t>=SCENES[i].start && t<SCENES[i].end){ activeIdx=i; break; }
   }
+  // If past last scene end, keep last active
+  if(activeIdx===-1 && t>=SCENES[SCENES.length-1].end) activeIdx=SCENES.length-1;
 
-  // Movimento dos blobs
-  const blob1 = document.querySelector('.blob-1');
-  const blob2 = document.querySelector('.blob-2');
-  const blob3 = document.querySelector('.blob-3');
-
-  blob1.style.transform = `translate(${Math.sin(t * 0.3) * 50}px, ${Math.cos(t * 0.2) * 50}px)`;
-  blob2.style.transform = `translate(${Math.cos(t * 0.25) * 60}px, ${Math.sin(t * 0.35) * 60}px)`;
-  blob3.style.transform = `translate(-50%, -50%) translate(${Math.sin(t * 0.4) * 40}px, ${Math.cos(t * 0.3) * 40}px)`;
-
-  // Zoom contínuo da câmera
-  const zoomScale = 1 + (t / TOTAL_DURATION) * 0.05;
-  stage.style.transform = `scale(${zoomScale * Math.min(window.innerWidth / 1080, window.innerHeight / 1920)})`;
-
-  // Logo sempre visível após início
-  if (t > 0) {
-    logo.classList.add('visible');
-  }
-
-  // Determinar cena atual
-  let currentScene = -1;
-  for (let i = 0; i < SCENES.length; i++) {
-    if (t >= SCENES[i].start && t < SCENES[i].end) {
-      currentScene = i;
-      break;
-    }
-  }
-
-  // Atualizar cenas
-  for (let i = 0; i < 5; i++) {
-    const sceneEl = document.getElementById(`scene-${i + 1}`);
-    if (i === currentScene) {
-      sceneEl.classList.add('active');
+  // Scene visibility + per-scene render
+  for(let i=0;i<SCENES.length;i++){
+    const el = document.getElementById(SCENES[i].id);
+    if(i===activeIdx){
+      el.style.opacity = '1';
+      el.style.pointerEvents = 'auto';
       renderScene(i, t);
     } else {
-      sceneEl.classList.remove('active');
+      el.style.opacity = '0';
+      el.style.pointerEvents = 'none';
     }
   }
 
-  // Transições entre cenas
-  for (let i = 0; i < SCENES.length - 1; i++) {
-    const transitionStart = SCENES[i].end;
-    const transitionEnd = SCENES[i + 1].start;
-    if (t >= transitionStart && t < transitionEnd) {
-      const progress = (t - transitionStart) / (transitionEnd - transitionStart);
-      transitionOverlay.style.opacity = Math.sin(progress * Math.PI) * 0.8;
+  // Transitions between scenes (flash overlay)
+  transOv.style.opacity = '0';
+  transOv.style.filter = 'blur(0px)';
+  for(let i=0;i<SCENES.length-1;i++){
+    const gapStart = SCENES[i].end;
+    const gapEnd   = SCENES[i+1].start;
+    if(t>=gapStart && t<gapEnd){
+      const p = (t-gapStart)/(gapEnd-gapStart);
+      const flash = Math.sin(p*Math.PI);
+      transOv.style.opacity = (flash*0.85).toFixed(3);
+      transOv.style.filter = 'blur('+lerp(0,12,flash).toFixed(1)+'px)';
     }
   }
 }
 
-// Renderizar cena específica
-function renderScene(sceneIndex, t) {
-  const scene = SCENES[sceneIndex];
-  const sceneDuration = scene.end - scene.start;
-  const sceneProgress = (t - scene.start) / sceneDuration;
+// ── Per-scene rendering ──
+function renderScene(idx, t){
+  const sc = SCENES[idx];
+  const dur = sc.end - sc.start;
+  const p = clamp01((t - sc.start)/dur);
 
-  // Animar palavras
-  const wordsContainer = document.getElementById(`words-${sceneIndex + 1}`);
-  const words = wordsContainer.querySelectorAll('.word');
-  const wordDuration = sceneDuration / words.length;
-
-  words.forEach((word, i) => {
-    const wordStart = i * wordDuration;
-    const wordProgress = Math.max(0, Math.min(1, (t - scene.start - wordStart) / 0.6));
-
-    if (wordProgress > 0) {
-      const eased = easeOutExpo(wordProgress);
-      word.style.opacity = eased;
-      word.style.transform = `translateY(${40 * (1 - eased)}px)`;
-      word.style.filter = `blur(${10 * (1 - eased)}px)`;
-    }
+  // Words: stagger entry
+  const wCont = document.getElementById(sc.wId);
+  const spans = wCont.querySelectorAll('.w');
+  const perWord = dur / (spans.length + 1);
+  spans.forEach((sp,i)=>{
+    const wStart = i * perWord;
+    const wp = clamp01((t - sc.start - wStart)/0.55);
+    const e = easeOut(wp);
+    sp.style.opacity = e;
+    sp.style.transform = 'translateY('+lerp(45,0,e).toFixed(1)+'px)';
+    sp.style.filter = 'blur('+lerp(12,0,e).toFixed(1)+'px)';
   });
 
-  // Elementos visuais específicos por cena
-  switch (sceneIndex) {
-    case 0: // Cena 1 - Gancho
-      const alertBadge = document.getElementById('alert-badge');
-      const badgeProgress = Math.max(0, Math.min(1, sceneProgress * 3));
-      const badgeEased = easeOutExpo(badgeProgress);
-      alertBadge.style.opacity = badgeEased;
-      alertBadge.style.transform = `scale(${0.8 + 0.2 * badgeEased})`;
-      break;
-
-    case 1: // Cena 2 - Dor
-      const spreadsheet1 = document.getElementById('spreadsheet-1');
-      const spreadsheet2 = document.getElementById('spreadsheet-2');
-      const clockIcon = document.getElementById('clock-icon');
-
-      const spreadProgress = Math.max(0, Math.min(1, sceneProgress * 2));
-      const spreadEased = easeOutExpo(spreadProgress);
-
-      spreadsheet1.style.opacity = spreadEased;
-      spreadsheet1.style.transform = `translateY(${50 * (1 - spreadEased)}px) rotate(${-10 + 10 * spreadEased}deg)`;
-
-      spreadsheet2.style.opacity = spreadEased;
-      spreadsheet2.style.transform = `translateY(${50 * (1 - spreadEased)}px) rotate(${10 - 10 * spreadEased}deg)`;
-
-      const clockProgress = Math.max(0, Math.min(1, (sceneProgress - 0.3) * 2));
-      const clockEased = easeOutExpo(clockProgress);
-      clockIcon.style.opacity = clockEased;
-      clockIcon.style.transform = `translate(-50%, -50%) scale(${0.5 + 0.5 * clockEased}) rotate(${360 * sceneProgress}deg)`;
-      break;
-
-    case 2: // Cena 3 - Solução
-      const screenshots = [
-        document.getElementById('screenshot-1'),
-        document.getElementById('screenshot-2'),
-        document.getElementById('screenshot-3')
-      ];
-
-      screenshots.forEach((shot, i) => {
-        const shotStart = i * 0.2;
-        const shotProgress = Math.max(0, Math.min(1, (sceneProgress - shotStart) * 2));
-        const shotEased = easeOutExpo(shotProgress);
-
-        shot.style.opacity = shotEased;
-        shot.style.transform = `translateY(${100 * (1 - shotEased)}px) rotateY(${-15 + 15 * shotEased}deg)`;
-      });
-      break;
-
-    case 3: // Cena 4 - Benefício
-      const chartContainer = document.getElementById('chart-container');
-      const chartBars = chartContainer.querySelectorAll('.chart-bar');
-      const notifications = [
-        document.getElementById('notif-1'),
-        document.getElementById('notif-2'),
-        document.getElementById('notif-3')
-      ];
-
-      const chartProgress = Math.max(0, Math.min(1, sceneProgress * 2));
-      const chartEased = easeOutExpo(chartProgress);
-      chartContainer.style.opacity = chartEased;
-
-      chartBars.forEach((bar, i) => {
-        const barDelay = i * 0.1;
-        const barProgress = Math.max(0, Math.min(1, (sceneProgress - barDelay) * 2));
-        const barEased = easeOutExpo(barProgress);
-        bar.style.transform = `scaleY(${barEased})`;
-      });
-
-      notifications.forEach((notif, i) => {
-        const notifStart = 0.3 + i * 0.15;
-        const notifProgress = Math.max(0, Math.min(1, (sceneProgress - notifStart) * 2));
-        const notifEased = easeOutExpo(notifProgress);
-
-        notif.style.opacity = notifEased;
-        notif.style.transform = `scale(${0.5 + 0.5 * notifEased})`;
-      });
-      break;
-
-    case 4: // Cena 5 - CTA
-      const ctaWord = document.getElementById('cta-word');
-      const commentBar = document.getElementById('comment-bar');
-      const commentText = document.getElementById('comment-text');
-      const knowMoreBtn = document.getElementById('know-more-btn');
-
-      const ctaProgress = Math.max(0, Math.min(1, sceneProgress * 2));
-      const ctaEased = easeOutExpo(ctaProgress);
-      ctaWord.style.opacity = ctaEased;
-      ctaWord.style.transform = `scale(${0.8 + 0.2 * ctaEased})`;
-
-      const commentProgress = Math.max(0, Math.min(1, (sceneProgress - 0.2) * 2));
-      const commentEased = easeOutExpo(commentProgress);
-      commentBar.style.opacity = commentEased;
-      commentBar.style.transform = `translateY(${30 * (1 - commentEased)}px)`;
-
-      // Digitar texto
-      const fullText = "EU QUERO";
-      const charProgress = Math.max(0, Math.min(1, (sceneProgress - 0.3) * 2));
-      const charsToShow = Math.floor(charProgress * fullText.length);
-      commentText.textContent = fullText.substring(0, charsToShow);
-
-      const btnProgress = Math.max(0, Math.min(1, (sceneProgress - 0.5) * 2));
-      const btnEased = easeOutExpo(btnProgress);
-      knowMoreBtn.style.opacity = btnEased;
-      knowMoreBtn.style.transform = `scale(${0.8 + 0.2 * btnEased})`;
-      break;
+  switch(idx){
+    case 0: renderScene1(p, t); break;
+    case 1: renderScene2(p, t); break;
+    case 2: renderScene3(p, t); break;
+    case 3: renderScene4(p, t); break;
+    case 4: renderScene5(p, t); break;
   }
 }
 
-// Loop de animação
-function animate(timestamp) {
-  if (!lastTimestamp) lastTimestamp = timestamp;
-  const delta = (timestamp - lastTimestamp) / 1000;
-  lastTimestamp = timestamp;
+// Cena 1 — Gancho
+function renderScene1(p, t){
+  const badge = document.getElementById('badge');
+  const bp = easeOut(clamp01(p*3.5));
+  badge.style.opacity = bp;
+  badge.style.transform = 'scale('+lerp(0.7,1,bp).toFixed(3)+')';
+}
 
-  if (isPlaying && !isCountingDown) {
-    currentTime += delta;
+// Cena 2 — Dor
+function renderScene2(p, t){
+  const sh1 = document.getElementById('sh1');
+  const sh2 = document.getElementById('sh2');
+  const clk = document.getElementById('clock-vis');
 
-    if (currentTime >= TOTAL_DURATION) {
-      currentTime = TOTAL_DURATION;
-      isPlaying = false;
+  const sp = easeOut(clamp01(p*2.2));
+  sh1.style.opacity = sp;
+  sh1.style.transform = 'translateY('+lerp(60,0,sp).toFixed(1)+'px) rotate('+lerp(-12,0,sp).toFixed(1)+'deg)';
+  sh2.style.opacity = sp;
+  sh2.style.transform = 'translateY('+lerp(60,0,sp).toFixed(1)+'px) rotate('+lerp(12,0,sp).toFixed(1)+'deg)';
+
+  // Clock appears later, spins
+  const cp = easeOut(clamp01((p-0.25)*2));
+  clk.style.opacity = cp;
+  const rot = p * 540; // 1.5 full rotations over scene
+  clk.style.transform = 'translate(-50%,-50%) scale('+lerp(0.4,1,cp).toFixed(3)+') rotate('+rot.toFixed(1)+'deg)';
+
+  // Sheets crumble/fall in second half
+  if(p > 0.55){
+    const fp = easeOut(clamp01((p-0.55)*2.5));
+    sh1.style.transform = 'translateY('+lerp(0,120,fp).toFixed(1)+'px) rotate('+lerp(0,-25,fp).toFixed(1)+'deg)';
+    sh1.style.opacity = lerp(1,0.15,fp).toFixed(3);
+    sh2.style.transform = 'translateY('+lerp(0,100,fp).toFixed(1)+'px) rotate('+lerp(0,20,fp).toFixed(1)+'deg)';
+    sh2.style.opacity = lerp(1,0.15,fp).toFixed(3);
+  }
+}
+
+// Cena 3 — Solução (screenshots cascade)
+function renderScene3(p, t){
+  const shots = [document.getElementById('s1'),document.getElementById('s2'),document.getElementById('s3')];
+  shots.forEach((el,i)=>{
+    const delay = i*0.15;
+    const sp = easeOut(clamp01((p-delay)*2.5));
+    el.style.opacity = sp;
+    el.style.transform = 'translateY('+lerp(120,0,sp).toFixed(1)+'px) rotateY('+lerp(-18,0,sp).toFixed(1)+'deg) scale('+lerp(0.85,1,sp).toFixed(3)+')';
+  });
+}
+
+// Cena 4 — Benefício
+function renderScene4(p, t){
+  const chart = document.getElementById('chart');
+  const bars = chart.querySelectorAll('.bar');
+  const cp = easeOut(clamp01(p*2));
+  chart.style.opacity = cp;
+
+  bars.forEach((bar,i)=>{
+    const delay = i*0.08;
+    const bp = easeOut(clamp01((p-delay)*2.5));
+    bar.style.transform = 'scaleY('+bp.toFixed(3)+')';
+  });
+
+  const notifs = [document.getElementById('n1'),document.getElementById('n2'),document.getElementById('n3')];
+  notifs.forEach((el,i)=>{
+    const delay = 0.3+i*0.12;
+    const np = easeOut(clamp01((p-delay)*2.5));
+    el.style.opacity = np;
+    el.style.transform = 'scale('+lerp(0.3,1,np).toFixed(3)+')';
+  });
+}
+
+// Cena 5 — CTA
+function renderScene5(p, t){
+  const ctaBig   = document.getElementById('cta-big');
+  const shine    = document.getElementById('cta-shine');
+  const cBar     = document.getElementById('comment-bar');
+  const cTxt     = document.getElementById('comment-txt');
+  const cursor   = document.getElementById('comment-cursor');
+  const saibaBtn = document.getElementById('saiba-mais');
+
+  // CTA word
+  const cp = easeOut(clamp01(p*2.5));
+  ctaBig.style.opacity = cp;
+  ctaBig.style.transform = 'scale('+lerp(0.7,1,cp).toFixed(3)+')';
+
+  // Shine sweep (driven by t, not CSS animation)
+  const shineCycle = ((t*0.8)%2)/2; // 0→1 every 2.5s
+  const shineX = lerp(-120, 220, shineCycle);
+  shine.style.transform = 'translateX('+shineX.toFixed(1)+'%)';
+
+  // Comment bar
+  const barP = easeOut(clamp01((p-0.15)*2.5));
+  cBar.style.opacity = barP;
+  cBar.style.transform = 'translateY('+lerp(35,0,barP).toFixed(1)+'px)';
+
+  // Typing effect
+  const fullText = 'EU QUERO';
+  const typeP = clamp01((p-0.25)*2.5);
+  const chars = Math.floor(typeP * fullText.length);
+  cTxt.textContent = fullText.substring(0, chars);
+
+  // Cursor blink (driven by t)
+  cursor.style.opacity = (Math.sin(t*6)>0)?'1':'0';
+
+  // Saiba Mais button
+  const btnP = easeOut(clamp01((p-0.45)*2.5));
+  saibaBtn.style.opacity = btnP;
+  saibaBtn.style.transform = 'scale('+lerp(0.7,1,btnP).toFixed(3)+')';
+
+  // Pulse effect on button in last 3 seconds (p > 0.62 ≈ last 2.5s of scene)
+  if(p > 0.62){
+    const pulse = 1 + Math.sin((t-23.5)*4)*0.04;
+    saibaBtn.style.transform = 'scale('+(pulse).toFixed(3)+')';
+  }
+}
+
+// ── Animation loop ──
+function tick(ts){
+  if(!lastTs) lastTs = ts;
+  const dt = (ts - lastTs)/1000;
+  lastTs = ts;
+
+  if(playing && !counting){
+    t += dt;
+    if(t >= DUR){
+      t = DUR;
+      playing = false;
+      document.body.classList.remove('playing');
       document.body.classList.add('paused');
     }
-
-    render(currentTime);
+    render(t);
   }
-
-  animationFrame = requestAnimationFrame(animate);
+  raf = requestAnimationFrame(tick);
 }
 
-// Contagem regressiva
-function startCountdown() {
-  isCountingDown = true;
-  countdownValue = 3;
-  startScreen.classList.add('hidden');
-  countdownScreen.classList.remove('hidden');
-  countdownNumber.textContent = countdownValue;
+// ── Countdown ──
+function startCountdown(){
+  counting = true;
+  cdVal = 3;
+  startScr.classList.add('hidden');
+  cdScr.classList.remove('hidden');
+  cdNum.textContent = cdVal;
 
-  const countInterval = setInterval(() => {
-    countdownValue--;
-    if (countdownValue > 0) {
-      countdownNumber.textContent = countdownValue;
+  const iv = setInterval(()=>{
+    cdVal--;
+    if(cdVal > 0){
+      cdNum.textContent = cdVal;
     } else {
-      clearInterval(countInterval);
-      countdownScreen.classList.add('hidden');
-      isCountingDown = false;
-      isPlaying = true;
+      clearInterval(iv);
+      cdScr.classList.add('hidden');
+      counting = false;
+      playing = true;
+      lastTs = null;
       document.body.classList.remove('paused');
-      lastTimestamp = null;
+      document.body.classList.add('playing');
     }
   }, 1000);
 }
 
-// Controles
-function togglePlay() {
-  if (isCountingDown) return;
-
-  if (!isPlaying && currentTime === 0) {
+// ── Controls ──
+function togglePlay(){
+  if(counting) return;
+  if(!playing && t===0){
+    startCountdown();
+  } else if(!playing && t>=DUR){
+    // restart from beginning
+    restart();
     startCountdown();
   } else {
-    isPlaying = !isPlaying;
-    document.body.classList.toggle('paused');
-    if (isPlaying) {
-      lastTimestamp = null;
+    playing = !playing;
+    if(playing){
+      lastTs = null;
+      document.body.classList.remove('paused');
+      document.body.classList.add('playing');
+    } else {
+      document.body.classList.remove('playing');
+      document.body.classList.add('paused');
     }
   }
 }
 
-function restart() {
-  currentTime = 0;
-  isPlaying = false;
-  isCountingDown = false;
+function restart(){
+  t = 0; playing = false; counting = false;
+  document.body.classList.remove('playing');
   document.body.classList.add('paused');
-  startScreen.classList.remove('hidden');
-  countdownScreen.classList.add('hidden');
+  startScr.classList.remove('hidden');
+  cdScr.classList.add('hidden');
   render(0);
 }
 
-function jumpScene(direction) {
-  const currentSceneIndex = SCENES.findIndex(s => currentTime >= s.start && currentTime < s.end);
-  let newIndex = currentSceneIndex + direction;
-
-  if (newIndex < 0) newIndex = 0;
-  if (newIndex >= SCENES.length) newIndex = SCENES.length - 1;
-
-  currentTime = SCENES[newIndex].start;
-  render(currentTime);
-}
-
-function toggleDebug() {
-  showDebug = !showDebug;
-  debugTimer.classList.toggle('visible');
-}
-
-// Event listeners
-document.addEventListener('click', togglePlay);
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    togglePlay();
-  } else if (e.code === 'KeyR') {
-    restart();
-  } else if (e.code === 'ArrowLeft') {
-    jumpScene(-1);
-  } else if (e.code === 'ArrowRight') {
-    jumpScene(1);
-  } else if (e.code === 'KeyT') {
-    toggleDebug();
+function jumpScene(dir){
+  let cur = -1;
+  for(let i=0;i<SCENES.length;i++){
+    if(t>=SCENES[i].start && t<SCENES[i].end){ cur=i; break; }
   }
+  if(cur===-1) cur = 0;
+  let ni = cur + dir;
+  if(ni<0) ni=0;
+  if(ni>=SCENES.length) ni=SCENES.length-1;
+  t = SCENES[ni].start;
+  render(t);
+}
+
+function toggleDebug(){
+  debugOn = !debugOn;
+  dbg.classList.toggle('on', debugOn);
+}
+
+// ── Event listeners ──
+document.addEventListener('click', togglePlay);
+document.addEventListener('keydown', e=>{
+  if(e.code==='Space'){ e.preventDefault(); togglePlay(); }
+  else if(e.code==='KeyR'){ restart(); }
+  else if(e.code==='ArrowLeft'){ jumpScene(-1); }
+  else if(e.code==='ArrowRight'){ jumpScene(1); }
+  else if(e.code==='KeyT'){ toggleDebug(); }
 });
 
-// Iniciar loop
-animationFrame = requestAnimationFrame(animate);
+// ── Init ──
+raf = requestAnimationFrame(tick);
 render(0);
 </script>
-
 </body>
 </html>

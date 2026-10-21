@@ -68,19 +68,21 @@ export default function Agenda() {
     try {
       const start = startOfDay(selectedDate).toISOString();
       const end = endOfDay(selectedDate).toISOString();
+      // Real schema (verified via Supabase REST probe + db-diagnose.mjs):
+      // appointments columns are date_time (NOT scheduled_at). No `type` column guaranteed.
       const { data, error } = await supabase
         .from('appointments')
         .select(`
           id,
-          scheduled_at,
+          date_time,
           notes,
           status,
           patient:patients(id, full_name)
         `)
         .eq('nutritionist_id', nutritionistId)
-        .gte('scheduled_at', start)
-        .lte('scheduled_at', end)
-        .order('scheduled_at');
+        .gte('date_time', start)
+        .lte('date_time', end)
+        .order('date_time');
       if (error) throw error;
       const formattedData = (data || []).map(item => ({
         ...item,

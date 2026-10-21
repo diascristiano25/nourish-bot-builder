@@ -165,19 +165,21 @@ export default function ModernDashboard() {
       // Upcoming appointments (next 7 days, not cancelled)
       const weekAhead = new Date(today);
       weekAhead.setDate(weekAhead.getDate() + 7);
+      // Real schema (verified via Supabase REST probe + db-diagnose.mjs):
+      // appointments uses date_time (NOT scheduled_at).
       const { data: upcomingAppts } = await supabase
         .from('appointments')
-        .select('id, scheduled_at, status, patient:patients(id, full_name)')
+        .select('id, date_time, status, patient:patients(id, full_name)')
         .eq('nutritionist_id', nutritionistId)
-        .gte('scheduled_at', dayStart.toISOString())
-        .lte('scheduled_at', weekAhead.toISOString())
+        .gte('date_time', dayStart.toISOString())
+        .lte('date_time', weekAhead.toISOString())
         .neq('status', 'cancelled')
-        .order('scheduled_at', { ascending: true })
+        .order('date_time', { ascending: true })
         .limit(5);
 
       (upcomingAppts || []).forEach((apt: any) => {
         const patientArr = Array.isArray(apt.patient) ? apt.patient[0] : apt.patient;
-        const aptDate = new Date(apt.scheduled_at);
+        const aptDate = new Date(apt.date_time);
         const isTodayApt = aptDate.toDateString() === today.toDateString();
         builtNotifications.push({
           id: `apt-${apt.id}`,
