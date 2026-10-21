@@ -19,11 +19,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { name: 'Evolução', path: '/evolucao', icon: TrendingUp },
-  { name: 'Mensagens', path: '/mensagens', icon: Send, badge: 5 },
+  { name: 'Pacientes', path: '/pacientes', icon: Users },
   { name: 'Agenda', path: '/agenda', icon: Calendar },
-  { name: 'Pacientes', path: '/pacientes', icon: Grid3X3 },
-  { name: 'Info', path: '/perfil', icon: Info },
+  { name: 'Mensagens', path: '/mensagens', icon: Send, badge: 5 },
+  { name: 'Financeiro', path: '/financeiro', icon: DollarSign },
+  { name: 'Evolução', path: '/evolucao', icon: TrendingUp },
+  { name: 'Perfil', path: '/perfil', icon: Info },
 ];
 
 export function ModernSidebar() {
