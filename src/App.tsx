@@ -45,6 +45,13 @@ const PublicPatientPortal = lazy(() => import("./pages/PublicPatientPortal"));
 const AccessDenied = lazy(() => import("./pages/AccessDenied"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Admin = lazy(() => import("./pages/Admin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const NutritionistList = lazy(() => import("./pages/admin/NutritionistList"));
+const NutritionistDetail = lazy(() => import("./pages/admin/NutritionistDetail"));
+const SupportThreadList = lazy(() => import("./pages/admin/SupportThreadList"));
+const SupportChatView = lazy(() => import("./pages/admin/SupportChatView"));
+const AdminFinanceiro = lazy(() => import("./pages/admin/AdminFinanceiro"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const SubscriptionExpired = lazy(() => import("./pages/SubscriptionExpired"));
 const Sobre = lazy(() => import("./pages/Sobre"));
 const TermosSuporte = lazy(() => import("./pages/suporte/Termos"));
@@ -190,7 +197,15 @@ function App() {
                       <Route path="/consulta/:patientId" element={<AccountStatusGuard><Consultation /></AccountStatusGuard>} />
                       <Route path="/lista-compras/:mealPlanId" element={<AccountStatusGuard><GroceryList /></AccountStatusGuard>} />
                       <Route path="/trafego-pago" element={<AccountStatusGuard><PaidTrafficAgent /></AccountStatusGuard>} />
-                      <Route path="/admin" element={<AccountStatusGuard><Admin /></AccountStatusGuard>} />
+                      <Route path="/admin" element={<Admin />}>
+                        <Route index element={<AdminDashboard />} />
+                        <Route path="nutris" element={<NutritionistList />} />
+                        <Route path="nutris/:id" element={<NutritionistDetail />} />
+                        <Route path="suporte" element={<SupportThreadList />} />
+                        <Route path="suporte/:ticketId" element={<SupportChatView />} />
+                        <Route path="financeiro" element={<AdminFinanceiro />} />
+                        <Route path="configuracoes" element={<AdminSettings />} />
+                      </Route>
                       <Route path="/subscription-expired" element={<SubscriptionExpired />} />
                       <Route path="/portal/:patientId" element={<PublicPatientPortal />} />
                       <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
