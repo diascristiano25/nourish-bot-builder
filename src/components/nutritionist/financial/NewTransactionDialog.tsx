@@ -53,7 +53,14 @@ export function NewTransactionDialog({
 
     setLoading(true);
     try {
-      const amountCents = Math.round(parseFloat(amount) * 100);
+      // Handle both comma and dot decimal separators for Brazilian format
+      const normalizedAmount = amount.replace(',', '.');
+      const amountValue = parseFloat(normalizedAmount);
+      if (isNaN(amountValue) || amountValue <= 0) {
+        throw new Error('Valor inválido');
+      }
+      // Store as integer cents to match DB schema (integer, no scale)
+      const amountCents = Math.round(amountValue * 100);
       const recordType = type === 'income' ? 'payment' : 'expense';
 
       // REAL schema (verified via supabase db query --linked):

@@ -99,27 +99,16 @@ export default function PatientAuth() {
   };
 
   const handleCheckEmail = async () => {
+    // The patients table has RLS that blocks anonymous SELECT by email
+    // (only the owning nutritionist, or a logged-in user whose JWT email
+    // matches, can read it). So we cannot pre-check the email before the
+    // patient has a session. Instead, for "first access" we ask for a new
+    // password and rely on the signUp/signIn flow + checkUserTypeAndRedirect
+    // (which runs AFTER a session exists and the JWT-claim policy allows the
+    // read). Here we just validate the email format and mark first-access mode.
     try {
       loginSchema.shape.email.parse(email);
-      
-      const { data: patient, error } = await supabase
-        .from('patients')
-        .select('id, user_id')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (!patient) {
-        toast({
-          title: "Email não encontrado",
-          description: "Este email não está cadastrado como paciente. Entre em contato com seu nutricionista.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      setIsFirstAccess(!patient.user_id);
+      setIsFirstAccess(true);
       return true;
     } catch (err) {
       if (err instanceof z.ZodError) {
