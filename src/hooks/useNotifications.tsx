@@ -82,9 +82,11 @@ export function useNotifications(nutritionistId: string | null) {
         },
         async (payload) => {
           const message = payload.new as any;
-          
+
+          // REAL schema (verified via `supabase db query --linked`):
+          // messages uses `sender_type` ('patient'|'nutritionist'), NOT is_staff_reply.
           // Only notify for patient messages
-          if (message.is_staff_reply !== 'patient') return;
+          if (message.sender_type !== 'patient') return;
 
           // Get patient name
           const { data: patient } = await supabase

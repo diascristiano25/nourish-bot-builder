@@ -4,16 +4,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
   SheetTitle,
-  SheetTrigger 
+  SheetTrigger
 } from '@/components/ui/sheet';
-import { 
-  MessageCircle, 
-  Send, 
+import {
+  MessageCircle,
+  Send,
   Loader2,
   User,
   Stethoscope
@@ -22,10 +22,15 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
+// REAL schema (verified via `supabase db query --linked` against the live DB):
+// messages columns: id, patient_id, nutritionist_id, sender_type,
+// content, is_read, read_at, created_at.
+// KEY: uses `sender_type` ('patient'|'nutritionist'), NOT is_staff_reply.
+// KEY: uses `content`, NOT message. Uses `created_at`, NOT sent_at.
 interface Message {
   id: string;
   content: string;
-  is_staff_reply: 'patient' | 'nutritionist';
+  sender_type: 'patient' | 'nutritionist';
   is_read: boolean;
   created_at: string;
 }
@@ -69,12 +74,15 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
         },
         (payload) => {
           const newMsg = payload.new as Message;
-          setMessages(prev => [...prev, newMsg]);
-          
-          if (newMsg.is_staff_reply === 'nutritionist' && !isOpen) {
+          setMessages(prev => [...prev, {
+            ...newMsg,
+            sender_type: (newMsg.sender_type === 'nutritionist' ? 'nutritionist' : 'patient') as 'patient' | 'nutritionist'
+          }]);
+
+          if (newMsg.sender_type === 'nutritionist' && !isOpen) {
             setUnreadCount(prev => prev + 1);
           }
-          
+
           scrollToBottom();
         }
       )
@@ -104,7 +112,7 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
       if (error) throw error;
       setMessages((data || []).map(msg => ({
         ...msg,
-        is_staff_reply: msg.is_staff_reply as 'patient' | 'nutritionist'
+        sender_type: (msg.sender_type === 'nutritionist' ? 'nutritionist' : 'patient') as 'patient' | 'nutritionist'
       })));
     } catch (error: any) {
       console.error('Error fetching messages:', error);
@@ -125,7 +133,7 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
         .select('*', { count: 'exact', head: true })
         .eq('patient_id', patientId)
         .eq('nutritionist_id', nutritionistId)
-        .eq('is_staff_reply', 'nutritionist')
+        .eq('sender_type', 'nutritionist')
         .eq('is_read', false);
 
       if (error) throw error;
@@ -139,10 +147,10 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
     try {
       await supabase
         .from('messages')
-        .update({ is_read: true })
+        .update({ is_read: true, read_at: new Date().toISOString() })
         .eq('patient_id', patientId)
         .eq('nutritionist_id', nutritionistId)
-        .eq('is_staff_reply', 'nutritionist')
+        .eq('sender_type', 'nutritionist')
         .eq('is_read', false);
 
       setUnreadCount(0);
@@ -156,13 +164,15 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
 
     setSending(true);
     try {
+      // REAL schema: uses sender_type (NOT is_staff_reply), content (NOT message)
       const { error } = await supabase
         .from('messages')
         .insert({
           patient_id: patientId,
           nutritionist_id: nutritionistId,
-          is_staff_reply: 'patient',
+          sender_type: 'patient',
           content: newMessage.trim(),
+          is_read: false,
         });
 
       if (error) throw error;
@@ -195,7 +205,7 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button 
+        <Button
           className="w-full h-12 rounded-xl bg-secondary hover:bg-secondary/90 relative"
         >
           <MessageCircle className="w-5 h-5 mr-2" />
@@ -242,13 +252,13 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
                   key={msg.id}
                   className={cn(
                     "flex",
-                    msg.is_staff_reply === 'patient' ? 'justify-end' : 'justify-start'
+                    msg.sender_type === 'patient' ? 'justify-end' : 'justify-start'
                   )}
                 >
                   <div
                     className={cn(
                       "max-w-[80%] rounded-2xl px-4 py-2.5",
-                      msg.is_staff_reply === 'patient'
+                      msg.sender_type === 'patient'
                         ? 'bg-primary text-primary-foreground rounded-br-md'
                         : 'bg-muted text-foreground rounded-bl-md'
                     )}
@@ -256,8 +266,8 @@ export function PatientChat({ patientId, nutritionistId, nutritionistName }: Pat
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                     <p className={cn(
                       "text-[10px] mt-1",
-                      msg.is_staff_reply === 'patient' 
-                        ? 'text-primary-foreground/70' 
+                      msg.sender_type === 'patient'
+                        ? 'text-primary-foreground/70'
                         : 'text-muted-foreground'
                     )}>
                       {format(new Date(msg.created_at), 'HH:mm', { locale: ptBR })}

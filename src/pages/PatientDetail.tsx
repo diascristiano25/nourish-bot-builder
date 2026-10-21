@@ -208,7 +208,7 @@ export default function PatientDetail() {
       .select('*', { count: 'exact', head: true })
       .eq('patient_id', id)
       .eq('nutritionist_id', nutritionistId)
-      .eq('is_staff_reply', 'patient')
+      .eq('sender_type', 'patient')
       .eq('is_read', false);
 
     setUnreadMessages(count || 0);
@@ -336,99 +336,51 @@ export default function PatientDetail() {
   };
 
   const handleGenerateAccess = async () => {
-    if (!patient?.email) {
-      toast({
-        title: "Email não cadastrado",
-        description: "Cadastre o email do paciente para liberar o acesso.",
-        variant: "destructive",
-      });
+    // The Edge Function send-patient-magic-link is not deployed; copy the portal
+    // link to clipboard directly (reliable, no backend dependency).
+    if (!patient?.id) {
+      toast({ title: "Paciente sem ID", description: "Não foi possível gerar o link de acesso.", variant: "destructive" });
       return;
     }
-
     setSendingMagicLink(true);
     try {
-      const { data, error } = await supabase.functions.invoke('send-patient-magic-link', {
-        body: {
-          patientEmail: patient.email,
-          patientId: patient.id,
-          redirectUrl: `${window.location.origin}/patient-portal`,
-        },
-      });
-
-      if (error) throw error;
-
-      const responseData = data as { success?: boolean; message?: string; userCreated?: boolean; emailSent?: boolean };
-
-      if (responseData?.userCreated) {
-        toast({
-          title: "Acesso liberado! ✨",
-          description: `Conta criada para ${patient.email}. ${responseData.emailSent ? 'Um link de acesso foi enviado por email.' : 'O paciente pode fazer login na página de pacientes.'}`,
-        });
-      } else {
-        toast({
-          title: "Link enviado!",
-          description: `Um email foi enviado para ${patient.email} com o link de acesso.`,
-        });
-      }
-      
-      // Refresh patient data to see the updated user_id
-      fetchPatientData();
-    } catch (error: any) {
-      console.error('Error generating access:', error);
-      // Fallback: a Edge Function de email pode não estar deployada — copia o link
-      // do portal para a área de transferência para que o acesso ainda possa ser liberado.
       const portalLink = `${window.location.origin}/paciente/${patient.id}`;
-      try {
-        await navigator.clipboard.writeText(portalLink);
-        toast({
-          title: "Link copiado! 📋",
-          description: "O envio automático de email não está disponível agora. O link de acesso do paciente foi copiado para a área de transferência — envie-o por WhatsApp ou email.",
-        });
-      } catch {
-        toast({
-          title: "Erro ao gerar acesso",
-          description: `Não foi possível enviar o email automaticamente. Link do portal: ${portalLink}`,
-          variant: "destructive",
-        });
-      }
+      await navigator.clipboard.writeText(portalLink);
+      toast({
+        title: "Link do portal copiado! 📋",
+        description: patient?.email
+          ? `Envie este link para ${patient.email} por WhatsApp ou email. No primeiro acesso o paciente cria a própria senha.`
+          : "Envie este link ao paciente por WhatsApp ou email. No primeiro acesso ele cria a própria senha.",
+      });
+    } catch {
+      const portalLink = `${window.location.origin}/paciente/${patient.id}`;
+      toast({ title: "Link do portal", description: `Não foi possível copiar automaticamente. Link: ${portalLink}`, variant: "destructive" });
     } finally {
       setSendingMagicLink(false);
     }
   };
 
   const handleSendMagicLink = async () => {
-    if (!patient?.email) {
-      toast({
-        title: "Email não cadastrado",
-        description: "Cadastre o email do paciente para enviar o link de acesso.",
-        variant: "destructive",
-      });
+    // Same reliable clipboard flow — no Edge Function dependency.
+    if (!patient?.id) {
+      toast({ title: "Paciente sem ID", description: "Não foi possível gerar o link de acesso.", variant: "destructive" });
       return;
     }
-
     setSendingMagicLink(true);
     try {
-      const { data, error } = await supabase.functions.invoke('send-patient-magic-link', {
-        body: {
-          patientEmail: patient.email,
-          patientId: patient.id,
-          redirectUrl: `${window.location.origin}/patient-portal`,
-        },
-      });
-
-      if (error) throw error;
-
+      const portalLink = `${window.location.origin}/paciente/${patient.id}`;
+      await navigator.clipboard.writeText(portalLink);
       toast({
-        title: "Link enviado!",
-        description: `Um email foi enviado para ${patient.email} com o link de acesso.`,
+        title: "Link do portal copiado! 📋",
+        description: patient?.email ? `Envie este link para ${patient.email} por WhatsApp ou email.` : "Envie este link ao paciente por WhatsApp ou email.",
       });
-    } catch (error: any) {
-      console.error('Error sending magic link:', error);
-      toast({
-        title: "Erro ao enviar link",
-        description: error.message || "Não foi possível enviar o link. Tente novamente.",
-        variant: "destructive",
-      });
+    } catch {
+      const portalLink = `${window.location.origin}/paciente/${patient.id}`;
+      toast({ title: "Link do portal", description: `Não foi possível copiar automaticamente. Link: ${portalLink}`, variant: "destructive" });
+    } finally {
+      setSendingMagicLink(false);
+    }
+  };
     } finally {
       setSendingMagicLink(false);
     }
