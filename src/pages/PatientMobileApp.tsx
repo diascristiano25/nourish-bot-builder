@@ -10,6 +10,7 @@ import { PatientPlano } from '@/components/patient-mobile/PatientPlano';
 import { PatientRegistro } from '@/components/patient-mobile/PatientRegistro';
 import { PatientEvolucao } from '@/components/patient-mobile/PatientEvolucao';
 import { PatientPerfil } from '@/components/patient-mobile/PatientPerfil';
+import { ChatWidget } from '@/components/patient/dashboard/ChatWidget';
 
 export interface PatientData {
   id: string;
@@ -48,7 +49,7 @@ export interface MealPlan {
   created_at: string;
 }
 
-export type TabType = 'inicio' | 'plano' | 'registro' | 'evolucao' | 'perfil';
+export type TabType = 'inicio' | 'plano' | 'registro' | 'evolucao' | 'mensagens' | 'perfil';
 
 export default function PatientMobileApp() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -240,6 +241,11 @@ export default function PatientMobileApp() {
       )}
       {activeTab === 'evolucao' && (
         <PatientEvolucao patientId={patient?.id || ''} />
+      )}
+      {activeTab === 'mensagens' && patient && (
+        <div className="p-4 h-[calc(100vh-80px)]">
+          <ChatWidget patientId={patient.id} nutritionistId={patient.nutritionist_id} />
+        </div>
       )}
       {activeTab === 'perfil' && (
         <PatientPerfil 

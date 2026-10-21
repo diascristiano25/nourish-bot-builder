@@ -1,4 +1,4 @@
-import { Home, UtensilsCrossed, Plus, TrendingUp, User } from 'lucide-react';
+import { Home, UtensilsCrossed, Plus, TrendingUp, User, MessageCircle } from 'lucide-react';
 import { TabType } from '@/pages/PatientMobileApp';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -13,7 +13,7 @@ const navItems: { id: TabType; label: string; icon: React.ComponentType<{ classN
   { id: 'inicio', label: 'Início', icon: Home },
   { id: 'plano', label: 'Plano', icon: UtensilsCrossed },
   { id: 'registro', label: '', icon: Plus },
-  { id: 'evolucao', label: 'Evolução', icon: TrendingUp },
+  { id: 'mensagens', label: 'Chat', icon: MessageCircle },
   { id: 'perfil', label: 'Perfil', icon: User },
 ];
 
