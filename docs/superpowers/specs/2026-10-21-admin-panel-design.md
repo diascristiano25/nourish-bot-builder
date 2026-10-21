@@ -1,20 +1,33 @@
-# Painel Admin NutriFlow — Design Spec
+# Painel Admin NutriFlow — Design Spec (Revisado)
 
 **Data:** 2026-10-21  
 **Autor:** Cristiano Dias (admin único)  
-**Status:** Draft para revisão  
+**Status:** Aprovado para implementação  
 
 ---
 
 ## 1. Visão Geral
 
-Painel administrativo exclusivo para o superadmin (`diascristianoconsultor@gmail.com`) gerenciar toda a plataforma NutriFlow. Acesso protegido por verificação de email + campo `is_admin` na tabela `profiles`. Layout consistente com o app existente (AppSidebar adaptada + AppLayout).
+Evolução do painel admin existente (`src/pages/Admin.tsx`, ~820 linhas) para um sistema completo de gerenciamento da plataforma. O painel atual já tem tabs básicas para Nutricionistas, Suporte (tickets), Analytics e Financeiro (placeholder). Esta spec define as melhorias necessárias para torná-lo 100% funcional e integrado.
+
+### Estado Atual vs. Objetivo
+
+| Módulo | Estado Atual | Objetivo |
+|--------|-------------|----------|
+| **Auth/Guard** | RPC `is_current_user_master_admin` + redirect | Manter (já funciona). Adicionar AdminGuard reutilizável |
+| **Layout** | Header próprio inline, sem sidebar | AdminSidebar dedicada + AdminLayout usando AppLayout pattern |
+| **Dashboard** | Stats inline na tab Nutricionistas | Dashboard dedicado com KPIs reais + gráficos Recharts |
+| **Nutricionistas** | Lista + toggle ativo/inativo + busca | Adicionar: detail page, estender trial, alterar plano, notas admin |
+| **Suporte** | Tickets list + dialog com mensagens | Chat em tempo real via Supabase Realtime, status workflow completo |
+| **Financeiro** | Placeholder "Em desenvolvimento" | Receitas consolidadas, status por nutri, breakdown por plano |
+| **Configurações** | Não existe | Trial duration, feature flags, modo manutenção |
+| **Audit Log** | Não existe | Toda ação admin logada |
 
 ### Princípios
-- **Admin único:** Sem sistema de roles complexo. Verificação hardcoded por email + flag DB.
-- **100% funcional:** Tudo integrado ao Supabase, sem dados mock.
-- **Mesmo padrão visual:** Reutilizar PageHeader, RichCard, StatCard, componentes shadcn/ui, paleta verde NutriFlow.
-- **Segurança first:** Middleware de rota + verificação no servidor (Supabase RLS).
+- **Admin único:** `diascristianoconsultor@gmail.com` — verificação por email + `is_admin` flag
+- **100% funcional:** Tudo integrado ao Supabase, zero dados mock
+- **Mesmo padrão visual:** PageHeader, GlassCard, NeonText, Recharts, paleta verde NutriFlow (#518C5B)
+- **Evoluir, não reescrever:** Refatorar Admin.tsx em módulos separados, preservar lógica existente
 
 ---
 
@@ -22,238 +35,172 @@ Painel administrativo exclusivo para o superadmin (`diascristianoconsultor@gmail
 
 ### 2.1 Proteção de Acesso
 
+Manter RPC existente `is_current_user_master_admin`. Criar `AdminGuard` component reutilizável que encapsula essa verificação.
+
 ```
 Route: /admin/*
 Guard: AdminGuard component
-  ├── Verifica session do Supabase Auth
-  ├── Busca profiles.is_admin WHERE user_id = session.user.id
-  ├── Verifica email === 'diascristianoconsultor@gmail.com'
-  └── Redirect para /acesso-negado se falhar
+ ├── Verifica session do Supabase Auth
+ ├── Chama RPC is_current_user_master_admin
+ └── Redirect para /acesso-negado se falhar
 ```
 
-**RLS no Supabase:** Políticas `SELECT/UPDATE/DELETE` nas tabelas relevantes só permitem acesso quando `auth.jwt()->>'email' = 'diascristianoconsultor@gmail.com'`.
-
-### 2.2 Estrutura de Rotas
+### 2.2 Estrutura de Rotas (evolução)
 
 ```
-/admin                    → AdminDashboard (overview)
-/admin/nutris             → NutritionistList (lista + filtros + ações)
-/admin/nutris/:id         → NutritionistDetail (perfil completo + ações)
-/admin/suporte            → SupportChatList (conversas de suporte)
-/admin/suporte/:threadId  → SupportChatView (chat com nutri específico)
-/admin/financeiro         → AdminFinanceiro (receitas, planos, cobranças)
-/admin/configuracoes      → AdminSettings (configurações globais da plataforma)
+/admin                    → AdminDashboard (NOVO - overview com KPIs)
+/admin/nutris             → NutritionistList (refatorado de Admin.tsx tab)
+/admin/nutris/:id         → NutritionistDetail (NOVO)
+/admin/suporte            → SupportThreadList (refatorado de Admin.tsx tab)
+/admin/suporte/:ticketId  → SupportChatView (NOVO - fullscreen, realtime)
+/admin/financeiro         → AdminFinanceiro (NOVO - substitui placeholder)
+/admin/configuracoes      → AdminSettings (NOVO)
 ```
 
-### 2.3 Sidebar Admin
+### 2.3 AdminSidebar
 
-Extensão da AppSidebar existente. Quando o usuário é admin e está em `/admin/*`, a sidebar mostra:
-- **Visão Geral** (dashboard)
-- **Nutricionistas** (gerenciamento)
-- **Suporte** (chats)
-- **Financeiro** (plataforma)
-- **Configurações** (globais)
+Nova sidebar dedicada seguindo o padrão da AppSidebar. Itens:
+- Visão Geral, Nutricionistas, Suporte, Financeiro, Configurações
 - Separador
-- Link "Voltar ao App" → `/dashboard`
+- "Voltar ao App" → `/dashboard`
+
+### 2.4 Tabelas Existentes (confirmadas no DB)
+
+- `profiles` — nutritionists (id, full_name, user_id, crn, phone, is_active, is_admin, account_status, created_at, has_seen_onboarding, trial_ends_at)
+- `support_tickets` — tickets (id, ticket_number, subject, message/description, status, priority, created_at, attachment_url, nutritionist FK)
+- `support_ticket_messages` — mensagens (id, ticket_id, is_staff_reply, description, created_at)
+- `patients`, `meal_plans`, `appointments` — dados dos nutris
+- `financial_records` — transações financeiras (record_type, record_date, amount/value)
+
+### 2.5 Novas Tabelas Necessárias
+
+```sql
+-- Configurações globais key-value
+CREATE TABLE admin_settings (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Audit log de ações admin
+CREATE TABLE admin_audit_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  action TEXT NOT NULL,
+  target_type TEXT,
+  target_id UUID,
+  details JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 2.6 Alterações em Tabelas Existentes
+
+- `profiles`: Adicionar `admin_notes TEXT` (notas internas do admin sobre o nutri)
+- `profiles`: Garantir `trial_ends_at TIMESTAMPTZ` existe
+- `profiles`: Adicionar `last_login_at TIMESTAMPTZ`
 
 ---
 
 ## 3. Módulos Funcionais
 
-### 3.1 Dashboard Admin (`/admin`)
+### 3.1 AdminDashboard (`/admin`) — NOVO
 
-**KPIs em tempo real:**
-| Card | Métrica | Fonte |
-|------|---------|-------|
-| Nutris Ativos | COUNT(profiles) WHERE account_status = 'active' | profiles |
-| Nutris em Trial | COUNT(profiles) WHERE trial_ends_at > NOW() AND account_status = 'trial' | profiles |
-| Receita Mensal | SUM(valor) FROM financial_records WHERE tipo = 'receita' AND mês atual | financial_records |
-| Chats Pendentes | COUNT(support_threads) WHERE status = 'open' | support_threads |
-| Novos Hoje | COUNT(profiles) WHERE created_at = TODAY | profiles |
-| Taxa de Conversão Trial→Pago | (ativos / (ativos + expirados)) × 100 | profiles |
+KPIs em tempo real usando queries Supabase:
+- Nutris Ativos (profiles WHERE is_active = true)
+- Nutris em Trial (profiles WHERE trial_ends_at > NOW() AND account_status = 'trial')
+- Receita Mensal (SUM financial_records)
+- Tickets Pendentes (support_tickets WHERE status = 'open')
+- Novos Hoje (profiles WHERE created_at = TODAY)
+- Taxa Conversão Trial→Pago
 
-**Gráficos:**
-- Evolução de nutris ativos (últimos 12 meses) — Recharts LineChart
-- Receita mensal (últimos 6 meses) — Recharts BarChart
-- Distribuição por plano (pie chart)
+Gráficos Recharts: evolução de nutris (12 meses), receita mensal (6 meses), distribuição por plano.
 
-**Alertas:**
-- Trials expirando nos próximos 3 dias
-- Nutris inativos há >30 dias
-- Tickets de suporte abertos há >48h
+Alertas: trials expirando em 3 dias, tickets abertos >48h.
 
-### 3.2 Gerenciamento de Nutricionistas (`/admin/nutris`)
+### 3.2 Gerenciamento de Nutricionistas — EVOLUÇÃO
 
-**Lista com filtros:**
-- Status: Todos / Ativos / Trial / Inativos / Suspensos
-- Busca por nome, email ou CRN
-- Ordenação: Data cadastro, último acesso, nome
+Refatorar tab "nutritionists" do Admin.tsx em página dedicada `/admin/nutris`.
 
-**Ações por nutri (inline na tabela + detail page):**
-| Ação | Descrição | Implementação |
-|------|-----------|---------------|
-| Ativar/Desativar | Toggle account_status | UPDATE profiles SET account_status |
-| Estender Trial | Adicionar dias ao trial_ends_at | UPDATE profiles SET trial_ends_at |
-| Alterar Plano | Mudar subscription_plan | UPDATE nutritionists SET subscription_plan |
-| Reset Senha | Trigger password reset email | Supabase Auth admin API |
-| Ver Detalhes | Navegar para /admin/nutris/:id | Router link |
-| Enviar Mensagem | Abrir chat de suporte | Cria/abre support_thread |
-| Logs de Acesso | Ver últimos logins | Query auth.audit_log_entries |
+Manter: lista, busca, toggle ativo/inativo.
 
-**Detail Page (`/admin/nutris/:id`):**
-- Header: Nome, email, CRN, status badge, data cadastro
-- Tabs:
-  - **Perfil:** Dados completos, foto, cores personalizadas
-  - **Pacientes:** Lista de pacientes do nutri (COUNT + link)
-  - **Agenda:** Próximas consultas
-  - **Financeiro:** Histórico de pagamentos/transações
-  - **Suporte:** Histórico de conversas
-  - **Logs:** Auditoria de ações
+Adicionar:
+- Filtros por status (Ativos/Trial/Inativos/Suspensos)
+- Detail page `/admin/nutris/:id` com tabs: Perfil, Pacientes, Agenda, Financeiro, Suporte, Logs
+- Ações: Estender Trial (UPDATE trial_ends_at), Alterar Plano, Reset Senha (Supabase Auth admin API), Notas Admin
+- Link direto para chat de suporte com o nutri
 
-### 3.3 Chat de Suporte (`/admin/suporte`)
+### 3.3 Chat de Suporte — EVOLUÇÃO
 
-**Modelo de dados novo:** Tabela `support_threads`
+Refatorar tab "support" em páginas dedicadas. Usar tabelas existentes `support_tickets` + `support_ticket_messages`.
 
-```sql
-CREATE TABLE support_threads (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  nutritionist_id UUID REFERENCES profiles(id),
-  admin_email TEXT NOT NULL DEFAULT 'diascristianoconsultor@gmail.com',
-  subject TEXT NOT NULL,
-  status TEXT NOT NULL CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
-  priority TEXT NOT NULL DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  resolved_at TIMESTAMPTZ
-);
+Lista (`/admin/suporte`): filtros por status/prioridade, badge de pendentes, ordenação.
 
-CREATE TABLE support_messages (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  thread_id UUID REFERENCES support_threads(id) ON DELETE CASCADE,
-  sender_type TEXT NOT NULL CHECK (sender_type IN ('nutritionist', 'admin')),
-  sender_id UUID,  -- nullable for admin (identified by email)
-  content TEXT NOT NULL,
-  is_read BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
+Chat View (`/admin/suporte/:ticketId`): interface fullscreen estilo Mensagens, mensagens em tempo real via Supabase Realtime (`postgres_changes` on support_ticket_messages), workflow de status (open → answered → resolved/closed).
 
-**Interface:**
-- Lista de threads com filtros (status, prioridade, nutri)
-- Badge de não-lidas
-- Chat view estilo Mensagens existente (reutilizar padrões de UI)
-- Admin responde como "Admin" (identificado por email)
-- Notificações em tempo real via Supabase Realtime
-- Marcar como resolvido/fechado
+### 3.4 Financeiro da Plataforma — NOVO
 
-### 3.4 Financeiro da Plataforma (`/admin/financeiro`)
-
-**Visão consolidada:**
-- Receitas totais vs despesas (se houver custos operacionais registrados)
+Substituir placeholder. Queries em `financial_records` + `profiles`:
+- Receitas totais vs despesas
 - Breakdown por plano de assinatura
-- Lista de transações recentes (financial_records com nutritionist_id)
-- Status de cobrança por nutri (ativo, inadimplente, cancelado)
+- Status de cobrança por nutri
+- Lista de transações recentes
 
-**Integração Stripe (via nutritionists table):**
-- Listar nutris com subscription_status != 'active'
-- Link direto para Stripe Dashboard do customer
-- Histórico de pagamentos via Stripe API (server-side)
+### 3.5 Configurações Globais — NOVO
 
-### 3.5 Configurações Globais (`/admin/configuracoes`)
-
-- **Trial Duration:** Duração padrão do trial (dias)
-- **Planos e Preços:** Editar nomes e descrições dos planos
-- **Email Templates:** Templates de email do sistema (boas-vindas, trial expirando, etc.)
-- **Feature Flags:** Ativar/desativar features globalmente (ex: AI meal plans, chat)
-- **Manutenção:** Modo manutenção (banner no app)
-- **Logs do Sistema:** Últimas ações administrativas
+Formulários para:
+- Trial Duration (dias)
+- Feature Flags (AI meal plans, chat, etc.)
+- Modo Manutenção (banner global)
+- Salvar em `admin_settings` table
 
 ---
 
-## 4. Schema Changes
+## 4. Componentes a Criar/Refatorar
 
-### Novas Tabelas
-1. `support_threads` — Threads de suporte admin↔nutri
-2. `support_messages` — Mensagens dentro das threads
-3. `admin_settings` — Key-value store para configurações globais
-4. `admin_audit_log` — Log de ações do admin
-
-### Alterações em Tabelas Existentes
-- `profiles`: Garantir que `is_admin` existe e tem default `false`
-- `profiles`: Adicionar `last_login_at TIMESTAMPTZ` (se não existir)
-- `profiles`: Adicionar `notes TEXT` (campo interno do admin sobre o nutri)
-
-### RLS Policies
-Todas as novas tabelas com políticas restritivas ao email admin.
-
----
-
-## 5. Componentes a Criar
-
-| Componente | Localização | Reutiliza |
-|------------|-------------|-----------|
-| `AdminGuard` | src/components/admin/AdminGuard.tsx | useAuth + supabase query |
-| `AdminSidebar` | src/components/admin/AdminSidebar.tsx | AppSidebar pattern |
-| `AdminLayout` | src/components/admin/AdminLayout.tsx | AppLayout pattern |
-| `AdminDashboard` | src/pages/admin/AdminDashboard.tsx | StatCard, Recharts |
-| `NutritionistList` | src/pages/admin/NutritionistList.tsx | Table, Badge, Dialog |
-| `NutritionistDetail` | src/pages/admin/NutritionistDetail.tsx | Tabs, RichCard |
-| `SupportThreadList` | src/pages/admin/SupportThreadList.tsx | Mensagens pattern |
-| `SupportChatView` | src/pages/admin/SupportChatView.tsx | NutritionistChat pattern |
-| `AdminFinanceiro` | src/pages/admin/AdminFinanceiro.tsx | Financeiro pattern |
-| `AdminSettings` | src/pages/admin/AdminSettings.tsx | Form components |
-| `AdminStatCard` | src/components/admin/AdminStatCard.tsx | StatCard base |
-| `NutriActionMenu` | src/components/admin/NutriActionMenu.tsx | DropdownMenu |
+| Componente | Ação | Localização |
+|------------|------|-------------|
+| `AdminGuard` | Criar | src/components/admin/AdminGuard.tsx |
+| `AdminSidebar` | Criar | src/components/admin/AdminSidebar.tsx |
+| `AdminLayout` | Criar | src/components/admin/AdminLayout.tsx |
+| `AdminDashboard` | Criar | src/pages/admin/AdminDashboard.tsx |
+| `NutritionistList` | Extrair de Admin.tsx | src/pages/admin/NutritionistList.tsx |
+| `NutritionistDetail` | Criar | src/pages/admin/NutritionistDetail.tsx |
+| `SupportThreadList` | Extrair de Admin.tsx | src/pages/admin/SupportThreadList.tsx |
+| `SupportChatView` | Criar | src/pages/admin/SupportChatView.tsx |
+| `AdminFinanceiro` | Criar | src/pages/admin/AdminFinanceiro.tsx |
+| `AdminSettings` | Criar | src/pages/admin/AdminSettings.tsx |
+| `Admin.tsx` | Refatorar como router/shell | src/pages/Admin.tsx |
 
 ---
 
-## 6. Integrações
+## 5. Segurança
 
-### Supabase
-- Queries diretas via supabase-js (mesmo padrão do app)
-- Realtime para support_messages e support_threads
-- Auth admin API para reset de senha
-
-### Stripe (opcional, fase 2)
-- Server-side via Edge Function para listar subscriptions
-- Links para Stripe Dashboard
-
-### Email
-- Supabase Edge Function para envio de emails transacionais
-- Templates editáveis em admin_settings
+1. Dupla verificação: RPC `is_current_user_master_admin` + RLS no Supabase
+2. Audit Log: toda ação admin registrada em `admin_audit_log`
+3. RLS Restritivo: tabelas admin só acessíveis por admin
+4. AdminGuard em todas as rotas `/admin/*`
 
 ---
 
-## 7. Segurança
-
-1. **Dupla verificação:** Email hardcoded NO FRONTEND + is_admin NO BANCO + RLS NO SUPABASE
-2. **Audit Log:** Toda ação admin registrada em admin_audit_log
-3. **RLS Restritivo:** Nenhuma tabela admin acessível por não-admins
-4. **Rate Limiting:** Edge Functions com limite de requisições
-5. **Session Timeout:** Sessão admin expira após 8h de inatividade
-
----
-
-## 8. Fora do Escopo (Fase 1)
+## 6. Fora do Escopo (Fase 1)
 
 - Multi-admin com roles
-- Billing automático / checkout
-- API pública para integrações
-- Relatórios exportáveis (PDF/CSV) — adicionar na fase 2
-- White-label / customização por nutri via admin
-- Moderação de conteúdo de pacientes
+- Billing automático / checkout Stripe
+- API pública
+- Relatórios exportáveis (PDF/CSV)
+- White-label
 
 ---
 
-## 9. Critérios de Aceite
+## 7. Critérios de Aceite
 
-- [ ] Admin acessa /admin e vê dashboard com dados reais
+- [ ] Admin acessa /admin e vê dashboard com KPIs reais
 - [ ] Admin lista, filtra e busca nutricionistas
 - [ ] Admin ativa/desativa nutri e vê mudança imediata
 - [ ] Admin estende trial e nutri recebe acesso renovado
 - [ ] Admin abre chat de suporte e troca mensagens em tempo real
 - [ ] Admin vê financeiro consolidado da plataforma
-- [ ] Admin altera configurações globais e mudanças refletem no app
-- [ ] Não-admin tentando acessar /admin é redirecionado para /acesso-negado
+- [ ] Admin altera configurações globais
+- [ ] Não-admin tentando acessar /admin é redirecionado
 - [ ] Todas as ações admin são logadas
-- [ ] Layout consistente com o resto do app (mesma paleta, tipografia, componentes)
+- [ ] Layout consistente com o resto do app

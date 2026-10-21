@@ -381,10 +381,6 @@ export default function PatientDetail() {
       setSendingMagicLink(false);
     }
   };
-    } finally {
-      setSendingMagicLink(false);
-    }
-  };
 
   const handleCopyPortalLink = () => {
     const portalUrl = `https://nutriflow.inf.br/paciente/${patient?.id}`;
