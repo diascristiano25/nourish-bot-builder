@@ -14,6 +14,7 @@ const navItems: { id: TabType; label: string; icon: React.ComponentType<{ classN
   { id: 'plano', label: 'Plano', icon: UtensilsCrossed },
   { id: 'registro', label: '', icon: Plus },
   { id: 'mensagens', label: 'Chat', icon: MessageCircle },
+  { id: 'evolucao', label: 'Evolução', icon: TrendingUp },
   { id: 'perfil', label: 'Perfil', icon: User },
 ];
 
