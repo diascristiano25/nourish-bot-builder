@@ -76,13 +76,14 @@ export default function Financeiro() {
       if (!nId) throw new Error('No profile');
       setNutritionistId(nId);
 
-      // Query uses the REAL column names from COMPLETE-DATABASE-FIX.sql:
-      // type (income/expense/payment/refund), nutritionist_id, date, status, amount
+      // Real schema (verified via Supabase REST probe): id, nutritionist_id,
+      // record_type, amount, description, record_date, status (+ created_at).
+      // There is NO `date`, `type`, or `payment_method` column.
       const { data: financialData, error: financialError } = await supabase
         .from('financial_records')
-        .select('id, amount, type, status, description, date, payment_method, created_at, patient:patients(id, full_name)')
+        .select('id, amount, record_type, status, description, record_date, created_at')
         .eq('nutritionist_id', nId)
-        .order('date', { ascending: false })
+        .order('record_date', { ascending: false })
         .limit(200);
       if (financialError) throw financialError;
 
@@ -91,11 +92,11 @@ export default function Financeiro() {
       const monthEnd = endOfMonth(now);
 
       const records = (financialData || []) as any[];
-      const incomeRecords = records.filter((r) => (r.type === 'income' || r.type === 'payment') && r.status !== 'cancelled');
-      const expenseRecords = records.filter((r) => r.type === 'expense' && r.status !== 'cancelled');
+      const incomeRecords = records.filter((r) => (r.record_type === 'income' || r.record_type === 'payment') && r.status !== 'cancelled');
+      const expenseRecords = records.filter((r) => r.record_type === 'expense' && r.status !== 'cancelled');
 
       const currentMonthIncome = incomeRecords.filter((r) => {
-        const d = new Date(r.date);
+        const d = new Date(r.record_date);
         return d >= monthStart && d <= monthEnd;
       });
       const totalRev = currentMonthIncome.reduce((sum, r) => sum + Number(r.amount || 0), 0);
@@ -116,11 +117,11 @@ export default function Financeiro() {
         const mStart = startOfMonth(targetMonth);
         const mEnd = endOfMonth(targetMonth);
         const monthIncome = incomeRecords.filter((r) => {
-          const d = new Date(r.date);
+          const d = new Date(r.record_date);
           return d >= mStart && d <= mEnd;
         });
         const monthExpense = expenseRecords.filter((r) => {
-          const d = new Date(r.date);
+          const d = new Date(r.record_date);
           return d >= mStart && d <= mEnd;
         });
         const net = monthIncome.reduce((s, r) => s + Number(r.amount || 0), 0)
@@ -129,16 +130,15 @@ export default function Financeiro() {
       }
 
       const transactionsList: Transaction[] = records.slice(0, 20).map((record) => {
-        const isExpense = record.type === 'expense';
-        const isRefund = record.type === 'refund';
+        const isExpense = record.record_type === 'expense';
+        const isRefund = record.record_type === 'refund';
         const tType: Transaction['type'] = isRefund ? 'refund' : record.status === 'pending' ? 'pending' : 'payment';
-        const patientArr = Array.isArray(record.patient) ? record.patient[0] : record.patient;
         return {
           id: record.id,
-          patientName: patientArr?.full_name || record.description || (isExpense ? 'Despesa' : 'Receita'),
+          patientName: record.description || (isExpense ? 'Despesa' : 'Receita'),
           type: tType,
           amount: (isExpense ? -1 : 1) * (Number(record.amount || 0) / 100),
-          date: record.date || record.created_at,
+          date: record.record_date || record.created_at,
           status: (record.status === 'cancelled' ? 'failed' : record.status) as 'completed' | 'pending' | 'failed',
         };
       });
@@ -152,8 +152,15 @@ export default function Financeiro() {
         transactions: transactionsList,
       });
     } catch (err) {
-      console.warn('Supabase fetch failed for Financeiro, using mock data:', err);
-      setData(getMockData());
+      console.warn('Supabase fetch failed for Financeiro, showing empty state:', err);
+      setData({
+        totalRevenue: 0,
+        pendingPayments: 0,
+        avgConsultationCost: 0,
+        totalTransactions: 0,
+        monthlyRevenue: [],
+        transactions: [],
+      });
     } finally {
       setLoading(false);
     }
@@ -178,7 +185,7 @@ export default function Financeiro() {
           title="Financeiro"
           subtitle="Acompanhe suas receitas, pagamentos e transações"
           icon={<DollarSign className="w-7 h-7 text-white" />}
-          gradient="from-[#C4764A] via-[#b56a42] to-[#9d5a38]"
+          gradient="from-[#518C5B] via-[#4a7d52] to-[#2d5a37]"
         />
 
         {/* KPI tiles */}

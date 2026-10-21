@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Pacientes', path: '/pacientes', icon: Users },
   { name: 'Agenda', path: '/agenda', icon: Calendar },
-  { name: 'Mensagens', path: '/mensagens', icon: Send, badge: 5 },
+  { name: 'Mensagens', path: '/mensagens', icon: Send },
   { name: 'Financeiro', path: '/financeiro', icon: DollarSign },
   { name: 'Evolução', path: '/evolucao', icon: TrendingUp },
   { name: 'Perfil', path: '/perfil', icon: Info },

@@ -113,6 +113,15 @@
         ],
         "createdAt": "2026-10-20T23:03:41.943Z",
         "reason": "opacity raised from 0.04 to 0.12 in this session; white cross pattern over green gradient is intentional subtle texture, visible on screen"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "nutriflow-reels-ads.html"
+        ],
+        "createdAt": "2026-10-21T03:36:00.885Z",
+        "reason": "user confirmed: Meta Ads brief explicitly requests glow shadows on screenshot cards and shine effect on CTA for high-conversion ad"
       }
     ]
   }

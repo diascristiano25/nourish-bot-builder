@@ -59,12 +59,10 @@ export function NewTransactionDialog({
       const { error } = await supabase.from('financial_records').insert({
         nutritionist_id: nutritionistId,
         amount: amountCents,
-        type: recordType,
+        record_type: recordType,
         status: 'completed',
-        date: new Date().toISOString().split('T')[0],
+        record_date: new Date().toISOString().split('T')[0],
         description: description || (type === 'income' ? 'Receita' : 'Despesa'),
-        payment_method: paymentMethod || null,
-        patient_id: null,
       });
 
       if (error) throw error;
