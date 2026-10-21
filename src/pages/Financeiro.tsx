@@ -11,11 +11,13 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { FinancialDashboard } from '@/components/nutritionist/financial/FinancialDashboard';
 import { RevenueChart } from '@/components/nutritionist/financial/RevenueChart';
 import { TransactionList, Transaction } from '@/components/nutritionist/financial/TransactionList';
+import { NewTransactionDialog } from '@/components/nutritionist/financial/NewTransactionDialog';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { RichCard } from '@/components/shared/RichCard';
-import { DollarSign, TrendingUp, Clock, Receipt } from 'lucide-react';
+import { DollarSign, TrendingUp, Clock, Receipt, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 interface RevenueData {
   month: string;
@@ -49,6 +51,8 @@ export default function Financeiro() {
   const navigate = useNavigate();
   const [data, setData] = useState(getMockData());
   const [loading, setLoading] = useState(true);
+  const [nutritionistId, setNutritionistId] = useState<string>('');
+  const [newTxOpen, setNewTxOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
@@ -56,6 +60,7 @@ export default function Financeiro() {
 
   useEffect(() => {
     if (user) fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchData = async () => {
@@ -67,62 +72,82 @@ export default function Financeiro() {
         .eq('user_id', user!.id)
         .maybeSingle();
       if (profileError) throw profileError;
-      const nutritionistId = profileData?.id;
-      if (!nutritionistId) throw new Error('No profile');
+      const nId = profileData?.id;
+      if (!nId) throw new Error('No profile');
+      setNutritionistId(nId);
 
+      // Query uses the REAL column names from COMPLETE-DATABASE-FIX.sql:
+      // type (income/expense/payment/refund), nutritionist_id, date, status, amount
       const { data: financialData, error: financialError } = await supabase
         .from('financial_records')
-        .select('id, amount, transaction_type, status, description, created_at, patient:patient_id(id, full_name)')
-        .eq('user_id', user!.id)
-        .order('created_at', { ascending: false });
+        .select('id, amount, type, status, description, date, payment_method, created_at, patient:patients(id, full_name)')
+        .eq('nutritionist_id', nId)
+        .order('date', { ascending: false })
+        .limit(200);
       if (financialError) throw financialError;
 
       const now = new Date();
       const monthStart = startOfMonth(now);
       const monthEnd = endOfMonth(now);
-      const currentMonthRecords = (financialData || []).filter((r: any) => {
-        const recordDate = new Date(r.created_at);
-        return recordDate >= monthStart && recordDate <= monthEnd && r.status === 'completed';
+
+      const records = (financialData || []) as any[];
+      const incomeRecords = records.filter((r) => (r.type === 'income' || r.type === 'payment') && r.status !== 'cancelled');
+      const expenseRecords = records.filter((r) => r.type === 'expense' && r.status !== 'cancelled');
+
+      const currentMonthIncome = incomeRecords.filter((r) => {
+        const d = new Date(r.date);
+        return d >= monthStart && d <= monthEnd;
       });
-      const totalRev = currentMonthRecords.reduce((sum: number, r: any) => sum + r.amount, 0);
-      const pending = (financialData || [])
-        .filter((r: any) => r.status === 'pending')
-        .reduce((sum: number, r: any) => sum + r.amount, 0);
-      const consultationRecords = (financialData || []).filter(
-        (r: any) => r.transaction_type === 'consultation' && r.status === 'completed'
-      );
-      const avgCost = consultationRecords.length > 0
-        ? consultationRecords.reduce((sum: number, r: any) => sum + r.amount, 0) / consultationRecords.length
+      const totalRev = currentMonthIncome.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+
+      const pending = records
+        .filter((r) => r.status === 'pending')
+        .reduce((sum, r) => sum + Number(r.amount || 0), 0);
+
+      const completedIncome = incomeRecords.filter((r) => r.status === 'completed');
+      const avgCost = completedIncome.length > 0
+        ? completedIncome.reduce((sum, r) => sum + Number(r.amount || 0), 0) / completedIncome.length
         : 0;
 
       const revenueMonths: RevenueData[] = [];
       const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      for (let i = 11; i >= 0; i--) {
+      for (let i = 5; i >= 0; i--) {
         const targetMonth = subMonths(now, i);
         const mStart = startOfMonth(targetMonth);
         const mEnd = endOfMonth(targetMonth);
-        const monthRecords = (financialData || []).filter((r: any) => {
-          const recordDate = new Date(r.created_at);
-          return recordDate >= mStart && recordDate <= mEnd && r.status === 'completed';
+        const monthIncome = incomeRecords.filter((r) => {
+          const d = new Date(r.date);
+          return d >= mStart && d <= mEnd;
         });
-        const total = monthRecords.reduce((sum: number, r: any) => sum + r.amount, 0);
-        revenueMonths.push({ month: monthNames[targetMonth.getMonth()], revenue: total / 100 });
+        const monthExpense = expenseRecords.filter((r) => {
+          const d = new Date(r.date);
+          return d >= mStart && d <= mEnd;
+        });
+        const net = monthIncome.reduce((s, r) => s + Number(r.amount || 0), 0)
+          - monthExpense.reduce((s, r) => s + Number(r.amount || 0), 0);
+        revenueMonths.push({ month: monthNames[targetMonth.getMonth()], revenue: net / 100 });
       }
 
-      const transactionsList: Transaction[] = (financialData || []).slice(0, 20).map((record: any) => ({
-        id: record.id,
-        patientName: record.patient?.full_name || 'Paciente',
-        type: record.transaction_type === 'refund' ? 'refund' as const : record.status === 'pending' ? 'pending' as const : 'payment' as const,
-        amount: record.amount / 100,
-        date: record.created_at,
-        status: record.status as 'completed' | 'pending' | 'failed',
-      }));
+      const transactionsList: Transaction[] = records.slice(0, 20).map((record) => {
+        const isExpense = record.type === 'expense';
+        const isRefund = record.type === 'refund';
+        const tType: Transaction['type'] = isRefund ? 'refund' : record.status === 'pending' ? 'pending' : 'payment';
+        const patientArr = Array.isArray(record.patient) ? record.patient[0] : record.patient;
+        return {
+          id: record.id,
+          patientName: patientArr?.full_name || record.description || (isExpense ? 'Despesa' : 'Receita'),
+          type: tType,
+          amount: (isExpense ? -1 : 1) * (Number(record.amount || 0) / 100),
+          date: record.date || record.created_at,
+          status: (record.status === 'cancelled' ? 'failed' : record.status) as 'completed' | 'pending' | 'failed',
+        };
+      });
 
       setData({
         totalRevenue: totalRev / 100,
         pendingPayments: pending / 100,
         avgConsultationCost: avgCost / 100,
-        totalTransactions: (financialData || []).length,
+        totalTransactions: records.length,
         monthlyRevenue: revenueMonths,
         transactions: transactionsList,
       });
@@ -232,6 +257,21 @@ export default function Financeiro() {
           </RichCard>
         </div>
 
+        {/* Action bar: New transaction button */}
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="font-serif text-xl md:text-2xl font-bold text-slate-800">
+            Movimentações
+          </h2>
+          <Button
+            onClick={() => setNewTxOpen(true)}
+            disabled={!nutritionistId}
+            className="bg-[#518C5B] hover:bg-[#3d7047] text-white rounded-xl px-5 h-11 shadow-md shadow-[#518C5B]/20 gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Novo Lançamento
+          </Button>
+        </div>
+
         {/* Revenue chart in rich card */}
         <RichCard delay={0.5} padding="lg">
           <RevenueChart data={data.monthlyRevenue} />
@@ -241,6 +281,16 @@ export default function Financeiro() {
         <RichCard delay={0.6} padding="lg">
           <TransactionList transactions={data.transactions} />
         </RichCard>
+
+        {/* New Transaction Dialog */}
+        {nutritionistId && (
+          <NewTransactionDialog
+            open={newTxOpen}
+            onOpenChange={setNewTxOpen}
+            nutritionistId={nutritionistId}
+            onSuccess={fetchData}
+          />
+        )}
       </div>
     </ModernLayout>
   );
