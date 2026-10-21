@@ -3,706 +3,670 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NutriFlow — Meta Ads Reels 30s</title>
+<title>NutriFlow — Meta Ads 30s (Polished Fluid)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@600&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Inter',sans-serif}
-body.playing{cursor:none}
-body.paused{cursor:default}
-
-/* ── Stage container ── */
-#stage-wrap{
-  width:100vw;height:100vh;
-  display:flex;align-items:center;justify-content:center;
-  background:#000;
+:root {
+--bg: #050505;
+--text: #F4F1EC;
+--accent: #22C55E;
+--support: #3B82F6;
 }
-#stage{
-  width:1080px;height:1920px;
-  position:relative;overflow:hidden;
-  background:#0A0A0F;
-  transform-origin:center center;
-  /* scale set by JS */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Inter', sans-serif; }
+body.playing { cursor: none; }
+body.paused { cursor: default; }
+
+/* Stage */
+#stage-wrap {
+width: 100vw; height: 100vh;
+display: flex; align-items: center; justify-content: center;
+background: #000;
 }
-
-/* ── Fundo vivo: blobs ── */
-.blob{position:absolute;border-radius:50%;pointer-events:none;will-change:transform}
-.blob-a{width:700px;height:700px;background:radial-gradient(circle,rgba(34,197,94,.35),transparent 70%);filter:blur(100px);top:-250px;left:-200px}
-.blob-b{width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,.30),transparent 70%);filter:blur(100px);bottom:-200px;right:-180px}
-.blob-c{width:500px;height:500px;background:radial-gradient(circle,rgba(34,197,94,.20),transparent 70%);filter:blur(90px);top:45%;left:55%}
-
-/* ── Granulado ── */
-.grain{
-  position:absolute;inset:0;pointer-events:none;opacity:.04;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:256px 256px;
+#stage {
+width: 1080px; height: 1920px;
+position: relative; overflow: hidden;
+background: var(--bg);
+transform-origin: center center;
 }
 
-/* ── Vinheta ── */
-.vignette{
-  position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.55) 100%);
+/* Fluid Canvas Background - The "Goo" Effect */
+#fluid-canvas {
+position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+z-index: 0;
+/* High contrast + blur creates the metaball merging effect */
+filter: blur(40px) contrast(25);
+opacity: 0.9;
 }
 
-/* ── Overlay de transição (flash/zoom-blur) ── */
-#trans-overlay{
-  position:absolute;inset:0;pointer-events:none;z-index:800;
-  background:#0A0A0F;opacity:0;
-  will-change:opacity,filter;
+/* Overlays */
+.grain {
+position: absolute; inset: 0; pointer-events: none; z-index: 10;
+opacity: 0.08; mix-blend-mode: overlay;
+background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.vignette {
+position: absolute; inset: 0; pointer-events: none; z-index: 11;
+background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.9) 100%);
 }
 
-/* ── Telas de controle ── */
-.ctrl-screen{
-  position:absolute;inset:0;z-index:900;
-  display:flex;align-items:center;justify-content:center;flex-direction:column;
-  background:#0A0A0F;
+/* Controls */
+.screen {
+position: absolute; inset: 0; z-index: 1000;
+display: flex; align-items: center; justify-content: center; flex-direction: column;
+background: rgba(5, 5, 5, 0.95);
+backdrop-filter: blur(20px);
+transition: opacity 0.5s;
 }
-.ctrl-screen.hidden{display:none}
-#start-screen .label{
-  font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:600;
-  color:#F4F1EC;text-align:center;padding:0 80px;line-height:1.5;
+.screen.hidden { opacity: 0; pointer-events: none; }
+.start-text {
+font-family: 'Space Grotesk', sans-serif;
+font-size: 64px; font-weight: 700;
+color: var(--text); text-align: center;
+padding: 0 80px; line-height: 1.2;
+text-shadow: 0 0 20px rgba(255,255,255,0.2);
 }
-#start-screen .sub{
-  font-family:'Inter',sans-serif;font-size:36px;color:rgba(244,241,236,.5);
-  margin-top:30px;
-}
-#countdown-screen .num{
-  font-family:'Space Grotesk',sans-serif;font-size:260px;font-weight:700;
-  color:#22C55E;
-}
-
-/* ── Debug timer ── */
-#debug{
-  position:absolute;top:20px;left:20px;z-index:950;
-  font-family:'Inter',monospace;font-size:28px;color:#22C55E;
-  background:rgba(0,0,0,.75);padding:10px 22px;border-radius:10px;
-  display:none;
-}
-#debug.on{display:block}
-
-/* ── Logo ── */
-#logo{
-  position:absolute;top:100px;left:50%;
-  width:130px;height:130px;
-  transform:translateX(-50%);
-  opacity:0;will-change:opacity,transform;
-  z-index:100;
-}
-#logo img{width:100%;height:100%;object-fit:contain}
-
-/* ── Scenes ── */
-.scene{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;align-items:center;
-  /* Área segura: top 280px, bottom 1250px → conteúdo entre y=280 e y=1250 */
-  padding:280px 70px 0 70px;
-  opacity:0;pointer-events:none;
-  will-change:opacity,transform,filter;
+.countdown-text {
+font-family: 'Space Grotesk', sans-serif;
+font-size: 300px; font-weight: 700;
+color: var(--accent);
+text-shadow: 0 0 80px var(--accent);
 }
 
-/* ── Word containers ── */
-.words{
-  display:flex;flex-wrap:wrap;justify-content:center;
-  gap:16px 22px;
-  max-width:940px;
+/* Debug */
+#debug-timer {
+position: absolute; top: 20px; left: 20px; z-index: 999;
+font-family: monospace; font-size: 24px;
+color: var(--accent); background: rgba(0,0,0,0.8);
+padding: 10px 20px; border-radius: 8px;
+display: none; border: 1px solid var(--accent);
 }
-.w{
-  font-family:'Space Grotesk',sans-serif;
-  font-size:96px;font-weight:700;
-  color:#F4F1EC;line-height:1.15;
-  opacity:0;
-  will-change:opacity,transform,filter;
-}
-.w.hl{color:#22C55E}
-.w.hl2{color:#3B82F6}
+#debug-timer.visible { display: block; }
 
-/* ── Cena 1: badge ATENÇÃO ── */
-#badge{
-  font-family:'Space Grotesk',sans-serif;font-size:52px;font-weight:700;
-  background:#22C55E;color:#0A0A0F;
-  padding:18px 48px;border-radius:14px;
-  margin-bottom:36px;
-  opacity:0;will-change:opacity,transform;
+/* Scenes */
+.scene {
+position: absolute; inset: 0; z-index: 20;
+display: flex; flex-direction: column;
+align-items: center; justify-content: center;
+padding: 280px 70px 670px 70px; /* Safe Area */
+opacity: 0; pointer-events: none;
+will-change: opacity, transform;
 }
 
-/* ── Cena 2: visuais de dor ── */
-#pain-vis{
-  position:relative;width:700px;height:380px;margin-top:30px;
+/* Typography - Massive & Glowing (No blend mode for readability) */
+.word-container {
+display: flex; flex-wrap: wrap; justify-content: center;
+gap: 20px 30px; max-width: 940px;
+z-index: 30;
 }
-.sheet{
-  position:absolute;width:180px;height:180px;opacity:0;
-  will-change:opacity,transform;
+.word {
+font-family: 'Space Grotesk', sans-serif;
+font-size: 110px; font-weight: 700;
+color: #fff;
+line-height: 0.95;
+opacity: 0;
+text-shadow: 0 0 20px rgba(255,255,255,0.5), 0 10px 30px rgba(0,0,0,0.8);
+will-change: transform, opacity, filter;
 }
-.sheet svg{width:100%;height:100%}
-#clock-vis{
-  position:absolute;top:50%;left:50%;
-  width:260px;height:260px;
-  transform:translate(-50%,-50%);
-  opacity:0;will-change:opacity,transform;
+.word.hl {
+color: var(--accent);
+text-shadow: 0 0 40px var(--accent), 0 0 80px var(--accent), 0 10px 30px rgba(0,0,0,0.8);
 }
-#clock-vis svg{width:100%;height:100%}
+.word.hl-blue {
+color: var(--support);
+text-shadow: 0 0 40px var(--support), 0 0 80px var(--support), 0 10px 30px rgba(0,0,0,0.8);
+}
 
-/* ── Cena 3: screenshots ── */
-#shots{
-  display:flex;gap:24px;margin-top:30px;
-  perspective:1200px;
+/* Scene 1: Badge */
+.alert-badge {
+font-family: 'Space Grotesk', sans-serif;
+font-size: 48px; font-weight: 700;
+background: rgba(34, 197, 94, 0.1);
+border: 2px solid var(--accent);
+color: var(--accent);
+padding: 20px 50px; border-radius: 100px;
+margin-bottom: 50px; opacity: 0;
+box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+backdrop-filter: blur(10px);
+will-change: transform, opacity;
 }
-.shot{
-  width:270px;height:480px;
-  border-radius:22px;overflow:hidden;
-  border:3px solid rgba(34,197,94,.6);
-  box-shadow:0 16px 48px rgba(0,0,0,.6);
-  opacity:0;will-change:opacity,transform;
-}
-.shot img{width:100%;height:100%;object-fit:cover;display:block}
 
-/* ── Cena 4: benefício ── */
-#benefit-vis{
-  position:relative;width:800px;height:360px;margin-top:30px;
+/* Scene 2: Pain (Abstract) */
+.pain-visual {
+position: relative; width: 600px; height: 400px;
+margin-top: 50px;
+perspective: 1000px;
 }
-#chart{
-  position:absolute;left:0;bottom:0;
-  width:380px;height:300px;
-  display:flex;align-items:flex-end;gap:18px;
-  opacity:0;will-change:opacity;
+.float-card {
+position: absolute; width: 200px; height: 200px;
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 24px;
+backdrop-filter: blur(10px);
+display: flex; align-items: center; justify-content: center;
+opacity: 0;
+box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
-.bar{
-  width:65px;border-radius:10px 10px 0 0;
-  background:linear-gradient(to top,#22C55E,#3B82F6);
-  transform-origin:bottom;
-  will-change:transform;
+.float-card svg { width: 80px; height: 80px; stroke: var(--text); stroke-width: 1.5; fill: none; opacity: 0.7; }
+#card1 { top: 0; left: 0; }
+#card2 { bottom: 0; right: 0; border-color: rgba(59,130,246,0.3); }
+#clock-ring {
+position: absolute; top: 50%; left: 50%;
+width: 300px; height: 300px;
+border: 2px dashed var(--accent);
+border-radius: 50%;
+transform: translate(-50%, -50%);
+opacity: 0;
+box-shadow: 0 0 40px rgba(34, 197, 94, 0.4), inset 0 0 40px rgba(34, 197, 94, 0.2);
 }
-#notifs{
-  position:absolute;right:0;top:50%;
-  transform:translateY(-50%);
-  display:flex;flex-direction:column;gap:22px;
-}
-.notif{
-  width:110px;height:110px;
-  border-radius:50%;
-  background:rgba(34,197,94,.15);
-  border:2.5px solid #22C55E;
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;will-change:opacity,transform;
-}
-.notif svg{width:52px;height:52px;fill:#22C55E}
 
-/* ── Cena 5: CTA ── */
-#cta-big{
-  font-family:'Space Grotesk',sans-serif;
-  font-size:170px;font-weight:700;
-  color:#22C55E;text-align:center;
-  margin-bottom:40px;
-  opacity:0;will-change:opacity,transform;
-  position:relative;overflow:hidden;
+/* Scene 3: Solution (Screenshots) */
+.screenshots {
+display: flex; gap: 30px; margin-top: 60px;
+perspective: 1500px;
 }
-/* Shine sweep — driven by JS, not CSS animation */
-#cta-shine{
-  position:absolute;top:0;left:-120%;
-  width:80%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
-  pointer-events:none;
-  will-change:transform;
+.shot {
+width: 280px; height: 500px;
+border-radius: 30px; overflow: hidden;
+border: 1px solid rgba(255,255,255,0.1);
+box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+opacity: 0;
+background: #111;
+position: relative;
 }
-#comment-bar{
-  width:820px;height:76px;
-  background:rgba(255,255,255,.08);
-  border:2.5px solid #3B82F6;
-  border-radius:38px;
-  display:flex;align-items:center;
-  padding:0 28px;gap:12px;
-  opacity:0;will-change:opacity,transform;
+.shot::after {
+content: ''; position: absolute; inset: 0;
+background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 40%);
+pointer-events: none;
 }
-#comment-txt{
-  font-family:'Inter',sans-serif;font-size:42px;
-  color:#F4F1EC;flex:1;
+.shot img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+
+/* Scene 4: Benefit */
+.benefit-visual {
+position: relative; width: 700px; height: 400px;
+margin-top: 60px;
 }
-#comment-cursor{
-  width:3px;height:48px;background:#22C55E;
-  opacity:1;will-change:opacity;
+.chart {
+position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+display: flex; align-items: flex-end; gap: 20px;
+opacity: 0;
 }
-#saiba-mais{
-  margin-top:36px;
-  font-family:'Space Grotesk',sans-serif;font-size:50px;font-weight:700;
-  background:#22C55E;color:#0A0A0F;
-  padding:28px 80px;border-radius:18px;
-  box-shadow:0 8px 32px rgba(34,197,94,.45);
-  opacity:0;will-change:opacity,transform;
+.bar {
+flex: 1; background: linear-gradient(to top, var(--support), var(--accent));
+border-radius: 12px 12px 0 0;
+transform-origin: bottom; transform: scaleY(0);
+box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
+}
+.notif {
+position: absolute; width: 100px; height: 100px;
+background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.3);
+border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+opacity: 0;
+box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+backdrop-filter: blur(5px);
+}
+.notif svg { width: 50px; height: 50px; fill: var(--accent); filter: drop-shadow(0 0 10px var(--accent)); }
+#n1 { top: 10%; right: 0; }
+#n2 { top: 50%; right: 20%; }
+#n3 { top: 80%; right: 5%; }
+
+/* Scene 5: CTA */
+.cta-word {
+font-family: 'Space Grotesk', sans-serif;
+font-size: 220px; font-weight: 700;
+color: var(--accent); text-align: center;
+margin-bottom: 60px; opacity: 0;
+text-shadow: 0 0 60px var(--accent), 0 0 120px var(--accent);
+line-height: 0.8;
+}
+.comment-bar {
+width: 800px; height: 90px;
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 45px;
+display: flex; align-items: center;
+padding: 0 40px; opacity: 0;
+backdrop-filter: blur(10px);
+box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+.comment-text {
+font-size: 48px; color: var(--text); flex: 1; font-weight: 600;
+}
+.cursor {
+width: 4px; height: 50px; background: var(--accent);
+box-shadow: 0 0 15px var(--accent);
+}
+.know-more {
+margin-top: 50px;
+font-family: 'Space Grotesk', sans-serif;
+font-size: 56px; font-weight: 700;
+background: var(--accent); color: #000;
+padding: 30px 90px; border-radius: 100px;
+opacity: 0;
+box-shadow: 0 0 50px var(--accent);
+}
+
+/* Logo */
+.logo {
+position: absolute; top: 120px; left: 50%;
+transform: translateX(-50%);
+width: 160px; height: 160px;
+opacity: 0; z-index: 100;
+filter: drop-shadow(0 0 30px var(--accent));
+}
+.logo img { width: 100%; height: 100%; object-fit: contain; }
+
+/* Transition */
+#trans-overlay {
+position: absolute; inset: 0; z-index: 500;
+background: var(--bg); opacity: 0; pointer-events: none;
 }
 </style>
 </head>
 <body class="paused">
-
 <div id="stage-wrap">
 <div id="stage">
+<!-- Fluid Canvas Background -->
+<canvas id="fluid-canvas" width="1080" height="1920"></canvas>
+<div class="grain"></div>
+<div class="vignette"></div>
+<div id="trans-overlay"></div>
+<div id="debug-timer">0.00s</div>
 
-  <!-- Fundo vivo -->
-  <div class="blob blob-a" id="blobA"></div>
-  <div class="blob blob-b" id="blobB"></div>
-  <div class="blob blob-c" id="blobC"></div>
-  <div class="grain"></div>
-  <div class="vignette"></div>
+<!-- Start -->
+<div id="start-screen" class="screen">
+<div class="start-text">Clique ou ESPAÇO<br>para começar</div>
+</div>
+<div id="countdown-screen" class="screen hidden">
+<div class="countdown-text" id="cd-num">3</div>
+</div>
 
-  <!-- Transição -->
-  <div id="trans-overlay"></div>
+<!-- Logo -->
+<div class="logo" id="logo"><img src="logo-nutriflow.png" alt="NutriFlow"></div>
 
-  <!-- Debug -->
-  <div id="debug">0.00s</div>
+<!-- Scene 1 -->
+<div class="scene" id="sc1">
+<div class="alert-badge" id="badge">⚡ SELEÇÃO EXCLUSIVA</div>
+<div class="word-container" id="w1"></div>
+</div>
 
-  <!-- Tela inicial -->
-  <div class="ctrl-screen" id="start-screen">
-    <div class="label">Clique ou aperte ESPAÇO<br>para começar</div>
-    <div class="sub">NutriFlow — Meta Ads 30 s</div>
-  </div>
+<!-- Scene 2 -->
+<div class="scene" id="sc2">
+<div class="word-container" id="w2"></div>
+<div class="pain-visual">
+<div class="float-card" id="card1">
+<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+</div>
+<div class="float-card" id="card2">
+<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+</div>
+<div id="clock-ring"></div>
+</div>
+</div>
 
-  <!-- Contagem -->
-  <div class="ctrl-screen hidden" id="countdown-screen">
-    <div class="num" id="cd-num">3</div>
-  </div>
+<!-- Scene 3 -->
+<div class="scene" id="sc3">
+<div class="word-container" id="w3"></div>
+<div class="screenshots">
+<div class="shot" id="s1"><img src="https://via.placeholder.com/800x1200/111/22C55E?text=Dashboard" alt="App"></div>
+<div class="shot" id="s2"><img src="https://via.placeholder.com/800x1200/111/3B82F6?text=Planos" alt="App"></div>
+<div class="shot" id="s3"><img src="https://via.placeholder.com/800x1200/111/22C55E?text=Pacientes" alt="App"></div>
+</div>
+</div>
 
-  <!-- Logo -->
-  <div id="logo"><img src="logo-nutriflow.png" alt="NutriFlow"></div>
+<!-- Scene 4 -->
+<div class="scene" id="sc4">
+<div class="word-container" id="w4"></div>
+<div class="benefit-visual">
+<div class="chart" id="chart">
+<div class="bar" style="height: 40%"></div>
+<div class="bar" style="height: 65%"></div>
+<div class="bar" style="height: 85%"></div>
+<div class="bar" style="height: 100%"></div>
+</div>
+<div class="notif" id="n1"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+<div class="notif" id="n2"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
+<div class="notif" id="n3"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+</div>
+</div>
 
-  <!-- Cena 1 — Gancho [0 – 4 s] -->
-  <div class="scene" id="sc1">
-    <div id="badge">⚡ ATENÇÃO</div>
-    <div class="words" id="w1"></div>
-  </div>
-
-  <!-- Cena 2 — Dor [4.5 – 9 s] -->
-  <div class="scene" id="sc2">
-    <div class="words" id="w2"></div>
-    <div id="pain-vis">
-      <div class="sheet" id="sh1" style="left:30px;top:20px">
-        <svg viewBox="0 0 100 100"><rect x="8" y="8" width="84" height="84" rx="6" fill="none" stroke="#F4F1EC" stroke-width="2.5"/><line x1="8" y1="28" x2="92" y2="28" stroke="#F4F1EC" stroke-width="1.5"/><line x1="8" y1="48" x2="92" y2="48" stroke="#F4F1EC" stroke-width="1.5"/><line x1="8" y1="68" x2="92" y2="68" stroke="#F4F1EC" stroke-width="1.5"/><line x1="36" y1="8" x2="36" y2="92" stroke="#F4F1EC" stroke-width="1.5"/><line x1="64" y1="8" x2="64" y2="92" stroke="#F4F1EC" stroke-width="1.5"/></svg>
-      </div>
-      <div class="sheet" id="sh2" style="right:30px;top:80px">
-        <svg viewBox="0 0 100 100"><rect x="8" y="8" width="84" height="84" rx="6" fill="none" stroke="#F4F1EC" stroke-width="2.5"/><line x1="8" y1="28" x2="92" y2="28" stroke="#F4F1EC" stroke-width="1.5"/><line x1="8" y1="48" x2="92" y2="48" stroke="#F4F1EC" stroke-width="1.5"/><line x1="8" y1="68" x2="92" y2="68" stroke="#F4F1EC" stroke-width="1.5"/><line x1="36" y1="8" x2="36" y2="92" stroke="#F4F1EC" stroke-width="1.5"/><line x1="64" y1="8" x2="64" y2="92" stroke="#F4F1EC" stroke-width="1.5"/></svg>
-      </div>
-      <div id="clock-vis">
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="#22C55E" stroke-width="3.5"/><line x1="50" y1="50" x2="50" y2="18" stroke="#22C55E" stroke-width="3.5" stroke-linecap="round"/><line x1="50" y1="50" x2="72" y2="50" stroke="#3B82F6" stroke-width="3.5" stroke-linecap="round"/></svg>
-      </div>
-    </div>
-  </div>
-
-  <!-- Cena 3 — Solução [9.5 – 16.5 s] -->
-  <div class="scene" id="sc3">
-    <div class="words" id="w3"></div>
-    <div id="shots">
-      <div class="shot" id="s1"><img src="https://via.placeholder.com/800x1000/111111/22C55E?text=Print+Real+1" alt="Screenshot 1"></div>
-      <div class="shot" id="s2"><img src="https://via.placeholder.com/800x1000/111111/3B82F6?text=Print+Real+2" alt="Screenshot 2"></div>
-      <div class="shot" id="s3"><img src="https://via.placeholder.com/800x1000/111111/22C55E?text=Print+Real+3" alt="Screenshot 3"></div>
-    </div>
-  </div>
-
-  <!-- Cena 4 — Benefício [17 – 23 s] -->
-  <div class="scene" id="sc4">
-    <div class="words" id="w4"></div>
-    <div id="benefit-vis">
-      <div id="chart">
-        <div class="bar" style="height:80px"></div>
-        <div class="bar" style="height:140px"></div>
-        <div class="bar" style="height:210px"></div>
-        <div class="bar" style="height:290px"></div>
-      </div>
-      <div id="notifs">
-        <div class="notif" id="n1"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-        <div class="notif" id="n2"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
-        <div class="notif" id="n3"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Cena 5 — CTA [23.5 – 30 s] -->
-  <div class="scene" id="sc5">
-    <div class="words" id="w5"></div>
-    <div id="cta-big">EU QUERO<div id="cta-shine"></div></div>
-    <div id="comment-bar">
-      <span id="comment-txt"></span>
-      <div id="comment-cursor"></div>
-    </div>
-    <div id="saiba-mais">SAIBA MAIS</div>
-  </div>
-
+<!-- Scene 5 -->
+<div class="scene" id="sc5">
+<div class="word-container" id="w5"></div>
+<div class="cta-word" id="cta">EU QUERO</div>
+<div class="comment-bar" id="cmt-bar">
+<span class="comment-text" id="cmt-txt"></span>
+<div class="cursor" id="cmt-cur"></div>
+</div>
+<div class="know-more" id="btn">SAIBA MAIS</div>
+</div>
 </div>
 </div>
 
 <script>
-/* ================================================================
-   NutriFlow Meta Ads Reels — 30 s
-   Single-clock render(t) architecture. No loose CSS animations.
-   ================================================================ */
-
-// ── Config ──
+/**
+* NutriFlow Meta Ads - POLISHED FLUID EDITION
+* High-performance Canvas Metaballs + Cinematic DOM UI
+*/
 const DUR = 30;
 const SCENES = [
-  { id:'sc1', wId:'w1', start:0,    end:4,
-    text:"Atenção, Nutricionista! Estamos selecionando profissionais para testar uma nova ferramenta exclusiva.",
-    hl:["Atenção,"], hl2:["exclusiva."] },
-  { id:'sc2', wId:'w2', start:4.5,  end:9,
-    text:"Chega de perder horas montando planos alimentares em planilhas.",
-    hl:["Chega"], hl2:["horas"] },
-  { id:'sc3', wId:'w3', start:9.5,  end:16.5,
-    text:"Conheça o NutriFlow. Automatize seus atendimentos e entregue tudo em minutos.",
-    hl:["NutriFlow."], hl2:["minutos."] },
-  { id:'sc4', wId:'w4', start:17,   end:23,
-    text:"Ganhe tempo livre e tenha pacientes muito mais engajados.",
-    hl:["tempo","livre"], hl2:["engajados."] },
-  { id:'sc5', wId:'w5', start:23.5, end:30,
-    text:"Vagas limitadas para o teste. Comente EU QUERO que te envio o acesso agora.",
-    hl:["limitadas"], hl2:["EU","QUERO"] }
+{ id: 'sc1', wId: 'w1', start: 0, end: 4, text: "Atenção, Nutricionista! Estamos selecionando profissionais para testar uma nova ferramenta exclusiva.", hl: ["Atenção,"], hl2: ["exclusiva."] },
+{ id: 'sc2', wId: 'w2', start: 4.5, end: 9, text: "Chega de perder horas montando planos alimentares em planilhas.", hl: ["Chega"], hl2: ["horas"] },
+{ id: 'sc3', wId: 'w3', start: 9.5, end: 16.5, text: "Conheça o NutriFlow. Automatize seus atendimentos e entregue tudo em minutos.", hl: ["NutriFlow."], hl2: ["minutos."] },
+{ id: 'sc4', wId: 'w4', start: 17, end: 23, text: "Ganhe tempo livre e tenha pacientes muito mais engajados.", hl: ["tempo", "livre"], hl2: ["engajados."] },
+{ id: 'sc5', wId: 'w5', start: 23.5, end: 30, text: "Vagas limitadas para o teste. Comente EU QUERO que te envio o acesso agora.", hl: ["limitadas"], hl2: ["EU", "QUERO"] }
 ];
 
-// ── State ──
 let t = 0, playing = false, counting = false, cdVal = 3;
 let raf = null, lastTs = null, debugOn = false;
 let baseScale = 1;
 
-// ── DOM refs ──
-const stage      = document.getElementById('stage');
-const startScr   = document.getElementById('start-screen');
-const cdScr      = document.getElementById('countdown-screen');
-const cdNum      = document.getElementById('cd-num');
-const dbg        = document.getElementById('debug');
-const transOv    = document.getElementById('trans-overlay');
-const logoEl     = document.getElementById('logo');
-const blobA      = document.getElementById('blobA');
-const blobB      = document.getElementById('blobB');
-const blobC      = document.getElementById('blobC');
+const stage = document.getElementById('stage');
+const startScr = document.getElementById('start-screen');
+const cdScr = document.getElementById('countdown-screen');
+const cdNum = document.getElementById('cd-num');
+const dbg = document.getElementById('debug-timer');
+const transOv = document.getElementById('trans-overlay');
+const logoEl = document.getElementById('logo');
+const canvas = document.getElementById('fluid-canvas');
+const ctx = canvas.getContext('2d');
 
-// ── Scale stage to fit viewport ──
-function fitStage(){
-  const sx = window.innerWidth / 1080;
-  const sy = window.innerHeight / 1920;
-  baseScale = Math.min(sx, sy);
-  applyTransform(0);
+// Init Words
+SCENES.forEach(sc => {
+const c = document.getElementById(sc.wId);
+sc.text.split(' ').forEach(word => {
+const sp = document.createElement('span');
+sp.className = 'word';
+if (sc.hl.includes(word)) sp.classList.add('hl');
+else if (sc.hl2.includes(word)) sp.classList.add('hl-blue');
+sp.textContent = word;
+c.appendChild(sp);
+});
+});
+
+// Utils
+const clamp = (v, min=0, max=1) => Math.min(Math.max(v, min), max);
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOutExpo = (x) => x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const easeOutBack = (x) => { const c1 = 1.70158; const c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+
+// Fluid Particles (Metaballs) - Tuned for "Goo" effect
+const blobs = [
+{ x: 300, y: 400, r: 350, color: '34, 197, 94', phase: 0, speed: 0.15 },
+{ x: 800, y: 1200, r: 450, color: '59, 130, 246', phase: 2, speed: 0.12 },
+{ x: 500, y: 1600, r: 300, color: '34, 197, 94', phase: 4, speed: 0.18 },
+{ x: 200, y: 1000, r: 400, color: '59, 130, 246', phase: 1, speed: 0.14 },
+{ x: 900, y: 300, r: 250, color: '255, 255, 255', phase: 3, speed: 0.2 } // White highlight for pop
+];
+
+function drawFluid(t) {
+ctx.clearRect(0, 0, 1080, 1920);
+// Use lighter composite for glowing overlap before the CSS contrast filter hits it
+ctx.globalCompositeOperation = 'lighter';
+
+blobs.forEach(b => {
+// Organic sine wave movement - slow and heavy
+const offsetX = Math.sin(t * b.speed + b.phase) * 300;
+const offsetY = Math.cos(t * b.speed * 0.8 + b.phase) * 300;
+const currentX = b.x + offsetX;
+const currentY = b.y + offsetY;
+
+// Pulsing radius
+const currentR = b.r + Math.sin(t * b.speed * 2) * 60;
+
+// Draw soft gradient circle - the core needs to be bright for the contrast filter to work
+const grad = ctx.createRadialGradient(currentX, currentY, 0, currentX, currentY, currentR);
+grad.addColorStop(0, `rgba(${b.color}, 1)`); // Solid core
+grad.addColorStop(0.4, `rgba(${b.color}, 0.8)`); // Strong mid
+grad.addColorStop(1, `rgba(${b.color}, 0)`); // Fade out
+
+ctx.fillStyle = grad;
+ctx.beginPath();
+ctx.arc(currentX, currentY, currentR, 0, Math.PI * 2);
+ctx.fill();
+});
 }
-function applyTransform(zoomExtra){
-  const s = baseScale * (1 + zoomExtra);
-  stage.style.transform = 'scale('+s+')';
+
+function fitStage() {
+const sx = window.innerWidth / 1080;
+const sy = window.innerHeight / 1920;
+baseScale = Math.min(sx, sy);
+stage.style.transform = `scale(${baseScale})`;
 }
-fitStage();
 window.addEventListener('resize', fitStage);
+fitStage();
 
-// ── Easing ──
-function easeOut(t){ return t>=1?1:1-Math.pow(2,-10*t); }
-function clamp01(v){ return v<0?0:v>1?1:v; }
-function lerp(a,b,p){ return a+(b-a)*p; }
+// Main Render
+function render(t) {
+if (debugOn) dbg.textContent = t.toFixed(2) + 's';
 
-// ── Build word spans ──
-SCENES.forEach(sc=>{
-  const c = document.getElementById(sc.wId);
-  sc.text.split(' ').forEach(word=>{
-    const sp = document.createElement('span');
-    sp.className = 'w';
-    if(sc.hl.some(h=>word===h)) sp.classList.add('hl');
-    else if(sc.hl2.some(h=>word===h)) sp.classList.add('hl2');
-    sp.textContent = word;
-    c.appendChild(sp);
-  });
+// Camera Zoom
+const zoom = 1 + (t / DUR) * 0.08;
+stage.style.transform = `scale(${baseScale * zoom})`;
+
+// Draw Fluid
+drawFluid(t);
+
+// Logo
+const lp = clamp(t / 1.5);
+logoEl.style.opacity = easeOutExpo(lp);
+logoEl.style.transform = `translateX(-50%) translateY(${lerp(50, 0, easeOutExpo(lp))}px)`;
+
+// Scene Logic
+let activeIdx = -1;
+for (let i = 0; i < SCENES.length; i++) {
+if (t >= SCENES[i].start && t < SCENES[i].end) { activeIdx = i; break; }
+}
+if (activeIdx === -1 && t >= SCENES[SCENES.length - 1].end) activeIdx = SCENES.length - 1;
+
+for (let i = 0; i < SCENES.length; i++) {
+const el = document.getElementById(SCENES[i].id);
+if (i === activeIdx) {
+el.style.opacity = 1;
+el.style.pointerEvents = 'auto';
+renderScene(i, t);
+} else {
+el.style.opacity = 0;
+el.style.pointerEvents = 'none';
+}
+}
+
+// Transitions
+transOv.style.opacity = 0;
+for (let i = 0; i < SCENES.length - 1; i++) {
+const gapStart = SCENES[i].end;
+const gapEnd = SCENES[i + 1].start;
+if (t >= gapStart && t < gapEnd) {
+const p = (t - gapStart) / (gapEnd - gapStart);
+transOv.style.opacity = Math.sin(p * Math.PI);
+}
+}
+}
+
+function renderScene(idx, t) {
+const sc = SCENES[idx];
+const dur = sc.end - sc.start;
+const p = clamp((t - sc.start) / dur);
+
+// Text Animation
+const wCont = document.getElementById(sc.wId);
+const spans = wCont.querySelectorAll('.word');
+const wordDur = dur / (spans.length + 1);
+
+spans.forEach((sp, i) => {
+const wStart = i * wordDur;
+const wp = clamp((t - sc.start - wStart) / 0.6);
+const e = easeOutBack(wp);
+sp.style.opacity = clamp(wp * 2);
+sp.style.transform = `translateY(${lerp(60, 0, e)}px) scale(${lerp(0.8, 1, e)})`;
+sp.style.filter = `blur(${lerp(10, 0, wp)}px)`;
 });
 
-// ── RENDER(t) — the single clock ──
-function render(t){
-  if(debugOn) dbg.textContent = t.toFixed(2)+'s';
+// Specifics
+if (idx === 0) {
+const badge = document.getElementById('badge');
+const bp = easeOutBack(clamp(p * 3));
+badge.style.opacity = clamp(bp);
+badge.style.transform = `scale(${lerp(0.5, 1, bp)})`;
+}
+else if (idx === 1) {
+const c1 = document.getElementById('card1');
+const c2 = document.getElementById('card2');
+const ring = document.getElementById('clock-ring');
+const sp = easeOutExpo(clamp(p * 2));
+c1.style.opacity = sp;
+c1.style.transform = `translate(${lerp(-50, 0, sp)}px, ${lerp(-50, 0, sp)}px) rotate(${lerp(-20, -10, sp)}deg)`;
+c2.style.opacity = sp;
+c2.style.transform = `translate(${lerp(50, 0, sp)}px, ${lerp(50, 0, sp)}px) rotate(${lerp(20, 10, sp)}deg)`;
+const rp = easeOutExpo(clamp((p - 0.3) * 2));
+ring.style.opacity = rp;
+ring.style.transform = `translate(-50%, -50%) scale(${lerp(0.5, 1, rp)}) rotate(${t * 40}deg)`;
+if (p > 0.6) {
+const cp = easeOutExpo(clamp((p - 0.6) * 2.5));
+c1.style.transform = `translate(${lerp(0, -100, cp)}px, ${lerp(0, 100, cp)}px) rotate(${lerp(-10, -45, cp)}deg)`;
+c1.style.opacity = 1 - cp;
+c2.style.transform = `translate(${lerp(0, 100, cp)}px, ${lerp(0, -50, cp)}px) rotate(${lerp(10, 30, cp)}deg)`;
+c2.style.opacity = 1 - cp;
+}
+}
+else if (idx === 2) {
+const shots = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+shots.forEach((el, i) => {
+const delay = i * 0.15;
+const sp = easeOutBack(clamp((p - delay) * 2));
+el.style.opacity = clamp(sp);
+el.style.transform = `translateY(${lerp(100, 0, sp)}px) rotateY(${lerp(-30, 0, sp)}deg) scale(${lerp(0.8, 1, sp)})`;
+const float = Math.sin(t * 2 + i) * 10 * clamp(sp);
+el.style.transform += ` translateY(${float}px)`;
+});
+}
+else if (idx === 3) {
+const chart = document.getElementById('chart');
+const bars = chart.querySelectorAll('.bar');
+const cp = easeOutExpo(clamp(p * 2));
+chart.style.opacity = cp;
+bars.forEach((bar, i) => {
+const delay = i * 0.1;
+const bp = easeOutBack(clamp((p - delay) * 2));
+bar.style.transform = `scaleY(${bp})`;
+});
+const notifs = [document.getElementById('n1'), document.getElementById('n2'), document.getElementById('n3')];
+notifs.forEach((el, i) => {
+const delay = 0.4 + i * 0.1;
+const np = easeOutBack(clamp((p - delay) * 2.5));
+el.style.opacity = clamp(np);
+el.style.transform = `scale(${lerp(0, 1, np)})`;
+const pulse = 1 + Math.sin(t * 4 + i) * 0.1 * clamp(np);
+el.style.transform += ` scale(${pulse})`;
+});
+}
+else if (idx === 4) {
+const cta = document.getElementById('cta');
+const bar = document.getElementById('cmt-bar');
+const txt = document.getElementById('cmt-txt');
+const cur = document.getElementById('cmt-cur');
+const btn = document.getElementById('btn');
 
-  // Continuous slow zoom (0 → 5% over 30s)
-  const zoom = (t/DUR)*0.05;
-  applyTransform(zoom);
+const cp = easeOutBack(clamp(p * 2.5));
+cta.style.opacity = clamp(cp);
+cta.style.transform = `scale(${lerp(0.5, 1, cp)})`;
+const glow = 60 + Math.sin(t * 5) * 20;
+cta.style.textShadow = `0 0 ${glow}px var(--accent), 0 0 ${glow*2}px var(--accent)`;
 
-  // Blobs drift
-  blobA.style.transform = 'translate('+Math.sin(t*0.28)*55+'px,'+Math.cos(t*0.19)*45+'px)';
-  blobB.style.transform = 'translate('+Math.cos(t*0.22)*65+'px,'+Math.sin(t*0.31)*55+'px)';
-  blobC.style.transform = 'translate('+Math.sin(t*0.35)*40+'px,'+Math.cos(t*0.26)*35+'px)';
+const bp = easeOutExpo(clamp((p - 0.2) * 2));
+bar.style.opacity = bp;
+bar.style.transform = `translateY(${lerp(40, 0, bp)}px)`;
 
-  // Logo fade in
-  const logoP = clamp01(t/0.8);
-  logoEl.style.opacity = easeOut(logoP);
-  logoEl.style.transform = 'translateX(-50%) translateY('+lerp(20,0,easeOut(logoP))+'px)';
+const typeP = clamp((p - 0.3) * 3);
+const full = "EU QUERO";
+txt.textContent = full.substring(0, Math.floor(typeP * full.length));
+cur.style.opacity = (Math.sin(t * 10) > 0) ? 1 : 0;
 
-  // Determine active scene
-  let activeIdx = -1;
-  for(let i=0;i<SCENES.length;i++){
-    if(t>=SCENES[i].start && t<SCENES[i].end){ activeIdx=i; break; }
-  }
-  // If past last scene end, keep last active
-  if(activeIdx===-1 && t>=SCENES[SCENES.length-1].end) activeIdx=SCENES.length-1;
-
-  // Scene visibility + per-scene render
-  for(let i=0;i<SCENES.length;i++){
-    const el = document.getElementById(SCENES[i].id);
-    if(i===activeIdx){
-      el.style.opacity = '1';
-      el.style.pointerEvents = 'auto';
-      renderScene(i, t);
-    } else {
-      el.style.opacity = '0';
-      el.style.pointerEvents = 'none';
-    }
-  }
-
-  // Transitions between scenes (flash overlay)
-  transOv.style.opacity = '0';
-  transOv.style.filter = 'blur(0px)';
-  for(let i=0;i<SCENES.length-1;i++){
-    const gapStart = SCENES[i].end;
-    const gapEnd   = SCENES[i+1].start;
-    if(t>=gapStart && t<gapEnd){
-      const p = (t-gapStart)/(gapEnd-gapStart);
-      const flash = Math.sin(p*Math.PI);
-      transOv.style.opacity = (flash*0.85).toFixed(3);
-      transOv.style.filter = 'blur('+lerp(0,12,flash).toFixed(1)+'px)';
-    }
-  }
+const btnP = easeOutBack(clamp((p - 0.5) * 2));
+btn.style.opacity = clamp(btnP);
+btn.style.transform = `scale(${lerp(0.5, 1, btnP)})`;
+const btnPulse = 1 + Math.sin(t * 6) * 0.05 * clamp(btnP);
+btn.style.transform += ` scale(${btnPulse})`;
+}
 }
 
-// ── Per-scene rendering ──
-function renderScene(idx, t){
-  const sc = SCENES[idx];
-  const dur = sc.end - sc.start;
-  const p = clamp01((t - sc.start)/dur);
-
-  // Words: stagger entry
-  const wCont = document.getElementById(sc.wId);
-  const spans = wCont.querySelectorAll('.w');
-  const perWord = dur / (spans.length + 1);
-  spans.forEach((sp,i)=>{
-    const wStart = i * perWord;
-    const wp = clamp01((t - sc.start - wStart)/0.55);
-    const e = easeOut(wp);
-    sp.style.opacity = e;
-    sp.style.transform = 'translateY('+lerp(45,0,e).toFixed(1)+'px)';
-    sp.style.filter = 'blur('+lerp(12,0,e).toFixed(1)+'px)';
-  });
-
-  switch(idx){
-    case 0: renderScene1(p, t); break;
-    case 1: renderScene2(p, t); break;
-    case 2: renderScene3(p, t); break;
-    case 3: renderScene4(p, t); break;
-    case 4: renderScene5(p, t); break;
-  }
+// Loop
+function tick(ts) {
+if (!lastTs) lastTs = ts;
+const dt = (ts - lastTs) / 1000;
+lastTs = ts;
+if (playing && !counting) {
+t += dt;
+if (t >= DUR) {
+t = DUR;
+playing = false;
+document.body.classList.replace('playing', 'paused');
+}
+render(t);
+}
+raf = requestAnimationFrame(tick);
 }
 
-// Cena 1 — Gancho
-function renderScene1(p, t){
-  const badge = document.getElementById('badge');
-  const bp = easeOut(clamp01(p*3.5));
-  badge.style.opacity = bp;
-  badge.style.transform = 'scale('+lerp(0.7,1,bp).toFixed(3)+')';
+// Controls
+function togglePlay() {
+if (counting) return;
+if (!playing && t === 0) startCountdown();
+else if (!playing && t >= DUR) restart();
+else {
+playing = !playing;
+document.body.classList.toggle('playing', playing);
+document.body.classList.toggle('paused', !playing);
+if (playing) lastTs = null;
+}
 }
 
-// Cena 2 — Dor
-function renderScene2(p, t){
-  const sh1 = document.getElementById('sh1');
-  const sh2 = document.getElementById('sh2');
-  const clk = document.getElementById('clock-vis');
-
-  const sp = easeOut(clamp01(p*2.2));
-  sh1.style.opacity = sp;
-  sh1.style.transform = 'translateY('+lerp(60,0,sp).toFixed(1)+'px) rotate('+lerp(-12,0,sp).toFixed(1)+'deg)';
-  sh2.style.opacity = sp;
-  sh2.style.transform = 'translateY('+lerp(60,0,sp).toFixed(1)+'px) rotate('+lerp(12,0,sp).toFixed(1)+'deg)';
-
-  // Clock appears later, spins
-  const cp = easeOut(clamp01((p-0.25)*2));
-  clk.style.opacity = cp;
-  const rot = p * 540; // 1.5 full rotations over scene
-  clk.style.transform = 'translate(-50%,-50%) scale('+lerp(0.4,1,cp).toFixed(3)+') rotate('+rot.toFixed(1)+'deg)';
-
-  // Sheets crumble/fall in second half
-  if(p > 0.55){
-    const fp = easeOut(clamp01((p-0.55)*2.5));
-    sh1.style.transform = 'translateY('+lerp(0,120,fp).toFixed(1)+'px) rotate('+lerp(0,-25,fp).toFixed(1)+'deg)';
-    sh1.style.opacity = lerp(1,0.15,fp).toFixed(3);
-    sh2.style.transform = 'translateY('+lerp(0,100,fp).toFixed(1)+'px) rotate('+lerp(0,20,fp).toFixed(1)+'deg)';
-    sh2.style.opacity = lerp(1,0.15,fp).toFixed(3);
-  }
+function startCountdown() {
+counting = true; cdVal = 3;
+startScr.classList.add('hidden');
+cdScr.classList.remove('hidden');
+cdNum.textContent = cdVal;
+const iv = setInterval(() => {
+cdVal--;
+if (cdVal > 0) cdNum.textContent = cdVal;
+else {
+clearInterval(iv);
+cdScr.classList.add('hidden');
+counting = false; playing = true; lastTs = null;
+document.body.classList.replace('paused', 'playing');
+}
+}, 1000);
 }
 
-// Cena 3 — Solução (screenshots cascade)
-function renderScene3(p, t){
-  const shots = [document.getElementById('s1'),document.getElementById('s2'),document.getElementById('s3')];
-  shots.forEach((el,i)=>{
-    const delay = i*0.15;
-    const sp = easeOut(clamp01((p-delay)*2.5));
-    el.style.opacity = sp;
-    el.style.transform = 'translateY('+lerp(120,0,sp).toFixed(1)+'px) rotateY('+lerp(-18,0,sp).toFixed(1)+'deg) scale('+lerp(0.85,1,sp).toFixed(3)+')';
-  });
+function restart() {
+t = 0; playing = false; counting = false;
+document.body.classList.replace('playing', 'paused');
+startScr.classList.remove('hidden');
+cdScr.classList.add('hidden');
+render(0);
 }
 
-// Cena 4 — Benefício
-function renderScene4(p, t){
-  const chart = document.getElementById('chart');
-  const bars = chart.querySelectorAll('.bar');
-  const cp = easeOut(clamp01(p*2));
-  chart.style.opacity = cp;
-
-  bars.forEach((bar,i)=>{
-    const delay = i*0.08;
-    const bp = easeOut(clamp01((p-delay)*2.5));
-    bar.style.transform = 'scaleY('+bp.toFixed(3)+')';
-  });
-
-  const notifs = [document.getElementById('n1'),document.getElementById('n2'),document.getElementById('n3')];
-  notifs.forEach((el,i)=>{
-    const delay = 0.3+i*0.12;
-    const np = easeOut(clamp01((p-delay)*2.5));
-    el.style.opacity = np;
-    el.style.transform = 'scale('+lerp(0.3,1,np).toFixed(3)+')';
-  });
+function jumpScene(dir) {
+let cur = SCENES.findIndex(s => t >= s.start && t < s.end);
+if (cur === -1) cur = 0;
+let next = cur + dir;
+if (next < 0) next = 0;
+if (next >= SCENES.length) next = SCENES.length - 1;
+t = SCENES[next].start;
+render(t);
 }
 
-// Cena 5 — CTA
-function renderScene5(p, t){
-  const ctaBig   = document.getElementById('cta-big');
-  const shine    = document.getElementById('cta-shine');
-  const cBar     = document.getElementById('comment-bar');
-  const cTxt     = document.getElementById('comment-txt');
-  const cursor   = document.getElementById('comment-cursor');
-  const saibaBtn = document.getElementById('saiba-mais');
-
-  // CTA word
-  const cp = easeOut(clamp01(p*2.5));
-  ctaBig.style.opacity = cp;
-  ctaBig.style.transform = 'scale('+lerp(0.7,1,cp).toFixed(3)+')';
-
-  // Shine sweep (driven by t, not CSS animation)
-  const shineCycle = ((t*0.8)%2)/2; // 0→1 every 2.5s
-  const shineX = lerp(-120, 220, shineCycle);
-  shine.style.transform = 'translateX('+shineX.toFixed(1)+'%)';
-
-  // Comment bar
-  const barP = easeOut(clamp01((p-0.15)*2.5));
-  cBar.style.opacity = barP;
-  cBar.style.transform = 'translateY('+lerp(35,0,barP).toFixed(1)+'px)';
-
-  // Typing effect
-  const fullText = 'EU QUERO';
-  const typeP = clamp01((p-0.25)*2.5);
-  const chars = Math.floor(typeP * fullText.length);
-  cTxt.textContent = fullText.substring(0, chars);
-
-  // Cursor blink (driven by t)
-  cursor.style.opacity = (Math.sin(t*6)>0)?'1':'0';
-
-  // Saiba Mais button
-  const btnP = easeOut(clamp01((p-0.45)*2.5));
-  saibaBtn.style.opacity = btnP;
-  saibaBtn.style.transform = 'scale('+lerp(0.7,1,btnP).toFixed(3)+')';
-
-  // Pulse effect on button in last 3 seconds (p > 0.62 ≈ last 2.5s of scene)
-  if(p > 0.62){
-    const pulse = 1 + Math.sin((t-23.5)*4)*0.04;
-    saibaBtn.style.transform = 'scale('+(pulse).toFixed(3)+')';
-  }
-}
-
-// ── Animation loop ──
-function tick(ts){
-  if(!lastTs) lastTs = ts;
-  const dt = (ts - lastTs)/1000;
-  lastTs = ts;
-
-  if(playing && !counting){
-    t += dt;
-    if(t >= DUR){
-      t = DUR;
-      playing = false;
-      document.body.classList.remove('playing');
-      document.body.classList.add('paused');
-    }
-    render(t);
-  }
-  raf = requestAnimationFrame(tick);
-}
-
-// ── Countdown ──
-function startCountdown(){
-  counting = true;
-  cdVal = 3;
-  startScr.classList.add('hidden');
-  cdScr.classList.remove('hidden');
-  cdNum.textContent = cdVal;
-
-  const iv = setInterval(()=>{
-    cdVal--;
-    if(cdVal > 0){
-      cdNum.textContent = cdVal;
-    } else {
-      clearInterval(iv);
-      cdScr.classList.add('hidden');
-      counting = false;
-      playing = true;
-      lastTs = null;
-      document.body.classList.remove('paused');
-      document.body.classList.add('playing');
-    }
-  }, 1000);
-}
-
-// ── Controls ──
-function togglePlay(){
-  if(counting) return;
-  if(!playing && t===0){
-    startCountdown();
-  } else if(!playing && t>=DUR){
-    // restart from beginning
-    restart();
-    startCountdown();
-  } else {
-    playing = !playing;
-    if(playing){
-      lastTs = null;
-      document.body.classList.remove('paused');
-      document.body.classList.add('playing');
-    } else {
-      document.body.classList.remove('playing');
-      document.body.classList.add('paused');
-    }
-  }
-}
-
-function restart(){
-  t = 0; playing = false; counting = false;
-  document.body.classList.remove('playing');
-  document.body.classList.add('paused');
-  startScr.classList.remove('hidden');
-  cdScr.classList.add('hidden');
-  render(0);
-}
-
-function jumpScene(dir){
-  let cur = -1;
-  for(let i=0;i<SCENES.length;i++){
-    if(t>=SCENES[i].start && t<SCENES[i].end){ cur=i; break; }
-  }
-  if(cur===-1) cur = 0;
-  let ni = cur + dir;
-  if(ni<0) ni=0;
-  if(ni>=SCENES.length) ni=SCENES.length-1;
-  t = SCENES[ni].start;
-  render(t);
-}
-
-function toggleDebug(){
-  debugOn = !debugOn;
-  dbg.classList.toggle('on', debugOn);
-}
-
-// ── Event listeners ──
 document.addEventListener('click', togglePlay);
-document.addEventListener('keydown', e=>{
-  if(e.code==='Space'){ e.preventDefault(); togglePlay(); }
-  else if(e.code==='KeyR'){ restart(); }
-  else if(e.code==='ArrowLeft'){ jumpScene(-1); }
-  else if(e.code==='ArrowRight'){ jumpScene(1); }
-  else if(e.code==='KeyT'){ toggleDebug(); }
+document.addEventListener('keydown', e => {
+if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+if (e.code === 'KeyR') restart();
+if (e.code === 'ArrowLeft') jumpScene(-1);
+if (e.code === 'ArrowRight') jumpScene(1);
+if (e.code === 'KeyT') { debugOn = !debugOn; dbg.classList.toggle('visible'); }
 });
 
-// ── Init ──
 raf = requestAnimationFrame(tick);
 render(0);
 </script>

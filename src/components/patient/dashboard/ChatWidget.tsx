@@ -52,16 +52,20 @@ export function ChatWidget({ patientId, nutritionistId }: ChatWidgetProps) {
         },
         (payload) => {
           const newMsg = payload.new as any;
+          // REAL schema (verified via `supabase db query --linked`):
+          // messages columns: patient_id, nutritionist_id, sender_type,
+          // content, is_read, read_at, created_at.
+          // KEY: uses `sender_type` ('patient'|'nutritionist'), NOT is_staff_reply.
           setMessages((prev) => [...prev, {
             id: newMsg.id,
             content: newMsg.content,
-            sender_type: newMsg.is_staff_reply === 'nutritionist' ? 'nutritionist' : 'patient',
+            sender_type: newMsg.sender_type === 'nutritionist' ? 'nutritionist' : 'patient',
             created_at: newMsg.created_at,
             is_read: newMsg.is_read,
           }]);
 
           // Mark as read if it's from nutritionist
-          if (newMsg.is_staff_reply === 'nutritionist') {
+          if (newMsg.sender_type === 'nutritionist') {
              markAsRead(newMsg.id);
           }
         }
@@ -91,10 +95,12 @@ export function ChatWidget({ patientId, nutritionistId }: ChatWidgetProps) {
 
       if (error) throw error;
 
+      // REAL schema (verified via `supabase db query --linked`):
+      // messages uses `sender_type` ('patient'|'nutritionist'), NOT is_staff_reply.
       setMessages((data || []).map(m => ({
         id: m.id,
         content: m.content,
-        sender_type: m.is_staff_reply === 'nutritionist' ? 'nutritionist' : 'patient',
+        sender_type: (m.sender_type === 'nutritionist' ? 'nutritionist' : 'patient') as 'patient' | 'nutritionist',
         created_at: m.created_at,
         is_read: m.is_read,
       })));
@@ -123,11 +129,13 @@ export function ChatWidget({ patientId, nutritionistId }: ChatWidgetProps) {
 
     setSending(true);
     try {
+      // REAL schema (verified via `supabase db query --linked`):
+      // messages uses `sender_type` ('patient'|'nutritionist'), NOT is_staff_reply.
       const { error } = await supabase.from('messages').insert({
         patient_id: patientId,
         nutritionist_id: nutritionistId,
         content: newMessage.trim(),
-        is_staff_reply: 'patient', // Patient sending
+        sender_type: 'patient',
         is_read: false,
       });
 

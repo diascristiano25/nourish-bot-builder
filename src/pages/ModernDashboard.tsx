@@ -165,21 +165,23 @@ export default function ModernDashboard() {
       // Upcoming appointments (next 7 days, not cancelled)
       const weekAhead = new Date(today);
       weekAhead.setDate(weekAhead.getDate() + 7);
-      // Real schema (verified via Supabase REST probe + db-diagnose.mjs):
-      // appointments uses date_time (NOT scheduled_at).
+      // REAL schema (verified via `supabase db query --linked`):
+      // appointments columns: id, patient_id, nutritionist_id, scheduled_at,
+      // duration_minutes, status, type, notes, reminder_sent, created_at, updated_at.
+      // KEY: the date column is `scheduled_at` (NOT date_time).
       const { data: upcomingAppts } = await supabase
         .from('appointments')
-        .select('id, date_time, status, patient:patients(id, full_name)')
+        .select('id, scheduled_at, status, patient:patients(id, full_name)')
         .eq('nutritionist_id', nutritionistId)
-        .gte('date_time', dayStart.toISOString())
-        .lte('date_time', weekAhead.toISOString())
+        .gte('scheduled_at', dayStart.toISOString())
+        .lte('scheduled_at', weekAhead.toISOString())
         .neq('status', 'cancelled')
-        .order('date_time', { ascending: true })
+        .order('scheduled_at', { ascending: true })
         .limit(5);
 
       (upcomingAppts || []).forEach((apt: any) => {
         const patientArr = Array.isArray(apt.patient) ? apt.patient[0] : apt.patient;
-        const aptDate = new Date(apt.date_time);
+        const aptDate = new Date(apt.scheduled_at);
         const isTodayApt = aptDate.toDateString() === today.toDateString();
         builtNotifications.push({
           id: `apt-${apt.id}`,
@@ -253,20 +255,13 @@ export default function ModernDashboard() {
   return (
     <ModernLayout>
       <div className="space-y-8">
-        {/* Top Bar - Search & Actions */}
+        {/* Top Bar - Actions only (search lives in ModernLayout's CommandBar to avoid duplication) */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="flex items-center gap-4"
+          className="flex items-center gap-4 justify-end"
         >
-          <div className="relative flex-1 max-w-xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder="Buscar eventos, pacientes etc."
-              className="pl-12 h-12 rounded-2xl bg-white border-slate-200/60 shadow-soft text-base"
-            />
-          </div>
           <div className="flex items-center gap-2 ml-auto">
             <div className="relative">
               <motion.button

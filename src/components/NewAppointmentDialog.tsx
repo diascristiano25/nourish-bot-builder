@@ -127,17 +127,19 @@ export function NewAppointmentDialog({
       const dateTime = new Date(date);
       dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      // Real schema (verified via Supabase REST probe + db-diagnose.mjs):
-      // appointments uses date_time (NOT scheduled_at). Drop `type` to avoid
-      // column-not-found errors; status 'scheduled' is valid.
+      // REAL schema (verified via `supabase db query --linked` against the live DB):
+      // appointments columns: id, patient_id, nutritionist_id, scheduled_at,
+      // duration_minutes, status, type, notes, reminder_sent, created_at, updated_at.
+      // KEY: the date column is `scheduled_at` (NOT date_time). `type` exists.
       const { error } = await supabase
         .from('appointments')
         .insert({
           nutritionist_id: nutritionist.id,
           patient_id: patientId,
-          date_time: dateTime.toISOString(),
+          scheduled_at: dateTime.toISOString(),
           notes: notes || null,
           status: 'scheduled',
+          type: 'consultation',
         });
 
       if (error) {

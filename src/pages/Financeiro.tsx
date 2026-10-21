@@ -76,14 +76,18 @@ export default function Financeiro() {
       if (!nId) throw new Error('No profile');
       setNutritionistId(nId);
 
-      // Real schema (verified via Supabase REST probe): id, nutritionist_id,
-      // record_type, amount, description, record_date, status (+ created_at).
-      // There is NO `date`, `type`, or `payment_method` column.
+      // REAL schema (verified via `supabase db query --linked` against the live DB):
+      // financial_records columns: id, user_id, patient_id, transaction_type,
+      // amount, currency, status, payment_method, stripe_payment_intent_id,
+      // description, metadata, processed_at, created_at, updated_at.
+      // KEY: owner column is `user_id` (auth uid), NOT nutritionist_id/profile id.
+      // KEY: type column is `transaction_type`, NOT record_type/type.
+      // KEY: date column is `processed_at`/`created_at`, NOT date/record_date.
       const { data: financialData, error: financialError } = await supabase
         .from('financial_records')
-        .select('id, amount, record_type, status, description, record_date, created_at')
-        .eq('nutritionist_id', nId)
-        .order('record_date', { ascending: false })
+        .select('id, amount, transaction_type, status, description, processed_at, created_at, payment_method')
+        .eq('user_id', user!.id)
+        .order('created_at', { ascending: false })
         .limit(200);
       if (financialError) throw financialError;
 
@@ -92,13 +96,15 @@ export default function Financeiro() {
       const monthEnd = endOfMonth(now);
 
       const records = (financialData || []) as any[];
-      const incomeRecords = records.filter((r) => (r.record_type === 'income' || r.record_type === 'payment') && r.status !== 'cancelled');
-      const expenseRecords = records.filter((r) => r.record_type === 'expense' && r.status !== 'cancelled');
+      const recordDate = (r: any) => new Date(r.processed_at || r.created_at);
+      const incomeRecords = records.filter((r) => (r.transaction_type === 'income' || r.transaction_type === 'payment') && r.status !== 'cancelled');
+      const expenseRecords = records.filter((r) => r.transaction_type === 'expense' && r.status !== 'cancelled');
 
       const currentMonthIncome = incomeRecords.filter((r) => {
-        const d = new Date(r.record_date);
+        const d = recordDate(r);
         return d >= monthStart && d <= monthEnd;
       });
+      // amounts are stored in reais (not cents) per live data — display as-is
       const totalRev = currentMonthIncome.reduce((sum, r) => sum + Number(r.amount || 0), 0);
 
       const pending = records
@@ -117,28 +123,28 @@ export default function Financeiro() {
         const mStart = startOfMonth(targetMonth);
         const mEnd = endOfMonth(targetMonth);
         const monthIncome = incomeRecords.filter((r) => {
-          const d = new Date(r.record_date);
+          const d = recordDate(r);
           return d >= mStart && d <= mEnd;
         });
         const monthExpense = expenseRecords.filter((r) => {
-          const d = new Date(r.record_date);
+          const d = recordDate(r);
           return d >= mStart && d <= mEnd;
         });
         const net = monthIncome.reduce((s, r) => s + Number(r.amount || 0), 0)
           - monthExpense.reduce((s, r) => s + Number(r.amount || 0), 0);
-        revenueMonths.push({ month: monthNames[targetMonth.getMonth()], revenue: net / 100 });
+        revenueMonths.push({ month: monthNames[targetMonth.getMonth()], revenue: net });
       }
 
       const transactionsList: Transaction[] = records.slice(0, 20).map((record) => {
-        const isExpense = record.record_type === 'expense';
-        const isRefund = record.record_type === 'refund';
+        const isExpense = record.transaction_type === 'expense';
+        const isRefund = record.transaction_type === 'refund';
         const tType: Transaction['type'] = isRefund ? 'refund' : record.status === 'pending' ? 'pending' : 'payment';
         return {
           id: record.id,
           patientName: record.description || (isExpense ? 'Despesa' : 'Receita'),
           type: tType,
-          amount: (isExpense ? -1 : 1) * (Number(record.amount || 0) / 100),
-          date: record.record_date || record.created_at,
+          amount: (isExpense ? -1 : 1) * Number(record.amount || 0),
+          date: record.processed_at || record.created_at,
           status: (record.status === 'cancelled' ? 'failed' : record.status) as 'completed' | 'pending' | 'failed',
         };
       });

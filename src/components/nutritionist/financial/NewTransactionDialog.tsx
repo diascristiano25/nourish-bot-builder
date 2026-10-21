@@ -56,12 +56,23 @@ export function NewTransactionDialog({
       const amountCents = Math.round(parseFloat(amount) * 100);
       const recordType = type === 'income' ? 'payment' : 'expense';
 
+      // REAL schema (verified via supabase db query --linked):
+      // financial_records columns: id, user_id, patient_id, transaction_type,
+      // amount, currency, status, payment_method, stripe_payment_intent_id,
+      // description, metadata, processed_at, created_at, updated_at.
+      // NOTE: uses `user_id` (auth uid), NOT nutritionist_id/profile id.
+      // NOTE: uses `transaction_type`, NOT record_type/type.
+      // NOTE: uses `processed_at` for the date, NOT date/record_date.
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error('Usuário não autenticado');
+
       const { error } = await supabase.from('financial_records').insert({
-        nutritionist_id: nutritionistId,
+        user_id: authUser.id,
         amount: amountCents,
-        record_type: recordType,
+        transaction_type: recordType,
         status: 'completed',
-        record_date: new Date().toISOString().split('T')[0],
+        processed_at: new Date().toISOString(),
+        payment_method: paymentMethod || null,
         description: description || (type === 'income' ? 'Receita' : 'Despesa'),
       });
 

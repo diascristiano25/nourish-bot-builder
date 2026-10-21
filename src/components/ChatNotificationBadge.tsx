@@ -39,11 +39,13 @@ export function ChatNotificationBadge({ nutritionistId, className }: ChatNotific
   }, [nutritionistId]);
 
   const fetchUnreadCount = async () => {
+    // REAL schema (verified via `supabase db query --linked`):
+    // messages uses `sender_type` ('patient'|'nutritionist'), NOT is_staff_reply.
     const { count, error } = await supabase
       .from('messages')
       .select('*', { count: 'exact', head: true })
       .eq('nutritionist_id', nutritionistId)
-      .eq('is_staff_reply', 'patient')
+      .eq('sender_type', 'patient')
       .eq('is_read', false);
 
     if (!error && count !== null) {

@@ -10,10 +10,15 @@ import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
+// REAL schema (verified via `supabase db query --linked` against the live DB):
+// messages columns: id, patient_id, nutritionist_id, sender_type,
+// content, is_read, read_at, created_at.
+// KEY: uses `sender_type` ('patient'|'nutritionist'), NOT is_staff_reply.
+// KEY: uses `content`, NOT message. Uses `created_at`, NOT sent_at.
 interface Message {
   id: string;
   content: string;
-  is_staff_reply: 'patient' | 'nutritionist';
+  sender_type: 'patient' | 'nutritionist';
   created_at: string;
   is_read: boolean;
 }
@@ -32,11 +37,9 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Fetch messages
   useEffect(() => {
     fetchMessages();
-    
-    // Subscribe to new messages
+
     const channel = supabase
       .channel(`chat-${patientId}`)
       .on(
@@ -50,9 +53,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
         (payload) => {
           const newMsg = payload.new as Message;
           setMessages((prev) => [...prev, newMsg]);
-          
-          // Mark as read if from patient
-          if (newMsg.is_staff_reply === 'patient') {
+          if (newMsg.sender_type === 'patient') {
             markAsRead(newMsg.id);
           }
         }
@@ -64,19 +65,16 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
     };
   }, [patientId]);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Mark patient messages as read when viewing
   useEffect(() => {
     const unreadMessages = messages.filter(
-      (m) => m.is_staff_reply === 'patient' && !m.is_read
+      (m) => m.sender_type === 'patient' && !m.is_read
     );
-    
     unreadMessages.forEach((m) => markAsRead(m.id));
   }, [messages]);
 
@@ -92,7 +90,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
       if (error) throw error;
       setMessages((data || []).map(m => ({
         ...m,
-        is_staff_reply: m.is_staff_reply as 'patient' | 'nutritionist'
+        sender_type: (m.sender_type as 'patient' | 'nutritionist') || 'patient'
       })));
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -104,7 +102,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
   const markAsRead = async (messageId: string) => {
     await supabase
       .from('messages')
-      .update({ is_read: true })
+      .update({ is_read: true, read_at: new Date().toISOString() })
       .eq('id', messageId);
   };
 
@@ -114,11 +112,13 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
 
     setSending(true);
     try {
+      // REAL schema: uses sender_type (NOT is_staff_reply), content (NOT message)
       const { error } = await supabase.from('messages').insert({
         patient_id: patientId,
         nutritionist_id: nutritionistId,
         content: newMessage.trim(),
-        is_staff_reply: 'nutritionist',
+        sender_type: 'nutritionist',
+        is_read: false,
       });
 
       if (error) throw error;
@@ -146,7 +146,6 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
     return format(parseISO(dateStr), 'HH:mm', { locale: ptBR });
   };
 
-  // Group messages by date
   const groupedMessages = messages.reduce((groups, message) => {
     const date = formatMessageDate(message.created_at);
     if (!groups[date]) {
@@ -166,7 +165,6 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
 
   return (
     <div className="flex flex-col h-[500px] border border-border/50 rounded-xl overflow-hidden bg-background/50">
-      {/* Header */}
       <div className="p-4 border-b border-border/50 bg-muted/30 flex items-center gap-3">
         <Avatar className="h-10 w-10">
           <AvatarFallback className="bg-primary/10 text-primary">
@@ -176,7 +174,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
         <div className="flex-1">
           <h3 className="font-semibold text-foreground">{patientName}</h3>
           <p className="text-xs text-muted-foreground">
-            {messages.length > 0 
+            {messages.length > 0
               ? `${messages.length} mensagens`
               : 'Nenhuma mensagem ainda'}
           </p>
@@ -184,7 +182,6 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
         <MessageCircle className="w-5 h-5 text-muted-foreground" />
       </div>
 
-      {/* Messages */}
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
@@ -196,35 +193,33 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
           <div className="space-y-4">
             {Object.entries(groupedMessages).map(([date, msgs]) => (
               <div key={date}>
-                {/* Date divider */}
                 <div className="flex items-center justify-center my-4">
                   <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
                     {date}
                   </span>
                 </div>
 
-                {/* Messages for this date */}
                 <div className="space-y-3">
                   {msgs.map((message) => (
                     <div
                       key={message.id}
                       className={cn(
                         "flex gap-2",
-                        message.is_staff_reply === 'nutritionist' ? "justify-end" : "justify-start"
+                        message.sender_type === 'nutritionist' ? "justify-end" : "justify-start"
                       )}
                     >
-                      {message.is_staff_reply === 'patient' && (
+                      {message.sender_type === 'patient' && (
                         <Avatar className="h-8 w-8 flex-shrink-0">
                           <AvatarFallback className="bg-secondary/20 text-secondary text-xs">
                             <User className="w-4 h-4" />
                           </AvatarFallback>
                         </Avatar>
                       )}
-                      
+
                       <div
                         className={cn(
                           "max-w-[75%] rounded-2xl px-4 py-2.5",
-                          message.is_staff_reply === 'nutritionist'
+                          message.sender_type === 'nutritionist'
                             ? "bg-primary text-primary-foreground rounded-br-md"
                             : "bg-muted text-foreground rounded-bl-md"
                         )}
@@ -234,12 +229,12 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
                         </p>
                         <div className={cn(
                           "flex items-center gap-1 mt-1",
-                          message.is_staff_reply === 'nutritionist' ? "justify-end" : "justify-start"
+                          message.sender_type === 'nutritionist' ? "justify-end" : "justify-start"
                         )}>
                           <span className={cn(
                             "text-[10px]",
-                            message.is_staff_reply === 'nutritionist' 
-                              ? "text-primary-foreground/70" 
+                            message.sender_type === 'nutritionist'
+                              ? "text-primary-foreground/70"
                               : "text-muted-foreground"
                           )}>
                             {formatMessageTime(message.created_at)}
@@ -247,7 +242,7 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
                         </div>
                       </div>
 
-                      {message.is_staff_reply === 'nutritionist' && (
+                      {message.sender_type === 'nutritionist' && (
                         <Avatar className="h-8 w-8 flex-shrink-0">
                           <AvatarFallback className="bg-primary/20 text-primary text-xs">
                             <Stethoscope className="w-4 h-4" />
@@ -263,7 +258,6 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
         )}
       </ScrollArea>
 
-      {/* Input */}
       <form onSubmit={handleSend} className="p-4 border-t border-border/50 bg-muted/20">
         <div className="flex gap-2">
           <Input
@@ -273,8 +267,8 @@ export function NutritionistChat({ patientId, patientName, nutritionistId }: Nut
             className="flex-1 bg-background border-border/50 focus:border-primary/50"
             disabled={sending}
           />
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             size="icon"
             disabled={!newMessage.trim() || sending}
             className="bg-primary hover:bg-primary/90 shrink-0"

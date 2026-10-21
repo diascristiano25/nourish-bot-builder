@@ -122,6 +122,15 @@
         ],
         "createdAt": "2026-10-21T03:36:00.885Z",
         "reason": "user confirmed: Meta Ads brief explicitly requests glow shadows on screenshot cards and shine effect on CTA for high-conversion ad"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "nutriflow-reels-ads.html"
+        ],
+        "createdAt": "2026-10-21T04:05:39.644Z",
+        "reason": "user confirmed: placeholders are intentional for user to replace with real screenshots, opacity 0.9 is for glass effect"
       }
     ]
   }
