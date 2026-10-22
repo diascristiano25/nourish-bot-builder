@@ -1,9 +1,9 @@
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { 
-  Home, 
-  Users, 
-  Calendar, 
-  DollarSign, 
+import {
+  Home,
+  Users,
+  Calendar,
+  DollarSign,
   Settings,
   ChevronLeft,
   LogOut,
@@ -13,7 +13,8 @@ import {
   Sun,
   Moon,
   FileText,
-  Shield
+  Shield,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -35,12 +36,15 @@ const navItems: NavItemWithTour[] = [
   { label: 'Dashboard', icon: Home, href: '/dashboard', tourId: 'nav-home' },
   { label: 'Pacientes', icon: Users, href: '/pacientes', tourId: 'nav-pacientes' },
   { label: 'Agenda', icon: Calendar, href: '/agenda', tourId: 'nav-agenda' },
+  { label: 'Mensagens', icon: MessageSquare, href: '/mensagens', tourId: 'nav-mensagens' },
   { label: 'Biblioteca', icon: BookOpen, href: '/biblioteca', tourId: 'nav-biblioteca' },
   { label: 'Financeiro', icon: DollarSign, href: '/financeiro', tourId: 'nav-financeiro' },
+  { label: 'Evolução', icon: TrendingUp, href: '/evolucao', tourId: 'nav-evolucao' },
+  { label: 'Suporte', icon: HelpCircle, href: '/support', tourId: 'nav-support' },
   { label: 'Configurações', icon: Settings, href: '/perfil', tourId: 'nav-config' },
 ];
 
-const WHATSAPP_HELP_URL = "https://wa.me/5547992381906?text=Olá! Preciso de ajuda com o NutriFlow.";
+const WHATSAPP_HELP_URL = "https://wa.me/5513996205253?text=Olá! Preciso de ajuda com o NutriFlow.";
 
 interface AppSidebarProps {
   isMobile?: boolean;
@@ -171,6 +175,26 @@ export function AppSidebar({ isMobile = false, onNavigate, onCommandBarOpen }: A
             </Button>
           );
         })}
+      {/* Admin Link - only visible to superadmin */}
+        {user?.email === 'diascristianoconsultor@gmail.com' && (
+          <Button
+            variant="ghost"
+            onClick={() => handleNavigation('/admin')}
+            className={cn(
+              "w-full justify-start gap-3 h-11 rounded-xl transition-all duration-200 touch-manipulation group relative mt-2",
+              isCollapsed && "justify-center px-0",
+              location.pathname.startsWith('/admin')
+                ? "bg-primary/10 text-primary font-semibold"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            )}
+          >
+            <ShieldCheck className={cn(
+              "w-[18px] h-[18px] flex-shrink-0",
+              location.pathname.startsWith('/admin') ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+            )} strokeWidth={location.pathname.startsWith('/admin') ? 2 : 1.5} />
+            {!isCollapsed && <span className="text-sm flex-1 text-left">Admin</span>}
+          </Button>
+        )}
       </nav>
 
       {/* Footer */}

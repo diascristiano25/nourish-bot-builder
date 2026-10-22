@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import logoImg from '@/assets/logo.png';
 
 export default function SubscriptionExpired() {
-  const whatsappNumber = '5511999999999'; // Replace with actual support number
+  const whatsappNumber = '5513996205253';
   const whatsappMessage = encodeURIComponent('Olá! Minha licença do NutriFlow expirou e gostaria de renovar.');
   
   return (

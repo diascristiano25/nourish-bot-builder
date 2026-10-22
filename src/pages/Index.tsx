@@ -72,7 +72,7 @@ export default function Index() {
           <nav className="flex items-center gap-4">
             <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline font-medium">Preços</a>
             <a href="/sobre" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline font-medium">Sobre</a>
-            <a href="https://wa.me/5547992381906" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline font-medium">Contato</a>
+            <a href="https://wa.me/5513996205253" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline font-medium">Contato</a>
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-xl text-muted-foreground hover:text-foreground" aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}>
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>

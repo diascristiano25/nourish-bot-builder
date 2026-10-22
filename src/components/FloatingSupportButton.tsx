@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-const WHATSAPP_NUMBER = '5547992381906';
+const WHATSAPP_NUMBER = '5513996205253';
 const WHATSAPP_MESSAGE = 'Olá! Preciso de ajuda com o NutriFlow.';
 
 export function FloatingSupportButton() {

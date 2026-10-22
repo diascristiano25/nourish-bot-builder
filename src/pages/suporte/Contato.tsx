@@ -65,7 +65,7 @@ export default function Contato() {
         </div>
         <h3 className="font-semibold mb-2">WhatsApp</h3>
         <a
-          href="https://wa.me/5513978113923"
+          href="https://wa.me/5513996205253"
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm text-[#25D366] hover:underline"
