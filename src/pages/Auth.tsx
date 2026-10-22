@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +10,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, Lock, User, ArrowRight, Sparkles, Activity, Users, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { z } from 'zod';
 import logoImg from '@/assets/logo-nutriflow.png';
+
+// Redirect based on user role: patients go to /meu-app, nutritionists to /dashboard
+const redirectByRole = async (navigate: (path: string) => void) => {
+  try {
+    const { data, error } = await supabase.rpc('get_user_role');
+    if (!error && data === 'patient') {
+      navigate('/meu-app');
+      return;
+    }
+  } catch {
+    // fall through to default
+  }
+  navigate('/dashboard');
+};
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -52,7 +67,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      redirectByRole(navigate);
     }
   }, [user, navigate]);
 
@@ -74,7 +89,7 @@ export default function Auth() {
         });
       } else {
         toast({ title: "Bem-vindo!", description: "Login realizado com sucesso." });
-        navigate('/dashboard');
+        redirectByRole(navigate);
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -107,7 +122,7 @@ export default function Auth() {
         toast({ title: "Erro no cadastro", description: message, variant: "destructive" });
       } else {
         toast({ title: "Conta criada!", description: "Bem-vindo ao NutriFlow." });
-        navigate('/dashboard');
+        redirectByRole(navigate);
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
