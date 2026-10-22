@@ -470,7 +470,7 @@ export default function PatientDetail() {
     message += `\n🔗 Acesse seu portal:\n${portalUrl}\n`;
     message += `\n_Continue firme! Estou aqui para te ajudar._`;
     
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/5513996205253?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
