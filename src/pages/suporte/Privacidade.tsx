@@ -229,7 +229,7 @@ export default function Privacidade() {
             <p className="text-slate-700">
               <strong>WhatsApp:</strong>{' '}
               <a href="https://wa.me/5513996205253" className="text-emerald-600 hover:text-emerald-700">
-                (13) 97811-3923
+                (13) 99620-5253
               </a>
             </p>
           </section>

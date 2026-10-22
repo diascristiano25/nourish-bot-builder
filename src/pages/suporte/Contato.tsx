@@ -70,7 +70,7 @@ export default function Contato() {
           rel="noopener noreferrer"
           className="text-sm text-[#25D366] hover:underline"
         >
-          (13) 97811-3923
+          (13) 99620-5253
         </a>
       </Card>
     </div>
