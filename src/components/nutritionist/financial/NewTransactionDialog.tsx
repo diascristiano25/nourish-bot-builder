@@ -46,7 +46,10 @@ export function NewTransactionDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || parseFloat(amount) <= 0) {
+    // Normalize Brazilian decimal separator before validation
+    const normalizedForValidation = amount.replace(',', '.');
+    const parsedAmount = parseFloat(normalizedForValidation);
+    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
       toast({ title: 'Valor inválido', description: 'Informe um valor maior que zero.', variant: 'destructive' });
       return;
     }
@@ -61,7 +64,10 @@ export function NewTransactionDialog({
       }
       // Store as integer cents to match DB schema (integer, no scale)
       const amountCents = Math.round(amountValue * 100);
-      const recordType = type === 'income' ? 'payment' : 'expense';
+      // DB constraint financial_records_transaction_type_check only allows:
+      // 'payment', 'refund', 'subscription', 'consultation'
+      // Map income -> 'payment', expense -> 'consultation' (closest valid semantic)
+      const recordType = type === 'income' ? 'payment' : 'consultation';
 
       // REAL schema (verified via supabase db query --linked):
       // financial_records columns: id, user_id, patient_id, transaction_type,
@@ -86,8 +92,8 @@ export function NewTransactionDialog({
       if (error) throw error;
 
       toast({
-        title: type === 'income' ? 'Receita registrada! ✅' : 'Despesa registrada! ✅',
-        description: `R$ ${parseFloat(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} lançado com sucesso.`,
+        title: type === 'income' ? 'Receita registrada!' : 'Despesa registrada!',
+        description: `R$ ${amountValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} lançado com sucesso.`,
       });
 
       setAmount('');
@@ -159,12 +165,15 @@ export function NewTransactionDialog({
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">R$</span>
               <Input
                 id="amount"
-                type="number"
-                step="0.01"
-                min="0"
+                type="text"
+                inputMode="decimal"
                 placeholder="0,00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                  // Allow only digits, comma and dot for Brazilian decimal format
+                  const val = e.target.value.replace(/[^0-9.,]/g, '');
+                  setAmount(val);
+                }}
                 required
                 className="pl-10 h-12 text-lg font-semibold rounded-xl"
               />
