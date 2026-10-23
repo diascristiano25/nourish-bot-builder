@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react';
 import { ModernSidebar } from './ModernSidebar';
 import { MobileBottomNav } from './MobileBottomNav';
 import { CommandBar } from '@/components/CommandBar';
+import { FloatingSupportButton } from '@/components/FloatingSupportButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search } from 'lucide-react';
 
@@ -59,6 +60,9 @@ export function ModernLayout({ children }: ModernLayoutProps) {
           <CommandBar open={commandOpen} onOpenChange={setCommandOpen} />
         )}
       </AnimatePresence>
+
+      {/* Floating WhatsApp Support Button */}
+      <FloatingSupportButton />
     </div>
   );
 }

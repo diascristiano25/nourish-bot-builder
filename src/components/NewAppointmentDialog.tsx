@@ -63,6 +63,7 @@ export function NewAppointmentDialog({
   const [patientId, setPatientId] = useState('');
   const [date, setDate] = useState<Date | undefined>(selectedDate);
   const [time, setTime] = useState('');
+  const [appointmentType, setAppointmentType] = useState<'presencial' | 'online'>('presencial');
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
@@ -139,7 +140,8 @@ export function NewAppointmentDialog({
           scheduled_at: dateTime.toISOString(),
           notes: notes || null,
           status: 'scheduled',
-          type: 'consultation',
+          type: appointmentType === 'online' ? 'online' : 'presencial',
+          appointment_type: appointmentType === 'online' ? 'online' : 'presencial',
         });
 
       if (error) {
@@ -244,6 +246,20 @@ export function NewAppointmentDialog({
                     {slot}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Appointment Type */}
+          <div className="space-y-2">
+            <Label className="text-muted-foreground text-sm">Tipo de Consulta *</Label>
+            <Select value={appointmentType} onValueChange={(v) => setAppointmentType(v as 'presencial' | 'online')}>
+              <SelectTrigger className="bg-background/50 border-border/50">
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent className="glass-strong border-border/50">
+                <SelectItem value="presencial">🏥 Presencial</SelectItem>
+                <SelectItem value="online">💻 Teleconsulta (Online)</SelectItem>
               </SelectContent>
             </Select>
           </div>

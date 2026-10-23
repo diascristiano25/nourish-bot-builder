@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { ChevronDown, MoreHorizontal } from 'lucide-react';
-import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -19,11 +19,14 @@ const defaultEvents: CalendarEvent[] = [];
 
 export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
   const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 0 });
+  const [weekOffset, setWeekOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState(today);
 
-  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const currentWeekStart = addWeeks(startOfWeek(today, { weekStartsOn: 0 }), weekOffset);
+  const days = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
   const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+  const monthLabel = format(currentWeekStart, 'MMMM', { locale: ptBR });
 
   return (
     <motion.div
@@ -34,16 +37,31 @@ export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
       className="bg-white rounded-3xl overflow-hidden border border-slate-200/60 shadow-soft"
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#518C5B] to-[#3d7047] px-6 py-4 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-[#518C5B] to-[#3d7047] px-4 py-4 flex items-center justify-between">
         <h3 className="text-white font-semibold tracking-wide text-sm">MEU CALENDÁRIO</h3>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg text-white text-xs font-medium hover:bg-white/30 transition-colors"
-        >
-          {format(today, 'MMMM', { locale: ptBR })}
-          <ChevronDown className="w-3 h-3" />
-        </motion.button>
+        <div className="flex items-center gap-1">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setWeekOffset(w => w - 1)}
+            className="p-1.5 rounded-lg bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors"
+            aria-label="Semana anterior"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </motion.button>
+          <span className="text-white text-xs font-medium capitalize px-2 min-w-[80px] text-center">
+            {monthLabel}
+          </span>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setWeekOffset(w => w + 1)}
+            className="p-1.5 rounded-lg bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors"
+            aria-label="Próxima semana"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </motion.button>
+        </div>
       </div>
 
       {/* Week strip */}

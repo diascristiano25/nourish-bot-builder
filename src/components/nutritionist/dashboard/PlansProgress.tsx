@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface PlanItem {
   label: string;
@@ -18,6 +19,7 @@ const defaultPlans: PlanItem[] = [
 ];
 
 export function PlansProgress({ plans = defaultPlans }: PlansProgressProps) {
+  const navigate = useNavigate();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -66,7 +68,8 @@ export function PlansProgress({ plans = defaultPlans }: PlansProgressProps) {
       <motion.button
         whileHover={{ scale: 1.02, backgroundColor: 'rgba(81, 140, 91, 0.05)' }}
         whileTap={{ scale: 0.98 }}
-        className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-[#518C5B] hover:border-[#518C5B]/40 transition-all"
+        onClick={() => navigate('/novo-paciente')}
+        className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-[#518C5B] hover:border-[#518C5B]/40 transition-all cursor-pointer"
       >
         <Plus className="w-4 h-4" />
         Adicionar plano
