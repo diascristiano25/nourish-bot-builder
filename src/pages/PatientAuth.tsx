@@ -182,9 +182,7 @@ export default function PatientAuth() {
       loginSchema.parse({ email, password });
 
       const { data: patient, error: patientError } = await supabase
-        .from('patients')
-        .select('id, full_name, nutritionist_id')
-        .eq('email', email)
+        .rpc('patients_select_by_email_for_auth', { patient_email: email })
         .maybeSingle();
 
       if (patientError) throw patientError;
