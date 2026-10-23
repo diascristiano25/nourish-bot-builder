@@ -23,6 +23,10 @@
       ],
       "port": 3456,
       "url": "http://localhost:3456/nutriflow-reels-ads.html"
+    },
+    {
+      "name": "production",
+      "url": "https://nutriflow.inf.br"
     }
   ]
 }
