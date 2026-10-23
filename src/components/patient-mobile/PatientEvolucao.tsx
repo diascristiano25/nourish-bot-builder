@@ -147,7 +147,24 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium text-muted-foreground">Evolução do Peso</h2>
-            <Button variant="ghost" size="sm" className="h-8 text-xs">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => {
+                const weight = prompt('Digite seu peso atual (kg):');
+                if (weight && !isNaN(Number(weight))) {
+                  supabase
+                    .from('weight_logs')
+                    .insert({
+                      patient_id: patientId,
+                      weight: Number(weight),
+                      measured_at: new Date().toISOString(),
+                    })
+                    .then(() => fetchWeightLogs());
+                }
+              }}
+            >
               <Plus className="w-3.5 h-3.5 mr-1" />
               Adicionar
             </Button>
@@ -201,7 +218,14 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium text-muted-foreground">Antes e Depois</h2>
-            <Button variant="ghost" size="sm" className="h-8 text-xs">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => {
+                alert('Funcionalidade de upload de fotos será implementada em breve!');
+              }}
+            >
               <Camera className="w-3.5 h-3.5 mr-1" />
               Nova foto
             </Button>

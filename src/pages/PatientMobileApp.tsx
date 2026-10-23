@@ -128,8 +128,8 @@ export default function PatientMobileApp() {
       const { data: mealPlans } = await supabase
         .from('meal_plans')
         .select('*')
-        .eq('patient_id', patientData.id)
-        .eq('is_active', true)
+        .eq('client_id', patientData.id)
+        .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -142,12 +142,19 @@ export default function PatientMobileApp() {
       }
 
       // Fetch today's water log
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStart = today.toISOString();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const todayEnd = tomorrow.toISOString();
+
       const { data: waterData } = await supabase
         .from('water_logs')
         .select('amount_ml')
         .eq('patient_id', patientData.id)
-        .eq('logged_at', today)
+        .gte('logged_at', todayStart)
+        .lt('logged_at', todayEnd)
         .maybeSingle();
 
       if (waterData) {
@@ -168,8 +175,14 @@ export default function PatientMobileApp() {
 
   const handleAddWater = async (amount: number) => {
     if (!patient) return;
-    
-    const today = new Date().toISOString().split('T')[0];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStart = today.toISOString();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const todayEnd = tomorrow.toISOString();
+
     const newAmount = waterLog.currentMl + amount;
 
     try {
@@ -177,7 +190,8 @@ export default function PatientMobileApp() {
         .from('water_logs')
         .select('id')
         .eq('patient_id', patient.id)
-        .eq('logged_at', today)
+        .gte('logged_at', todayStart)
+        .lt('logged_at', todayEnd)
         .maybeSingle();
 
       if (existing) {
@@ -191,7 +205,7 @@ export default function PatientMobileApp() {
           .insert({
             patient_id: patient.id,
             amount_ml: newAmount,
-            logged_at: today,
+            logged_at: new Date().toISOString(),
           });
       }
 

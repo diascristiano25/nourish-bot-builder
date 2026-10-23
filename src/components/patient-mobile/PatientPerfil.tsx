@@ -4,9 +4,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { PatientChat } from './PatientChat';
-import { 
-  User, 
-  Bell, 
+import { useTheme } from '@/components/theme-provider';
+import {
+  User,
+  Bell,
   LogOut,
   ChevronRight,
   Moon,
@@ -31,7 +32,8 @@ const goalLabels: Record<string, string> = {
 
 export function PatientPerfil({ patient, onSignOut }: PatientPerfilProps) {
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  const { theme, setTheme } = useTheme();
+  const darkMode = theme === 'dark';
 
   const menuItems = [
     {
@@ -48,7 +50,7 @@ export function PatientPerfil({ patient, onSignOut }: PatientPerfilProps) {
       description: 'Aparência do aplicativo',
       action: 'toggle' as const,
       value: darkMode,
-      onChange: setDarkMode,
+      onChange: (value: boolean) => setTheme(value ? 'dark' : 'light'),
     },
     {
       icon: Shield,

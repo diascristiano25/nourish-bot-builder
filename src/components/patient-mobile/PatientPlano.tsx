@@ -111,7 +111,7 @@ export function PatientPlano({ mealPlan }: PatientPlanoProps) {
             <div>
               <p className="text-sm text-muted-foreground">Total diário</p>
               <p className="text-xl font-bold text-foreground">
-                {mealPlan.total_calories || mealPlan.plan_data.totalCalories || '—'} kcal
+                {mealPlan.total_calories || mealPlan.plan_data?.totalCalories || '—'} kcal
               </p>
             </div>
           </div>
@@ -120,7 +120,7 @@ export function PatientPlano({ mealPlan }: PatientPlanoProps) {
 
       {/* Meals Accordion */}
       <Accordion type="single" collapsible className="space-y-3">
-        {mealPlan.plan_data.meals?.map((meal, index) => {
+        {(mealPlan.plan_data?.meals || []).map((meal, index) => {
           const Icon = mealIcons[meal.name] || UtensilsCrossed;
           const colors = mealColors[meal.name] || mealColors['Ceia'];
 
@@ -159,8 +159,8 @@ export function PatientPlano({ mealPlan }: PatientPlanoProps) {
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 pt-2">
                 <div className="space-y-2 mb-4">
-                  {meal.items?.map((item, itemIndex) => (
-                    <div 
+                  {(meal.items || []).map((item, itemIndex) => (
+                    <div
                       key={itemIndex}
                       className="flex items-center justify-between py-2 border-b border-dashed border-border/30 last:border-0"
                     >
@@ -224,7 +224,7 @@ export function PatientPlano({ mealPlan }: PatientPlanoProps) {
       </Accordion>
 
       {/* Notes */}
-      {mealPlan.plan_data.notes && (
+      {mealPlan.plan_data?.notes && (
         <Card className="border-border/50 mt-4">
           <CardContent className="p-4">
             <h3 className="font-semibold text-sm text-foreground mb-2">Observações</h3>
