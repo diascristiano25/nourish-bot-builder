@@ -98,7 +98,7 @@ actions={
 <div><Label>Email</Label><Input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="paciente@email.com" /></div>
 <div><Label>Telefone</Label><Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="(11) 99999-9999" /></div>
 <div><Label>Data de Nascimento</Label><Input type="date" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} /></div>
-<div><Label>Sexo</Label><Select value={formData.gender} onValueChange={v => setFormData({...formData, gender: v})}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent><SelectItem value="Feminino">Feminino</SelectItem><SelectItem value="Masculino">Masculino</SelectItem><SelectItem value="Outro">Outro</SelectItem></SelectContent></Select></div>
+<div><Label>Sexo</Label><Select value={formData.gender} onValueChange={v => setFormData({...formData, gender: v})}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent><SelectItem value="female">Feminino</SelectItem><SelectItem value="male">Masculino</SelectItem><SelectItem value="other">Outro</SelectItem></SelectContent></Select></div>
 </div>
 </div>
 <div>
@@ -111,8 +111,8 @@ actions={
 <div>
 <h3 className="text-lg font-bold text-[#518C5B] mb-4 flex items-center gap-2"><UserPlus className="w-5 h-5" /> Objetivo & Atividade</h3>
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div><Label>Objetivo</Label><Select value={formData.goal} onValueChange={v => setFormData({...formData, goal: v})}><SelectTrigger><SelectValue placeholder="Selecione o objetivo" /></SelectTrigger><SelectContent><SelectItem value="Emagrecimento">Emagrecimento</SelectItem><SelectItem value="Hipertrofia">Hipertrofia</SelectItem><SelectItem value="Manutenção">Manutenção</SelectItem><SelectItem value="Saúde">Saúde</SelectItem></SelectContent></Select></div>
-<div><Label>Nível de Atividade</Label><Select value={formData.activityLevel} onValueChange={v => setFormData({...formData, activityLevel: v})}><SelectTrigger><SelectValue placeholder="Selecione o nível" /></SelectTrigger><SelectContent><SelectItem value="Sedentário">Sedentário</SelectItem><SelectItem value="Leve">Leve</SelectItem><SelectItem value="Moderado">Moderado</SelectItem><SelectItem value="Intenso">Intenso</SelectItem></SelectContent></Select></div>
+<div><Label>Objetivo</Label><Select value={formData.goal} onValueChange={v => setFormData({...formData, goal: v})}><SelectTrigger><SelectValue placeholder="Selecione o objetivo" /></SelectTrigger><SelectContent><SelectItem value="weight_loss">Emagrecimento</SelectItem><SelectItem value="hypertrophy">Hipertrofia</SelectItem><SelectItem value="maintenance">Manutenção</SelectItem><SelectItem value="health">Saúde</SelectItem></SelectContent></Select></div>
+<div><Label>Nível de Atividade</Label><Select value={formData.activityLevel} onValueChange={v => setFormData({...formData, activityLevel: v})}><SelectTrigger><SelectValue placeholder="Selecione o nível" /></SelectTrigger><SelectContent><SelectItem value="sedentary">Sedentário</SelectItem><SelectItem value="light">Leve</SelectItem><SelectItem value="moderate">Moderado</SelectItem><SelectItem value="active">Intenso</SelectItem></SelectContent></Select></div>
 </div>
 </div>
 <div>
