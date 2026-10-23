@@ -29,3 +29,30 @@ dist-ssr
 # Local Netlify folder
 .netlify
 .env.production
+
+# AI agent skill caches
+.adal/
+.agents/
+.aider*/
+.augment/
+.autohand/
+.bob/
+.codeartsdoer/
+.codebuddy/
+.codemaker/
+.codestudio/
+.commandcode/
+.continue/
+.cortex/
+.crush/
+.devin/
+.forge/
+.goose/
+.grok/
+.hermes/
+.iflow/
+.inferencesh/
+.jazz/
+.junie/
+.mcp/
+.git-push-commits.sh
