@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -105,9 +105,24 @@ const isPatientSubdomain = () => {
 function App() {
   const patientDomain = isPatientSubdomain();
 
+  // Force theme class application on mount
+  useEffect(() => {
+    const root = window.document.documentElement;
+    const storedTheme = localStorage.getItem('vite-ui-theme') || 'light';
+
+    root.classList.remove('light', 'dark');
+
+    if (storedTheme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(storedTheme);
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <AuthProvider>
           <TooltipProvider>
             <Toaster />

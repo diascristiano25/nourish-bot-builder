@@ -39,6 +39,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      admin_settings: {
+        Row: {
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string | null
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       anthropometrics: {
         Row: {
           body_fat_percentage: number | null
@@ -48,7 +96,8 @@ export type Database = {
           id: string
           measured_at: string
           notes: string | null
-          user_id: string
+          patient_id: string
+          updated_at: string | null
           waist_cm: number | null
           weight_kg: number | null
         }
@@ -60,7 +109,8 @@ export type Database = {
           id?: string
           measured_at?: string
           notes?: string | null
-          user_id: string
+          patient_id: string
+          updated_at?: string | null
           waist_cm?: number | null
           weight_kg?: number | null
         }
@@ -73,6 +123,7 @@ export type Database = {
           measured_at?: string
           notes?: string | null
           patient_id?: string
+          updated_at?: string | null
           waist_cm?: number | null
           weight_kg?: number | null
         }
@@ -93,7 +144,7 @@ export type Database = {
           id: string
           notes: string | null
           nutritionist_id: string
-          user_id: string
+          patient_id: string
           reminder_sent: boolean | null
           scheduled_at: string
           status: string | null
@@ -106,7 +157,7 @@ export type Database = {
           id?: string
           notes?: string | null
           nutritionist_id: string
-          user_id: string
+          patient_id: string
           reminder_sent?: boolean | null
           scheduled_at: string
           status?: string | null
@@ -272,6 +323,110 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          direction: string | null
+          id: string
+          model: string | null
+          role: string
+          tokens_used: number | null
+          tool_calls: Json | null
+          tool_results: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          direction?: string | null
+          id?: string
+          model?: string | null
+          role: string
+          tokens_used?: number | null
+          tool_calls?: Json | null
+          tool_results?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          direction?: string | null
+          id?: string
+          model?: string | null
+          role?: string
+          tokens_used?: number | null
+          tool_calls?: Json | null
+          tool_results?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          contact_id: string
+          contact_name: string | null
+          contact_phone: string | null
+          contact_stage: string | null
+          created_at: string | null
+          id: string
+          last_message_at: string | null
+          last_outbound_at: string | null
+          message_count: number | null
+          metadata: Json | null
+          prospect_campaign_id: string | null
+          prospect_step: number | null
+          source: string | null
+          started_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contact_id: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_stage?: string | null
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_outbound_at?: string | null
+          message_count?: number | null
+          metadata?: Json | null
+          prospect_campaign_id?: string | null
+          prospect_step?: number | null
+          source?: string | null
+          started_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contact_id?: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_stage?: string | null
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_outbound_at?: string | null
+          message_count?: number | null
+          metadata?: Json | null
+          prospect_campaign_id?: string | null
+          prospect_step?: number | null
+          source?: string | null
+          started_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       custom_foods: {
         Row: {
           calories: number | null
@@ -387,6 +542,65 @@ export type Database = {
           },
         ]
       }
+      financial_records: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          patient_id: string | null
+          payment_method: string | null
+          processed_at: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          transaction_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          patient_id?: string | null
+          payment_method?: string | null
+          processed_at?: string | null
+          status: string
+          stripe_payment_intent_id?: string | null
+          transaction_type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          patient_id?: string | null
+          payment_method?: string | null
+          processed_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          transaction_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_records_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       food_database: {
         Row: {
           brand: string | null
@@ -401,6 +615,7 @@ export type Database = {
           portion_grams: number | null
           protein: number | null
           supplement_type: string | null
+          updated_at: string | null
         }
         Insert: {
           brand?: string | null
@@ -415,6 +630,7 @@ export type Database = {
           portion_grams?: number | null
           protein?: number | null
           supplement_type?: string | null
+          updated_at?: string | null
         }
         Update: {
           brand?: string | null
@@ -429,25 +645,201 @@ export type Database = {
           portion_grams?: number | null
           protein?: number | null
           supplement_type?: string | null
+          updated_at?: string | null
         }
         Relationships: []
+      }
+      food_intake_logs: {
+        Row: {
+          created_at: string | null
+          hunger_before: number | null
+          id: string
+          logged_at: string | null
+          meal_type: string
+          notes: string | null
+          patient_id: string
+          photo_url: string | null
+          satiety_after: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          hunger_before?: number | null
+          id?: string
+          logged_at?: string | null
+          meal_type: string
+          notes?: string | null
+          patient_id: string
+          photo_url?: string | null
+          satiety_after?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          hunger_before?: number | null
+          id?: string
+          logged_at?: string | null
+          meal_type?: string
+          notes?: string | null
+          patient_id?: string
+          photo_url?: string | null
+          satiety_after?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_intake_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lgpd_consents: {
+        Row: {
+          consent_type: string
+          created_at: string | null
+          granted: boolean
+          granted_at: string | null
+          id: string
+          ip_address: unknown
+          metadata: Json | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+          user_type: string
+          version: string | null
+        }
+        Insert: {
+          consent_type: string
+          created_at?: string | null
+          granted?: boolean
+          granted_at?: string | null
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          user_type: string
+          version?: string | null
+        }
+        Update: {
+          consent_type?: string
+          created_at?: string | null
+          granted?: boolean
+          granted_at?: string | null
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          user_type?: string
+          version?: string | null
+        }
+        Relationships: []
+      }
+      lgpd_data_access_log: {
+        Row: {
+          accessor_email: string | null
+          accessor_user_id: string | null
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown
+          reason: string | null
+          record_ids: Json | null
+          target_table: string | null
+          target_user_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accessor_email?: string | null
+          accessor_user_id?: string | null
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          reason?: string | null
+          record_ids?: Json | null
+          target_table?: string | null
+          target_user_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accessor_email?: string | null
+          accessor_user_id?: string | null
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          reason?: string | null
+          record_ids?: Json | null
+          target_table?: string | null
+          target_user_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      meal_logs: {
+        Row: {
+          created_at: string | null
+          hunger_before: number | null
+          id: string
+          logged_at: string | null
+          meal_type: string | null
+          notes: string | null
+          patient_id: string
+          photo_url: string | null
+          satiety_after: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          hunger_before?: number | null
+          id?: string
+          logged_at?: string | null
+          meal_type?: string | null
+          notes?: string | null
+          patient_id: string
+          photo_url?: string | null
+          satiety_after?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          hunger_before?: number | null
+          id?: string
+          logged_at?: string | null
+          meal_type?: string | null
+          notes?: string | null
+          patient_id?: string
+          photo_url?: string | null
+          satiety_after?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meal_plans: {
         Row: {
           ai_generated: boolean | null
           calories_target: number | null
           carbs_target: number | null
-          client_id: string
           created_at: string | null
           description: string | null
           end_date: string | null
           fat_target: number | null
           id: string
+          is_active: boolean | null
           meals: Json
           nutritionist_id: string
+          patient_id: string
           protein_target: number | null
           start_date: string | null
-          status: string | null
           title: string
           total_calories: number | null
           updated_at: string | null
@@ -456,17 +848,17 @@ export type Database = {
           ai_generated?: boolean | null
           calories_target?: number | null
           carbs_target?: number | null
-          client_id: string
           created_at?: string | null
           description?: string | null
           end_date?: string | null
           fat_target?: number | null
           id?: string
+          is_active?: boolean | null
           meals?: Json
           nutritionist_id: string
+          patient_id: string
           protein_target?: number | null
           start_date?: string | null
-          status?: string | null
           title: string
           total_calories?: number | null
           updated_at?: string | null
@@ -475,27 +867,27 @@ export type Database = {
           ai_generated?: boolean | null
           calories_target?: number | null
           carbs_target?: number | null
-          client_id?: string
           created_at?: string | null
           description?: string | null
           end_date?: string | null
           fat_target?: number | null
           id?: string
+          is_active?: boolean | null
           meals?: Json
           nutritionist_id?: string
+          patient_id?: string
           protein_target?: number | null
           start_date?: string | null
-          status?: string | null
           title?: string
           total_calories?: number | null
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "meal_plans_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "meal_plans_patient_id_fkey"
+            columns: ["patient_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
@@ -507,9 +899,9 @@ export type Database = {
           id: string
           is_read: boolean | null
           nutritionist_id: string
-          user_id: string
+          patient_id: string
           read_at: string | null
-          is_staff_reply: string
+          sender_type: string
         }
         Insert: {
           content: string
@@ -517,9 +909,9 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           nutritionist_id: string
-          user_id: string
+          patient_id: string
           read_at?: string | null
-          is_staff_reply: string
+          sender_type: string
         }
         Update: {
           content?: string
@@ -529,7 +921,7 @@ export type Database = {
           nutritionist_id?: string
           patient_id?: string
           read_at?: string | null
-          is_staff_reply?: string
+          sender_type?: string
         }
         Relationships: [
           {
@@ -603,17 +995,23 @@ export type Database = {
           birth_date: string | null
           created_at: string
           critical_tags: string[] | null
+          data_retention_until: string | null
           dietary_restrictions: string[] | null
           email: string | null
           full_name: string | null
           gender: string | null
           goal: string | null
+          height: number | null
           id: string
+          initial_weight: number | null
           is_active: boolean | null
           medical_conditions: string | null
           notes: string | null
           nutritionist_id: string
           phone: string | null
+          privacy_consent_at: string | null
+          privacy_consent_version: string | null
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
@@ -622,17 +1020,23 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           critical_tags?: string[] | null
+          data_retention_until?: string | null
           dietary_restrictions?: string[] | null
           email?: string | null
           full_name?: string | null
           gender?: string | null
           goal?: string | null
+          height?: number | null
           id?: string
+          initial_weight?: number | null
           is_active?: boolean | null
           medical_conditions?: string | null
           notes?: string | null
           nutritionist_id: string
           phone?: string | null
+          privacy_consent_at?: string | null
+          privacy_consent_version?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
@@ -641,24 +1045,85 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           critical_tags?: string[] | null
+          data_retention_until?: string | null
           dietary_restrictions?: string[] | null
           email?: string | null
           full_name?: string | null
           gender?: string | null
           goal?: string | null
+          height?: number | null
           id?: string
+          initial_weight?: number | null
           is_active?: boolean | null
           medical_conditions?: string | null
           notes?: string | null
           nutritionist_id?: string
           phone?: string | null
+          privacy_consent_at?: string | null
+          privacy_consent_version?: string | null
+          updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      payment_events: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string | null
+          customer_id: string | null
+          error: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          payment_intent_id: string | null
+          processed: boolean
+          processed_at: string | null
+          raw_event: Json
+          status: string | null
+          stripe_event_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          customer_id?: string | null
+          error?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          payment_intent_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          raw_event: Json
+          status?: string | null
+          stripe_event_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          customer_id?: string | null
+          error?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          payment_intent_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          raw_event?: Json
+          status?: string | null
+          stripe_event_id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
           account_status: string | null
+          admin_notes: string | null
           created_at: string | null
           crn: string | null
           email_signature: string | null
@@ -667,9 +1132,13 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_admin: boolean | null
+          last_login_at: string | null
           logo_url: string | null
+          marketing_opt_in: boolean | null
           phone: string | null
           primary_color: string | null
+          privacy_consent_at: string | null
+          privacy_consent_version: string | null
           secondary_color: string | null
           trial_ends_at: string | null
           updated_at: string | null
@@ -677,6 +1146,7 @@ export type Database = {
         }
         Insert: {
           account_status?: string | null
+          admin_notes?: string | null
           created_at?: string | null
           crn?: string | null
           email_signature?: string | null
@@ -685,9 +1155,13 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_admin?: boolean | null
+          last_login_at?: string | null
           logo_url?: string | null
+          marketing_opt_in?: boolean | null
           phone?: string | null
           primary_color?: string | null
+          privacy_consent_at?: string | null
+          privacy_consent_version?: string | null
           secondary_color?: string | null
           trial_ends_at?: string | null
           updated_at?: string | null
@@ -695,6 +1169,7 @@ export type Database = {
         }
         Update: {
           account_status?: string | null
+          admin_notes?: string | null
           created_at?: string | null
           crn?: string | null
           email_signature?: string | null
@@ -703,9 +1178,13 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_admin?: boolean | null
+          last_login_at?: string | null
           logo_url?: string | null
+          marketing_opt_in?: boolean | null
           phone?: string | null
           primary_color?: string | null
+          privacy_consent_at?: string | null
+          privacy_consent_version?: string | null
           secondary_color?: string | null
           trial_ends_at?: string | null
           updated_at?: string | null
@@ -713,12 +1192,269 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_events: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json | null
+          patient_id: string | null
+          payment_status: string
+          product_id: string | null
+          product_type: string
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          patient_id?: string | null
+          payment_status: string
+          product_id?: string | null
+          product_type: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          patient_id?: string | null
+          payment_status?: string
+          product_id?: string | null
+          product_type?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_ticket_messages: {
+        Row: {
+          attachments: Json | null
+          created_at: string
+          id: string
+          is_staff_reply: boolean
+          message: string
+          ticket_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          is_staff_reply?: boolean
+          message: string
+          ticket_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          is_staff_reply?: boolean
+          message?: string
+          ticket_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: string | null
+          created_at: string
+          description: string
+          id: string
+          patient_id: string | null
+          priority: string
+          resolved_at: string | null
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          patient_id?: string | null
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          patient_id?: string | null
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      water_logs: {
+        Row: {
+          amount_ml: number
+          created_at: string
+          id: string
+          logged_at: string
+          notes: string | null
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_ml: number
+          created_at?: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_ml?: number
+          created_at?: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "water_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weight_logs: {
+        Row: {
+          created_at: string
+          id: string
+          measured_at: string
+          notes: string | null
+          patient_id: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          measured_at?: string
+          notes?: string | null
+          patient_id: string
+          updated_at?: string
+          weight: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          measured_at?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weight_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      find_patient_by_email: {
+        Args: { p_email: string }
+        Returns: {
+          full_name: string
+          id: string
+          nutritionist_id: string
+        }[]
+      }
       get_user_account_status: { Args: never; Returns: string }
+      get_user_role: { Args: never; Returns: string }
+      is_current_user_master_admin: { Args: never; Returns: boolean }
+      is_master_admin: { Args: never; Returns: boolean }
+      link_patient_user: { Args: { p_email: string }; Returns: undefined }
+      patients_select_by_email_for_auth: {
+        Args: { patient_email: string }
+        Returns: {
+          full_name: string
+          id: string
+          nutritionist_id: string
+        }[]
+      }
+      send_message: {
+        Args: {
+          p_content: string
+          p_nutritionist_id: string
+          p_patient_id: string
+          p_sender_type: string
+        }
+        Returns: {
+          msg_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
