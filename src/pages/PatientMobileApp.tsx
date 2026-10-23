@@ -128,8 +128,8 @@ export default function PatientMobileApp() {
       const { data: mealPlans } = await supabase
         .from('meal_plans')
         .select('*')
-        .eq('client_id', patientData.id)
-        .eq('status', 'active')
+        .eq('patient_id', patientData.id)
+        .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1);
 

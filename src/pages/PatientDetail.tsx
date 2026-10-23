@@ -249,7 +249,7 @@ export default function PatientDetail() {
       const { data: mealData, error: mealError } = await supabase
         .from('meal_plans')
         .select('id, title, description, total_calories, created_at, meals')
-        .eq('client_id', id)
+        .eq('patient_id', id)
         .order('created_at', { ascending: false });
 
       if (mealError) throw mealError;

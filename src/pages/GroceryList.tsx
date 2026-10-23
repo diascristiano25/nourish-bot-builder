@@ -90,7 +90,7 @@ export default function GroceryList() {
 
       const { data: planDataResult, error: planError } = await supabase
         .from('meal_plans')
-        .select('meals, title, client_id')
+        .select('meals, title, patient_id')
         .eq('id', mealPlanId)
         .single();
 
@@ -101,7 +101,7 @@ export default function GroceryList() {
       const { data: patientData, error: patientError } = await supabase
         .from('patients')
         .select('full_name')
-        .eq('id', planDataResult.client_id)
+        .eq('id', planDataResult.patient_id)
         .single();
 
       if (patientError) throw patientError;
