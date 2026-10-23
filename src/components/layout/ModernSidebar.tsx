@@ -2,13 +2,16 @@ import { motion } from 'framer-motion';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Calendar, Users, FileText, DollarSign,
-  Settings, HelpCircle, LogOut, Send, Grid3X3, Info, TrendingUp
+  Settings, HelpCircle, LogOut, Send, Grid3X3, Info, TrendingUp, ShieldCheck, MessageCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import logoImg from '@/assets/logo.png';
+
+const WHATSAPP_HELP_URL = "https://wa.me/5513996205253?text=Olá! Preciso de ajuda com o NutriFlow.";
 
 interface NavItem {
   name: string;
@@ -24,6 +27,7 @@ const navItems: NavItem[] = [
   { name: 'Mensagens', path: '/mensagens', icon: Send },
   { name: 'Financeiro', path: '/financeiro', icon: DollarSign },
   { name: 'Evolução', path: '/evolucao', icon: TrendingUp },
+  { name: 'Suporte', path: '/support', icon: HelpCircle },
   { name: 'Perfil', path: '/perfil', icon: Info },
 ];
 
@@ -31,6 +35,22 @@ export function ModernSidebar() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const email = session?.user?.email?.toLowerCase();
+        if (email === 'diascristianoconsultor@gmail.com') {
+          setIsAdmin(true);
+        }
+      } catch (e) {
+        console.error('Admin check failed:', e);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -139,6 +159,76 @@ export function ModernSidebar() {
 
       {/* Bottom Actions */}
       <div className="flex flex-col items-center gap-2 w-full px-2 mt-auto">
+        {isAdmin && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+            className="relative w-full"
+            onMouseEnter={() => setHoveredItem('Admin')}
+            onMouseLeave={() => setHoveredItem(null)}
+          >
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                cn(
+                  "relative flex items-center justify-center w-full h-12 rounded-2xl transition-all duration-300 group",
+                  isActive ? "shadow-lg" : "hover:bg-white/10"
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebar-active-admin"
+                      className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/10"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  <ShieldCheck className={cn(
+                    "w-5 h-5 relative z-10 transition-all duration-300",
+                    isActive ? "text-white scale-110" : "text-white/60 group-hover:text-white group-hover:scale-105"
+                  )} />
+                  {hoveredItem === 'Admin' && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                    >
+                      Admin
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900/95" />
+                    </motion.div>
+                  )}
+                </>
+              )}
+            </NavLink>
+          </motion.div>
+        )}
+        <motion.a
+          href={WHATSAPP_HELP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
+          whileTap={{ scale: 0.95 }}
+          className="w-full h-12 rounded-2xl flex items-center justify-center text-white/60 hover:text-[#25D366] transition-all relative group"
+          onMouseEnter={() => setHoveredItem('Ajuda')}
+          onMouseLeave={() => setHoveredItem(null)}
+        >
+          <MessageCircle className="w-5 h-5" />
+          {hoveredItem === 'Ajuda' && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
+            >
+              Ajuda (WhatsApp)
+              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900/95" />
+            </motion.div>
+          )}
+        </motion.a>
         <motion.button
           whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
           whileTap={{ scale: 0.95 }}
