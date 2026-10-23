@@ -16,7 +16,7 @@ import { logAdminAction } from '@/lib/admin-audit';
 interface TicketMessage {
   id: string;
   ticket_id: string;
-  is_staff_reply: string;
+  is_staff_reply: boolean;
   description: string;
   created_at: string;
 }
@@ -111,7 +111,7 @@ export default function SupportChatView() {
     try {
       const { error } = await supabase.from('support_ticket_messages').insert({
         ticket_id: ticketId,
-        is_staff_reply: 'admin',
+        is_staff_reply: true,
         description: newMessage.trim(),
       });
       if (error) throw error;
@@ -226,14 +226,14 @@ export default function SupportChatView() {
                 <div
                   key={msg.id}
                   className={`max-w-[80%] p-4 rounded-2xl ${
-                    msg.is_staff_reply === 'admin'
+                    msg.is_staff_reply === true
                       ? 'ml-auto bg-primary text-white rounded-br-md'
                       : 'mr-auto bg-muted text-foreground rounded-bl-md'
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{msg.description}</p>
-                  <p className={`text-xs mt-2 ${msg.is_staff_reply === 'admin' ? 'text-white/70' : 'text-muted-foreground'}`}>
-                    {msg.is_staff_reply === 'admin' ? 'Admin' : ticket.profiles?.full_name || 'Nutricionista'} • {format(new Date(msg.created_at), 'dd/MM HH:mm', { locale: ptBR })}
+                  <p className={`text-xs mt-2 ${msg.is_staff_reply === true ? 'text-white/70' : 'text-muted-foreground'}`}>
+                    {msg.is_staff_reply === true ? 'Admin' : ticket.profiles?.full_name || 'Nutricionista'} • {format(new Date(msg.created_at), 'dd/MM HH:mm', { locale: ptBR })}
                   </p>
                 </div>
               ))
