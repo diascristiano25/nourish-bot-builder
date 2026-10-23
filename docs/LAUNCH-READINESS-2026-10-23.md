@@ -92,10 +92,10 @@ This adds `patients_select_by_email_for_auth()` function for patient signup flow
 
 ## Recommended Launch Steps
 
-1. **Deploy to Vercel:**
+1. **Deploy to Netlify:**
    ```bash
    git pull origin main  # Already done - we just pushed
-   vercel --prod
+   netlify deploy --prod
    ```
 
 2. **Apply migrations:**
