@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { ThemeProvider } from "@/hooks/useTheme";
+import { ThemeProvider } from "@/components/theme-provider";
 import { AccountStatusGuard } from "@/components/AccountStatusGuard";
 import { Loader2 } from "lucide-react";
 
