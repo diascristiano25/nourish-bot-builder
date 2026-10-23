@@ -41,7 +41,7 @@ interface ProfileData {
 
 interface PatientRecord { id: string; full_name: string; created_at: string; }
 interface AppointmentRecord { id: string; scheduled_at: string; status: string; type: string | null; }
-interface FinancialRecord { id: string; record_type: string; amount: number; record_date: string; description: string | null; }
+interface FinancialRecord { id: string; transaction_type: string; amount: number; created_at: string; description: string | null; }
 interface TicketRecord { id: string; ticket_number: number; subject: string; status: string; priority: string; created_at: string; }
 interface AuditRecord { id: string; action: string; details: Record<string, unknown> | null; created_at: string; }
 
@@ -89,7 +89,7 @@ export default function NutritionistDetail() {
       const [patRes, appRes, finRes, tickRes, audRes] = await Promise.all([
         supabase.from('patients').select('id, full_name, created_at').eq('nutritionist_id', profileId).order('created_at', { ascending: false }).limit(50),
         supabase.from('appointments').select('id, scheduled_at, status, type').eq('nutritionist_id', profileId).order('scheduled_at', { ascending: false }).limit(20),
-        supabase.from('financial_records').select('id, record_type, amount, record_date, description').eq('nutritionist_id', profileId).order('record_date', { ascending: false }).limit(30),
+        supabase.from('financial_records').select('id, transaction_type, amount, created_at, description').eq('user_id', prof.user_id).order('created_at', { ascending: false }).limit(30),
         supabase.from('support_tickets').select('id, ticket_number, subject, status, priority, created_at').eq('nutritionist_id', profileId).order('created_at', { ascending: false }),
         supabase.from('admin_audit_log').select('id, action, details, created_at').eq('target_id', profileId).order('created_at', { ascending: false }).limit(50),
       ]);
@@ -297,8 +297,8 @@ export default function NutritionistDetail() {
                     <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Nenhuma transação</TableCell></TableRow>
                   ) : financials.map(f => (
                     <TableRow key={f.id}>
-                      <TableCell>{format(new Date(f.record_date), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
-                      <TableCell><Badge variant={f.record_type === 'income' ? 'default' : 'secondary'}>{f.record_type === 'income' ? 'Receita' : 'Despesa'}</Badge></TableCell>
+                      <TableCell>{format(new Date(f.created_at), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
+                      <TableCell><Badge variant={f.transaction_type === 'income' ? 'default' : 'secondary'}>{f.transaction_type === 'income' ? 'Receita' : 'Despesa'}</Badge></TableCell>
                       <TableCell className="text-muted-foreground">{f.description || '-'}</TableCell>
                       <TableCell className="text-right font-medium">R$ {Number(f.amount).toLocaleString('pt-BR')}</TableCell>
                     </TableRow>
