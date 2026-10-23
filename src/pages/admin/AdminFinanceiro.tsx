@@ -14,11 +14,11 @@ import { motion } from 'framer-motion';
 
 interface FinancialRecord {
   id: string;
-  record_type: string;
+  transaction_type: string;
   amount: number;
-  record_date: string;
+  created_at: string;
   description: string | null;
-  nutritionist_id: string | null;
+  user_id: string | null;
 }
 
 interface ProfileSummary {
@@ -49,14 +49,14 @@ export default function AdminFinanceiro() {
       // Fetch all financial records
       const { data: records, error: recErr } = await supabase
         .from('financial_records')
-        .select('id, record_type, amount, record_date, description, nutritionist_id')
-        .order('record_date', { ascending: false });
+        .select('id, transaction_type, amount, created_at, description, user_id')
+        .order('created_at', { ascending: false });
 
       if (recErr) throw recErr;
 
       const allRecords = records || [];
-      const income = allRecords.filter(r => r.record_type === 'income').reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
-      const expense = allRecords.filter(r => r.record_type === 'expense').reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+      const income = allRecords.filter(r => r.transaction_type === 'payment' || r.transaction_type === 'subscription').reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+      const expense = allRecords.filter(r => r.transaction_type === 'refund').reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
 
       setTotalIncome(income);
       setTotalExpense(expense);
@@ -68,10 +68,10 @@ export default function AdminFinanceiro() {
         const mStart = startOfMonth(subMonths(new Date(), i));
         const mEnd = endOfMonth(subMonths(new Date(), i));
         const mIncome = allRecords
-          .filter(r => r.record_type === 'income' && new Date(r.record_date) >= mStart && new Date(r.record_date) <= mEnd)
+          .filter(r => (r.transaction_type === 'payment' || r.transaction_type === 'subscription') && new Date(r.created_at) >= mStart && new Date(r.created_at) <= mEnd)
           .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
         const mExpense = allRecords
-          .filter(r => r.record_type === 'expense' && new Date(r.record_date) >= mStart && new Date(r.record_date) <= mEnd)
+          .filter(r => r.transaction_type === 'refund' && new Date(r.created_at) >= mStart && new Date(r.created_at) <= mEnd)
           .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
         monthly.push({
           month: format(mStart, 'MMM/yyyy', { locale: ptBR }),
@@ -217,20 +217,23 @@ export default function AdminFinanceiro() {
                       Nenhuma transação registrada
                     </TableCell>
                   </TableRow>
-                ) : recentTransactions.map(t => (
+                ) : recentTransactions.map(t => {
+                  const isIncome = t.transaction_type === 'payment' || t.transaction_type === 'subscription';
+                  return (
                   <TableRow key={t.id} className="border-border/30">
-                    <TableCell>{format(new Date(t.record_date), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
+                    <TableCell>{format(new Date(t.created_at), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
                     <TableCell>
-                      <Badge variant={t.record_type === 'income' ? 'default' : 'secondary'} className={t.record_type === 'income' ? 'bg-success/20 text-success border-success/30' : ''}>
-                        {t.record_type === 'income' ? 'Receita' : 'Despesa'}
+                      <Badge variant={isIncome ? 'default' : 'secondary'} className={isIncome ? 'bg-success/20 text-success border-success/30' : ''}>
+                        {isIncome ? 'Receita' : 'Reembolso'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground max-w-xs truncate">{t.description || '-'}</TableCell>
-                    <TableCell className={`text-right font-medium ${t.record_type === 'income' ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {t.record_type === 'income' ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR')}
+                    <TableCell className={`text-right font-medium ${isIncome ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {isIncome ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR')}
                     </TableCell>
                   </TableRow>
-                ))}
+                );
+                })}
               </TableBody>
             </Table>
           </div>
