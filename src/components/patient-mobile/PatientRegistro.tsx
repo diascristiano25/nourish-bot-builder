@@ -2,16 +2,18 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { 
-  Camera, 
-  Upload, 
+import {
+  Camera,
   UtensilsCrossed,
   Smile,
   Frown,
   Meh,
-  ChevronRight
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 const mealOptions = [
   { id: 'cafe', name: 'Café da Manhã', icon: '☕' },
@@ -31,19 +33,92 @@ const hungerLevels = [
 ];
 
 export function PatientRegistro() {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
   const [hungerBefore, setHungerBefore] = useState([3]);
   const [satietyAfter, setSatietyAfter] = useState([3]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedMeal || submitting) return;
+    setSubmitting(true);
+    try {
+      // Resolve the patient row for the logged-in user
+      const { data: patientRow, error: patientErr } = await supabase
+        .from('patients')
+        .select('id')
+        .eq('user_id', user!.id)
+        .maybeSingle();
+      if (patientErr) throw patientErr;
+      if (!patientRow) throw new Error('Paciente não encontrado para este usuário');
+
+      let photoUrl: string | null = null;
+      if (imageFile) {
+        const ext = imageFile.name.split('.').pop() || 'jpg';
+        const fileName = `${patientRow.id}/${Date.now()}.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from('food-photos')
+          .upload(fileName, imageFile, { upsert: true });
+        if (uploadErr) throw uploadErr;
+        const { data: publicData } = supabase.storage
+          .from('food-photos')
+          .getPublicUrl(fileName);
+        photoUrl = publicData?.publicUrl || null;
+      }
+
+      // Map UI meal ids to food_intake_logs CHECK constraint values
+      const mealTypeMap: Record<string, string> = {
+        'cafe': 'breakfast',
+        'lanche-manha': 'snack',
+        'almoco': 'lunch',
+        'lanche-tarde': 'snack',
+        'jantar': 'dinner',
+        'ceia': 'snack',
+      };
+
+      // Persist to food_intake_logs (schema: patient_id, meal_type, food_name,
+      // quantity, unit, calories, protein, carbs, fats, logged_at, notes)
+      const { error: logErr } = await supabase.from('food_intake_logs').insert({
+        patient_id: patientRow.id,
+        meal_type: mealTypeMap[selectedMeal] || 'snack',
+        food_name: mealOptions.find(m => m.id === selectedMeal)?.name || selectedMeal,
+        quantity: 1,
+        unit: 'porção',
+        notes: `Fome antes: ${hungerBefore[0]}/5 | Saciedade após: ${satietyAfter[0]}/5${photoUrl ? ' | Foto registrada' : ''}`,
+        logged_at: new Date().toISOString(),
+      });
+      if (logErr) throw logErr;
+
+      toast({ title: 'Refeição registrada!', description: 'Seu nutricionista foi notificado.' });
+      setSelectedMeal(null);
+      setHungerBefore([3]);
+      setSatietyAfter([3]);
+      setImagePreview(null);
+      setImageFile(null);
+    } catch (error: any) {
+      console.error('Error registering meal:', error);
+      toast({
+        title: 'Erro ao registrar refeição',
+        description: error.message || 'Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -69,10 +144,10 @@ export function PatientRegistro() {
                 key={meal.id}
                 onClick={() => setSelectedMeal(meal.id)}
                 className={cn(
-                  "flex items-center gap-2 p-3 rounded-xl border transition-all",
+                  'flex items-center gap-2 p-3 rounded-xl border transition-all',
                   selectedMeal === meal.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border/50 text-foreground hover:border-primary/30"
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border/50 text-foreground hover:border-primary/30'
                 )}
               >
                 <span className="text-lg">{meal.icon}</span>
@@ -89,19 +164,22 @@ export function PatientRegistro() {
           <h2 className="text-sm font-medium text-muted-foreground mb-3">
             Foto do prato
           </h2>
-          
+
           {imagePreview ? (
             <div className="relative">
-              <img 
-                src={imagePreview} 
-                alt="Preview" 
+              <img
+                src={imagePreview}
+                alt="Preview"
                 className="w-full h-48 object-cover rounded-xl"
               />
               <Button
                 variant="secondary"
                 size="sm"
                 className="absolute bottom-2 right-2"
-                onClick={() => setImagePreview(null)}
+                onClick={() => {
+                  setImagePreview(null);
+                  setImageFile(null);
+                }}
               >
                 Alterar
               </Button>
@@ -180,12 +258,17 @@ export function PatientRegistro() {
       </Card>
 
       {/* Submit Button */}
-      <Button 
+      <Button
         className="w-full h-12 rounded-xl text-base font-semibold"
-        disabled={!selectedMeal}
+        disabled={!selectedMeal || submitting}
+        onClick={handleSubmit}
       >
-        <UtensilsCrossed className="w-5 h-5 mr-2" />
-        Registrar Refeição
+        {submitting ? (
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+        ) : (
+          <UtensilsCrossed className="w-5 h-5 mr-2" />
+        )}
+        {submitting ? 'Registrando...' : 'Registrar Refeição'}
       </Button>
 
       <p className="text-center text-xs text-muted-foreground mt-4">
