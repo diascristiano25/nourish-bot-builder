@@ -829,17 +829,17 @@ export type Database = {
           ai_generated: boolean | null
           calories_target: number | null
           carbs_target: number | null
-          client_id: string
           created_at: string | null
           description: string | null
           end_date: string | null
           fat_target: number | null
           id: string
+          is_active: boolean | null
           meals: Json
           nutritionist_id: string
+          patient_id: string
           protein_target: number | null
           start_date: string | null
-          status: string | null
           title: string
           total_calories: number | null
           updated_at: string | null
@@ -848,17 +848,17 @@ export type Database = {
           ai_generated?: boolean | null
           calories_target?: number | null
           carbs_target?: number | null
-          client_id: string
           created_at?: string | null
           description?: string | null
           end_date?: string | null
           fat_target?: number | null
           id?: string
+          is_active?: boolean | null
           meals?: Json
           nutritionist_id: string
+          patient_id: string
           protein_target?: number | null
           start_date?: string | null
-          status?: string | null
           title: string
           total_calories?: number | null
           updated_at?: string | null
@@ -867,25 +867,25 @@ export type Database = {
           ai_generated?: boolean | null
           calories_target?: number | null
           carbs_target?: number | null
-          client_id?: string
           created_at?: string | null
           description?: string | null
           end_date?: string | null
           fat_target?: number | null
           id?: string
+          is_active?: boolean | null
           meals?: Json
           nutritionist_id?: string
+          patient_id?: string
           protein_target?: number | null
           start_date?: string | null
-          status?: string | null
           title?: string
           total_calories?: number | null
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "meal_plans_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "meal_plans_patient_id_fkey"
+            columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
             referencedColumns: ["id"]
