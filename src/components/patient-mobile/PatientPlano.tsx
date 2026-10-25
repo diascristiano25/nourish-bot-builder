@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Accordion,
   AccordionContent,
@@ -23,7 +22,8 @@ import {
   Cookie,
   RefreshCw,
   ChevronRight,
-  Sparkles
+  Flame,
+  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -47,6 +47,7 @@ interface PatientPlanoProps {
     name?: string;
     total_calories?: number;
     plan_data?: any;
+    meals?: any[];
   } | null;
 }
 
@@ -57,36 +58,36 @@ const mealIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   'Lanche da Tarde': Cookie,
   'Jantar': Moon,
   'Ceia': UtensilsCrossed,
-  'cafe_da_manha': Coffee,
-  'breakfast': Coffee,
-  'almoco': Sun,
-  'lunch': Sun,
-  'lanche': Cookie,
-  'snack': Cookie,
-  'jantar': Moon,
-  'dinner': Moon,
+  cafe_da_manha: Coffee,
+  breakfast: Coffee,
+  almoco: Sun,
+  lunch: Sun,
+  lanche: Cookie,
+  snack: Cookie,
+  jantar: Moon,
+  dinner: Moon,
 };
 
-const mealColors: Record<string, { bg: string; text: string; border: string }> = {
-  'Café da Manhã': { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/30' },
-  'Lanche da Manhã': { bg: 'bg-orange-500/10', text: 'text-orange-500', border: 'border-orange-500/30' },
-  'Almoço': { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/30' },
-  'Lanche da Tarde': { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/30' },
-  'Jantar': { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/30' },
-  'Ceia': { bg: 'bg-secondary/10', text: 'text-muted-foreground', border: 'border-border' },
-  'cafe_da_manha': { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/30' },
-  'breakfast': { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/30' },
-  'almoco': { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/30' },
-  'lunch': { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/30' },
-  'lanche': { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/30' },
-  'snack': { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/30' },
-  'jantar': { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/30' },
-  'dinner': { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/30' },
+// Clean clinical accent per meal type — muted, not neon
+const mealAccent: Record<string, string> = {
+  'Café da Manhã': 'text-amber-600 bg-amber-500/10',
+  'Lanche da Manhã': 'text-orange-600 bg-orange-500/10',
+  'Almoço': 'text-[#518C5B] bg-[#518C5B]/10',
+  'Lanche da Tarde': 'text-sky-600 bg-sky-500/10',
+  'Jantar': 'text-indigo-600 bg-indigo-500/10',
+  'Ceia': 'text-muted-foreground bg-muted',
+  cafe_da_manha: 'text-amber-600 bg-amber-500/10',
+  breakfast: 'text-amber-600 bg-amber-500/10',
+  almoco: 'text-[#518C5B] bg-[#518C5B]/10',
+  lunch: 'text-[#518C5B] bg-[#518C5B]/10',
+  lanche: 'text-sky-600 bg-sky-500/10',
+  snack: 'text-sky-600 bg-sky-500/10',
+  jantar: 'text-indigo-600 bg-indigo-500/10',
+  dinner: 'text-indigo-600 bg-indigo-500/10',
 };
 
-const defaultColors = { bg: 'bg-secondary/10', text: 'text-muted-foreground', border: 'border-border' };
+const defaultAccent = 'text-muted-foreground bg-muted';
 
-// Dummy substitutes data
 const mealSubstitutes: Record<string, MealItem[]> = {
   'Café da Manhã': [
     { food: 'Pão integral com queijo branco', portion: '2 fatias + 30g', calories: 180 },
@@ -117,18 +118,16 @@ const mealTypeLabels: Record<string, string> = {
 };
 
 /**
- * Robustly extract meal groups from any plan_data structure the AI might generate.
- * Returns an array of MealGroup with normalized items.
+ * Extrai grupos de refeição de qualquer estrutura de plan_data/meals que a IA possa gerar.
+ * Suporta: meals[], array de dias, days[0].meals, chaves por tipo (cafe_da_manha/almoco), day_1 aninhado.
  */
 function extractMealGroups(planData: any): MealGroup[] {
   if (!planData) return [];
 
-  // Structure A: plan_data.meals is array of meal groups (each with items[])
   if (Array.isArray(planData.meals)) {
     return planData.meals.map((m: any, idx: number) => normalizeMealGroup(m, idx));
   }
 
-  // Structure B: plan_data is array of days → take first day's meals
   if (Array.isArray(planData) && planData.length > 0) {
     const first = planData[0];
     if (Array.isArray(first?.meals)) {
@@ -139,7 +138,6 @@ function extractMealGroups(planData: any): MealGroup[] {
     }
   }
 
-  // Structure C: plan_data.days[0].meals
   if (planData.days && Array.isArray(planData.days) && planData.days[0]) {
     const day = planData.days[0];
     if (Array.isArray(day.meals)) {
@@ -147,7 +145,6 @@ function extractMealGroups(planData: any): MealGroup[] {
     }
   }
 
-  // Structure D: plan_data has meal-type keys (cafe_da_manha, almoco, etc.)
   const mealKeys = ['cafe_da_manha', 'breakfast', 'almoco', 'lunch', 'lanche', 'snack', 'jantar', 'dinner', 'ceia'];
   const found: MealGroup[] = [];
   for (const key of mealKeys) {
@@ -170,7 +167,6 @@ function extractMealGroups(planData: any): MealGroup[] {
   }
   if (found.length > 0) return found;
 
-  // Structure E: plan_data.day_1 / dia_1 with nested meals
   const dayKeys = Object.keys(planData).filter(k => /^day[_-]?\d|^dia[_-]?\d/i.test(k));
   if (dayKeys.length > 0) {
     return extractMealGroups(planData[dayKeys[0]]);
@@ -208,16 +204,18 @@ export function PatientPlano({ mealPlan }: PatientPlanoProps) {
 
   if (!mealPlan) {
     return (
-      <div className="px-4 pt-4 animate-fade-in">
-        <header className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Plano Alimentar</h1>
-          <p className="text-sm text-muted-foreground">Seu cardápio personalizado</p>
+      <div className="px-4 pt-4">
+        <header className="mb-5">
+          <h1 className="text-xl font-semibold text-foreground">Plano Alimentar</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Seu cardápio personalizado</p>
         </header>
-        <Card className="border-dashed border-border/50">
+        <Card className="border-dashed border-border/60">
           <CardContent className="p-8 text-center">
-            <UtensilsCrossed className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground font-medium">Nenhum cardápio disponível</p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <UtensilsCrossed className="w-6 h-6 text-muted-foreground/50" />
+            </div>
+            <p className="text-foreground font-medium">Nenhum cardápio disponível</p>
+            <p className="text-sm text-muted-foreground mt-1.5">
               Aguarde seu nutricionista criar seu plano alimentar.
             </p>
           </CardContent>
@@ -226,145 +224,141 @@ export function PatientPlano({ mealPlan }: PatientPlanoProps) {
     );
   }
 
-  const planData = mealPlan.plan_data;
+  // Lê tanto a coluna real `meals` quanto o alias `plan_data`
+  const planData = mealPlan.plan_data || (mealPlan.meals ? { meals: mealPlan.meals } : null);
   const mealGroups = extractMealGroups(planData);
   const totalCalories = mealPlan.total_calories || planData?.totalCalories || planData?.total_calories;
   const planTitle = mealPlan.title || mealPlan.name || 'Cardápio Personalizado';
 
   return (
-    <div className="px-4 pt-4 animate-fade-in">
-      {/* Header */}
+    <div className="px-4 pt-4 pb-4">
       <header className="mb-4">
-        <h1 className="text-2xl font-bold text-foreground">Plano Alimentar</h1>
-        <p className="text-sm text-muted-foreground">{planTitle}</p>
+        <h1 className="text-xl font-semibold text-foreground">Plano Alimentar</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{planTitle}</p>
       </header>
 
-      {/* Calories Summary */}
-      {totalCalories && (
-        <Card className="border-border/50 mb-4 bg-gradient-to-br from-primary/10 to-primary/5">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total diário</p>
-                <p className="text-xl font-bold text-foreground">
-                  {totalCalories} kcal
-                </p>
-              </div>
+      {totalCalories != null && (
+        <Card className="border-border/60 mb-4 bg-[#518C5B]/[0.06]">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#518C5B]/15 flex items-center justify-center flex-shrink-0">
+              <Flame className="w-5 h-5 text-[#518C5B]" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Meta diária</p>
+              <p className="text-lg font-semibold text-foreground leading-tight tabular-nums">
+                {totalCalories} <span className="text-sm font-normal text-muted-foreground">kcal</span>
+              </p>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Meals Accordion */}
       {mealGroups.length === 0 ? (
-        <Card className="border-dashed border-border/50">
+        <Card className="border-dashed border-border/60">
           <CardContent className="p-8 text-center">
-            <UtensilsCrossed className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground font-medium">Refeições indisponíveis</p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <UtensilsCrossed className="w-6 h-6 text-muted-foreground/50" />
+            </div>
+            <p className="text-foreground font-medium">Refeições indisponíveis</p>
+            <p className="text-sm text-muted-foreground mt-1.5">
               Seu nutricionista está preparando seu cardápio.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <Accordion type="single" collapsible defaultValue="meal-0" className="space-y-3">
+        <Accordion type="single" collapsible defaultValue="meal-0" className="space-y-2.5">
           {mealGroups.map((meal, index) => {
             const Icon = mealIcons[meal.name] || mealIcons[meal.id] || UtensilsCrossed;
-            const colors = mealColors[meal.name] || mealColors[meal.id] || defaultColors;
+            const accent = mealAccent[meal.name] || mealAccent[meal.id] || defaultAccent;
+            const [accentText, accentBg] = accent.split(' ');
             return (
               <AccordionItem
                 key={meal.id}
                 value={`meal-${index}`}
-                className={cn(
-                  "border rounded-xl overflow-hidden",
-                  colors.border
-                )}
+                className="border border-border/60 rounded-2xl overflow-hidden bg-card px-1"
               >
-                <AccordionTrigger className={cn(
-                  "px-4 py-3 hover:no-underline [&[data-state=open]]:rounded-b-none",
-                  colors.bg
-                )}>
+                <AccordionTrigger className="px-3 py-3 hover:no-underline">
                   <div className="flex items-center gap-3 w-full">
-                    <div className={cn(
-                      "w-9 h-9 rounded-lg flex items-center justify-center",
-                      "bg-background/60"
-                    )}>
-                      <Icon className={cn("w-4 h-4", colors.text)} />
+                    <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0', accentBg)}>
+                      <Icon className={cn('w-4 h-4', accentText)} />
                     </div>
-                    <div className="flex-1 text-left">
-                      <h3 className="font-semibold text-foreground text-sm">{meal.name}</h3>
-                      {meal.time && (
-                        <p className="text-xs text-muted-foreground">{meal.time}</p>
-                      )}
+                    <div className="flex-1 text-left min-w-0">
+                      <h3 className="font-semibold text-foreground text-sm leading-tight">{meal.name}</h3>
+                      <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                        {meal.time && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {meal.time}
+                          </span>
+                        )}
+                        {meal.totalCalories != null && (
+                          <>
+                            {meal.time && <span className="text-muted-foreground/40">•</span>}
+                            <span className="tabular-nums">{meal.totalCalories} kcal</span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    {meal.totalCalories && (
-                      <Badge variant="secondary" className="mr-2 text-xs">
-                        {meal.totalCalories} kcal
-                      </Badge>
-                    )}
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4 pt-2">
+                <AccordionContent className="px-3 pb-3 pt-1">
                   {meal.items.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-2">Detalhes em breve</p>
                   ) : (
-                    <div className="space-y-2 mb-4">
+                    <ul className="space-y-1 mb-3">
                       {meal.items.map((item, itemIndex) => (
-                        <div
+                        <li
                           key={itemIndex}
-                          className="flex items-center justify-between py-2 border-b border-dashed border-border/30 last:border-0"
+                          className="flex items-start justify-between gap-3 py-2 border-b border-border/40 last:border-0"
                         >
-                          <div>
-                            <p className="font-medium text-sm text-foreground">{item.food}</p>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground leading-snug">{item.food}</p>
                             {item.portion && (
-                              <p className="text-xs text-muted-foreground">{item.portion}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{item.portion}</p>
                             )}
                           </div>
                           {item.calories != null && (
-                            <span className="text-xs text-muted-foreground font-mono">
+                            <span className="text-xs text-muted-foreground font-medium tabular-nums flex-shrink-0">
                               {item.calories} kcal
                             </span>
                           )}
-                        </div>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   )}
-                  {/* Substitute Button */}
+
                   <Drawer>
                     <DrawerTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full h-9 rounded-lg border-dashed"
+                        className="w-full h-9 rounded-xl border-dashed border-border/70 text-muted-foreground hover:text-foreground"
                         onClick={() => setSelectedMeal(meal.name)}
                       >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Substituir
+                        <RefreshCw className="w-3.5 h-3.5 mr-2" />
+                        Ver substituições
                       </Button>
                     </DrawerTrigger>
                     <DrawerContent>
                       <DrawerHeader>
-                        <DrawerTitle>Opções de Substituição</DrawerTitle>
+                        <DrawerTitle className="text-base">Substituições — {meal.name}</DrawerTitle>
                       </DrawerHeader>
-                      <div className="px-4 pb-8 space-y-3">
+                      <div className="px-4 pb-8 space-y-2.5">
                         {(mealSubstitutes[meal.name] || mealSubstitutes['Almoço']).map((sub, i) => (
                           <Card
                             key={i}
-                            className="border-border/50 hover:border-primary/30 transition-colors cursor-pointer"
+                            className="border-border/60 hover:border-[#518C5B]/40 transition-colors cursor-pointer"
                           >
-                            <CardContent className="p-4 flex items-center justify-between">
-                              <div>
-                                <p className="font-medium text-foreground">{sub.food}</p>
-                                <p className="text-xs text-muted-foreground">{sub.portion}</p>
+                            <CardContent className="p-3.5 flex items-center justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-foreground leading-snug">{sub.food}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{sub.portion}</p>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground font-mono">
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span className="text-xs text-muted-foreground tabular-nums">
                                   {sub.calories} kcal
                                 </span>
-                                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                                <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
                               </div>
                             </CardContent>
                           </Card>
@@ -379,12 +373,11 @@ export function PatientPlano({ mealPlan }: PatientPlanoProps) {
         </Accordion>
       )}
 
-      {/* Notes */}
       {planData?.notes && (
-        <Card className="border-border/50 mt-4">
+        <Card className="border-border/60 mt-4">
           <CardContent className="p-4">
-            <h3 className="font-semibold text-sm text-foreground mb-2">Observações</h3>
-            <p className="text-sm text-muted-foreground">{planData.notes}</p>
+            <h3 className="font-semibold text-sm text-foreground mb-1.5">Observações</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">{planData.notes}</p>
           </CardContent>
         </Card>
       )}

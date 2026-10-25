@@ -1,5 +1,4 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Clock, ChevronRight, Coffee, Sun, Moon, Cookie, UtensilsCrossed } from 'lucide-react';
 import { Meal } from '@/pages/PatientMobileApp';
 
@@ -16,64 +15,54 @@ const mealIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   'Ceia': UtensilsCrossed,
 };
 
-const mealGradients: Record<string, string> = {
-  'Café da Manhã': 'from-amber-500/20 to-amber-500/5',
-  'Lanche da Manhã': 'from-orange-500/20 to-orange-500/5',
-  'Almoço': 'from-green-500/20 to-green-500/5',
-  'Lanche da Tarde': 'from-blue-500/20 to-blue-500/5',
-  'Jantar': 'from-purple-500/20 to-purple-500/5',
-  'Ceia': 'from-slate-500/20 to-slate-500/5',
-};
-
 export function NextMealCard({ meal }: NextMealCardProps) {
   const Icon = mealIcons[meal.name] || UtensilsCrossed;
-  const gradient = mealGradients[meal.name] || 'from-primary/20 to-primary/5';
 
   return (
-    <Card className={`border-border/50 overflow-hidden bg-gradient-to-br ${gradient}`}>
+    <Card className="border-border/60 overflow-hidden bg-card">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-muted-foreground">Próxima Refeição</h2>
-          {meal.isTomorrow && (
-            <span className="text-[10px] bg-muted/50 text-muted-foreground px-2 py-0.5 rounded-full">
-              Amanhã
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Próxima Refeição
+            </span>
+            {meal.isTomorrow && (
+              <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                Amanhã
+              </span>
+            )}
+          </div>
+          {meal.scheduledTime && (
+            <span className="text-xs font-medium text-[#518C5B] flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {meal.scheduledTime}
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-background/60 flex items-center justify-center">
-            <Icon className="w-6 h-6 text-primary" />
+          <div className="w-11 h-11 rounded-xl bg-[#518C5B]/10 flex items-center justify-center flex-shrink-0">
+            <Icon className="w-5 h-5 text-[#518C5B]" />
           </div>
-          
-          <div className="flex-1">
-            <h3 className="font-semibold text-foreground">{meal.name}</h3>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Clock className="w-3 h-3" />
-              <span>{meal.scheduledTime || meal.time}</span>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-foreground text-sm">{meal.name}</h3>
+            <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
               {meal.totalCalories && (
+                <span className="tabular-nums">{meal.totalCalories} kcal</span>
+              )}
+              {meal.items && meal.items.length > 0 && (
                 <>
-                  <span className="mx-1">•</span>
-                  <span>{meal.totalCalories} kcal</span>
+                  {meal.totalCalories && <span className="text-muted-foreground/40">•</span>}
+                  <span className="truncate">
+                    {meal.items.slice(0, 2).map(item => item.food).join(', ')}
+                    {meal.items.length > 2 && ` +${meal.items.length - 2}`}
+                  </span>
                 </>
               )}
             </div>
           </div>
-          
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
-            <ChevronRight className="w-5 h-5" />
-          </Button>
+          <ChevronRight className="w-4 h-4 text-muted-foreground/50 flex-shrink-0" />
         </div>
-
-        {/* Preview items */}
-        {meal.items && meal.items.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-border/30">
-            <p className="text-xs text-muted-foreground">
-              {meal.items.slice(0, 3).map(item => item.food).join(' • ')}
-              {meal.items.length > 3 && ` +${meal.items.length - 3} mais`}
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

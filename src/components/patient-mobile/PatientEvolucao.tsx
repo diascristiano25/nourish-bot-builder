@@ -2,24 +2,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Camera, 
-  Plus,
-  Scale,
-  Calendar
-} from 'lucide-react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip,
-  Area,
-  AreaChart,
-} from 'recharts';
+import { TrendingUp, TrendingDown, Plus, Scale, Camera } from 'lucide-react';
+import { XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart } from 'recharts';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -33,21 +17,12 @@ interface WeightLog {
   measured_at: string;
 }
 
-// Dummy before/after photos
-const dummyPhotos = [
-  { id: 1, date: '2024-01-15', type: 'before' as const },
-  { id: 2, date: '2024-02-15', type: 'progress' as const },
-  { id: 3, date: '2024-03-15', type: 'progress' as const },
-];
-
 export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (patientId) {
-      fetchWeightLogs();
-    }
+    if (patientId) fetchWeightLogs();
   }, [patientId]);
 
   const fetchWeightLogs = async () => {
@@ -58,20 +33,11 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
         .eq('patient_id', patientId)
         .order('measured_at', { ascending: true })
         .limit(30);
-
       if (error) throw error;
       setWeightLogs(data || []);
     } catch (error) {
       console.error('Error fetching weight logs:', error);
-      // Use dummy data if no real data
-      setWeightLogs([
-        { id: '1', weight: 78.5, measured_at: '2024-01-01' },
-        { id: '2', weight: 77.8, measured_at: '2024-01-15' },
-        { id: '3', weight: 77.2, measured_at: '2024-02-01' },
-        { id: '4', weight: 76.5, measured_at: '2024-02-15' },
-        { id: '5', weight: 76.0, measured_at: '2024-03-01' },
-        { id: '6', weight: 75.3, measured_at: '2024-03-15' },
-      ]);
+      setWeightLogs([]);
     } finally {
       setLoading(false);
     }
@@ -83,15 +49,25 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
   }));
 
   const currentWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weight : 0;
-  const previousWeight = weightLogs.length > 1 ? weightLogs[weightLogs.length - 2].weight : currentWeight;
-  const weightDiff = currentWeight - previousWeight;
-  const isLosing = weightDiff < 0;
+  const firstWeight = weightLogs.length > 0 ? weightLogs[0].weight : currentWeight;
+  const totalDiff = currentWeight - firstWeight;
+  const isLosing = totalDiff < 0;
+
+  const handleAddWeight = () => {
+    const weight = prompt('Digite seu peso atual (kg):');
+    if (weight && !isNaN(Number(weight))) {
+      supabase
+        .from('weight_logs')
+        .insert({ patient_id: patientId, weight: Number(weight), measured_at: new Date().toISOString() })
+        .then(() => fetchWeightLogs());
+    }
+  };
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-card/95 backdrop-blur-sm border border-border/50 rounded-lg px-3 py-2 shadow-lg">
-          <p className="text-sm font-semibold text-foreground">{payload[0].value} kg</p>
+        <div className="bg-card border border-border/60 rounded-lg px-3 py-2 shadow-lg">
+          <p className="text-sm font-semibold text-foreground tabular-nums">{payload[0].value} kg</p>
           <p className="text-xs text-muted-foreground">{payload[0].payload.date}</p>
         </div>
       );
@@ -99,94 +75,96 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
     return null;
   };
 
+  if (loading) {
+    return (
+      <div className="px-4 pt-4">
+        <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">Carregando...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="px-4 pt-4 animate-fade-in">
-      {/* Header */}
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Evolução</h1>
-        <p className="text-sm text-muted-foreground">Acompanhe seu progresso</p>
+    <div className="px-4 pt-4 pb-4">
+      <header className="mb-5">
+        <h1 className="text-xl font-semibold text-foreground">Evolução</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Acompanhe seu progresso</p>
       </header>
 
-      {/* Current Weight Card */}
-      <Card className="border-border/50 mb-4 bg-gradient-to-br from-primary/10 to-primary/5">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Scale className="w-6 h-6 text-primary" />
+      {/* Stat cards row */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <Card className="border-border/60">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-[#518C5B]/10 flex items-center justify-center">
+                <Scale className="w-4 h-4 text-[#518C5B]" />
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Peso atual</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {currentWeight.toFixed(1)} kg
-                </p>
-              </div>
+              <span className="text-xs font-medium text-muted-foreground">Peso atual</span>
             </div>
-            {weightDiff !== 0 && (
-              <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full ${
-                isLosing 
-                  ? 'bg-success/20 text-success' 
-                  : 'bg-warning/20 text-warning'
+            <p className="text-2xl font-semibold text-foreground leading-none tabular-nums">
+              {currentWeight > 0 ? currentWeight.toFixed(1) : '—'}
+              <span className="text-sm font-normal text-muted-foreground"> kg</span>
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                totalDiff === 0 ? 'bg-muted' : isLosing ? 'bg-[#518C5B]/10' : 'bg-[#C4764A]/10'
               }`}>
-                {isLosing ? (
-                  <TrendingDown className="w-4 h-4" />
+                {totalDiff === 0 ? (
+                  <Scale className="w-4 h-4 text-muted-foreground" />
+                ) : isLosing ? (
+                  <TrendingDown className="w-4 h-4 text-[#518C5B]" />
                 ) : (
-                  <TrendingUp className="w-4 h-4" />
+                  <TrendingUp className="w-4 h-4 text-[#C4764A]" />
                 )}
-                <span className="text-sm font-semibold">
-                  {Math.abs(weightDiff).toFixed(1)} kg
-                </span>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              <span className="text-xs font-medium text-muted-foreground">Variação</span>
+            </div>
+            <p className={`text-2xl font-semibold leading-none tabular-nums ${
+              totalDiff === 0 ? 'text-foreground' : isLosing ? 'text-[#518C5B]' : 'text-[#C4764A]'
+            }`}>
+              {totalDiff === 0 ? '0.0' : `${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(1)}`}
+              <span className="text-sm font-normal text-muted-foreground"> kg</span>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Weight Chart */}
-      <Card className="border-border/50 mb-4">
+      <Card className="border-border/60 mb-4">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-medium text-muted-foreground">Evolução do Peso</h2>
+            <h2 className="text-sm font-semibold text-foreground">Curva de Peso</h2>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="h-8 text-xs"
-              onClick={() => {
-                const weight = prompt('Digite seu peso atual (kg):');
-                if (weight && !isNaN(Number(weight))) {
-                  supabase
-                    .from('weight_logs')
-                    .insert({
-                      patient_id: patientId,
-                      weight: Number(weight),
-                      measured_at: new Date().toISOString(),
-                    })
-                    .then(() => fetchWeightLogs());
-                }
-              }}
+              className="h-8 text-xs rounded-lg border-border/70"
+              onClick={handleAddWeight}
             >
               <Plus className="w-3.5 h-3.5 mr-1" />
-              Adicionar
+              Registrar
             </Button>
           </div>
-          
-          {chartData.length > 0 ? (
+          {chartData.length > 1 ? (
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                   <defs>
                     <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#518C5B" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#518C5B" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis 
-                    dataKey="date" 
+                  <XAxis
+                    dataKey="date"
                     tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
                     axisLine={false}
                     tickLine={false}
                   />
-                  <YAxis 
+                  <YAxis
                     domain={['dataMin - 2', 'dataMax + 2']}
                     tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
                     axisLine={false}
@@ -196,58 +174,50 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
                   <Area
                     type="monotone"
                     dataKey="weight"
-                    stroke="hsl(var(--primary))"
+                    stroke="#518C5B"
                     strokeWidth={2}
                     fill="url(#weightGradient)"
-                    dot={{ r: 3, fill: 'hsl(var(--primary))' }}
-                    activeDot={{ r: 5, fill: 'hsl(var(--primary))' }}
+                    dot={{ r: 3, fill: '#518C5B' }}
+                    activeDot={{ r: 5, fill: '#518C5B' }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-48 flex items-center justify-center text-muted-foreground">
-              <p className="text-sm">Nenhum registro de peso ainda</p>
+            <div className="h-48 flex flex-col items-center justify-center text-center">
+              <Scale className="w-10 h-10 text-muted-foreground/30 mb-3" />
+              <p className="text-sm text-muted-foreground">
+                {chartData.length === 1 ? 'Registre mais pesos para ver sua curva' : 'Nenhum registro de peso ainda'}
+              </p>
+              <Button variant="outline" size="sm" className="mt-3 rounded-lg border-border/70" onClick={handleAddWeight}>
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                Registrar primeiro peso
+              </Button>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Before & After Photos */}
-      <Card className="border-border/50">
+      {/* Photos placeholder — honest empty state instead of dummy data */}
+      <Card className="border-border/60">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-medium text-muted-foreground">Antes e Depois</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 text-xs"
-              onClick={() => {
-                alert('Funcionalidade de upload de fotos será implementada em breve!');
-              }}
-            >
-              <Camera className="w-3.5 h-3.5 mr-1" />
-              Nova foto
-            </Button>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-foreground">Fotos de Evolução</h2>
           </div>
-          
           <div className="grid grid-cols-3 gap-2">
-            {dummyPhotos.map((photo) => (
-              <div 
-                key={photo.id}
-                className="aspect-square rounded-xl bg-muted/30 border border-dashed border-border/50 flex flex-col items-center justify-center"
+            {[0, 1, 2].map(i => (
+              <div
+                key={i}
+                className="aspect-square rounded-xl bg-muted/40 border border-dashed border-border/60 flex flex-col items-center justify-center"
               >
-                <Camera className="w-6 h-6 text-muted-foreground/50 mb-1" />
-                <span className="text-[10px] text-muted-foreground">
-                  {format(new Date(photo.date), 'MMM yyyy', { locale: ptBR })}
-                </span>
+                <Camera className="w-5 h-5 text-muted-foreground/40 mb-1" />
+                <span className="text-[10px] text-muted-foreground/70">Em breve</span>
               </div>
             ))}
-            <button className="aspect-square rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center hover:border-primary/30 transition-colors">
-              <Plus className="w-6 h-6 text-muted-foreground/50 mb-1" />
-              <span className="text-[10px] text-muted-foreground">Adicionar</span>
-            </button>
           </div>
+          <p className="text-xs text-muted-foreground/70 mt-3 text-center">
+            O upload de fotos estará disponível em uma próxima atualização.
+          </p>
         </CardContent>
       </Card>
     </div>
