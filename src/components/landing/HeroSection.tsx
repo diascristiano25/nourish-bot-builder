@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Play, Sparkles, Zap, ShieldCheck, Activity } from 'lucide-react';
 
@@ -35,12 +35,12 @@ export default function HeroSection() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start scroll-fade-up scroll-stagger-3">
-              <Link to="/auth" className="w-full sm:w-auto">
+              <a href="https://wa.me/5513996205253?text=Ol%C3%A1!%20Quero%20come%C3%A7ar%20meu%20teste%20gr%C3%A1tis%20de%2014%20dias%20no%20NutriFlow." target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg bg-nf-teal hover:bg-nf-teal/90 text-white shadow-lg shadow-nf-teal/25 transition-all hover:scale-105 group">
-                  Começar Grátis Agora
+                  Começar Teste Grátis
                   <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
-              </Link>
+              </a>
               <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg border-2 border-nf-border hover:border-nf-teal hover:text-nf-teal transition-colors bg-card/50 backdrop-blur-sm">
                 <Play className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
                 Ver Demonstração

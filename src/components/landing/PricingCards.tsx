@@ -6,9 +6,8 @@ import { pricingPlans } from '@/data/landingContent';
 
 export function PricingCards(): JSX.Element {
   const handlePlanClick = (planId: string, ctaLink: string) => {
-    const url = `${ctaLink}?plan=${planId}`;
-    console.log('Navigate to:', url);
-    // TODO: actual navigation when signup flow exists
+    // ctaLink já é a URL completa do WhatsApp com mensagem pré-preenchida
+    window.open(ctaLink, '_blank', 'noopener,noreferrer');
   };
 
   return (

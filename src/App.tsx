@@ -72,6 +72,7 @@ const PatientProgress = lazy(() => import("./pages/PatientProgress"));
 const PatientProfile = lazy(() => import("./pages/PatientProfile"));
 const PatientMealPlan = lazy(() => import("./pages/PatientMealPlan"));
 const Suporte = lazy(() => import("./pages/Suporte"));
+const DesafioNutri = lazy(() => import("./pages/DesafioNutri"));
 
 function PageLoader() {
   return (
@@ -127,6 +128,7 @@ function App() {
                   ) : (
                     <>
                       <Route path="/" element={<LandingPage />} />
+          <Route path="/desafio-nutri" element={<DesafioNutri />} />
                       <Route path="/old" element={<LandingPageProfessional />} />
                       <Route path="/new" element={<LandingPageNew />} />
                       <Route path="/auth" element={<Auth />} />

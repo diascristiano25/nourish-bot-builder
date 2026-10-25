@@ -51,7 +51,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     id: 'basico',
     name: 'Básico',
-    price: 97,
+    price: 39.90,
     billingPeriod: 'month',
     description: 'Para nutricionistas iniciando a carreira digital',
     features: [
@@ -62,13 +62,13 @@ export const pricingPlans: PricingPlan[] = [
       'Suporte por email'
     ],
     highlighted: false,
-    ctaText: 'Começar agora',
-    ctaLink: '/auth'
+    ctaText: 'Começar Teste Grátis',
+    ctaLink: 'https://wa.me/5513996205253?text=' + encodeURIComponent('Olá! Quero começar meu teste grátis de 14 dias no NutriFlow.')
   },
   {
     id: 'pro',
     name: 'Pro',
-    price: 197,
+    price: 69.90,
     billingPeriod: 'month',
     description: 'Para consultórios estabelecidos com demanda crescente',
     features: [
@@ -81,13 +81,13 @@ export const pricingPlans: PricingPlan[] = [
       'Suporte prioritário'
     ],
     highlighted: true,
-    ctaText: 'Teste grátis por 14 dias',
-    ctaLink: '/auth'
+    ctaText: 'Começar Teste Grátis',
+    ctaLink: 'https://wa.me/5513996205253?text=' + encodeURIComponent('Olá! Quero começar meu teste grátis de 14 dias no NutriFlow.')
   },
   {
     id: 'elite',
     name: 'Elite',
-    price: 397,
+    price: 109.90,
     billingPeriod: 'month',
     description: 'Para clínicas com múltiplos profissionais',
     features: [
@@ -100,8 +100,8 @@ export const pricingPlans: PricingPlan[] = [
       'Suporte 24/7 via WhatsApp'
     ],
     highlighted: false,
-    ctaText: 'Falar com consultor',
-    ctaLink: 'mailto:contato@nutriflow.com.br'
+    ctaText: 'Começar Teste Grátis',
+    ctaLink: 'https://wa.me/5513996205253?text=' + encodeURIComponent('Olá! Quero começar meu teste grátis de 14 dias no NutriFlow (plano Enterprise).')
   }
 ];
 

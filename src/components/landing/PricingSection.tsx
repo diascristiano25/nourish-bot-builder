@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Check, Sparkles, ArrowRight, Zap } from 'lucide-react';
 
+const WHATSAPP_CHECKOUT = 'https://wa.me/5513996205253?text=' + encodeURIComponent('Olá! Quero começar meu teste grátis de 14 dias no NutriFlow.');
+
 const plans = [
   {
     name: 'Starter',
-    price: 'R$ 99',
+    price: 'R$ 39,90',
     period: '/mês',
     description: 'Para começar a inovar',
     features: [
@@ -17,11 +19,12 @@ const plans = [
     ],
     highlighted: false,
     accent: 'teal',
-    cta: 'Começar Grátis',
+    cta: 'Começar Teste Grátis',
+    ctaHref: WHATSAPP_CHECKOUT,
   },
   {
     name: 'Pro',
-    price: 'R$ 299',
+    price: 'R$ 69,90',
     period: '/mês',
     description: 'Para crescer com IA',
     badge: 'Mais Popular',
@@ -36,12 +39,13 @@ const plans = [
     ],
     highlighted: true,
     accent: 'coral',
-    cta: 'Começar Grátis por 14 Dias',
+    cta: 'Começar Teste Grátis por 14 Dias',
+    ctaHref: WHATSAPP_CHECKOUT,
   },
   {
     name: 'Enterprise',
-    price: 'Customizado',
-    period: '',
+    price: 'R$ 109,90',
+    period: '/mês',
     description: 'Solução completa para clínicas',
     features: [
       'Pacientes ilimitados',
@@ -54,7 +58,8 @@ const plans = [
     ],
     highlighted: false,
     accent: 'teal',
-    cta: 'Falar com Vendas',
+    cta: 'Começar Teste Grátis',
+    ctaHref: WHATSAPP_CHECKOUT,
   },
 ];
 
@@ -138,8 +143,8 @@ export default function PricingSection() {
                   )}
                 </div>
 
-                {/* CTA */}
-                <Link to="/auth" className="block mb-8">
+                {/* CTA — aponta para WhatsApp (campanha leva ao teste) */}
+                <a href={plan.ctaHref} target="_blank" rel="noopener noreferrer" className="block mb-8">
                   <Button
                     className={`w-full py-4 text-base font-semibold rounded-xl transition-all duration-300 group ${
                       plan.highlighted
@@ -150,7 +155,7 @@ export default function PricingSection() {
                     {plan.cta}
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
-                </Link>
+                </a>
 
                 {/* Features */}
                 <div className="space-y-4 flex-1">
