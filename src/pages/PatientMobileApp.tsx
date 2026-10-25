@@ -135,9 +135,12 @@ export default function PatientMobileApp() {
 
       if (mealPlans && mealPlans.length > 0) {
         const plan = mealPlans[0];
+        // REAL schema: column is `meals` (jsonb), NOT `plan_data`.
+        // Map meals → plan_data.meals so PatientPlano's extractMealGroups works.
+        const mealsArray = Array.isArray(plan.meals) ? plan.meals : [];
         setMealPlan({
           ...plan,
-          plan_data: plan.plan_data as unknown as MealPlanData,
+          plan_data: { meals: mealsArray, totalCalories: plan.total_calories } as unknown as MealPlanData,
         });
       }
 
