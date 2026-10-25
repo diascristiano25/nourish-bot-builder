@@ -26,14 +26,106 @@ interface Meal {
 }
 
 interface MealPlanData {
-  meals: Meal[];
+  meals?: Meal[];
   totalCalories?: number;
+  total_calories?: number;
   macros?: {
     protein: number;
     carbs: number;
     fat: number;
   };
   notes?: string;
+  [key: string]: any; // Allow flexible AI-generated structures
+}
+
+// Robust meal extraction supporting multiple plan_data structures
+function extractMealsFromPlanData(planData: any): Meal[] {
+  if (!planData) return [];
+
+  // Structure 1: plan_data.meals (array of meal groups)
+  if (Array.isArray(planData.meals)) {
+    return planData.meals.map((m: any, idx: number) => ({
+      name: m.name || m.nome || m.title || `Refeição ${idx + 1}`,
+      time: m.time || m.horario || m.hour || undefined,
+      totalCalories: m.totalCalories || m.total_calories || m.kcal || undefined,
+      items: Array.isArray(m.items || m.foods || m.alimentos || m.refeicoes)
+        ? (m.items || m.foods || m.alimentos || m.refeicoes).map((it: any, i: number) => ({
+            food: it.food || it.nome || it.name || it.alimento || `Item ${i + 1}`,
+            portion: it.portion || it.porcao || it.quantidade || it.amount || '',
+            calories: it.calories || it.kcal || it.calorias || undefined,
+          }))
+        : [],
+    }));
+  }
+
+  // Structure 2: plan_data is array of days → take first day
+  if (Array.isArray(planData) && planData.length > 0) {
+    const first = planData[0];
+    if (Array.isArray(first?.meals)) {
+      return extractMealsFromPlanData({ meals: first.meals });
+    }
+    if (Array.isArray(first)) {
+      return first.map((m: any, idx: number) => ({
+        name: m.name || m.nome || `Refeição ${idx + 1}`,
+        time: m.time || m.horario || undefined,
+        items: Array.isArray(m.items || m) ? (m.items || m).map((it: any, i: number) => ({
+          food: typeof it === 'string' ? it : (it.food || it.nome || it.name || `Item ${i + 1}`),
+          portion: it.portion || it.porcao || '',
+          calories: it.calories || it.kcal || undefined,
+        })) : [],
+      }));
+    }
+  }
+
+  // Structure 3: plan_data.days[0].meals
+  if (planData.days && Array.isArray(planData.days) && planData.days[0]?.meals) {
+    return extractMealsFromPlanData({ meals: planData.days[0].meals });
+  }
+
+  // Structure 4: plan_data has meal-type keys (cafe_da_manha, almoco, etc.)
+  const mealKeys = ['cafe_da_manha', 'breakfast', 'almoco', 'lunch', 'lanche', 'snack', 'jantar', 'dinner', 'ceia'];
+  const found: Meal[] = [];
+  for (const key of mealKeys) {
+    if (planData[key]) {
+      const val = planData[key];
+      const label = {
+        cafe_da_manha: 'Café da Manhã', breakfast: 'Café da Manhã',
+        almoco: 'Almoço', lunch: 'Almoço',
+        lanche: 'Lanche', snack: 'Lanche',
+        jantar: 'Jantar', dinner: 'Jantar',
+        ceia: 'Ceia',
+      }[key] || key;
+
+      if (Array.isArray(val)) {
+        found.push({
+          name: label,
+          items: val.map((it: any, i: number) => ({
+            food: typeof it === 'string' ? it : (it.food || it.nome || it.name || `Item ${i + 1}`),
+            portion: it.portion || it.porcao || '',
+            calories: it.calories || it.kcal || undefined,
+          })),
+        });
+      } else if (typeof val === 'object') {
+        found.push({
+          name: label,
+          items: [{
+            food: val.name || val.nome || val.food || label,
+            portion: val.portion || val.porcao || '',
+            calories: val.calories || val.kcal || undefined,
+          }],
+        });
+      }
+    }
+  }
+  if (found.length > 0) return found;
+
+  // Structure 5: plan_data.day_1 / dia_1
+  const dayKeys = Object.keys(planData).filter(k => /^day[_-]?\d|^dia[_-]?\d/i.test(k));
+  if (dayKeys.length > 0) {
+    return extractMealsFromPlanData(planData[dayKeys[0]]);
+  }
+
+  return [];
 }
 
 interface MealPlan {
@@ -337,47 +429,65 @@ export default function PublicPatientPortal() {
                 <span className="text-foreground">Suas Refeições</span>
               </h3>
               
-              {planData?.meals?.map((meal, index) => (
-                <GlassCard key={index} className="border-cyan-500/20 overflow-hidden">
-                  <div 
-                    className="px-4 py-3 flex items-center justify-between border-b border-cyan-500/20"
-                    style={{ background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}15)` }}
-                  >
-                    <div className="flex items-center gap-2 text-foreground">
-                      {mealIcons[meal.name] || <Utensils className="w-5 h-5" />}
-                      <span className="font-semibold">{meal.name}</span>
+              {(() => {
+                const meals = extractMealsFromPlanData(planData);
+                if (meals.length === 0) {
+                  return (
+                    <GlassCard className="border-cyan-500/20">
+                      <CardContent className="pt-6 text-center">
+                        <Utensils className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                        <p className="text-muted-foreground">Refeições indisponíveis</p>
+                        <p className="text-xs text-muted-foreground mt-1">Seu nutricionista está preparando seu cardápio.</p>
+                      </CardContent>
+                    </GlassCard>
+                  );
+                }
+                return meals.map((meal, index) => (
+                  <GlassCard key={index} className="border-cyan-500/20 overflow-hidden">
+                    <div
+                      className="px-4 py-3 flex items-center justify-between border-b border-cyan-500/20"
+                      style={{ background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}15)` }}
+                    >
+                      <div className="flex items-center gap-2 text-foreground">
+                        {mealIcons[meal.name] || <Utensils className="w-5 h-5" />}
+                        <span className="font-semibold">{meal.name}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        {meal.time && (
+                          <span className="flex items-center gap-1 text-muted-foreground font-mono">
+                            <Clock className="w-4 h-4" />
+                            {meal.time}
+                          </span>
+                        )}
+                        {meal.totalCalories && (
+                          <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+                            {meal.totalCalories} kcal
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      {meal.time && (
-                        <span className="flex items-center gap-1 text-muted-foreground font-mono">
-                          <Clock className="w-4 h-4" />
-                          {meal.time}
-                        </span>
+                    <CardContent className="pt-4">
+                      {meal.items && meal.items.length > 0 ? (
+                        <ul className="space-y-2">
+                          {meal.items.map((item, itemIndex) => (
+                            <li key={itemIndex} className="flex justify-between items-center py-2 border-b border-cyan-500/10 last:border-0">
+                              <div>
+                                <p className="font-medium text-foreground">{item.food}</p>
+                                <p className="text-sm text-muted-foreground">{item.portion}</p>
+                              </div>
+                              {item.calories && (
+                                <span className="text-sm font-mono text-cyan-400">{item.calories} kcal</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-muted-foreground py-2">Detalhes em breve</p>
                       )}
-                      {meal.totalCalories && (
-                        <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
-                          {meal.totalCalories} kcal
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <CardContent className="pt-4">
-                    <ul className="space-y-2">
-                      {meal.items?.map((item, itemIndex) => (
-                        <li key={itemIndex} className="flex justify-between items-center py-2 border-b border-cyan-500/10 last:border-0">
-                          <div>
-                            <p className="font-medium text-foreground">{item.food}</p>
-                            <p className="text-sm text-muted-foreground">{item.portion}</p>
-                          </div>
-                          {item.calories && (
-                            <span className="text-sm font-mono text-cyan-400">{item.calories} kcal</span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </GlassCard>
-              ))}
+                    </CardContent>
+                  </GlassCard>
+                ));
+              })()}
             </div>
 
             {/* Notes/Observations */}
