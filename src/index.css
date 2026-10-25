@@ -97,51 +97,20 @@
   }
 }
 
-/* ========================================
-   SCROLL-DRIVEN MOTION SYSTEM (Approach A)
-   ======================================== */
+/* ======================================== */
 
-@supports (animation-timeline: view()) {
-  .scroll-fade-up {
-    animation: nfFadeUp linear forwards;
-    animation-timeline: view();
-    animation-range: entry 0% entry 40%;
-  }
-  .scroll-slide-left {
-    animation: nfSlideLeft linear forwards;
-    animation-timeline: view();
-    animation-range: entry 0% entry 50%;
-  }
-  .scroll-slide-right {
-    animation: nfSlideRight linear forwards;
-    animation-timeline: view();
-    animation-range: entry 0% entry 50%;
-  }
-  .scroll-scale-in {
-    animation: nfScaleIn linear forwards;
-    animation-timeline: view();
-    animation-range: entry 0% entry 40%;
-  }
-  .scroll-parallax-y {
-    animation: nfParallaxY linear forwards;
-    animation-timeline: scroll();
-    animation-range: 0% 100%;
-  }
-  .scroll-line-grow {
-    animation: nfLineGrow linear forwards;
-    animation-timeline: view();
-    animation-range: entry 0% cover 50%;
-  }
-  .scroll-rotate-in {
-    animation: nfRotateIn linear forwards;
-    animation-timeline: view();
-    animation-range: entry 0% entry 50%;
-  }
-  .scroll-blur-in {
-    animation: nfBlurIn linear forwards;
-    animation-timeline: view();
-    animation-range: entry 0% entry 40%;
-  }
+/* Force visibility for all scroll-animated elements (critical for dark mode) */
+.scroll-fade-up,
+.scroll-slide-left,
+.scroll-slide-right,
+.scroll-scale-in,
+.scroll-parallax-y,
+.scroll-line-grow,
+.scroll-rotate-in,
+.scroll-blur-in {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
 }
 
 /* Fallback for browsers without scroll-timeline support */
