@@ -3,9 +3,9 @@ import { testimonials } from '@/data/landingContent';
 
 export function TestimonialGrid() {
   return (
-    <section id="testimonials" className="py-16 md:py-24 bg-slate-50">
+    <section id="testimonials" className="py-16 md:py-24 bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-slate-900">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-foreground">
           O que dizem nossos clientes
         </h2>
 
@@ -16,7 +16,7 @@ export function TestimonialGrid() {
             const instagramUrl = `https://instagram.com/${instagramHandle}`;
 
             return (
-              <Card key={testimonial.id} className="border-slate-200 bg-white">
+              <Card key={testimonial.id} className="border-border bg-card">
                 <CardContent className="p-6">
                   <img
                     src={testimonial.photo}
@@ -25,15 +25,15 @@ export function TestimonialGrid() {
                     loading="lazy"
                   />
 
-                  <p className="text-slate-700 italic mb-4">
+                  <p className="text-foreground italic mb-4">
                     "{testimonial.quote}"
                   </p>
 
                   <div className="space-y-1">
-                    <p className="font-semibold text-slate-900">
+                    <p className="font-semibold text-foreground">
                       {testimonial.name}
                     </p>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-muted-foreground">
                       {testimonial.city}, {testimonial.state}
                     </p>
                     <a

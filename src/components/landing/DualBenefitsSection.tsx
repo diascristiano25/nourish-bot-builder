@@ -14,15 +14,15 @@ const patientBenefits = [
 
 export function DualBenefitsSection(): JSX.Element {
   return (
-    <section className="py-16 md:py-24 bg-slate-50">
+    <section className="py-16 md:py-24 bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-16">
           Benefícios para Todos
         </h2>
         <div className="grid lg:grid-cols-2 gap-16">
           {/* Left column: Nutritionist */}
           <div>
-            <h3 className="text-2xl font-semibold text-slate-900 mb-8">
+            <h3 className="text-2xl font-semibold text-foreground mb-8">
               Para o Nutricionista
             </h3>
             <div className="space-y-6">
@@ -34,10 +34,10 @@ export function DualBenefitsSection(): JSX.Element {
                       <Icon size={32} weight="duotone" className="text-emerald-500" />
                     </div>
                     <div>
-                      <h4 className="text-lg font-semibold text-slate-900 mb-1">
+                      <h4 className="text-lg font-semibold text-foreground mb-1">
                         {benefit.title}
                       </h4>
-                      <p className="text-slate-600">
+                      <p className="text-muted-foreground">
                         {benefit.description}
                       </p>
                     </div>
@@ -49,7 +49,7 @@ export function DualBenefitsSection(): JSX.Element {
 
           {/* Right column: Patient */}
           <div>
-            <h3 className="text-2xl font-semibold text-slate-900 mb-8">
+            <h3 className="text-2xl font-semibold text-foreground mb-8">
               Para o Paciente
             </h3>
             <div className="space-y-6">
@@ -61,10 +61,10 @@ export function DualBenefitsSection(): JSX.Element {
                       <Icon size={32} weight="duotone" className="text-emerald-500" />
                     </div>
                     <div>
-                      <h4 className="text-lg font-semibold text-slate-900 mb-1">
+                      <h4 className="text-lg font-semibold text-foreground mb-1">
                         {benefit.title}
                       </h4>
-                      <p className="text-slate-600">
+                      <p className="text-muted-foreground">
                         {benefit.description}
                       </p>
                     </div>

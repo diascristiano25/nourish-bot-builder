@@ -51,7 +51,7 @@ export default function ValuePropsSection() {
                 <div className="space-y-2">
                   <div className="h-2 w-full bg-nf-border/50 rounded-full overflow-hidden">
                     <div className="h-full bg-nf-teal w-3/4 animate-shimmer relative">
-                      <div className="absolute inset-0 bg-white/30 animate-shimmer" />
+                      <div className="absolute inset-0 bg-card/30 animate-shimmer" />
                     </div>
                   </div>
                   <div className="flex justify-between text-xs text-nf-text-muted">

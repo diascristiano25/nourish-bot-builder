@@ -57,7 +57,7 @@ export default function LandingFooter() {
             © 2026 NutriFlow. Inovação em nutrição. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-2 text-xs text-nf-text-muted">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>Todos os sistemas operacionais</span>
           </div>
         </div>

@@ -12,9 +12,9 @@ export function FeatureTabsSection(): JSX.Element {
   };
 
   return (
-    <section id="features" className="py-16 md:py-24 px-6 lg:px-8 bg-white">
+    <section id="features" className="py-16 md:py-24 px-6 lg:px-8 bg-card">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
           Recursos Completos para sua Prática
         </h2>
 
@@ -39,12 +39,12 @@ export function FeatureTabsSection(): JSX.Element {
                 {/* Left: Screenshot */}
                 <div className="order-2 lg:order-1">
                   {!imageLoaded[tab.id] ? (
-                    <div className="w-full aspect-[4/3] rounded-lg bg-slate-200 animate-pulse" />
+                    <div className="w-full aspect-[4/3] rounded-lg bg-muted animate-pulse" />
                   ) : null}
                   <img
                     src={tab.screenshot}
                     alt={`Interface de ${tab.label} do NutriFlow`}
-                    className={`rounded-lg border border-slate-200 shadow-lg w-full transition-opacity duration-300 ${
+                    className={`rounded-lg border border-border shadow-lg w-full transition-opacity duration-300 ${
                       imageLoaded[tab.id] ? 'opacity-100' : 'opacity-0'
                     }`}
                     onLoad={() => handleImageLoad(tab.id)}
@@ -68,10 +68,10 @@ export function FeatureTabsSection(): JSX.Element {
                           )}
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                          <h3 className="text-lg font-semibold text-foreground mb-1">
                             {feature.title}
                           </h3>
-                          <p className="text-slate-600 leading-relaxed">
+                          <p className="text-muted-foreground leading-relaxed">
                             {feature.description}
                           </p>
                         </div>

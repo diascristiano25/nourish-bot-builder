@@ -15,10 +15,10 @@ export function PricingCards(): JSX.Element {
     <section id="pricing" className="py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Planos e Preços
           </h2>
-          <p className="text-xl text-slate-600">
+          <p className="text-xl text-muted-foreground">
             Teste grátis por 14 dias, sem cartão de crédito
           </p>
         </div>
@@ -27,10 +27,10 @@ export function PricingCards(): JSX.Element {
           {pricingPlans.map((plan) => (
             <Card
               key={plan.id}
-              className={`relative bg-white ${
+              className={`relative bg-card ${
                 plan.highlighted
                   ? 'border-2 border-emerald-500 shadow-lg'
-                  : 'border border-slate-200'
+                  : 'border border-border'
               }`}
             >
               {plan.highlighted && (
@@ -42,20 +42,20 @@ export function PricingCards(): JSX.Element {
               )}
 
               <CardHeader className="pb-4">
-                <CardTitle className="text-2xl text-slate-900">
+                <CardTitle className="text-2xl text-foreground">
                   {plan.name}
                 </CardTitle>
-                <CardDescription className="text-slate-600">
+                <CardDescription className="text-muted-foreground">
                   {plan.description}
                 </CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-6">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-slate-900">
+                  <span className="text-4xl font-bold text-foreground">
                     R$ {plan.price}
                   </span>
-                  <span className="text-slate-600">/mês</span>
+                  <span className="text-muted-foreground">/mês</span>
                 </div>
 
                 <ul className="space-y-3">
@@ -66,7 +66,7 @@ export function PricingCards(): JSX.Element {
                         weight="bold"
                         className="text-emerald-500 flex-shrink-0 mt-0.5"
                       />
-                      <span className="text-slate-700">{feature}</span>
+                      <span className="text-foreground">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -77,7 +77,7 @@ export function PricingCards(): JSX.Element {
                   className={`w-full ${
                     plan.highlighted
                       ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                      : 'bg-slate-900 hover:bg-slate-800 text-white'
+                      : 'bg-foreground hover:bg-foreground/90 text-white'
                   }`}
                   onClick={() => handlePlanClick(plan.id, plan.ctaLink)}
                 >

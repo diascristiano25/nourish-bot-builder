@@ -33,16 +33,16 @@ export function HeroWithScreenshot(): JSX.Element {
   };
 
   return (
-    <section className="py-20 px-6 lg:px-8 bg-slate-50">
+    <section className="py-20 px-6 lg:px-8 bg-secondary">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left: Content & Form */}
           <div className="space-y-8">
             <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-tight">
                 {heroContent.headline}
               </h1>
-              <p className="text-xl text-slate-600 leading-relaxed">
+              <p className="text-xl text-muted-foreground leading-relaxed">
                 {heroContent.subheadline}
               </p>
             </div>
@@ -61,7 +61,7 @@ export function HeroWithScreenshot(): JSX.Element {
                   aria-describedby={errors.name ? 'name-error' : undefined}
                 />
                 {errors.name && (
-                  <p id="name-error" className="text-sm text-red-600 mt-1">
+                  <p id="name-error" className="text-sm text-destructive mt-1">
                     {errors.name}
                   </p>
                 )}
@@ -79,7 +79,7 @@ export function HeroWithScreenshot(): JSX.Element {
                   aria-describedby={errors.email ? 'email-error' : undefined}
                 />
                 {errors.email && (
-                  <p id="email-error" className="text-sm text-red-600 mt-1">
+                  <p id="email-error" className="text-sm text-destructive mt-1">
                     {errors.email}
                   </p>
                 )}
@@ -96,11 +96,11 @@ export function HeroWithScreenshot(): JSX.Element {
 
             {/* Trust Badges Strip */}
             <div className="flex flex-wrap gap-3 items-center pt-4">
-              <span className="text-sm text-slate-500">Integrado com:</span>
-              <Badge variant="outline" className="px-3 py-1 text-slate-700 border-slate-300">
+              <span className="text-sm text-muted-foreground">Integrado com:</span>
+              <Badge variant="outline" className="px-3 py-1 text-foreground border-border">
                 Google Calendar
               </Badge>
-              <Badge variant="outline" className="px-3 py-1 text-slate-700 border-slate-300">
+              <Badge variant="outline" className="px-3 py-1 text-foreground border-border">
                 WhatsApp
               </Badge>
             </div>
@@ -111,7 +111,7 @@ export function HeroWithScreenshot(): JSX.Element {
             <img
               src={heroContent.screenshotUrl}
               alt="Painel do NutriFlow mostrando dashboard de nutrição"
-              className="rounded-lg border border-slate-200 shadow-2xl w-full"
+              className="rounded-lg border border-border shadow-2xl w-full"
               loading="eager"
             />
           </div>

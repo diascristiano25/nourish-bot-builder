@@ -102,7 +102,7 @@ function MockupGenerator() {
       <div className="mt-4 flex items-center gap-3">
         <div className="flex-1 h-1.5 rounded-full bg-nf-border/50 overflow-hidden">
           <div className="h-full w-[78%] rounded-full bg-gradient-to-r from-nf-teal to-nf-coral relative">
-            <div className="absolute inset-0 bg-white/30 animate-shimmer" />
+            <div className="absolute inset-0 bg-card/30 animate-shimmer" />
           </div>
         </div>
         <span className="text-xs font-bold text-nf-teal">78%</span>
@@ -141,8 +141,8 @@ function MockupMobile() {
               <div className="text-base font-bold text-nf-text mb-1">Almoço • 12:30</div>
               <div className="text-xs text-nf-text-muted">Frango grelhado + quinoa + legumes</div>
               <div className="mt-3 flex gap-2">
-                <span className="px-2 py-1 rounded-md bg-white/60 text-[10px] font-medium text-nf-text">450 kcal</span>
-                <span className="px-2 py-1 rounded-md bg-white/60 text-[10px] font-medium text-nf-text">35g prot</span>
+                <span className="px-2 py-1 rounded-md bg-card/60 text-[10px] font-medium text-nf-text">450 kcal</span>
+                <span className="px-2 py-1 rounded-md bg-card/60 text-[10px] font-medium text-nf-text">35g prot</span>
               </div>
             </div>
 
@@ -185,7 +185,7 @@ function MockupMobile() {
       {/* Floating Notification */}
       <div className="absolute top-12 -right-4 md:-right-12 glass-card rounded-2xl p-3 animate-float shadow-xl max-w-[180px] z-20">
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-xs font-bold text-nf-text">Check-in feito!</span>
         </div>
         <div className="text-[11px] text-nf-text-muted">Maria marcou o almoço às 12:32</div>

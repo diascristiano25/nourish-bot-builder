@@ -87,11 +87,11 @@ export default function VideoShowcaseSection() {
                       onClick={handlePlay}
                       className="flex items-center gap-2 text-white hover:text-nf-teal transition-colors"
                     >
-                      <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-card/20 backdrop-blur-sm flex items-center justify-center hover:bg-card/30 transition-colors">
                         {isPlaying ? (
                           <div className="flex gap-1">
-                            <div className="w-1 h-4 bg-white rounded" />
-                            <div className="w-1 h-4 bg-white rounded" />
+                            <div className="w-1 h-4 bg-card rounded" />
+                            <div className="w-1 h-4 bg-card rounded" />
                           </div>
                         ) : (
                           <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
@@ -135,7 +135,7 @@ export default function VideoShowcaseSection() {
           {/* Floating elements around video */}
           <div className="absolute -top-6 -left-6 md:-left-12 glass-card rounded-2xl p-4 animate-float shadow-xl max-w-[200px] hidden md:block">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs font-bold text-nf-text">Ao vivo</span>
             </div>
             <div className="text-xs text-nf-text-muted">

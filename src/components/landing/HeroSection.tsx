@@ -41,7 +41,7 @@ export default function HeroSection() {
                   <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg border-2 border-nf-border hover:border-nf-teal hover:text-nf-teal transition-colors bg-white/50 backdrop-blur-sm">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg border-2 border-nf-border hover:border-nf-teal hover:text-nf-teal transition-colors bg-card/50 backdrop-blur-sm">
                 <Play className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
                 Ver Demonstração
               </Button>
@@ -64,7 +64,7 @@ export default function HeroSection() {
           <div className="relative lg:h-[600px] flex items-center justify-center scroll-blur-in scroll-stagger-2">
 
             {/* Main Dashboard Card - Glassmorphism */}
-            <div className="relative w-full max-w-lg aspect-[4/3] bg-white/70 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-6 transform rotate-1 hover:rotate-0 transition-transform duration-500 z-10">
+            <div className="relative w-full max-w-lg aspect-[4/3] bg-card/70 backdrop-blur-xl border border-border/50 shadow-2xl rounded-3xl p-6 transform rotate-1 hover:rotate-0 transition-transform duration-500 z-10">
               {/* Header */}
               <div className="flex justify-between items-center mb-6 border-b border-nf-border/50 pb-4">
                 <div className="flex items-center gap-3">
@@ -76,7 +76,7 @@ export default function HeroSection() {
                     <div className="text-xs text-nf-text-muted">Atualizado agora</div>
                   </div>
                 </div>
-                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
 
               {/* Content Mockup */}
@@ -131,7 +131,7 @@ export default function HeroSection() {
             </div>
 
             {/* Floating Element 1 - AI Generation */}
-            <div className="absolute -top-6 -left-6 md:-left-12 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-nf-border/50 animate-float z-20 max-w-[200px]">
+            <div className="absolute -top-6 -left-6 md:-left-12 bg-card/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-nf-border/50 animate-float z-20 max-w-[200px]">
               <div className="flex items-center gap-3 mb-2">
                 <div className="h-8 w-8 rounded-lg bg-nf-coral/10 flex items-center justify-center text-nf-coral">
                   <Sparkles className="h-4 w-4" />
@@ -147,9 +147,9 @@ export default function HeroSection() {
             </div>
 
             {/* Floating Element 2 - Success Notification */}
-            <div className="absolute -bottom-6 -right-6 md:-right-12 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-nf-border/50 animate-float-delay z-20">
+            <div className="absolute -bottom-6 -right-6 md:-right-12 bg-card/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-nf-border/50 animate-float-delay z-20">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                <div className="h-10 w-10 rounded-full bg-nf-teal/20 flex items-center justify-center text-nf-teal">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
