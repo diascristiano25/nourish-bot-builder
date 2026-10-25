@@ -11,7 +11,7 @@ export default function DashboardComparison() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border">
+      <div className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -30,7 +30,7 @@ export default function DashboardComparison() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-slate-100 rounded-xl p-1">
+            <div className="flex items-center gap-2 bg-muted rounded-xl p-1">
               <Button
                 variant={activeView === 'both' ? 'default' : 'ghost'}
                 size="sm"
@@ -76,17 +76,17 @@ export default function DashboardComparison() {
             >
               {/* Original Dashboard */}
               <div className="space-y-4">
-                <div className="bg-white rounded-2xl p-4 border-2 border-slate-200">
+                <div className="bg-card rounded-2xl p-4 border-2 border-border">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                      <Eye className="w-5 h-5 text-slate-600" />
+                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                      <Eye className="w-5 h-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h2 className="font-bold text-slate-800">Dashboard Original</h2>
-                      <p className="text-xs text-slate-500">Design atual do NutriFlow</p>
+                      <h2 className="font-bold text-foreground">Dashboard Original</h2>
+                      <p className="text-xs text-muted-foreground">Design atual do NutriFlow</p>
                     </div>
                   </div>
-                  <div className="aspect-video bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+                  <div className="aspect-video bg-secondary rounded-xl overflow-hidden border border-border">
                     <iframe
                       src="/dashboard"
                       className="w-full h-full"
@@ -102,9 +102,9 @@ export default function DashboardComparison() {
                   </Button>
                 </div>
 
-                <div className="bg-white rounded-xl p-6">
+                <div className="bg-card rounded-xl p-6">
                   <h3 className="font-semibold mb-3 text-sm">Características</h3>
-                  <ul className="space-y-2 text-sm text-slate-600">
+                  <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                       Paleta orgânica (Sage Green + Terracotta)
@@ -137,7 +137,7 @@ export default function DashboardComparison() {
                       <p className="text-xs text-emerald-600">Inspirado em Medlio + HorizonX</p>
                     </div>
                   </div>
-                  <div className="aspect-video bg-white rounded-xl overflow-hidden border border-emerald-200 shadow-xl shadow-emerald-500/20">
+                  <div className="aspect-video bg-card rounded-xl overflow-hidden border border-emerald-200 shadow-xl shadow-emerald-500/20">
                     <iframe
                       src="/modern-dashboard"
                       className="w-full h-full"
@@ -193,7 +193,7 @@ export default function DashboardComparison() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="max-w-6xl mx-auto"
             >
-              <div className="aspect-video bg-white rounded-3xl overflow-hidden border-2 border-slate-200 shadow-2xl">
+              <div className="aspect-video bg-card rounded-3xl overflow-hidden border-2 border-border shadow-2xl">
                 <iframe
                   src="/dashboard"
                   className="w-full h-full"
@@ -211,7 +211,7 @@ export default function DashboardComparison() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="max-w-6xl mx-auto"
             >
-              <div className="aspect-video bg-white rounded-3xl overflow-hidden border-2 border-emerald-200 shadow-2xl shadow-emerald-500/20">
+              <div className="aspect-video bg-card rounded-3xl overflow-hidden border-2 border-emerald-200 shadow-2xl shadow-emerald-500/20">
                 <iframe
                   src="/modern-dashboard"
                   className="w-full h-full"
@@ -227,15 +227,15 @@ export default function DashboardComparison() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mt-8 bg-white rounded-2xl p-8 border border-slate-200"
+          className="mt-8 bg-card rounded-2xl p-8 border border-border"
         >
-          <h2 className="text-2xl font-bold mb-6 text-slate-800">Comparação de Features</h2>
+          <h2 className="text-2xl font-bold mb-6 text-foreground">Comparação de Features</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="text-left py-4 px-4 font-semibold text-slate-700">Feature</th>
-                  <th className="text-center py-4 px-4 font-semibold text-slate-700">Original</th>
+                <tr className="border-b border-border">
+                  <th className="text-left py-4 px-4 font-semibold text-foreground">Feature</th>
+                  <th className="text-center py-4 px-4 font-semibold text-foreground">Original</th>
                   <th className="text-center py-4 px-4 font-semibold text-emerald-700">Novo</th>
                 </tr>
               </thead>
@@ -250,8 +250,8 @@ export default function DashboardComparison() {
                   { feature: 'Painel Lateral Colorido', original: '❌', new: '✅' },
                   { feature: 'Hover Effects', original: '✅ Simples', new: '✅ Elaborados' },
                 ].map((row, i) => (
-                  <tr key={i} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-4 px-4 text-sm font-medium text-slate-700">{row.feature}</td>
+                  <tr key={i} className="hover:bg-secondary transition-colors">
+                    <td className="py-4 px-4 text-sm font-medium text-foreground">{row.feature}</td>
                     <td className="py-4 px-4 text-center text-sm">{row.original}</td>
                     <td className="py-4 px-4 text-center text-sm font-semibold text-emerald-600">{row.new}</td>
                   </tr>

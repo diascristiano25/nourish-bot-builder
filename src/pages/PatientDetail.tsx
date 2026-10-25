@@ -538,7 +538,7 @@ export default function PatientDetail() {
               onClick={() => navigate('/pacientes')}
               className="hover:bg-[#518C5B]/10 rounded-xl"
             >
-              <ArrowLeft className="w-5 h-5 text-slate-600" />
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </Button>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center glow-primary">

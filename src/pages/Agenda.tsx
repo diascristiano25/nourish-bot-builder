@@ -138,7 +138,7 @@ export default function Agenda() {
           actions={
             <Button
               onClick={() => setDialogOpen(true)}
-              className="gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white border border-white/20 rounded-2xl font-semibold px-5 h-11 shadow-lg"
+              className="gap-2 bg-card/15 hover:bg-card/25 backdrop-blur-sm text-white border border-white/20 rounded-2xl font-semibold px-5 h-11 shadow-lg"
               data-tour="agenda-new-btn"
             >
               <Plus className="w-4 h-4" />
@@ -155,12 +155,12 @@ export default function Agenda() {
                 <Clock className="w-6 h-6 text-[#518C5B]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Hoje</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Hoje</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   {dayAppointments.length}
                 </motion.p>
@@ -173,12 +173,12 @@ export default function Agenda() {
                 <div className="w-3 h-3 rounded-full bg-amber-500 animate-pulse" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Confirmadas</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Confirmadas</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   {confirmedCount}
                 </motion.p>
@@ -191,12 +191,12 @@ export default function Agenda() {
                 <Users className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Realizadas</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Realizadas</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   {completedCount}
                 </motion.p>

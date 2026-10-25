@@ -108,14 +108,14 @@ export function PatientDashboard({ patient, mealPlan, waterLog, onAddWater }: Pa
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
-        className="bg-white rounded-3xl border border-slate-200/60 shadow-soft overflow-hidden p-5"
+        className="bg-card rounded-3xl border border-border/60 shadow-soft overflow-hidden p-5"
       >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
               <Droplets className="w-5 h-5 text-blue-500" />
             </div>
-            <h2 className="text-sm font-bold text-slate-700">Hidratação</h2>
+            <h2 className="text-sm font-bold text-foreground">Hidratação</h2>
           </div>
           <span className="text-xs font-semibold text-blue-500 bg-blue-50 px-2.5 py-1 rounded-full">
             {waterPercent}%
@@ -133,13 +133,13 @@ export function PatientDashboard({ patient, mealPlan, waterLog, onAddWater }: Pa
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="bg-white rounded-3xl border border-slate-200/60 shadow-soft p-5"
+        className="bg-card rounded-3xl border border-border/60 shadow-soft p-5"
       >
         <div className="flex items-center gap-2 mb-3">
           <div className="w-9 h-9 rounded-xl bg-[#C4764A]/10 flex items-center justify-center">
             <Flame className="w-5 h-5 text-[#C4764A]" />
           </div>
-          <h2 className="text-sm font-bold text-slate-700">Resumo do Dia</h2>
+          <h2 className="text-sm font-bold text-foreground">Resumo do Dia</h2>
         </div>
         <MacroSummary macros={macros} />
       </motion.div>

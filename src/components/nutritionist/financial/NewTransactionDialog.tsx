@@ -136,7 +136,7 @@ export function NewTransactionDialog({
               className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-medium text-sm ${
                 type === 'income'
                   ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
-                  : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                  : 'border-border bg-card text-muted-foreground hover:border-border'
               }`}
             >
               <TrendingDown className="w-4 h-4 rotate-180" />
@@ -148,7 +148,7 @@ export function NewTransactionDialog({
               className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-medium text-sm ${
                 type === 'expense'
                   ? 'border-red-400 bg-red-50 text-red-700'
-                  : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                  : 'border-border bg-card text-muted-foreground hover:border-border'
               }`}
             >
               <TrendingDown className="w-4 h-4" />
@@ -162,7 +162,7 @@ export function NewTransactionDialog({
               Valor (R$)
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">R$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">R$</span>
               <Input
                 id="amount"
                 type="text"

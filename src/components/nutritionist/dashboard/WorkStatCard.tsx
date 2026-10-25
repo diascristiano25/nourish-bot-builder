@@ -33,7 +33,7 @@ const variantConfig = {
     strokeColor: '#6366f1',
     fillColor: '#6366f1',
     bgColor: 'bg-indigo-50',
-    trendColor: 'text-slate-500',
+    trendColor: 'text-muted-foreground',
     chartType: 'line' as const,
   },
 };
@@ -53,7 +53,7 @@ export function WorkStatCard({ title, value, label, trend, variant, delay = 0 }:
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       whileHover={{ y: -6, boxShadow: '0 20px 40px -12px rgba(0,0,0,0.1)' }}
-      className="bg-white rounded-3xl p-5 border border-slate-200/60 shadow-soft cursor-pointer"
+      className="bg-card rounded-3xl p-5 border border-border/60 shadow-soft cursor-pointer"
     >
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</h3>

@@ -30,11 +30,11 @@ export function WeeklyChart({ data, isLoading = false }: WeeklyChartProps) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm h-80 flex items-center justify-center"
+        className="rounded-lg border border-border bg-card p-6 shadow-sm h-80 flex items-center justify-center"
       >
         <div className="text-center">
-          <div className="inline-block w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin mb-2" />
-          <p className="text-sm text-slate-600">Carregando dados...</p>
+          <div className="inline-block w-8 h-8 border-4 border-border border-t-amber-500 rounded-full animate-spin mb-2" />
+          <p className="text-sm text-muted-foreground">Carregando dados...</p>
         </div>
       </motion.div>
     );
@@ -45,11 +45,11 @@ export function WeeklyChart({ data, isLoading = false }: WeeklyChartProps) {
       initial="hidden"
       animate="visible"
       variants={fadeInUp}
-      className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+      className="rounded-lg border border-border bg-card p-6 shadow-sm"
     >
       <div className="flex items-center gap-2 mb-6">
         <Calendar className="w-5 h-5 text-amber-600" />
-        <h3 className="text-base font-semibold text-slate-900">
+        <h3 className="text-base font-semibold text-foreground">
           Consultas da Semana
         </h3>
       </div>
@@ -84,7 +84,7 @@ export function WeeklyChart({ data, isLoading = false }: WeeklyChartProps) {
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className="h-80 flex items-center justify-center text-slate-500">
+        <div className="h-80 flex items-center justify-center text-muted-foreground">
           <p className="text-sm">Nenhum dado de consultas disponível</p>
         </div>
       )}

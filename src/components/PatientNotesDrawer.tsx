@@ -92,14 +92,14 @@ export function PatientNotesDrawer({ patient, open, onOpenChange, children }: Pa
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-3">
               {patient.weight && (
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-cyan-500/20 text-center">
+                <div className="p-3 rounded-xl bg-card/[0.02] border border-cyan-500/20 text-center">
                   <Scale className="w-4 h-4 mx-auto mb-1 text-cyan-400" />
                   <p className="font-bold font-mono text-foreground">{patient.weight} kg</p>
                   <p className="text-xs text-muted-foreground">Peso</p>
                 </div>
               )}
               {patient.height && (
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-violet-500/20 text-center">
+                <div className="p-3 rounded-xl bg-card/[0.02] border border-violet-500/20 text-center">
                   <Target className="w-4 h-4 mx-auto mb-1 text-violet-400" />
                   <p className="font-bold font-mono text-foreground">{patient.height} cm</p>
                   <p className="text-xs text-muted-foreground">Altura</p>
@@ -182,7 +182,7 @@ export function PatientNotesDrawer({ patient, open, onOpenChange, children }: Pa
                   <FileText className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium text-foreground">Notas Gerais</span>
                 </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-cyan-500/20">
+                <div className="p-3 rounded-xl bg-card/[0.02] border border-cyan-500/20">
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">{patient.notes}</p>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export function PatientNotesDrawer({ patient, open, onOpenChange, children }: Pa
             {/* No alerts message */}
             {!hasAlerts && (
               <div className="text-center py-8 text-muted-foreground">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/[0.02] border border-cyan-500/20 flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-card/[0.02] border border-cyan-500/20 flex items-center justify-center">
                   <StickyNote className="w-8 h-8 text-muted-foreground/50" />
                 </div>
                 <p className="text-sm">Nenhum alerta ou restrição cadastrada</p>

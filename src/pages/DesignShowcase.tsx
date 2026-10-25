@@ -125,7 +125,7 @@ export default function DesignShowcase() {
               className="group relative"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 rounded-3xl" />
-              <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 hover:border-emerald-400/50 transition-all duration-300">
+              <div className="relative bg-card/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 hover:border-emerald-400/50 transition-all duration-300">
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4`}>
                   <feature.icon className="w-7 h-7 text-white" />
                 </div>
@@ -145,7 +145,7 @@ export default function DesignShowcase() {
           transition={{ delay: 0.8 }}
           className="max-w-4xl mx-auto"
         >
-          <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 overflow-hidden">
+          <div className="bg-card/10 backdrop-blur-xl rounded-3xl border border-white/20 overflow-hidden">
             <div className="p-8 border-b border-white/10">
               <h2 className="text-3xl font-bold text-white mb-2">Comparação Rápida</h2>
               <p className="text-emerald-100/70">O que mudou do original para o moderno</p>
@@ -172,14 +172,14 @@ export default function DesignShowcase() {
                       {item.original ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-400 mx-auto" />
                       ) : (
-                        <div className="w-5 h-5 rounded-full bg-white/10 mx-auto" />
+                        <div className="w-5 h-5 rounded-full bg-card/10 mx-auto" />
                       )}
                     </div>
                     <div className="text-center">
                       {item.modern ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-400 mx-auto" />
                       ) : (
-                        <div className="w-5 h-5 rounded-full bg-white/10 mx-auto" />
+                        <div className="w-5 h-5 rounded-full bg-card/10 mx-auto" />
                       )}
                     </div>
                   </motion.div>
@@ -209,7 +209,7 @@ export default function DesignShowcase() {
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Button
                 size="lg"
-                className="bg-white text-emerald-600 hover:bg-emerald-50 rounded-xl h-14 px-8 text-base font-semibold gap-2"
+                className="bg-card text-emerald-600 hover:bg-emerald-50 rounded-xl h-14 px-8 text-base font-semibold gap-2"
                 onClick={() => navigate('/modern-dashboard')}
               >
                 <Sparkles className="w-5 h-5" />
@@ -219,7 +219,7 @@ export default function DesignShowcase() {
               <Button
                 size="lg"
                 variant="ghost"
-                className="text-white hover:bg-white/10 rounded-xl h-14 px-8 text-base font-semibold gap-2"
+                className="text-white hover:bg-card/10 rounded-xl h-14 px-8 text-base font-semibold gap-2"
                 onClick={() => navigate('/dashboard')}
               >
                 Ver Dashboard Original

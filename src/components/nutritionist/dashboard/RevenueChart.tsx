@@ -30,11 +30,11 @@ export function RevenueChart({ data, isLoading = false }: RevenueChartProps) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm h-96 flex items-center justify-center"
+        className="rounded-lg border border-border bg-card p-6 shadow-sm h-96 flex items-center justify-center"
       >
         <div className="text-center">
-          <div className="inline-block w-8 h-8 border-4 border-slate-200 border-t-emerald-500 rounded-full animate-spin mb-2" />
-          <p className="text-sm text-slate-600">Carregando dados...</p>
+          <div className="inline-block w-8 h-8 border-4 border-border border-t-emerald-500 rounded-full animate-spin mb-2" />
+          <p className="text-sm text-muted-foreground">Carregando dados...</p>
         </div>
       </motion.div>
     );
@@ -45,12 +45,12 @@ export function RevenueChart({ data, isLoading = false }: RevenueChartProps) {
       initial="hidden"
       animate="visible"
       variants={fadeInUp}
-      className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+      className="rounded-lg border border-border bg-card p-6 shadow-sm"
     >
       <div className="flex items-center gap-2 mb-6">
         <TrendingUp className="w-5 h-5 text-emerald-600" />
-        <h3 className="text-base font-semibold text-slate-900">Faturamento</h3>
-        <span className="text-xs font-medium text-slate-500 ml-auto">
+        <h3 className="text-base font-semibold text-foreground">Faturamento</h3>
+        <span className="text-xs font-medium text-muted-foreground ml-auto">
           Últimos 6 meses
         </span>
       </div>
@@ -102,7 +102,7 @@ export function RevenueChart({ data, isLoading = false }: RevenueChartProps) {
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className="h-80 flex items-center justify-center text-slate-500">
+        <div className="h-80 flex items-center justify-center text-muted-foreground">
           <p className="text-sm">Nenhum dado de faturamento disponível</p>
         </div>
       )}

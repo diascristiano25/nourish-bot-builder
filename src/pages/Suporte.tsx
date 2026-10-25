@@ -48,8 +48,8 @@ export default function Suporte() {
                 <BookOpen className="w-6 h-6 text-[#518C5B]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Artigos</p>
-                <motion.p initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, type: 'spring' }} className="text-2xl font-bold text-slate-800 leading-tight">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Artigos</p>
+                <motion.p initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, type: 'spring' }} className="text-2xl font-bold text-foreground leading-tight">
                   {faqs.length}
                 </motion.p>
               </div>
@@ -61,7 +61,7 @@ export default function Suporte() {
                 <MessageSquare className="w-6 h-6 text-[#C4764A]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Chat</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Chat</p>
                 <motion.p initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, type: 'spring' }} className="text-lg font-bold text-emerald-600 leading-tight">
                   Online
                 </motion.p>
@@ -74,8 +74,8 @@ export default function Suporte() {
                 <Mail className="w-6 h-6 text-indigo-500" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Resposta</p>
-                <motion.p initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4, type: 'spring' }} className="text-lg font-bold text-slate-800 leading-tight">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Resposta</p>
+                <motion.p initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4, type: 'spring' }} className="text-lg font-bold text-foreground leading-tight">
                   &lt; 24h
                 </motion.p>
               </div>
@@ -98,7 +98,7 @@ export default function Suporte() {
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
                     isActive
                       ? 'bg-gradient-to-r from-[#518C5B] to-[#3d7047] text-white shadow-lg shadow-emerald-500/20'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      : 'bg-muted text-muted-foreground hover:bg-border'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -113,8 +113,8 @@ export default function Suporte() {
         <RichCard delay={0.4} padding="lg">
           <div className="flex items-center gap-2 mb-5">
             <HelpCircle className="w-5 h-5 text-[#518C5B]" />
-            <h2 className="text-lg font-bold text-slate-800">Perguntas Frequentes</h2>
-            <span className="ml-auto text-xs font-semibold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
+            <h2 className="text-lg font-bold text-foreground">Perguntas Frequentes</h2>
+            <span className="ml-auto text-xs font-semibold text-muted-foreground bg-muted px-3 py-1 rounded-full">
               {filteredFaqs.length} resultados
             </span>
           </div>
@@ -129,14 +129,14 @@ export default function Suporte() {
                 <MessageSquare className="w-6 h-6 text-[#518C5B]" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-800">Ainda precisa de ajuda?</h3>
-                <p className="text-slate-500 text-sm">Entre em contato com nosso time de suporte. Respondemos em até 24 horas.</p>
+                <h3 className="text-xl font-bold text-foreground">Ainda precisa de ajuda?</h3>
+                <p className="text-muted-foreground text-sm">Entre em contato com nosso time de suporte. Respondemos em até 24 horas.</p>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <a
                 href="mailto:support@nutriflow.com"
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white text-slate-700 border border-slate-200 hover:border-[#518C5B]/40 hover:bg-[#518C5B]/5 transition-all font-medium"
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-card text-foreground border border-border hover:border-[#518C5B]/40 hover:bg-[#518C5B]/5 transition-all font-medium"
               >
                 <Mail className="w-4 h-4" />
                 support@nutriflow.com
@@ -157,15 +157,15 @@ export default function Suporte() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             whileHover={{ y: -4, boxShadow: '0 20px 40px -12px rgba(0,0,0,0.08)' }}
-            className="block p-5 rounded-3xl bg-white border border-slate-200/60 shadow-soft hover:border-[#518C5B]/30 transition-all"
+            className="block p-5 rounded-3xl bg-card border border-border/60 shadow-soft hover:border-[#518C5B]/30 transition-all"
           >
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-xl bg-[#518C5B]/10 flex items-center justify-center">
                 <FileText className="w-5 h-5 text-[#518C5B]" />
               </div>
-              <h4 className="font-semibold text-slate-800">Termos de Serviço</h4>
+              <h4 className="font-semibold text-foreground">Termos de Serviço</h4>
             </div>
-            <p className="text-sm text-slate-500 ml-13">Leia nossos termos e condições de uso</p>
+            <p className="text-sm text-muted-foreground ml-13">Leia nossos termos e condições de uso</p>
           </motion.a>
           <motion.a
             href="/suporte/privacidade"
@@ -173,15 +173,15 @@ export default function Suporte() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
             whileHover={{ y: -4, boxShadow: '0 20px 40px -12px rgba(0,0,0,0.08)' }}
-            className="block p-5 rounded-3xl bg-white border border-slate-200/60 shadow-soft hover:border-[#C4764A]/30 transition-all"
+            className="block p-5 rounded-3xl bg-card border border-border/60 shadow-soft hover:border-[#C4764A]/30 transition-all"
           >
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-xl bg-[#C4764A]/10 flex items-center justify-center">
                 <Shield className="w-5 h-5 text-[#C4764A]" />
               </div>
-              <h4 className="font-semibold text-slate-800">Política de Privacidade</h4>
+              <h4 className="font-semibold text-foreground">Política de Privacidade</h4>
             </div>
-            <p className="text-sm text-slate-500 ml-13">Entenda como protegemos seus dados</p>
+            <p className="text-sm text-muted-foreground ml-13">Entenda como protegemos seus dados</p>
           </motion.a>
         </div>
       </div>

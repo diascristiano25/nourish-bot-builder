@@ -140,9 +140,9 @@ export default function Auth() {
       {/* LEFT PANEL - Visual / Brand side */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-nf-teal via-nf-teal/90 to-nf-coral/80">
         {/* Decorative blobs */}
-        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl animate-float-slow" />
-        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-white/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-2xl animate-morph-blob" />
+        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-card/10 rounded-full blur-3xl animate-float-slow" />
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-card/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-card/5 rounded-full blur-2xl animate-morph-blob" />
 
         {/* Grid pattern overlay */}
         <div className="absolute inset-0 opacity-[0.07]" style={{
@@ -153,7 +153,7 @@ export default function Auth() {
         <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full text-white">
           {/* Top: Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+            <div className="w-12 h-12 rounded-2xl bg-card/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
               <img src={logoImg} alt="NutriFlow" className="h-8 w-auto brightness-0 invert" />
             </div>
             <span className="font-serif text-2xl font-bold tracking-tight">NutriFlow</span>
@@ -179,7 +179,7 @@ export default function Auth() {
                 { icon: CheckCircle2, text: '14 dias grátis, sem cartão de crédito' },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3 group">
-                  <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/20 group-hover:bg-white/25 transition-colors">
+                  <div className="w-9 h-9 rounded-xl bg-card/15 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/20 group-hover:bg-card/25 transition-colors">
                     <item.icon className="w-4 h-4" />
                   </div>
                   <span className="text-white/90 pt-1.5 text-sm leading-relaxed">{item.text}</span>
@@ -240,8 +240,8 @@ export default function Auth() {
               <span className="font-serif text-xl font-bold text-nf-text">NutriFlow</span>
             </div>
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-nf-teal via-nf-teal/90 to-nf-teal/70 px-5 pt-5 pb-3 text-center">
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-              <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-card/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-card/10 rounded-full blur-2xl" />
               <h1 className="relative font-serif text-base sm:text-lg font-bold text-white leading-snug">
                 Nutrição de precisão, potencializada por IA.
               </h1>
@@ -277,13 +277,13 @@ export default function Auth() {
             <TabsList className="grid w-full grid-cols-2 bg-nf-bg-alt p-1 h-12 rounded-xl">
               <TabsTrigger
                 value="login"
-                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-nf-teal data-[state=active]:shadow-sm font-medium transition-all"
+                className="rounded-lg data-[state=active]:bg-card data-[state=active]:text-nf-teal data-[state=active]:shadow-sm font-medium transition-all"
               >
                 Entrar
               </TabsTrigger>
               <TabsTrigger
                 value="signup"
-                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-nf-coral data-[state=active]:shadow-sm font-medium transition-all"
+                className="rounded-lg data-[state=active]:bg-card data-[state=active]:text-nf-coral data-[state=active]:shadow-sm font-medium transition-all"
               >
                 Cadastrar
               </TabsTrigger>

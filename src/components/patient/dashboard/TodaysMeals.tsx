@@ -53,12 +53,12 @@ export function TodaysMeals({ mealPlan }: TodaysMealsProps) {
       initial="hidden"
       animate="visible"
       variants={fadeInUp}
-      className="rounded-lg border border-blue-200 bg-white p-6 shadow-sm"
+      className="rounded-lg border border-blue-200 bg-card p-6 shadow-sm"
     >
-      <h2 className="text-xl font-bold text-slate-900 mb-4">Refeições de Hoje</h2>
+      <h2 className="text-xl font-bold text-foreground mb-4">Refeições de Hoje</h2>
 
       {meals.length === 0 ? (
-        <p className="text-slate-500 text-center py-8">
+        <p className="text-muted-foreground text-center py-8">
           Nenhuma refeição planejada para hoje
         </p>
       ) : (
@@ -75,7 +75,7 @@ export function TodaysMeals({ mealPlan }: TodaysMealsProps) {
                 className={`flex items-center gap-4 p-4 rounded-lg border transition-all cursor-pointer ${
                   isCompleted
                     ? 'bg-emerald-50 border-emerald-200'
-                    : 'bg-slate-50 border-slate-200 hover:border-teal-300'
+                    : 'bg-secondary border-border hover:border-teal-300'
                 }`}
                 onClick={() => toggleMealCompletion(meal.id)}
               >
@@ -83,10 +83,10 @@ export function TodaysMeals({ mealPlan }: TodaysMealsProps) {
                   {mealIcons[meal.type] || <Coffee className="w-5 h-5" />}
                 </div>
                 <div className="flex-1">
-                  <h3 className={`font-medium ${isCompleted ? 'text-emerald-900' : 'text-slate-900'}`}>
+                  <h3 className={`font-medium ${isCompleted ? 'text-emerald-900' : 'text-foreground'}`}>
                     {meal.name}
                   </h3>
-                  <p className={`text-sm ${isCompleted ? 'text-emerald-600' : 'text-slate-500'}`}>
+                  <p className={`text-sm ${isCompleted ? 'text-emerald-600' : 'text-muted-foreground'}`}>
                     {meal.time}
                   </p>
                 </div>

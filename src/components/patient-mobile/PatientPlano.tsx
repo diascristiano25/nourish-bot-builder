@@ -47,7 +47,7 @@ const mealColors: Record<string, { bg: string; text: string; border: string }> =
   'Almoço': { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/30' },
   'Lanche da Tarde': { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/30' },
   'Jantar': { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/30' },
-  'Ceia': { bg: 'bg-slate-500/10', text: 'text-slate-500', border: 'border-slate-500/30' },
+  'Ceia': { bg: 'bg-secondary0/10', text: 'text-muted-foreground', border: 'border-slate-500/30' },
 };
 
 // Dummy substitutes data

@@ -119,9 +119,9 @@ export default function LandingPageNew() {
           </Link>
 
           <nav className="hidden md:flex gap-8 text-sm">
-            <a href="#features" className="text-slate-400 hover:text-slate-50 transition">Recursos</a>
-            <a href="#pricing" className="text-slate-400 hover:text-slate-50 transition">Planos</a>
-            <a href="#testimonials" className="text-slate-400 hover:text-slate-50 transition">Cases</a>
+            <a href="#features" className="text-muted-foreground hover:text-slate-50 transition">Recursos</a>
+            <a href="#pricing" className="text-muted-foreground hover:text-slate-50 transition">Planos</a>
+            <a href="#testimonials" className="text-muted-foreground hover:text-slate-50 transition">Cases</a>
           </nav>
 
           <Link to="/auth">
@@ -169,7 +169,7 @@ export default function LandingPageNew() {
                 <span className="text-teal-400">Mais pacientes.</span>
               </h1>
 
-              <p className="text-lg lg:text-xl text-slate-400 leading-relaxed mb-8 max-w-[540px]">
+              <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed mb-8 max-w-[540px]">
                 Crie cardápios personalizados em minutos, não horas. Acompanhe resultados reais. Seus pacientes recebem tudo no celular.
               </p>
 
@@ -182,13 +182,13 @@ export default function LandingPageNew() {
                 </Link>
                 <Button
                   variant="outline"
-                  className="border-slate-700 text-slate-300 hover:bg-slate-800/50 hover:text-slate-50 px-8 py-6 text-base"
+                  className="border-slate-700 text-slate-300 hover:bg-foreground/50 hover:text-slate-50 px-8 py-6 text-base"
                 >
                   Ver demonstração
                 </Button>
               </div>
 
-              <div className="flex flex-wrap gap-6 text-sm text-slate-400">
+              <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-teal-400" />
                   Sem cartão de crédito
@@ -224,10 +224,10 @@ export default function LandingPageNew() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.8 }}
-                  className="absolute bottom-6 -left-6 bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 shadow-2xl"
+                  className="absolute bottom-6 -left-6 bg-foreground/95 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 shadow-2xl"
                 >
                   <div className="text-2xl font-bold text-teal-400 mb-1">3 min</div>
-                  <div className="text-xs text-slate-400">tempo médio por cardápio</div>
+                  <div className="text-xs text-muted-foreground">tempo médio por cardápio</div>
                 </motion.div>
               </div>
             </motion.div>
@@ -248,7 +248,7 @@ export default function LandingPageNew() {
               ease: [0.16, 0, 0.3, 1]
             }
           }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-500"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground"
         >
           <ChevronDown className="w-5 h-5" />
         </motion.div>
@@ -267,7 +267,7 @@ export default function LandingPageNew() {
             <h2 className="text-4xl lg:text-5xl font-bold tracking-tighter mb-4">
               Feito para nutricionistas que querem escalar
             </h2>
-            <p className="text-lg text-slate-400 max-w-[600px]">
+            <p className="text-lg text-muted-foreground max-w-[600px]">
               Automatize o trabalho repetitivo. Foque no que só você sabe fazer.
             </p>
           </motion.div>
@@ -286,14 +286,14 @@ export default function LandingPageNew() {
                   transition={{ duration: 0.6, delay: i * 0.1 }}
                   className={isLarge ? "md:col-span-1" : "md:col-span-1"}
                 >
-                  <Card className={`bg-slate-900/50 border-slate-800/50 ${isLarge ? 'p-8' : 'p-6'} hover:border-slate-700/50 transition group h-full`}>
+                  <Card className={`bg-foreground/50 border-slate-800/50 ${isLarge ? 'p-8' : 'p-6'} hover:border-slate-700/50 transition group h-full`}>
                     <div className={`w-12 h-12 rounded-lg bg-teal-600/10 flex items-center justify-center mb-4 group-hover:bg-teal-600/20 transition`}>
                       <Icon className="w-6 h-6 text-teal-400" />
                     </div>
                     <h3 className={`${isLarge ? 'text-2xl' : 'text-xl'} font-bold mb-3 tracking-tight`}>
                       {feature.title}
                     </h3>
-                    <p className="text-slate-400 leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
                   </Card>
@@ -307,7 +307,7 @@ export default function LandingPageNew() {
       {/* Social Proof - Marquee */}
       <section className="py-16 border-y border-slate-800/50">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 mb-8">
-          <p className="text-sm text-slate-500 text-center">Usado por nutricionistas em</p>
+          <p className="text-sm text-muted-foreground text-center">Usado por nutricionistas em</p>
         </div>
         <div className="relative overflow-hidden">
           <motion.div
@@ -316,13 +316,13 @@ export default function LandingPageNew() {
             className="flex gap-12 items-center"
           >
             {['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Brasília', 'Curitiba', 'Porto Alegre', 'Salvador', 'Fortaleza'].map((city, i) => (
-              <div key={i} className="text-slate-600 font-medium whitespace-nowrap flex items-center gap-2">
+              <div key={i} className="text-muted-foreground font-medium whitespace-nowrap flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 {city}
               </div>
             ))}
             {['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Brasília', 'Curitiba', 'Porto Alegre', 'Salvador', 'Fortaleza'].map((city, i) => (
-              <div key={`dup-${i}`} className="text-slate-600 font-medium whitespace-nowrap flex items-center gap-2">
+              <div key={`dup-${i}`} className="text-muted-foreground font-medium whitespace-nowrap flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 {city}
               </div>
@@ -344,7 +344,7 @@ export default function LandingPageNew() {
             <h2 className="text-4xl lg:text-5xl font-bold tracking-tighter mb-4">
               Planos transparentes
             </h2>
-            <p className="text-lg text-slate-400">
+            <p className="text-lg text-muted-foreground">
               Escolha o que faz sentido agora. Mude quando quiser.
             </p>
           </motion.div>
@@ -359,7 +359,7 @@ export default function LandingPageNew() {
                 transition={{ duration: 0.6, delay: i * 0.1 }}
                 className={plan.highlighted ? "md:-mt-4" : ""}
               >
-                <Card className={`border-slate-800/50 ${plan.highlighted ? 'bg-gradient-to-b from-teal-950/30 to-slate-900/50 border-teal-800/30' : 'bg-slate-900/30'} p-8 h-full flex flex-col`}>
+                <Card className={`border-slate-800/50 ${plan.highlighted ? 'bg-gradient-to-b from-teal-950/30 to-slate-900/50 border-teal-800/30' : 'bg-foreground/30'} p-8 h-full flex flex-col`}>
                   {plan.highlighted && (
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-600/10 border border-teal-600/20 text-teal-400 text-xs font-medium mb-4 self-start">
                       Mais popular
@@ -367,15 +367,15 @@ export default function LandingPageNew() {
                   )}
 
                   <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                  <p className="text-slate-400 mb-6">{plan.description}</p>
+                  <p className="text-muted-foreground mb-6">{plan.description}</p>
 
                   <div className="mb-8">
                     <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-slate-400">{plan.period}</span>
+                    <span className="text-muted-foreground">{plan.period}</span>
                   </div>
 
                   <Link to="/auth" className="block mb-8">
-                    <Button className={`w-full py-3 font-semibold ${plan.highlighted ? 'bg-teal-600 hover:bg-teal-500 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-50'}`}>
+                    <Button className={`w-full py-3 font-semibold ${plan.highlighted ? 'bg-teal-600 hover:bg-teal-500 text-white' : 'bg-foreground hover:bg-slate-700 text-slate-50'}`}>
                       {plan.cta}
                     </Button>
                   </Link>
@@ -415,7 +415,7 @@ export default function LandingPageNew() {
                 Configure sua conta em 5 minutos. Importe sua lista de pacientes. Gere seu primeiro cardápio.
               </p>
               <Link to="/auth">
-                <Button className="bg-white hover:bg-slate-50 text-teal-700 font-semibold px-8 py-6 text-base">
+                <Button className="bg-card hover:bg-secondary text-teal-700 font-semibold px-8 py-6 text-base">
                   Criar conta gratuita
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
@@ -436,13 +436,13 @@ export default function LandingPageNew() {
               <span className="text-lg font-semibold">NutriFlow</span>
             </div>
 
-            <div className="flex gap-8 text-sm text-slate-400">
+            <div className="flex gap-8 text-sm text-muted-foreground">
               <a href="#" className="hover:text-slate-300 transition">Privacidade</a>
               <a href="#" className="hover:text-slate-300 transition">Termos</a>
               <a href="#" className="hover:text-slate-300 transition">Suporte</a>
             </div>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               © 2026 NutriFlow. CNPJ 00.000.000/0001-00
             </p>
           </div>

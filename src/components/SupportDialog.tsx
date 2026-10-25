@@ -64,7 +64,7 @@ interface SupportDialogProps {
 }
 
 const priorityConfig = {
-  low: { label: 'Baixa', color: 'bg-slate-500', glow: 'shadow-slate-500/30' },
+  low: { label: 'Baixa', color: 'bg-secondary0', glow: 'shadow-slate-500/30' },
   normal: { label: 'Normal', color: 'bg-cyber-lime', glow: 'shadow-cyber-lime/30' },
   high: { label: 'Alta', color: 'bg-orange-500', glow: 'shadow-orange-500/30' },
   urgent: { label: 'Urgente', color: 'bg-red-500', glow: 'shadow-red-500/30' },
@@ -592,7 +592,7 @@ export function SupportDialog({ nutritionistId, onRestartTour }: SupportDialogPr
                           </SelectTrigger>
                           <SelectContent className="glass-strong border-white/10">
                             {Object.entries(priorityConfig).map(([key, config]) => (
-                              <SelectItem key={key} value={key} className="focus:bg-white/10">
+                              <SelectItem key={key} value={key} className="focus:bg-card/10">
                                 <div className="flex items-center gap-2">
                                   <span className={`w-2 h-2 rounded-full ${config.color}`} />
                                   {config.label}

@@ -61,7 +61,7 @@ export default function PatientProgress() {
         variants={staggerContainer}
         className="space-y-6 p-6 max-w-7xl mx-auto"
       >
-        <motion.h1 variants={staggerItem} className="text-3xl font-bold text-slate-900">
+        <motion.h1 variants={staggerItem} className="text-3xl font-bold text-foreground">
           Meu Progresso
         </motion.h1>
 
@@ -79,11 +79,11 @@ export default function PatientProgress() {
                 <TrendingDown className="w-6 h-6" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Parabéns pelo seu progresso!</h3>
-                <p className="text-slate-700">
+                <h3 className="text-xl font-bold text-foreground mb-2">Parabéns pelo seu progresso!</h3>
+                <p className="text-foreground">
                   Você perdeu <strong className="text-teal-600">{totalWeightLost.toFixed(1)} kg</strong> desde o início.
                 </p>
-                <div className="flex gap-6 mt-4 text-sm text-slate-600">
+                <div className="flex gap-6 mt-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     <span>{daysTracking} dias acompanhando</span>
@@ -100,10 +100,10 @@ export default function PatientProgress() {
 
         <motion.div
           variants={staggerItem}
-          className="bg-white p-6 rounded-lg border border-blue-200 shadow-sm"
+          className="bg-card p-6 rounded-lg border border-blue-200 shadow-sm"
         >
-          <h3 className="text-lg font-bold text-slate-900 mb-4">Dicas para Manter o Progresso</h3>
-          <ul className="space-y-3 text-slate-700">
+          <h3 className="text-lg font-bold text-foreground mb-4">Dicas para Manter o Progresso</h3>
+          <ul className="space-y-3 text-foreground">
             <li className="flex items-start gap-3">
               <span className="text-teal-500 mt-1">✓</span>
               <span>Registre suas medições semanalmente para acompanhar melhor seu progresso</span>

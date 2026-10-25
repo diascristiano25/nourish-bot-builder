@@ -271,7 +271,7 @@ export function FoodSearchAutocomplete({ onSelect, placeholder = "Buscar aliment
                               {food.is_supplement && food.supplement_type && (
                                 <span className={cn(
                                   "text-[10px] text-white px-1.5 py-0.5 rounded",
-                                  supplementTypeColors[food.supplement_type] || 'bg-gray-500'
+                                  supplementTypeColors[food.supplement_type] || 'bg-secondary0'
                                 )}>
                                   {food.supplement_type}
                                 </span>

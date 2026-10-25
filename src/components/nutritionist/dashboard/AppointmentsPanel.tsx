@@ -53,7 +53,7 @@ export function AppointmentsPanel({
           <Calendar className="w-5 h-5" />
           <h3 className="text-lg font-semibold">Próximas Consultas</h3>
         </div>
-        <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
+        <span className="text-sm font-medium bg-card/20 px-3 py-1 rounded-full">
           {appointments.length}
         </span>
       </div>
@@ -85,7 +85,7 @@ export function AppointmentsPanel({
                 key={appointment.id}
                 variants={slideInLeft}
                 whileHover={liftHover}
-                className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-colors cursor-pointer"
+                className="bg-card/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-card/15 transition-colors cursor-pointer"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -115,7 +115,7 @@ export function AppointmentsPanel({
         className="mt-6"
       >
         <Button
-          className="w-full bg-white text-emerald-600 hover:bg-gray-100 font-medium"
+          className="w-full bg-card text-emerald-600 hover:bg-muted font-medium"
           whileHover={liftHover}
         >
           Agendar Consulta

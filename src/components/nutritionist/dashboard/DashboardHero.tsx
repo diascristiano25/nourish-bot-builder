@@ -122,7 +122,7 @@ export function DashboardHero({ name }: DashboardHeroProps) {
           className="relative w-44 h-44 lg:w-52 lg:h-52"
         >
           {/* Glow behind illustration */}
-          <div className="absolute inset-0 bg-white/10 rounded-full blur-3xl scale-110" />
+          <div className="absolute inset-0 bg-card/10 rounded-full blur-3xl scale-110" />
           <svg viewBox="0 0 200 200" className="relative w-full h-full drop-shadow-2xl">
             {/* Body/coat */}
             <ellipse cx="100" cy="165" rx="42" ry="30" fill="white" opacity="0.95" />
@@ -161,7 +161,7 @@ export function DashboardHero({ name }: DashboardHeroProps) {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full mb-6 border border-white/20 shadow-lg"
+          className="inline-flex items-center gap-2 bg-card/10 backdrop-blur-md px-4 py-2 rounded-full mb-6 border border-white/20 shadow-lg"
         >
           <Calendar className="w-4 h-4" />
           <span className="text-sm font-medium tabular-nums">

@@ -31,16 +31,16 @@ export function TransactionList({
 }: TransactionListProps) {
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
-          <Receipt className="w-5 h-5 text-slate-600" />
-          <h3 className="text-base font-semibold text-slate-900">Transações Recentes</h3>
+          <Receipt className="w-5 h-5 text-muted-foreground" />
+          <h3 className="text-base font-semibold text-foreground">Transações Recentes</h3>
         </div>
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="h-16 rounded-lg bg-slate-100 animate-pulse"
+              className="h-16 rounded-lg bg-muted animate-pulse"
             />
           ))}
         </div>
@@ -57,7 +57,7 @@ export function TransactionList({
       case 'failed':
         return 'bg-red-50 text-red-700 border-red-200';
       default:
-        return 'bg-slate-50 text-slate-700 border-slate-200';
+        return 'bg-secondary text-foreground border-border';
     }
   };
 
@@ -88,41 +88,41 @@ export function TransactionList({
   };
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center gap-2 mb-6">
-        <Receipt className="w-5 h-5 text-slate-600" />
-        <h3 className="text-base font-semibold text-slate-900">Transações Recentes</h3>
-        <span className="text-xs font-medium text-slate-500 ml-auto">
+        <Receipt className="w-5 h-5 text-muted-foreground" />
+        <h3 className="text-base font-semibold text-foreground">Transações Recentes</h3>
+        <span className="text-xs font-medium text-muted-foreground ml-auto">
           {transactions.length} {transactions.length === 1 ? 'transação' : 'transações'}
         </span>
       </div>
 
       {transactions.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <Receipt className="w-8 h-8 text-slate-400" />
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+            <Receipt className="w-8 h-8 text-muted-foreground" />
           </div>
-          <p className="text-slate-900 font-medium mb-1">Nenhuma transação</p>
-          <p className="text-sm text-slate-600">As transações aparecerão aqui</p>
+          <p className="text-foreground font-medium mb-1">Nenhuma transação</p>
+          <p className="text-sm text-muted-foreground">As transações aparecerão aqui</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-200">
-                <th className="text-left py-3 px-4 text-xs font-medium text-slate-600 uppercase tracking-wider">
+              <tr className="border-b border-border">
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Data
                 </th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-slate-600 uppercase tracking-wider">
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Paciente
                 </th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-slate-600 uppercase tracking-wider">
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Tipo
                 </th>
-                <th className="text-right py-3 px-4 text-xs font-medium text-slate-600 uppercase tracking-wider">
+                <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Valor
                 </th>
-                <th className="text-center py-3 px-4 text-xs font-medium text-slate-600 uppercase tracking-wider">
+                <th className="text-center py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Status
                 </th>
               </tr>
@@ -139,29 +139,29 @@ export function TransactionList({
                   }}
                   onClick={() => onTransactionClick?.(transaction)}
                   className={`
-                    border-b border-slate-100 last:border-0
-                    ${onTransactionClick ? 'cursor-pointer hover:bg-slate-50' : ''}
+                    border-b border-border last:border-0
+                    ${onTransactionClick ? 'cursor-pointer hover:bg-secondary' : ''}
                     transition-colors
                   `}
                 >
                   <td className="py-4 px-4">
-                    <p className="text-sm text-slate-900">
+                    <p className="text-sm text-foreground">
                       {format(new Date(transaction.date), 'dd/MM/yyyy', { locale: ptBR })}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       {format(new Date(transaction.date), 'HH:mm', { locale: ptBR })}
                     </p>
                   </td>
                   <td className="py-4 px-4">
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-foreground">
                       {transaction.patientName}
                     </p>
                   </td>
                   <td className="py-4 px-4">
-                    <p className="text-sm text-slate-700">{getTypeLabel(transaction.type)}</p>
+                    <p className="text-sm text-foreground">{getTypeLabel(transaction.type)}</p>
                   </td>
                   <td className="py-4 px-4 text-right">
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-semibold text-foreground">
                       R$ {transaction.amount.toLocaleString('pt-BR', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,

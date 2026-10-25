@@ -53,7 +53,7 @@ const predefinedTags = [
 
 const getTagConfig = (tag: string) => {
   const found = predefinedTags.find(t => t.label.toLowerCase() === tag.toLowerCase());
-  return found || { label: tag, icon: AlertTriangle, color: 'bg-slate-500 hover:bg-slate-600' };
+  return found || { label: tag, icon: AlertTriangle, color: 'bg-secondary0 hover:bg-slate-600' };
 };
 
 export function CriticalTagsBadges({ 
@@ -126,7 +126,7 @@ export function CriticalTagsBadges({
                     e.stopPropagation();
                     handleRemoveTag(tag);
                   }}
-                  className="ml-1 hover:bg-white/20 rounded-full p-0.5"
+                  className="ml-1 hover:bg-card/20 rounded-full p-0.5"
                 >
                   <X className="w-3 h-3" />
                 </button>

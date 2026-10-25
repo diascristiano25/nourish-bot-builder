@@ -84,7 +84,7 @@ export function TicketHistory({ userId }: TicketHistoryProps) {
       <Badge variant={config.variant} className={
         status === 'resolved' ? 'bg-[#518C5B] text-white' :
         status === 'in_progress' ? 'bg-[#C4764A] text-white' :
-        'bg-slate-200 text-slate-700'
+        'bg-border text-foreground'
       }>
         {config.label}
       </Badge>

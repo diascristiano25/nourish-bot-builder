@@ -22,7 +22,7 @@ export default function Recursos() {
       description: "Dashboard executivo completo com gestão de pacientes, relatórios avançados e controle financeiro integrado.",
       icon: LayoutDashboard,
       path: "/recursos/gestao",
-      color: "bg-slate-50 dark:bg-slate-950/30"
+      color: "bg-secondary dark:bg-slate-950/30"
     }
   ];
 
@@ -30,10 +30,10 @@ export default function Recursos() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <div className="container mx-auto px-4 py-16 max-w-6xl">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-50 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground dark:text-slate-50 mb-4">
             Recursos do NutriFlow
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground dark:text-muted-foreground max-w-2xl mx-auto">
             Descubra todas as ferramentas que vão transformar a gestão do seu consultório de nutrição
           </p>
         </div>
@@ -47,16 +47,16 @@ export default function Recursos() {
                 to={recurso.path}
                 className="group block"
               >
-                <div className="h-full p-8 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-500 dark:hover:border-emerald-400 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <div className="h-full p-8 rounded-2xl border-2 border-border dark:border-slate-800 bg-card dark:bg-foreground hover:border-emerald-500 dark:hover:border-emerald-400 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                   <div className={`w-16 h-16 rounded-xl ${recurso.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                     <Icon className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                   </div>
 
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  <h2 className="text-2xl font-bold text-foreground dark:text-slate-50 mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                     {recurso.title}
                   </h2>
 
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-muted-foreground dark:text-muted-foreground leading-relaxed">
                     {recurso.description}
                   </p>
 
@@ -72,11 +72,11 @@ export default function Recursos() {
           })}
         </div>
 
-        <div className="mt-16 text-center p-8 rounded-2xl bg-gradient-to-r from-emerald-50 to-orange-50 dark:from-emerald-950/30 dark:to-orange-950/30 border-2 border-slate-200 dark:border-slate-800">
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-3">
+        <div className="mt-16 text-center p-8 rounded-2xl bg-gradient-to-r from-emerald-50 to-orange-50 dark:from-emerald-950/30 dark:to-orange-950/30 border-2 border-border dark:border-slate-800">
+          <h3 className="text-2xl font-bold text-foreground dark:text-slate-50 mb-3">
             Pronto para começar?
           </h3>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
+          <p className="text-muted-foreground dark:text-muted-foreground mb-6">
             Experimente gratuitamente todas as funcionalidades do NutriFlow
           </p>
           <Link

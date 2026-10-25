@@ -34,7 +34,7 @@ export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.5 }}
       whileHover={{ y: -4 }}
-      className="bg-white rounded-3xl overflow-hidden border border-slate-200/60 shadow-soft"
+      className="bg-card rounded-3xl overflow-hidden border border-border/60 shadow-soft"
     >
       {/* Header */}
       <div className="bg-gradient-to-r from-[#518C5B] to-[#3d7047] px-4 py-4 flex items-center justify-between">
@@ -44,7 +44,7 @@ export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setWeekOffset(w => w - 1)}
-            className="p-1.5 rounded-lg bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors"
+            className="p-1.5 rounded-lg bg-card/20 backdrop-blur-sm text-white hover:bg-card/30 transition-colors"
             aria-label="Semana anterior"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
@@ -56,7 +56,7 @@ export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setWeekOffset(w => w + 1)}
-            className="p-1.5 rounded-lg bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors"
+            className="p-1.5 rounded-lg bg-card/20 backdrop-blur-sm text-white hover:bg-card/30 transition-colors"
             aria-label="Próxima semana"
           >
             <ChevronRight className="w-3.5 h-3.5" />
@@ -80,7 +80,7 @@ export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
                   "flex flex-col items-center py-2 rounded-xl transition-all",
                   isSelected
                     ? "bg-gradient-to-br from-[#518C5B] to-[#3d7047] text-white shadow-lg shadow-emerald-500/30"
-                    : "hover:bg-slate-50 text-foreground"
+                    : "hover:bg-secondary text-foreground"
                 )}
               >
                 <span className={cn(
@@ -103,7 +103,7 @@ export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
 
       {/* Events list */}
       <div className="px-5 pb-5">
-        <div className="flex items-center justify-between mb-3 pt-2 border-t border-slate-100">
+        <div className="flex items-center justify-between mb-3 pt-2 border-t border-border">
           <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
             {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
           </h4>
@@ -115,7 +115,7 @@ export function MiniCalendar({ events = defaultEvents }: MiniCalendarProps) {
         <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
           {events.length === 0 ? (
               <div className="text-center py-6">
-                <p className="text-sm text-slate-400">Nenhuma consulta agendada para este dia</p>
+                <p className="text-sm text-muted-foreground">Nenhuma consulta agendada para este dia</p>
               </div>
             ) : events.map((event, i) => (
             <motion.div

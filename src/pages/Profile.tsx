@@ -98,7 +98,7 @@ export default function Profile() {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white border border-white/20 rounded-2xl font-semibold px-5 h-11 shadow-lg"
+              className="gap-2 bg-card/15 hover:bg-card/25 backdrop-blur-sm text-white border border-white/20 rounded-2xl font-semibold px-5 h-11 shadow-lg"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Salvar
@@ -116,12 +116,12 @@ export default function Profile() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Nome</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nome</p>
                 <motion.p
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-lg font-bold text-slate-800 truncate"
+                  className="text-lg font-bold text-foreground truncate"
                 >
                   {profile?.full_name || 'Nutricionista'}
                 </motion.p>
@@ -135,12 +135,12 @@ export default function Profile() {
                 <Award className="w-6 h-6 text-[#C4764A]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">CRN</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">CRN</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   {profile?.crn || '—'}
                 </motion.p>
@@ -154,12 +154,12 @@ export default function Profile() {
                 <Phone className="w-6 h-6 text-indigo-500" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Telefone</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Telefone</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4, type: 'spring' }}
-                  className="text-lg font-bold text-slate-800 leading-tight truncate"
+                  className="text-lg font-bold text-foreground leading-tight truncate"
                 >
                   {profile?.phone || '—'}
                 </motion.p>
@@ -172,7 +172,7 @@ export default function Profile() {
         <RichCard delay={0.4} padding="lg">
           <div className="flex items-center gap-2 mb-6">
             <UserIcon className="w-5 h-5 text-[#518C5B]" />
-            <h2 className="text-lg font-bold text-slate-800">Informações do Perfil</h2>
+            <h2 className="text-lg font-bold text-foreground">Informações do Perfil</h2>
           </div>
           <ProfileForm profile={profile} />
         </RichCard>

@@ -4,9 +4,9 @@ import logoImg from '@/assets/logo.png';
 
 export default function Privacidade() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-secondary">
       {/* Header */}
-      <header className="bg-slate-800 border-b border-slate-700">
+      <header className="bg-foreground border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-2">
@@ -42,11 +42,11 @@ export default function Privacidade() {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 space-y-8">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-8 space-y-8">
 
           {/* Introduction */}
           <section>
-            <p className="text-slate-700 leading-relaxed">
+            <p className="text-foreground leading-relaxed">
               O NutriFlow está comprometido com a proteção da privacidade e segurança dos dados pessoais
               de seus usuários. Esta Política de Privacidade descreve como coletamos, usamos, armazenamos
               e protegemos suas informações em conformidade com a Lei Geral de Proteção de Dados (LGPD -
@@ -59,12 +59,12 @@ export default function Privacidade() {
             <div className="flex items-start space-x-3 mb-4">
               <Database className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" />
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
+                <h2 className="text-2xl font-bold text-foreground mb-3">
                   1. Dados Coletados
                 </h2>
-                <div className="space-y-4 text-slate-700">
+                <div className="space-y-4 text-foreground">
                   <div>
-                    <h3 className="font-semibold text-slate-900 mb-2">1.1 Dados de Profissionais</h3>
+                    <h3 className="font-semibold text-foreground mb-2">1.1 Dados de Profissionais</h3>
                     <ul className="list-disc list-inside space-y-1 ml-4">
                       <li>Nome completo, CPF, CRN</li>
                       <li>E-mail e telefone</li>
@@ -73,7 +73,7 @@ export default function Privacidade() {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-900 mb-2">1.2 Dados de Pacientes</h3>
+                    <h3 className="font-semibold text-foreground mb-2">1.2 Dados de Pacientes</h3>
                     <ul className="list-disc list-inside space-y-1 ml-4">
                       <li>Dados cadastrais e de contato</li>
                       <li>Informações de saúde e nutricionais</li>
@@ -91,10 +91,10 @@ export default function Privacidade() {
             <div className="flex items-start space-x-3 mb-4">
               <Eye className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" />
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
+                <h2 className="text-2xl font-bold text-foreground mb-3">
                   2. Como Usamos os Dados
                 </h2>
-                <ul className="list-disc list-inside space-y-2 text-slate-700 ml-4">
+                <ul className="list-disc list-inside space-y-2 text-foreground ml-4">
                   <li>Prestação e melhoria dos serviços da plataforma</li>
                   <li>Comunicação sobre atualizações e suporte</li>
                   <li>Processamento de pagamentos e cobranças</li>
@@ -110,13 +110,13 @@ export default function Privacidade() {
             <div className="flex items-start space-x-3 mb-4">
               <Users className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" />
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
+                <h2 className="text-2xl font-bold text-foreground mb-3">
                   3. Compartilhamento de Dados
                 </h2>
-                <p className="text-slate-700 mb-3">
+                <p className="text-foreground mb-3">
                   Seus dados não serão vendidos ou compartilhados com terceiros, exceto nas seguintes situações:
                 </p>
-                <ul className="list-disc list-inside space-y-2 text-slate-700 ml-4">
+                <ul className="list-disc list-inside space-y-2 text-foreground ml-4">
                   <li>Prestadores de serviço essenciais (hospedagem, pagamento)</li>
                   <li>Quando exigido por lei ou ordem judicial</li>
                   <li>Com seu consentimento expresso</li>
@@ -131,13 +131,13 @@ export default function Privacidade() {
             <div className="flex items-start space-x-3 mb-4">
               <Lock className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" />
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
+                <h2 className="text-2xl font-bold text-foreground mb-3">
                   4. Segurança dos Dados
                 </h2>
-                <p className="text-slate-700 mb-3">
+                <p className="text-foreground mb-3">
                   Implementamos medidas técnicas e organizacionais para proteger seus dados:
                 </p>
-                <ul className="list-disc list-inside space-y-2 text-slate-700 ml-4">
+                <ul className="list-disc list-inside space-y-2 text-foreground ml-4">
                   <li>Criptografia SSL/TLS para transmissão de dados</li>
                   <li>Armazenamento em servidores seguros</li>
                   <li>Controle de acesso restrito</li>
@@ -153,13 +153,13 @@ export default function Privacidade() {
             <div className="flex items-start space-x-3 mb-4">
               <FileText className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" />
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
+                <h2 className="text-2xl font-bold text-foreground mb-3">
                   5. Seus Direitos (LGPD)
                 </h2>
-                <p className="text-slate-700 mb-3">
+                <p className="text-foreground mb-3">
                   Você tem direito a:
                 </p>
-                <ul className="list-disc list-inside space-y-2 text-slate-700 ml-4">
+                <ul className="list-disc list-inside space-y-2 text-foreground ml-4">
                   <li>Confirmar a existência de tratamento dos seus dados</li>
                   <li>Acessar seus dados pessoais</li>
                   <li>Corrigir dados incompletos, inexatos ou desatualizados</li>
@@ -168,7 +168,7 @@ export default function Privacidade() {
                   <li>Obter informações sobre compartilhamento</li>
                   <li>Portabilidade dos dados</li>
                 </ul>
-                <p className="text-slate-700 mt-4">
+                <p className="text-foreground mt-4">
                   Para exercer seus direitos, entre em contato através do e-mail:{' '}
                   <a href="mailto:privacidade@nutriflow.com.br" className="text-emerald-600 hover:text-emerald-700 font-medium">
                     privacidade@nutriflow.com.br
@@ -180,10 +180,10 @@ export default function Privacidade() {
 
           {/* Cookies */}
           <section>
-            <h2 className="text-2xl font-bold text-slate-900 mb-3">
+            <h2 className="text-2xl font-bold text-foreground mb-3">
               6. Cookies e Tecnologias Similares
             </h2>
-            <p className="text-slate-700">
+            <p className="text-foreground">
               Utilizamos cookies essenciais para o funcionamento da plataforma, como autenticação
               e preferências de usuário. Não utilizamos cookies de rastreamento ou publicidade.
             </p>
@@ -191,10 +191,10 @@ export default function Privacidade() {
 
           {/* Data Retention */}
           <section>
-            <h2 className="text-2xl font-bold text-slate-900 mb-3">
+            <h2 className="text-2xl font-bold text-foreground mb-3">
               7. Retenção de Dados
             </h2>
-            <p className="text-slate-700">
+            <p className="text-foreground">
               Mantemos seus dados pelo tempo necessário para cumprir as finalidades descritas nesta política
               ou conforme exigido por lei. Dados de saúde de pacientes são mantidos por no mínimo 20 anos,
               conforme exigências do Conselho Federal de Nutrição.
@@ -203,30 +203,30 @@ export default function Privacidade() {
 
           {/* Changes */}
           <section>
-            <h2 className="text-2xl font-bold text-slate-900 mb-3">
+            <h2 className="text-2xl font-bold text-foreground mb-3">
               8. Alterações nesta Política
             </h2>
-            <p className="text-slate-700">
+            <p className="text-foreground">
               Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos sobre mudanças
               significativas por e-mail ou através de avisos na plataforma.
             </p>
           </section>
 
           {/* Contact */}
-          <section className="border-t border-slate-200 pt-6">
-            <h2 className="text-2xl font-bold text-slate-900 mb-3">
+          <section className="border-t border-border pt-6">
+            <h2 className="text-2xl font-bold text-foreground mb-3">
               Contato
             </h2>
-            <p className="text-slate-700 mb-2">
+            <p className="text-foreground mb-2">
               Para questões sobre privacidade e proteção de dados:
             </p>
-            <p className="text-slate-700">
+            <p className="text-foreground">
               <strong>E-mail:</strong>{' '}
               <a href="mailto:privacidade@nutriflow.com.br" className="text-emerald-600 hover:text-emerald-700">
                 privacidade@nutriflow.com.br
               </a>
             </p>
-            <p className="text-slate-700">
+            <p className="text-foreground">
               <strong>WhatsApp:</strong>{' '}
               <a href="https://wa.me/5513996205253" className="text-emerald-600 hover:text-emerald-700">
                 (13) 99620-5253
@@ -237,7 +237,7 @@ export default function Privacidade() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-slate-800 text-slate-400 py-8 mt-12">
+      <footer className="bg-foreground text-muted-foreground py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-2">

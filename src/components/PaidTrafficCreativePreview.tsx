@@ -53,7 +53,7 @@ export default function PaidTrafficCreativePreview() {
     const Icon = categoryIcons[creative.category];
 
     return (
-      <Card key={creative.id} className="bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors">
+      <Card key={creative.id} className="bg-foreground border-slate-800 hover:border-slate-700 transition-colors">
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
@@ -61,7 +61,7 @@ export default function PaidTrafficCreativePreview() {
                 <div className={`p-1.5 rounded ${categoryColors[creative.category]}`}>
                   <Icon className="w-4 h-4" />
                 </div>
-                <Badge variant="outline" className="border-slate-700 text-slate-400 text-xs">
+                <Badge variant="outline" className="border-slate-700 text-muted-foreground text-xs">
                   {creative.id}
                 </Badge>
               </div>
@@ -75,7 +75,7 @@ export default function PaidTrafficCreativePreview() {
             <Button
               size="sm"
               variant="ghost"
-              className="text-slate-400 hover:text-slate-200"
+              className="text-muted-foreground hover:text-slate-200"
               onClick={() => handleCopy(
                 `${creative.headline}\n${creative.subheadline}\n\n${creative.body}\n\n${creative.cta}`,
                 creative.id
@@ -92,8 +92,8 @@ export default function PaidTrafficCreativePreview() {
 
         <CardContent className="space-y-4">
           {/* Target */}
-          <div className="p-3 bg-slate-800/50 rounded border border-slate-700">
-            <p className="text-xs text-slate-400 mb-1">🎯 Público-Alvo</p>
+          <div className="p-3 bg-foreground/50 rounded border border-slate-700">
+            <p className="text-xs text-muted-foreground mb-1">🎯 Público-Alvo</p>
             <p className="text-sm text-slate-200">{creative.target}</p>
           </div>
 
@@ -116,13 +116,13 @@ export default function PaidTrafficCreativePreview() {
 
           {/* Gatilhos */}
           <div>
-            <p className="text-xs text-slate-500 mb-2">Gatilhos Psicológicos:</p>
+            <p className="text-xs text-muted-foreground mb-2">Gatilhos Psicológicos:</p>
             <div className="flex flex-wrap gap-1.5">
               {creative.psychologicalTriggers.map((trigger, i) => (
                 <Badge
                   key={i}
                   variant="outline"
-                  className="border-slate-700 bg-slate-800/50 text-slate-300 text-xs"
+                  className="border-slate-700 bg-foreground/50 text-slate-300 text-xs"
                 >
                   {trigger}
                 </Badge>
@@ -132,7 +132,7 @@ export default function PaidTrafficCreativePreview() {
 
           {/* Fraquezas dos Concorrentes */}
           <div>
-            <p className="text-xs text-slate-500 mb-2">Ataca fraquezas:</p>
+            <p className="text-xs text-muted-foreground mb-2">Ataca fraquezas:</p>
             <div className="flex flex-wrap gap-1.5">
               {creative.competitorWeaknesses.map((weakness, i) => (
                 <Badge
@@ -146,9 +146,9 @@ export default function PaidTrafficCreativePreview() {
           </div>
 
           {/* Image Prompt */}
-          <div className="p-3 bg-slate-800/30 rounded border border-slate-700/50">
-            <p className="text-xs text-slate-500 mb-1.5">🎨 Prompt da Imagem:</p>
-            <p className="text-xs text-slate-400 leading-relaxed">
+          <div className="p-3 bg-foreground/30 rounded border border-slate-700/50">
+            <p className="text-xs text-muted-foreground mb-1.5">🎨 Prompt da Imagem:</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
               {creative.imagePrompt}
             </p>
           </div>
@@ -169,7 +169,7 @@ export default function PaidTrafficCreativePreview() {
             <h2 className="text-2xl font-bold text-slate-50">
               Criativos de Tráfego Pago
             </h2>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted-foreground">
               {adCreatives.length} variações persuasivas para capturar nutris dos concorrentes
             </p>
           </div>
@@ -178,49 +178,49 @@ export default function PaidTrafficCreativePreview() {
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-foreground border-slate-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <Eye className="w-8 h-8 text-cyan-400" />
               <div>
                 <p className="text-2xl font-bold text-slate-50">{adCreatives.length}</p>
-                <p className="text-xs text-slate-400">Criativos</p>
+                <p className="text-xs text-muted-foreground">Criativos</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-foreground border-slate-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <Target className="w-8 h-8 text-red-400" />
               <div>
                 <p className="text-2xl font-bold text-slate-50">6</p>
-                <p className="text-xs text-slate-400">Categorias</p>
+                <p className="text-xs text-muted-foreground">Categorias</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-foreground border-slate-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <Zap className="w-8 h-8 text-orange-400" />
               <div>
                 <p className="text-2xl font-bold text-slate-50">24</p>
-                <p className="text-xs text-slate-400">Gatilhos</p>
+                <p className="text-xs text-muted-foreground">Gatilhos</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-foreground border-slate-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <DollarSign className="w-8 h-8 text-emerald-400" />
               <div>
                 <p className="text-2xl font-bold text-slate-50">&lt; R$3.50</p>
-                <p className="text-xs text-slate-400">CPC Target</p>
+                <p className="text-xs text-muted-foreground">CPC Target</p>
               </div>
             </div>
           </CardContent>
@@ -229,7 +229,7 @@ export default function PaidTrafficCreativePreview() {
 
       {/* Filters */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className="bg-slate-800 border border-slate-700">
+        <TabsList className="bg-foreground border border-slate-700">
           <TabsTrigger value="all">Todos ({adCreatives.length})</TabsTrigger>
           <TabsTrigger value="dor">
             <Target className="w-3.5 h-3.5 mr-1.5" />
@@ -265,20 +265,20 @@ export default function PaidTrafficCreativePreview() {
       </Tabs>
 
       {/* Export Actions */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-foreground border-slate-800">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-slate-50 mb-1">
                 Exportar criativos
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 Baixe todos os criativos para usar no Meta Ads Manager
               </p>
             </div>
             <Button
               variant="outline"
-              className="border-slate-700 text-slate-200 hover:bg-slate-800"
+              className="border-slate-700 text-slate-200 hover:bg-foreground"
             >
               <Download className="w-4 h-4 mr-2" />
               Exportar CSV

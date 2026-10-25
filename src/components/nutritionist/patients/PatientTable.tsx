@@ -40,7 +40,7 @@ const goalLabels: Record<string, string> = {
 
 const statusColors: Record<string, { bg: string; text: string; badge: string }> = {
   active: { bg: 'bg-emerald-50', text: 'text-emerald-700', badge: 'bg-emerald-100' },
-  inactive: { bg: 'bg-slate-50', text: 'text-slate-700', badge: 'bg-slate-100' },
+  inactive: { bg: 'bg-secondary', text: 'text-foreground', badge: 'bg-muted' },
   paused: { bg: 'bg-amber-50', text: 'text-amber-700', badge: 'bg-amber-100' },
 };
 
@@ -75,19 +75,19 @@ export function PatientTable({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden"
+      className="bg-card rounded-lg border border-border shadow-sm overflow-hidden"
     >
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50">
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Nome</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Email</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Objetivo</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Progresso</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Status</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Ações</th>
+            <tr className="border-b border-border bg-secondary">
+              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Nome</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Email</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Objetivo</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Progresso</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Status</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -104,25 +104,25 @@ export function PatientTable({
                     backgroundColor: '#f9fafb',
                     transition: { duration: 0.2 },
                   }}
-                  className="border-b border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+                  className="border-b border-border cursor-pointer hover:bg-secondary transition-colors"
                   onClick={() => onSelectPatient(patient.id)}
                 >
-                  <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                  <td className="px-6 py-4 text-sm font-medium text-foreground">
                     {patient.full_name}
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{patient.email}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{patient.email}</td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground">
                     {patient.goal ? goalLabels[patient.goal] || patient.goal : '—'}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div className="w-16 h-2 bg-border rounded-full overflow-hidden">
                         <div
                           className="h-full bg-emerald-500 rounded-full transition-all"
                           style={{ width: `${(patient.progress || 0) % 101}%` }}
                         />
                       </div>
-                      <span className="text-xs text-slate-600">
+                      <span className="text-xs text-muted-foreground">
                         {(patient.progress || 0) % 101}%
                       </span>
                     </div>
@@ -187,8 +187,8 @@ export function PatientTable({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <div className="text-sm text-slate-600">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-secondary">
+          <div className="text-sm text-muted-foreground">
             Página {currentPage} de {totalPages} ({patients.length} pacientes)
           </div>
           <div className="flex items-center gap-2">

@@ -44,7 +44,7 @@ export function MealCard({ food, onRemove, onUpdateQuantity }: MealCardProps) {
       dragControls={controls}
       className="group relative"
     >
-      <div className="bg-white rounded-xl border border-border/40 p-4 hover:shadow-md transition-shadow">
+      <div className="bg-card rounded-xl border border-border/40 p-4 hover:shadow-md transition-shadow">
         <div className="flex items-center gap-3">
           {/* Drag Handle */}
           <div

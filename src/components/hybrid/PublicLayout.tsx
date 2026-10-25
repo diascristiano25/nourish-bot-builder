@@ -41,7 +41,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
       <main>{children}</main>
 
       {/* Footer */}
-      <footer className="border-t border-[#C4764A]/20 py-12 bg-white">
+      <footer className="border-t border-[#C4764A]/20 py-12 bg-card">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">

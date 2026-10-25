@@ -32,13 +32,13 @@ export function ProgressCard({ progress }: ProgressCardProps) {
       initial="hidden"
       animate="visible"
       variants={fadeInScale}
-      className="rounded-lg border border-blue-200 bg-white p-6 shadow-sm"
+      className="rounded-lg border border-blue-200 bg-card p-6 shadow-sm"
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-slate-600">Seu Progresso</p>
+          <p className="text-sm font-medium text-muted-foreground">Seu Progresso</p>
           <div className="mt-2 flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-slate-900">
+            <p className="text-3xl font-bold text-foreground">
               {weightLost > 0 ? `-${weightLost.toFixed(1)}` : '0.0'} kg
             </p>
             {weightLost > 0 && (
@@ -50,7 +50,7 @@ export function ProgressCard({ progress }: ProgressCardProps) {
               </div>
             )}
           </div>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Peso atual: {latestWeight > 0 ? `${latestWeight.toFixed(1)} kg` : 'Não registrado'}
           </p>
         </div>

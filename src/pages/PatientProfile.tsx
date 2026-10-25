@@ -122,15 +122,15 @@ export default function PatientProfile() {
         variants={fadeInUp}
         className="max-w-2xl mx-auto p-6"
       >
-        <h1 className="text-3xl font-bold text-slate-900 mb-6">Meu Perfil</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-6">Meu Perfil</h1>
 
         <motion.form
           variants={staggerContainer}
           onSubmit={handleSubmit}
-          className="bg-white rounded-lg border border-blue-200 shadow-sm p-6 space-y-6"
+          className="bg-card rounded-lg border border-blue-200 shadow-sm p-6 space-y-6"
         >
           <motion.div variants={staggerItem}>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Nome Completo
@@ -141,13 +141,13 @@ export default function PatientProfile() {
               name="full_name"
               value={formData.full_name}
               onChange={handleChange}
-              className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full border border-border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
               placeholder="Seu nome completo"
             />
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 Email
@@ -158,14 +158,14 @@ export default function PatientProfile() {
               name="email"
               value={formData.email}
               disabled
-              className="w-full border border-slate-300 rounded-lg px-4 py-2 bg-slate-50 text-slate-500"
+              className="w-full border border-border rounded-lg px-4 py-2 bg-secondary text-muted-foreground"
               placeholder="seu@email.com"
             />
-            <p className="text-xs text-slate-500 mt-1">Email não pode ser alterado</p>
+            <p className="text-xs text-muted-foreground mt-1">Email não pode ser alterado</p>
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
                 Telefone
@@ -176,13 +176,13 @@ export default function PatientProfile() {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full border border-border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
               placeholder="(00) 00000-0000"
             />
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 Data de Nascimento
@@ -193,12 +193,12 @@ export default function PatientProfile() {
               name="date_of_birth"
               value={formData.date_of_birth}
               onChange={handleChange}
-              className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full border border-border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4" />
                 Seu Objetivo
@@ -209,14 +209,14 @@ export default function PatientProfile() {
               name="goal"
               value={formData.goal}
               onChange={handleChange}
-              className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full border border-border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
               placeholder="Ex: Perder 10kg, Ganhar massa muscular"
             />
           </motion.div>
 
           <div className="grid grid-cols-2 gap-4">
             <motion.div variants={staggerItem}>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Altura (cm)
               </label>
               <input
@@ -224,14 +224,14 @@ export default function PatientProfile() {
                 name="height"
                 value={formData.height}
                 onChange={handleChange}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full border border-border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 placeholder="170"
                 step="0.1"
               />
             </motion.div>
 
             <motion.div variants={staggerItem}>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Peso Atual (kg)
               </label>
               <input
@@ -239,7 +239,7 @@ export default function PatientProfile() {
                 name="current_weight"
                 value={formData.current_weight}
                 onChange={handleChange}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full border border-border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 placeholder="70"
                 step="0.1"
               />
@@ -250,7 +250,7 @@ export default function PatientProfile() {
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition-colors font-medium disabled:bg-slate-300 disabled:cursor-not-allowed"
+              className="w-full bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition-colors font-medium disabled:bg-border disabled:cursor-not-allowed"
             >
               {isSaving ? 'Salvando...' : 'Salvar Alterações'}
             </button>

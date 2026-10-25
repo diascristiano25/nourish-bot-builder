@@ -75,8 +75,8 @@ export function MealPlanViewer({ mealPlan, onMarkMealDone }: MealPlanViewerProps
   if (!plan || meals.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-500">Nenhum plano alimentar disponível</p>
-        <p className="text-sm text-slate-400 mt-2">
+        <p className="text-muted-foreground">Nenhum plano alimentar disponível</p>
+        <p className="text-sm text-muted-foreground mt-2">
           Entre em contato com seu nutricionista para criar um plano personalizado
         </p>
       </div>
@@ -91,10 +91,10 @@ export function MealPlanViewer({ mealPlan, onMarkMealDone }: MealPlanViewerProps
       className="space-y-6"
     >
       {/* Plan header */}
-      <motion.div variants={staggerItem} className="bg-white rounded-lg p-6 border border-blue-200 shadow-sm">
-        <h2 className="text-2xl font-bold text-slate-900">{plan.name || 'Meu Plano Alimentar'}</h2>
+      <motion.div variants={staggerItem} className="bg-card rounded-lg p-6 border border-blue-200 shadow-sm">
+        <h2 className="text-2xl font-bold text-foreground">{plan.name || 'Meu Plano Alimentar'}</h2>
         {plan.start_date && (
-          <p className="text-sm text-slate-500 mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             Período: {new Date(plan.start_date).toLocaleDateString('pt-BR')} até{' '}
             {plan.end_date ? new Date(plan.end_date).toLocaleDateString('pt-BR') : 'Indeterminado'}
           </p>
@@ -106,13 +106,13 @@ export function MealPlanViewer({ mealPlan, onMarkMealDone }: MealPlanViewerProps
         <motion.div
           key={type}
           variants={staggerItem}
-          className="bg-white rounded-lg p-6 border border-blue-200 shadow-sm"
+          className="bg-card rounded-lg p-6 border border-blue-200 shadow-sm"
         >
           <div className="flex items-center gap-3 mb-4">
             <div className="text-teal-500">
               {mealIcons[type] || <Coffee className="w-6 h-6" />}
             </div>
-            <h3 className="text-xl font-bold text-slate-900">
+            <h3 className="text-xl font-bold text-foreground">
               {mealLabels[type] || type}
             </h3>
           </div>
@@ -126,20 +126,20 @@ export function MealPlanViewer({ mealPlan, onMarkMealDone }: MealPlanViewerProps
                   className={`p-4 rounded-lg border transition-all ${
                     isCompleted
                       ? 'bg-emerald-50 border-emerald-200'
-                      : 'bg-slate-50 border-slate-200'
+                      : 'bg-secondary border-border'
                   }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <h4 className="font-medium text-slate-900">{meal.name}</h4>
-                        <span className="text-sm text-slate-500">{meal.time}</span>
+                        <h4 className="font-medium text-foreground">{meal.name}</h4>
+                        <span className="text-sm text-muted-foreground">{meal.time}</span>
                       </div>
                       {meal.description && (
-                        <p className="text-sm text-slate-600 mt-2">{meal.description}</p>
+                        <p className="text-sm text-muted-foreground mt-2">{meal.description}</p>
                       )}
                       {(meal.calories || meal.protein || meal.carbs || meal.fats) && (
-                        <div className="flex gap-4 mt-3 text-xs text-slate-600">
+                        <div className="flex gap-4 mt-3 text-xs text-muted-foreground">
                           {meal.calories && <span>{meal.calories} kcal</span>}
                           {meal.protein && <span>{meal.protein}g proteína</span>}
                           {meal.carbs && <span>{meal.carbs}g carboidratos</span>}
@@ -149,7 +149,7 @@ export function MealPlanViewer({ mealPlan, onMarkMealDone }: MealPlanViewerProps
                     </div>
                     <button
                       onClick={() => toggleMealCompletion(meal.id)}
-                      className="ml-4 text-slate-400 hover:text-teal-500 transition-colors"
+                      className="ml-4 text-muted-foreground hover:text-teal-500 transition-colors"
                     >
                       {isCompleted ? (
                         <CheckCircle2 className="w-6 h-6 text-emerald-500" />

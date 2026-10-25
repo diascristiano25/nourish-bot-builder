@@ -263,7 +263,7 @@ export default function GroceryList() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-background print:bg-white">
+      <div className="min-h-screen bg-background print:bg-card">
         {/* Header */}
         <header className="sticky top-0 z-30 glass-strong border-b border-border/30 print:hidden">
           <div className="px-4 md:px-8 h-16 flex items-center justify-between">

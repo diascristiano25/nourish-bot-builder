@@ -10,20 +10,20 @@ import { Button } from '@/components/ui/button';
 
 function SocialProofBand() {
   return (
-    <section className="py-8 bg-slate-50 border-y border-slate-200">
+    <section className="py-8 bg-secondary border-y border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
           <div className="text-center">
-            <div className="text-3xl font-bold text-slate-900">500+</div>
-            <div className="text-sm text-slate-600">Nutricionistas</div>
+            <div className="text-3xl font-bold text-foreground">500+</div>
+            <div className="text-sm text-muted-foreground">Nutricionistas</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-slate-900">10.000+</div>
-            <div className="text-sm text-slate-600">Cardápios Criados</div>
+            <div className="text-3xl font-bold text-foreground">10.000+</div>
+            <div className="text-sm text-muted-foreground">Cardápios Criados</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-slate-900">95%</div>
-            <div className="text-sm text-slate-600">Satisfação</div>
+            <div className="text-3xl font-bold text-foreground">95%</div>
+            <div className="text-sm text-muted-foreground">Satisfação</div>
           </div>
         </div>
       </div>
@@ -35,10 +35,10 @@ function FinalCTA() {
   return (
     <section className="py-16 md:py-24 bg-emerald-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
           Pronto para transformar sua prática?
         </h2>
-        <p className="text-xl text-slate-600 mb-8">
+        <p className="text-xl text-muted-foreground mb-8">
           Comece seu teste grátis de 14 dias agora. Sem cartão de crédito.
         </p>
         <Button
@@ -55,7 +55,7 @@ function FinalCTA() {
 
 function Footer() {
   return (
-    <footer className="bg-slate-900 text-slate-400 py-12">
+    <footer className="bg-foreground text-muted-foreground py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div>
@@ -99,7 +99,7 @@ function Footer() {
 
 export default function LandingPageProfessional() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-card">
       <StickyNav />
       <HeroWithScreenshot />
       <SocialProofBand />

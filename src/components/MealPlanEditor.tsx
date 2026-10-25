@@ -282,7 +282,7 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
           <CardHeader className="py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-foreground">
+                <div className="w-10 h-10 rounded-xl bg-card/10 backdrop-blur-sm flex items-center justify-center text-foreground">
                   {mealIcons[meal.name] || <UtensilsCrossed className="w-5 h-5" />}
                 </div>
                 <div>
@@ -292,11 +292,11 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                     value={meal.time || ''}
                     onChange={(e) => updateMealTime(mealIndex, e.target.value)}
                     placeholder="ex: 07:00"
-                    className="h-7 w-24 mt-1 bg-white/10 border-white/20 text-xs font-mono"
+                    className="h-7 w-24 mt-1 bg-card/10 border-white/20 text-xs font-mono"
                   />
                 </div>
               </div>
-              <Badge className="bg-white/10 text-foreground border-white/20 font-mono">
+              <Badge className="bg-card/10 text-foreground border-white/20 font-mono">
                 {meal.totalCalories || 0} kcal
               </Badge>
             </div>
@@ -401,7 +401,7 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
             onChange={(e) => updateNotes(e.target.value)}
             placeholder="Adicione observações para o paciente..."
             rows={4}
-            className="bg-white/5 border-cyan-500/20 focus:border-cyan-500/50"
+            className="bg-card/5 border-cyan-500/20 focus:border-cyan-500/50"
           />
         </CardContent>
       </GlassCard>

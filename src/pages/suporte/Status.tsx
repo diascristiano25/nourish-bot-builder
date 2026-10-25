@@ -20,10 +20,10 @@ export default function Status() {
               Todos os sistemas operacionais
             </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
             Status do Sistema
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Acompanhe a disponibilidade e desempenho da plataforma NutriFlow em tempo real
           </p>
         </div>
@@ -32,14 +32,14 @@ export default function Status() {
         <Card className="p-8 bg-gradient-to-br from-slate-50 to-white border-2">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-slate-600">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <TrendingUp className="w-5 h-5" />
                 <span className="text-sm font-medium">Disponibilidade (30 dias)</span>
               </div>
-              <div className="text-5xl font-bold text-slate-900">
+              <div className="text-5xl font-bold text-foreground">
                 {data.uptime}%
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Média calculada nos últimos 30 dias
               </p>
             </div>
@@ -49,7 +49,7 @@ export default function Status() {
 
         {/* Services Grid */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-slate-900">Serviços</h2>
+          <h2 className="text-2xl font-bold text-foreground">Serviços</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {data.services.map((service) => (
               <Card key={service.name} className="p-6 bg-card">
@@ -79,8 +79,8 @@ export default function Status() {
 
         {/* Incidents Timeline */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-slate-900">Histórico de Incidentes</h2>
-          <p className="text-slate-600">
+          <h2 className="text-2xl font-bold text-foreground">Histórico de Incidentes</h2>
+          <p className="text-muted-foreground">
             Últimos incidentes registrados e suas resoluções
           </p>
           <div className="space-y-3">
@@ -90,7 +90,7 @@ export default function Status() {
               ))
             ) : (
               <Card className="p-8 text-center">
-                <p className="text-slate-600">
+                <p className="text-muted-foreground">
                   Nenhum incidente registrado recentemente
                 </p>
               </Card>
@@ -101,10 +101,10 @@ export default function Status() {
         {/* CTA */}
         <Card className="p-8 bg-gradient-to-br from-[#518C5B]/5 to-white border-[#518C5B]/20">
           <div className="text-center space-y-4">
-            <h3 className="text-2xl font-bold text-slate-900">
+            <h3 className="text-2xl font-bold text-foreground">
               Quer receber notificações sobre incidentes?
             </h3>
-            <p className="text-slate-600">
+            <p className="text-muted-foreground">
               Cadastre-se gratuitamente e ative alertas em tempo real
             </p>
             <button
@@ -130,10 +130,10 @@ export default function Status() {
               Todos os sistemas operacionais
             </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
             Status do Sistema
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Acompanhe a disponibilidade e desempenho da plataforma NutriFlow em tempo real
           </p>
         </div>
@@ -142,14 +142,14 @@ export default function Status() {
         <Card className="p-8 bg-gradient-to-br from-slate-50 to-white border-2">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-slate-600">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <TrendingUp className="w-5 h-5" />
                 <span className="text-sm font-medium">Disponibilidade (30 dias)</span>
               </div>
-              <div className="text-5xl font-bold text-slate-900">
+              <div className="text-5xl font-bold text-foreground">
                 {data.uptime}%
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Média calculada nos últimos 30 dias
               </p>
             </div>
@@ -159,7 +159,7 @@ export default function Status() {
 
         {/* Services Grid */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-slate-900">Serviços</h2>
+          <h2 className="text-2xl font-bold text-foreground">Serviços</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {data.services.map((service) => (
               <Card key={service.name} className="p-6 bg-card">
@@ -191,10 +191,10 @@ export default function Status() {
         <Card className="p-6 bg-blue-50 border-blue-200">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h3 className="font-semibold text-slate-900">
+              <h3 className="font-semibold text-foreground">
                 Notificações de Incidentes
               </h3>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Receba alertas por email quando houver problemas nos serviços
               </p>
             </div>
@@ -208,15 +208,15 @@ export default function Status() {
                   console.log('Notifications:', e.target.checked);
                 }}
               />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#518C5B]"></div>
+              <div className="w-11 h-6 bg-border peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#518C5B]"></div>
             </label>
           </div>
         </Card>
 
         {/* Incidents Timeline */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-slate-900">Histórico de Incidentes</h2>
-          <p className="text-slate-600">
+          <h2 className="text-2xl font-bold text-foreground">Histórico de Incidentes</h2>
+          <p className="text-muted-foreground">
             Últimos incidentes registrados e suas resoluções
           </p>
           <div className="space-y-3">
@@ -226,7 +226,7 @@ export default function Status() {
               ))
             ) : (
               <Card className="p-8 text-center">
-                <p className="text-slate-600">
+                <p className="text-muted-foreground">
                   Nenhum incidente registrado recentemente
                 </p>
               </Card>

@@ -43,7 +43,7 @@ export default function Prescricao() {
             </p>
           </div>
 
-          <Card className="p-8 border-[#518C5B]/20 bg-white">
+          <Card className="p-8 border-[#518C5B]/20 bg-card">
             <div className="flex items-start justify-between mb-6">
               <div>
                 <h3 className="text-2xl font-bold text-[#518C5B] mb-2">

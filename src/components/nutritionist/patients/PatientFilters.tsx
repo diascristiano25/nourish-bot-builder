@@ -31,15 +31,15 @@ export function PatientFilters({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-4 p-6 bg-white rounded-lg border border-slate-200 shadow-sm"
+      className="space-y-4 p-6 bg-card rounded-lg border border-border shadow-sm"
     >
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Buscar paciente por nome ou email..."
           onChange={(e) => onSearch(e.target.value)}
-          className="pl-10 py-2 h-10 rounded-lg bg-slate-50 border-slate-200 focus:bg-white focus:border-slate-300"
+          className="pl-10 py-2 h-10 rounded-lg bg-secondary border-border focus:bg-card focus:border-border"
         />
       </div>
 
@@ -53,8 +53,8 @@ export function PatientFilters({
             size="sm"
             className={`rounded-lg transition-all ${
               currentStatus === option.value
-                ? 'bg-slate-900 text-white hover:bg-slate-800'
-                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                ? 'bg-foreground text-white hover:bg-foreground'
+                : 'bg-card text-foreground border-border hover:border-border'
             }`}
           >
             {option.label}

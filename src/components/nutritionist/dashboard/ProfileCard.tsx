@@ -27,7 +27,7 @@ export function ProfileCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.5 }}
       whileHover={{ y: -4 }}
-      className="bg-white rounded-3xl overflow-hidden border border-slate-200/60 shadow-soft"
+      className="bg-card rounded-3xl overflow-hidden border border-border/60 shadow-soft"
     >
       {/* Header */}
       <div className="bg-gradient-to-r from-[#518C5B] to-[#3d7047] px-6 py-4 flex items-center justify-between">
@@ -35,7 +35,7 @@ export function ProfileCard({
         <motion.button
           whileHover={{ scale: 1.1, rotate: 15 }}
           whileTap={{ scale: 0.9 }}
-          className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+          className="w-8 h-8 rounded-lg bg-card/20 backdrop-blur-sm flex items-center justify-center hover:bg-card/30 transition-colors"
         >
           <Pencil className="w-4 h-4 text-white" />
         </motion.button>
@@ -67,7 +67,7 @@ export function ProfileCard({
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
+        <div className="grid grid-cols-3 gap-2 pt-4 border-t border-border">
           <StatItem icon={Cake} label="CRN" value={crn} color="text-[#518C5B]" />
           <StatItem icon={Droplet} label="Espec." value="Clínica" color="text-[#C4764A]" />
           <StatItem icon={Clock} label="Horário" value={workingHours} color="text-blue-500" />

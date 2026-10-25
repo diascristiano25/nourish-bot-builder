@@ -106,7 +106,7 @@ export default function Biblioteca() {
           actions={
             <Button
               onClick={handleCreateNew}
-              className="gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white border border-white/20 rounded-2xl font-semibold px-5 h-11 shadow-lg"
+              className="gap-2 bg-card/15 hover:bg-card/25 backdrop-blur-sm text-white border border-white/20 rounded-2xl font-semibold px-5 h-11 shadow-lg"
             >
               <Plus className="w-4 h-4" />
               Novo Plano
@@ -122,12 +122,12 @@ export default function Biblioteca() {
                 <BookOpen className="w-6 h-6 text-[#518C5B]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Planos</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total de Planos</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   {plans.length}
                 </motion.p>
@@ -140,12 +140,12 @@ export default function Biblioteca() {
                 <FileText className="w-6 h-6 text-[#C4764A]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Calorias Médias</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Calorias Médias</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   {totalCaloriesAvg} kcal
                 </motion.p>
@@ -158,12 +158,12 @@ export default function Biblioteca() {
                 <div className="w-3 h-3 rounded-full bg-indigo-500 animate-pulse" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Prontos para Uso</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Prontos para Uso</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   {plans.length}
                 </motion.p>
@@ -178,7 +178,7 @@ export default function Biblioteca() {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Loader2 className="w-8 h-8 animate-spin text-[#518C5B] mx-auto mb-3" />
-                <p className="text-slate-600 font-medium">Carregando planos...</p>
+                <p className="text-muted-foreground font-medium">Carregando planos...</p>
               </div>
             </div>
           </RichCard>

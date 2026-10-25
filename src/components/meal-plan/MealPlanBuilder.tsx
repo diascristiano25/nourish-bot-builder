@@ -186,7 +186,7 @@ export function MealPlanBuilder() {
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-border/40">
+      <div className="sticky top-0 z-40 bg-card/80 backdrop-blur-xl border-b border-border/40">
         <div className="px-8 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Construtor de Cardápio</h1>
@@ -259,7 +259,7 @@ export function MealPlanBuilder() {
                       <div className={`bg-gradient-to-r ${MEAL_COLORS[meal.type]} p-4 text-white`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-xl bg-card/20 flex items-center justify-center">
                               <Icon className="w-6 h-6" />
                             </div>
                             <div>

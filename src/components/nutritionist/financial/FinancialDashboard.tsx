@@ -29,10 +29,10 @@ export function FinancialDashboard({
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
-            className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm h-32 animate-pulse"
+            className="rounded-lg border border-border bg-card p-6 shadow-sm h-32 animate-pulse"
           >
-            <div className="h-4 bg-slate-200 rounded w-24 mb-4" />
-            <div className="h-8 bg-slate-200 rounded w-32" />
+            <div className="h-4 bg-border rounded w-24 mb-4" />
+            <div className="h-8 bg-border rounded w-32" />
           </div>
         ))}
       </div>

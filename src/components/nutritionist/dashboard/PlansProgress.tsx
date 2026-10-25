@@ -26,7 +26,7 @@ export function PlansProgress({ plans = defaultPlans }: PlansProgressProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.5 }}
       whileHover={{ y: -4 }}
-      className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-soft"
+      className="bg-card rounded-3xl p-6 border border-border/60 shadow-soft"
     >
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
@@ -53,7 +53,7 @@ export function PlansProgress({ plans = defaultPlans }: PlansProgressProps) {
               <span className="text-sm text-foreground font-medium">{plan.label}</span>
               <span className="text-sm font-bold text-foreground">{plan.percent}%</span>
             </div>
-            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${plan.percent}%` }}
@@ -69,7 +69,7 @@ export function PlansProgress({ plans = defaultPlans }: PlansProgressProps) {
         whileHover={{ scale: 1.02, backgroundColor: 'rgba(81, 140, 91, 0.05)' }}
         whileTap={{ scale: 0.98 }}
         onClick={() => navigate('/novo-paciente')}
-        className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-[#518C5B] hover:border-[#518C5B]/40 transition-all cursor-pointer"
+        className="w-full py-3 border-2 border-dashed border-border rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-[#518C5B] hover:border-[#518C5B]/40 transition-all cursor-pointer"
       >
         <Plus className="w-4 h-4" />
         Adicionar plano

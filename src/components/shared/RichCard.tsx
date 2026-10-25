@@ -60,8 +60,8 @@ export function RichCard({
       className={cn(
         'rounded-3xl border transition-all duration-300',
         glass
-          ? 'bg-white/70 backdrop-blur-xl border-white/40 shadow-lg'
-          : 'bg-white border-slate-200/60 shadow-soft',
+          ? 'bg-card/70 backdrop-blur-xl border-white/40 shadow-lg'
+          : 'bg-card border-border/60 shadow-soft',
         paddingMap[padding],
         onClick && 'cursor-pointer',
         className,
@@ -186,7 +186,7 @@ export function StatTile({
       ? 'text-emerald-600'
       : trend?.direction === 'down'
         ? 'text-red-500'
-        : 'text-slate-500';
+        : 'text-muted-foreground';
   const trendLabel = trend
     ? trend.direction === 'flat'
       ? '0%'
@@ -196,7 +196,7 @@ export function StatTile({
   return (
     <RichCard delay={delay} padding="md" glowColor={color === 'sage' ? 'sage' : color === 'terracotta' ? 'terracotta' : 'none'}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</h3>
+        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{label}</h3>
         {icon && <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', c.bg, c.text)}>{icon}</div>}
       </div>
       <div className="flex items-end gap-3">
@@ -219,14 +219,14 @@ export function StatTile({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: delay + 0.2, type: 'spring' }}
-            className="text-3xl font-bold text-slate-800 leading-none tabular-nums"
+            className="text-3xl font-bold text-foreground leading-none tabular-nums"
           >
             {value}
           </motion.p>
           {trendLabel && (
             <div className={cn('flex items-center gap-1 mt-1.5 text-xs font-semibold', trendColor)}>
               <span className="tabular-nums">{trendLabel}</span>
-              <span className="text-slate-400 font-normal">vs média</span>
+              <span className="text-muted-foreground font-normal">vs média</span>
             </div>
           )}
         </div>

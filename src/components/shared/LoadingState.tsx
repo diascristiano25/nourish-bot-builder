@@ -24,7 +24,7 @@ export function LoadingState({
           key={index}
           animate="animate"
           variants={pulse}
-          className={`${height} rounded-lg bg-slate-200`}
+          className={`${height} rounded-lg bg-border`}
         />
       ))}
     </div>
@@ -39,11 +39,11 @@ export function SkeletonCard() {
     <motion.div
       animate="animate"
       variants={pulse}
-      className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+      className="rounded-lg border border-border bg-card p-6 shadow-sm"
     >
       <div className="space-y-4">
-        <div className="h-4 rounded bg-slate-200 w-3/4" />
-        <div className="h-3 rounded bg-slate-200 w-1/2" />
+        <div className="h-4 rounded bg-border w-3/4" />
+        <div className="h-3 rounded bg-border w-1/2" />
       </div>
     </motion.div>
   );
@@ -60,7 +60,7 @@ export function SkeletonList({ count = 5 }: { count?: number }) {
           key={index}
           animate="animate"
           variants={pulse}
-          className="h-10 rounded bg-slate-200"
+          className="h-10 rounded bg-border"
         />
       ))}
     </div>

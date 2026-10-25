@@ -202,12 +202,12 @@ export default function Financeiro() {
                 <DollarSign className="w-6 h-6 text-[#518C5B]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Receita do Mês</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Receita do Mês</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   R$ {data.totalRevenue.toLocaleString('pt-BR')}
                 </motion.p>
@@ -220,12 +220,12 @@ export default function Financeiro() {
                 <Clock className="w-6 h-6 text-amber-500" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pendentes</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Pendentes</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   R$ {data.pendingPayments.toLocaleString('pt-BR')}
                 </motion.p>
@@ -238,12 +238,12 @@ export default function Financeiro() {
                 <TrendingUp className="w-6 h-6 text-indigo-500" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ticket Médio</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Ticket Médio</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   R$ {data.avgConsultationCost.toLocaleString('pt-BR')}
                 </motion.p>
@@ -256,12 +256,12 @@ export default function Financeiro() {
                 <Receipt className="w-6 h-6 text-[#518C5B]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Transações</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Transações</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight"
+                  className="text-2xl font-bold text-foreground leading-tight"
                 >
                   {data.totalTransactions}
                 </motion.p>
@@ -272,7 +272,7 @@ export default function Financeiro() {
 
         {/* Action bar: New transaction button */}
         <div className="flex items-center justify-between gap-4">
-          <h2 className="font-serif text-xl md:text-2xl font-bold text-slate-800">
+          <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground">
             Movimentações
           </h2>
           <Button

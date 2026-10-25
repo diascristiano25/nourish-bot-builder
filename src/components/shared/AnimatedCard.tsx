@@ -30,7 +30,7 @@ export function AnimatedCard({
       transition={{ delay }}
       whileHover={whileHover}
       onClick={onClick}
-      className={`rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow ${className}`}
+      className={`rounded-lg border border-border bg-card shadow-sm hover:shadow-md transition-shadow ${className}`}
     >
       {children}
     </motion.div>

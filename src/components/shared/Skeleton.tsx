@@ -20,7 +20,7 @@ export function Skeleton({ className, variant = 'text', width, height }: Skeleto
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-md bg-slate-200/60',
+        'relative overflow-hidden rounded-md bg-border/60',
         variantStyles[variant],
         className
       )}
@@ -43,7 +43,7 @@ export function SkeletonCard({ delay = 0 }: { delay?: number }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-3xl border border-slate-200/60 shadow-soft p-6 space-y-4"
+      className="bg-card rounded-3xl border border-border/60 shadow-soft p-6 space-y-4"
     >
       <div className="flex items-center justify-between">
         <Skeleton variant="text" width="40%" />
@@ -69,7 +69,7 @@ export function SkeletonTable({ rows = 5 }: { rows?: number }) {
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.05 }}
-          className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100"
+          className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border"
         >
           <Skeleton variant="avatar" />
           <div className="flex-1 space-y-2">

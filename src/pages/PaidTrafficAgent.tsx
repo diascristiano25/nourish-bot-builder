@@ -93,13 +93,13 @@ export default function PaidTrafficAgent() {
               Agent de Tráfego Pago
             </h1>
           </div>
-          <p className="text-slate-400 text-sm max-w-2xl">
+          <p className="text-muted-foreground text-sm max-w-2xl">
             IA que cria e otimiza campanhas de anúncios no Facebook/Instagram Ads automaticamente
           </p>
         </div>
 
         <Tabs defaultValue="creatives" className="space-y-6">
-          <TabsList className="bg-slate-800 border border-slate-700">
+          <TabsList className="bg-foreground border border-slate-700">
             <TabsTrigger value="creatives">
               <Palette className="w-4 h-4 mr-2" />
               Criativos
@@ -116,13 +116,13 @@ export default function PaidTrafficAgent() {
 
           {/* Configuração */}
           <TabsContent value="config" className="space-y-6">
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-foreground border-slate-800">
               <CardHeader>
                 <CardTitle className="text-slate-50 flex items-center gap-2">
                   <Target className="w-5 h-5 text-cyan-400" />
                   Contexto do Negócio
                 </CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-muted-foreground">
                   Forneça informações sobre seu negócio para a IA gerar a estratégia
                 </CardDescription>
               </CardHeader>
@@ -134,7 +134,7 @@ export default function PaidTrafficAgent() {
                       id="businessName"
                       value={businessContext.businessName}
                       onChange={(e) => setBusinessContext({ ...businessContext, businessName: e.target.value })}
-                      className="bg-slate-800 border-slate-700 text-slate-50"
+                      className="bg-foreground border-slate-700 text-slate-50"
                     />
                   </div>
 
@@ -144,7 +144,7 @@ export default function PaidTrafficAgent() {
                       id="industry"
                       value={businessContext.industry}
                       onChange={(e) => setBusinessContext({ ...businessContext, industry: e.target.value })}
-                      className="bg-slate-800 border-slate-700 text-slate-50"
+                      className="bg-foreground border-slate-700 text-slate-50"
                     />
                   </div>
                 </div>
@@ -155,7 +155,7 @@ export default function PaidTrafficAgent() {
                     id="targetAudience"
                     value={businessContext.targetAudience}
                     onChange={(e) => setBusinessContext({ ...businessContext, targetAudience: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-slate-50"
+                    className="bg-foreground border-slate-700 text-slate-50"
                     placeholder="Ex: Nutricionistas de 25-45 anos"
                   />
                 </div>
@@ -166,7 +166,7 @@ export default function PaidTrafficAgent() {
                     id="mainService"
                     value={businessContext.mainService}
                     onChange={(e) => setBusinessContext({ ...businessContext, mainService: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-slate-50 min-h-20"
+                    className="bg-foreground border-slate-700 text-slate-50 min-h-20"
                   />
                 </div>
 
@@ -176,7 +176,7 @@ export default function PaidTrafficAgent() {
                     id="usp"
                     value={businessContext.uniqueSellingPoint}
                     onChange={(e) => setBusinessContext({ ...businessContext, uniqueSellingPoint: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-slate-50 min-h-20"
+                    className="bg-foreground border-slate-700 text-slate-50 min-h-20"
                   />
                 </div>
 
@@ -186,19 +186,19 @@ export default function PaidTrafficAgent() {
                     id="websiteUrl"
                     value={businessContext.websiteUrl}
                     onChange={(e) => setBusinessContext({ ...businessContext, websiteUrl: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-slate-50"
+                    className="bg-foreground border-slate-700 text-slate-50"
                   />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-foreground border-slate-800">
               <CardHeader>
                 <CardTitle className="text-slate-50 flex items-center gap-2">
                   <Zap className="w-5 h-5 text-orange-400" />
                   Meta Ads API (Opcional)
                 </CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-muted-foreground">
                   Configure para criar campanhas automaticamente. Se deixar em branco, gera apenas a estratégia.
                 </CardDescription>
               </CardHeader>
@@ -210,7 +210,7 @@ export default function PaidTrafficAgent() {
                     type="password"
                     value={metaConfig.accessToken}
                     onChange={(e) => setMetaConfig({ ...metaConfig, accessToken: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-slate-50"
+                    className="bg-foreground border-slate-700 text-slate-50"
                     placeholder="EAAG..."
                   />
                 </div>
@@ -222,7 +222,7 @@ export default function PaidTrafficAgent() {
                       id="adAccountId"
                       value={metaConfig.adAccountId}
                       onChange={(e) => setMetaConfig({ ...metaConfig, adAccountId: e.target.value })}
-                      className="bg-slate-800 border-slate-700 text-slate-50"
+                      className="bg-foreground border-slate-700 text-slate-50"
                       placeholder="act_123456789"
                     />
                   </div>
@@ -233,7 +233,7 @@ export default function PaidTrafficAgent() {
                       id="pixelId"
                       value={metaConfig.pixelId}
                       onChange={(e) => setMetaConfig({ ...metaConfig, pixelId: e.target.value })}
-                      className="bg-slate-800 border-slate-700 text-slate-50"
+                      className="bg-foreground border-slate-700 text-slate-50"
                       placeholder="123456789"
                     />
                   </div>
@@ -271,46 +271,46 @@ export default function PaidTrafficAgent() {
           <TabsContent value="strategy">
             {strategy ? (
               <div className="space-y-6">
-                <Card className="bg-slate-900 border-slate-800">
+                <Card className="bg-foreground border-slate-800">
                   <CardHeader>
                     <CardTitle className="text-slate-50">Visão Geral da Campanha</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="p-4 bg-slate-800 rounded-lg border border-slate-700">
-                        <p className="text-xs text-slate-400 mb-1">Objetivo</p>
+                      <div className="p-4 bg-foreground rounded-lg border border-slate-700">
+                        <p className="text-xs text-muted-foreground mb-1">Objetivo</p>
                         <p className="text-lg font-semibold text-slate-50">{strategy.objective}</p>
                       </div>
-                      <div className="p-4 bg-slate-800 rounded-lg border border-slate-700">
-                        <p className="text-xs text-slate-400 mb-1">Budget Diário</p>
+                      <div className="p-4 bg-foreground rounded-lg border border-slate-700">
+                        <p className="text-xs text-muted-foreground mb-1">Budget Diário</p>
                         <p className="text-lg font-semibold text-slate-50">
                           R$ {(strategy.budget / 100).toFixed(2)}
                         </p>
                       </div>
-                      <div className="p-4 bg-slate-800 rounded-lg border border-slate-700">
-                        <p className="text-xs text-slate-400 mb-1">Duração</p>
+                      <div className="p-4 bg-foreground rounded-lg border border-slate-700">
+                        <p className="text-xs text-muted-foreground mb-1">Duração</p>
                         <p className="text-lg font-semibold text-slate-50">{strategy.duration} dias</p>
                       </div>
                     </div>
 
-                    <Separator className="bg-slate-800" />
+                    <Separator className="bg-foreground" />
 
                     <div>
                       <h3 className="text-sm font-semibold text-slate-50 mb-3">Segmentação</h3>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 bg-slate-800/50 rounded border border-slate-700">
-                          <p className="text-xs text-slate-400">Países</p>
+                        <div className="p-3 bg-foreground/50 rounded border border-slate-700">
+                          <p className="text-xs text-muted-foreground">Países</p>
                           <p className="text-sm text-slate-200">{strategy.targeting.countries.join(", ")}</p>
                         </div>
-                        <div className="p-3 bg-slate-800/50 rounded border border-slate-700">
-                          <p className="text-xs text-slate-400">Idade</p>
+                        <div className="p-3 bg-foreground/50 rounded border border-slate-700">
+                          <p className="text-xs text-muted-foreground">Idade</p>
                           <p className="text-sm text-slate-200">
                             {strategy.targeting.ageMin} - {strategy.targeting.ageMax} anos
                           </p>
                         </div>
                         {strategy.targeting.locations?.cities && (
-                          <div className="p-3 bg-slate-800/50 rounded border border-slate-700 col-span-2">
-                            <p className="text-xs text-slate-400">Cidades</p>
+                          <div className="p-3 bg-foreground/50 rounded border border-slate-700 col-span-2">
+                            <p className="text-xs text-muted-foreground">Cidades</p>
                             <p className="text-sm text-slate-200">
                               {strategy.targeting.locations.cities.join(", ")}
                             </p>
@@ -319,7 +319,7 @@ export default function PaidTrafficAgent() {
                       </div>
                     </div>
 
-                    <Separator className="bg-slate-800" />
+                    <Separator className="bg-foreground" />
 
                     <div>
                       <h3 className="text-sm font-semibold text-slate-50 mb-2">Raciocínio Estratégico</h3>
@@ -328,16 +328,16 @@ export default function PaidTrafficAgent() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-slate-900 border-slate-800">
+                <Card className="bg-foreground border-slate-800">
                   <CardHeader>
                     <CardTitle className="text-slate-50">Variações de Anúncios</CardTitle>
-                    <CardDescription className="text-slate-400">
+                    <CardDescription className="text-muted-foreground">
                       {strategy.adVariations.length} variações criadas para teste A/B
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {strategy.adVariations.map((ad: any, index: number) => (
-                      <div key={index} className="p-4 bg-slate-800 rounded-lg border border-slate-700">
+                      <div key={index} className="p-4 bg-foreground rounded-lg border border-slate-700">
                         <div className="flex items-start justify-between mb-3">
                           <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
                             Variação {index + 1}
@@ -348,17 +348,17 @@ export default function PaidTrafficAgent() {
                         </div>
                         <h4 className="text-base font-semibold text-slate-50 mb-2">{ad.title}</h4>
                         <p className="text-sm text-slate-300 mb-3">{ad.description}</p>
-                        <p className="text-xs text-slate-500">→ {ad.destinationUrl}</p>
+                        <p className="text-xs text-muted-foreground">→ {ad.destinationUrl}</p>
                       </div>
                     ))}
                   </CardContent>
                 </Card>
               </div>
             ) : (
-              <Card className="bg-slate-900 border-slate-800">
+              <Card className="bg-foreground border-slate-800">
                 <CardContent className="py-12 text-center">
-                  <Target className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">Gere uma estratégia primeiro</p>
+                  <Target className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">Gere uma estratégia primeiro</p>
                 </CardContent>
               </Card>
             )}
@@ -368,7 +368,7 @@ export default function PaidTrafficAgent() {
           <TabsContent value="analysis">
             {analysis ? (
               <div className="space-y-6">
-                <Card className="bg-slate-900 border-slate-800">
+                <Card className="bg-foreground border-slate-800">
                   <CardHeader>
                     <CardTitle className="text-slate-50 flex items-center gap-2">
                       <TrendingUp className="w-5 h-5 text-emerald-400" />
@@ -382,7 +382,7 @@ export default function PaidTrafficAgent() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-slate-900 border-slate-800">
+                <Card className="bg-foreground border-slate-800">
                   <CardHeader>
                     <CardTitle className="text-slate-50">Perfil do Público</CardTitle>
                   </CardHeader>
@@ -393,10 +393,10 @@ export default function PaidTrafficAgent() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-slate-900 border-slate-800">
+                <Card className="bg-foreground border-slate-800">
                   <CardHeader>
                     <CardTitle className="text-slate-50">Resultados Esperados</CardTitle>
-                    <CardDescription className="text-slate-400">
+                    <CardDescription className="text-muted-foreground">
                       Budget Recomendado: R$ {(analysis.recommendedBudget / 100).toFixed(2)}/dia
                     </CardDescription>
                   </CardHeader>
@@ -424,7 +424,7 @@ export default function PaidTrafficAgent() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-slate-900 border-slate-800">
+                <Card className="bg-foreground border-slate-800">
                   <CardHeader>
                     <CardTitle className="text-slate-50">Dicas de Otimização</CardTitle>
                   </CardHeader>
@@ -441,10 +441,10 @@ export default function PaidTrafficAgent() {
                 </Card>
               </div>
             ) : (
-              <Card className="bg-slate-900 border-slate-800">
+              <Card className="bg-foreground border-slate-800">
                 <CardContent className="py-12 text-center">
-                  <TrendingUp className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">Análise disponível após gerar estratégia</p>
+                  <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">Análise disponível após gerar estratégia</p>
                 </CardContent>
               </Card>
             )}

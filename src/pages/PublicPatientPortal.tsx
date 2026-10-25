@@ -236,7 +236,7 @@ export default function PublicPatientPortal() {
                 <img 
                   src={nutritionist.logo_url} 
                   alt="Logo" 
-                  className="h-14 object-contain bg-white/10 p-2 rounded-xl border border-white/10"
+                  className="h-14 object-contain bg-card/10 p-2 rounded-xl border border-white/10"
                 />
               )}
               <div>

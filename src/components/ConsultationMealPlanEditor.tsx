@@ -851,7 +851,7 @@ export function ConsultationMealPlanEditor({ patientId, patientName = 'Paciente'
       <div 
         ref={pdfRef}
         style={{ display: 'none', position: 'absolute', left: '-9999px' }}
-        className="bg-white text-black p-8 w-[800px]"
+        className="bg-card text-foreground p-8 w-[800px]"
       >
         {/* PDF Header */}
         <div 
@@ -884,7 +884,7 @@ export function ConsultationMealPlanEditor({ patientId, patientName = 'Paciente'
           <h2 className="text-xl font-bold mb-2" style={{ color: nutritionist?.primary_color || '#4a7c59' }}>
             Plano Alimentar Personalizado
           </h2>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             <strong>Paciente:</strong> {patientName}
           </p>
         </div>
@@ -899,19 +899,19 @@ export function ConsultationMealPlanEditor({ patientId, patientName = 'Paciente'
               <p className="text-2xl font-bold" style={{ color: nutritionist?.primary_color || '#4a7c59' }}>
                 {totals.calorias}
               </p>
-              <p className="text-sm text-gray-600">kcal</p>
+              <p className="text-sm text-muted-foreground">kcal</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-blue-600">{totals.proteinas}g</p>
-              <p className="text-sm text-gray-600">Proteínas</p>
+              <p className="text-sm text-muted-foreground">Proteínas</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-orange-600">{totals.carboidratos}g</p>
-              <p className="text-sm text-gray-600">Carboidratos</p>
+              <p className="text-sm text-muted-foreground">Carboidratos</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-green-600">{totals.gorduras}g</p>
-              <p className="text-sm text-gray-600">Gorduras</p>
+              <p className="text-sm text-muted-foreground">Gorduras</p>
             </div>
           </div>
         </div>
@@ -931,7 +931,7 @@ export function ConsultationMealPlanEditor({ patientId, patientName = 'Paciente'
               </div>
               {meal.alimentos.length > 0 && (
                 <table className="w-full">
-                  <thead className="bg-gray-100">
+                  <thead className="bg-muted">
                     <tr>
                       <th className="text-left p-2 text-sm font-semibold">Alimento</th>
                       <th className="text-left p-2 text-sm font-semibold">Porção</th>
@@ -945,7 +945,7 @@ export function ConsultationMealPlanEditor({ patientId, patientName = 'Paciente'
                     {meal.alimentos.map((food) => (
                       <tr key={food.id} className="border-t">
                         <td className="p-2">{food.nome}</td>
-                        <td className="p-2 text-gray-600">{food.porcao}</td>
+                        <td className="p-2 text-muted-foreground">{food.porcao}</td>
                         <td className="p-2 text-center">{food.calorias}</td>
                         <td className="p-2 text-center">{food.proteinas}g</td>
                         <td className="p-2 text-center">{food.carboidratos}g</td>
@@ -961,16 +961,16 @@ export function ConsultationMealPlanEditor({ patientId, patientName = 'Paciente'
 
         {/* Notes */}
         {pdfNotes && (
-          <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+          <div className="mt-6 p-4 bg-muted rounded-lg">
             <h3 className="font-bold mb-2" style={{ color: nutritionist?.primary_color || '#4a7c59' }}>
               Observações e Recomendações
             </h3>
-            <p className="text-gray-700 text-sm whitespace-pre-line">{pdfNotes}</p>
+            <p className="text-foreground text-sm whitespace-pre-line">{pdfNotes}</p>
           </div>
         )}
 
         {/* Footer */}
-        <div className="mt-8 pt-4 border-t text-center text-sm text-gray-500">
+        <div className="mt-8 pt-4 border-t text-center text-sm text-muted-foreground">
           <p>Plano alimentar gerado por NutriFlow</p>
           <p className="mt-1">
             Este documento é de uso pessoal e não substitui orientação profissional presencial.

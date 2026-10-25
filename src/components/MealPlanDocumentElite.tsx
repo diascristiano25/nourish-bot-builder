@@ -311,7 +311,7 @@ const MealPlanDocumentElite = forwardRef<HTMLDivElement, MealPlanDocumentElitePr
                       {meal.items?.map((item, itemIndex) => (
                         <div 
                           key={itemIndex} 
-                          className="flex justify-between items-center py-2 px-3 rounded-lg hover:bg-white/5 transition-colors"
+                          className="flex justify-between items-center py-2 px-3 rounded-lg hover:bg-card/5 transition-colors"
                         >
                           <div className="flex-1">
                             <p className="text-white font-medium">{item.food}</p>

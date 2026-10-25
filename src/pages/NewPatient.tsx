@@ -84,7 +84,7 @@ subtitle="Preencha a anamnese inicial"
 icon={<UserPlus className="w-7 h-7 text-white" />}
 gradient="from-[#518C5B] via-[#4a7d52] to-[#2d5a37]"
 actions={
-<Button onClick={() => navigate('/pacientes')} variant="ghost" className="text-white hover:bg-white/20 rounded-xl">
+<Button onClick={() => navigate('/pacientes')} variant="ghost" className="text-white hover:bg-card/20 rounded-xl">
 <ArrowLeft className="w-5 h-5 mr-2" /> Voltar
 </Button>
 }
@@ -116,11 +116,11 @@ actions={
 </div>
 </div>
 <div>
-<h3 className="text-lg font-bold text-slate-700 mb-3">Alergias</h3>
+<h3 className="text-lg font-bold text-foreground mb-3">Alergias</h3>
 <div className="flex flex-wrap gap-2">{commonAllergies.map(a => <Button key={a} type="button" size="sm" variant={formData.allergies.includes(a) ? 'default' : 'outline'} onClick={() => toggleAllergy(a)} className={formData.allergies.includes(a) ? 'bg-[#518C5B]' : ''}>{a}</Button>)}</div>
 </div>
 <div>
-<h3 className="text-lg font-bold text-slate-700 mb-3">Restrições Alimentares</h3>
+<h3 className="text-lg font-bold text-foreground mb-3">Restrições Alimentares</h3>
 <div className="flex flex-wrap gap-2">{commonRestrictions.map(r => <Button key={r} type="button" size="sm" variant={formData.restrictions.includes(r) ? 'default' : 'outline'} onClick={() => toggleRestriction(r)} className={formData.restrictions.includes(r) ? 'bg-[#C4764A]' : ''}>{r}</Button>)}</div>
 </div>
 <div><Label>Condições Médicas</Label><Textarea value={formData.medicalConditions} onChange={e => setFormData({...formData, medicalConditions: e.target.value})} placeholder="Diabetes, hipertensão, etc." /></div>

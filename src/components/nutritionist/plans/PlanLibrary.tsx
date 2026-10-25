@@ -29,7 +29,7 @@ export function PlanLibrary({ plans, onSelectPlan, onCreateNew, isLoading = fals
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse" />
+          <div key={i} className="h-64 bg-border rounded-lg animate-pulse" />
         ))}
       </div>
     );

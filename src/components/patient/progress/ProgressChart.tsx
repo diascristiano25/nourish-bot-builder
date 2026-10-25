@@ -42,12 +42,12 @@ export function ProgressChart({ data }: ProgressChartProps) {
         initial="hidden"
         animate="visible"
         variants={fadeInUp}
-        className="bg-white rounded-lg p-6 border border-blue-200 shadow-sm"
+        className="bg-card rounded-lg p-6 border border-blue-200 shadow-sm"
       >
-        <h3 className="text-lg font-bold text-slate-900 mb-4">Histórico de Peso</h3>
+        <h3 className="text-lg font-bold text-foreground mb-4">Histórico de Peso</h3>
         <div className="text-center py-12">
-          <p className="text-slate-500">Nenhum registro de progresso ainda</p>
-          <p className="text-sm text-slate-400 mt-2">
+          <p className="text-muted-foreground">Nenhum registro de progresso ainda</p>
+          <p className="text-sm text-muted-foreground mt-2">
             Registre suas medições para acompanhar seu progresso
           </p>
         </div>
@@ -60,9 +60,9 @@ export function ProgressChart({ data }: ProgressChartProps) {
       initial="hidden"
       animate="visible"
       variants={fadeInUp}
-      className="bg-white rounded-lg p-6 border border-blue-200 shadow-sm"
+      className="bg-card rounded-lg p-6 border border-blue-200 shadow-sm"
     >
-      <h3 className="text-lg font-bold text-slate-900 mb-6">Histórico de Peso</h3>
+      <h3 className="text-lg font-bold text-foreground mb-6">Histórico de Peso</h3>
 
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -126,19 +126,19 @@ export function ProgressChart({ data }: ProgressChartProps) {
 
       <div className="mt-6 grid grid-cols-3 gap-4">
         <div className="text-center p-3 bg-teal-50 rounded-lg">
-          <p className="text-sm text-slate-600">Peso Atual</p>
+          <p className="text-sm text-muted-foreground">Peso Atual</p>
           <p className="text-2xl font-bold text-teal-600">
             {chartData[chartData.length - 1]?.peso.toFixed(1)} kg
           </p>
         </div>
         <div className="text-center p-3 bg-blue-50 rounded-lg">
-          <p className="text-sm text-slate-600">Peso Inicial</p>
+          <p className="text-sm text-muted-foreground">Peso Inicial</p>
           <p className="text-2xl font-bold text-blue-600">
             {chartData[0]?.peso.toFixed(1)} kg
           </p>
         </div>
         <div className="text-center p-3 bg-emerald-50 rounded-lg">
-          <p className="text-sm text-slate-600">Perdido</p>
+          <p className="text-sm text-muted-foreground">Perdido</p>
           <p className="text-2xl font-bold text-emerald-600">
             {(chartData[0]?.peso - chartData[chartData.length - 1]?.peso).toFixed(1)} kg
           </p>

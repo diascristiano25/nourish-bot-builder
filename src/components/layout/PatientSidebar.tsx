@@ -63,7 +63,7 @@ export function PatientSidebar({ collapsed = false, onToggleCollapse }: PatientS
           transition={{ delay: 0.1 }}
           className="flex items-center gap-3"
         >
-          <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center overflow-hidden border border-white/10">
+          <div className="w-10 h-10 rounded-2xl bg-card/15 backdrop-blur-sm flex items-center justify-center overflow-hidden border border-white/10">
             <img src={logoImg} alt="NutriFlow" className="w-8 h-8 object-contain" />
           </div>
           <span className="text-xl font-bold text-white tracking-tight">NutriFlow</span>
@@ -85,8 +85,8 @@ export function PatientSidebar({ collapsed = false, onToggleCollapse }: PatientS
                 cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden",
                   isActive
-                    ? "bg-white/20 backdrop-blur-sm text-white shadow-lg"
-                    : "text-white/70 hover:text-white hover:bg-white/10"
+                    ? "bg-card/20 backdrop-blur-sm text-white shadow-lg"
+                    : "text-white/70 hover:text-white hover:bg-card/10"
                 )
               }
             >
@@ -95,7 +95,7 @@ export function PatientSidebar({ collapsed = false, onToggleCollapse }: PatientS
                   {isActive && (
                     <motion.div
                       layoutId="activePatientNav"
-                      className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-xl"
+                      className="absolute inset-0 bg-card/20 backdrop-blur-sm rounded-xl"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
@@ -116,7 +116,7 @@ export function PatientSidebar({ collapsed = false, onToggleCollapse }: PatientS
         <Button
           variant="ghost"
           onClick={handleSignOut}
-          className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 h-auto font-medium text-sm"
+          className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-card/10 h-auto font-medium text-sm"
         >
           <LogOut className="w-5 h-5" />
           Sair

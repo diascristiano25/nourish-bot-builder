@@ -241,7 +241,7 @@ export default function PatientApp() {
                     <AccordionItem 
                       key={index} 
                       value={`meal-${index}`}
-                      className="border border-cyan-500/20 rounded-xl px-4 bg-white/[0.02]"
+                      className="border border-cyan-500/20 rounded-xl px-4 bg-card/[0.02]"
                     >
                       <AccordionTrigger className="py-3 hover:no-underline">
                         <div className="flex items-center gap-3">

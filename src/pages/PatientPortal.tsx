@@ -75,12 +75,12 @@ gradient="from-[#518C5B] via-[#4a7d52] to-[#3d7047]"
 <Target className="w-6 h-6 text-[#518C5B]" />
 </div>
 <div className="flex-1 min-w-0">
-<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Seu Objetivo</p>
+<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Seu Objetivo</p>
 <motion.p
 initial={{ opacity: 0, scale: 0.8 }}
 animate={{ opacity: 1, scale: 1 }}
 transition={{ delay: 0.2, type: 'spring' }}
-className="text-lg font-bold text-slate-800 leading-tight truncate"
+className="text-lg font-bold text-foreground leading-tight truncate"
 >
 {patientData?.goal || 'Não definido'}
 </motion.p>
@@ -94,12 +94,12 @@ className="text-lg font-bold text-slate-800 leading-tight truncate"
 <Calendar className="w-6 h-6 text-[#C4764A]" />
 </div>
 <div>
-<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Refeições/Dia</p>
+<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Refeições/Dia</p>
 <motion.p
 initial={{ opacity: 0, scale: 0.8 }}
 animate={{ opacity: 1, scale: 1 }}
 transition={{ delay: 0.3, type: 'spring' }}
-className="text-2xl font-bold text-slate-800 leading-tight"
+className="text-2xl font-bold text-foreground leading-tight"
 >
 {mealPlanData?.mealsPerDay || '4'}
 </motion.p>
@@ -113,12 +113,12 @@ className="text-2xl font-bold text-slate-800 leading-tight"
 <Activity className="w-6 h-6 text-indigo-500" />
 </div>
 <div>
-<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Progresso</p>
+<p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Progresso</p>
 <motion.p
 initial={{ opacity: 0, scale: 0.8 }}
 animate={{ opacity: 1, scale: 1 }}
 transition={{ delay: 0.4, type: 'spring' }}
-className="text-2xl font-bold text-slate-800 leading-tight"
+className="text-2xl font-bold text-foreground leading-tight"
 >
 {progress?.percentage || 0}%
 </motion.p>
@@ -149,7 +149,7 @@ transition={{ delay: 0.5, duration: 0.5 }}
 <div className="w-9 h-9 rounded-xl bg-[#518C5B]/10 flex items-center justify-center">
 <Leaf className="w-5 h-5 text-[#518C5B]" />
 </div>
-<h2 className="text-lg font-bold text-slate-800">Refeições de Hoje</h2>
+<h2 className="text-lg font-bold text-foreground">Refeições de Hoje</h2>
 </div>
 <TodaysMeals mealPlan={mealPlan} />
 </RichCard>

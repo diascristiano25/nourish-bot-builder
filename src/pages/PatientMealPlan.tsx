@@ -71,7 +71,7 @@ export default function PatientMealPlan() {
         variants={fadeInUp}
         className="space-y-6 p-6 max-w-7xl mx-auto"
       >
-        <h1 className="text-3xl font-bold text-slate-900">Meu Plano Alimentar</h1>
+        <h1 className="text-3xl font-bold text-foreground">Meu Plano Alimentar</h1>
 
         <MealPlanViewer
           mealPlan={mealPlan}

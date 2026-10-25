@@ -81,10 +81,10 @@ function EvolutionAreaChart({
   if (data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
-          <Activity className="w-7 h-7 text-slate-400" />
+        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-3">
+          <Activity className="w-7 h-7 text-muted-foreground" />
         </div>
-        <p className="text-sm text-slate-500">{emptyLabel}</p>
+        <p className="text-sm text-muted-foreground">{emptyLabel}</p>
       </div>
     );
   }
@@ -160,7 +160,7 @@ function EvolutionSummaryCard({
   }, [last]);
 
   const bmiInfo = useMemo(() => {
-    if (!bmi) return { label: '—', barClass: 'bg-slate-200', textClass: 'text-slate-500', bgClass: 'bg-slate-100' };
+    if (!bmi) return { label: '—', barClass: 'bg-border', textClass: 'text-muted-foreground', bgClass: 'bg-muted' };
     if (bmi < 18.5) return { label: 'Abaixo do peso', barClass: 'bg-blue-400', textClass: 'text-blue-600', bgClass: 'bg-blue-50' };
     if (bmi < 25) return { label: 'Peso normal', barClass: 'bg-[#518C5B]', textClass: 'text-[#518C5B]', bgClass: 'bg-[#518C5B]/10' };
     if (bmi < 30) return { label: 'Sobrepeso', barClass: 'bg-[#C4764A]', textClass: 'text-[#C4764A]', bgClass: 'bg-[#C4764A]/10' };
@@ -189,8 +189,8 @@ function EvolutionSummaryCard({
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center">
         <AlertCircle className="w-12 h-12 text-slate-300 mb-3" />
-        <p className="text-slate-500 font-medium">Nenhuma medição registrada para este paciente</p>
-        <p className="text-sm text-slate-400 mt-1">Registre peso e medidas na ficha do paciente para ver a evolução.</p>
+        <p className="text-muted-foreground font-medium">Nenhuma medição registrada para este paciente</p>
+        <p className="text-sm text-muted-foreground mt-1">Registre peso e medidas na ficha do paciente para ver a evolução.</p>
       </div>
     );
   }
@@ -201,47 +201,47 @@ function EvolutionSummaryCard({
         <div className={`h-1.5 rounded-full ${bmiInfo.barClass} mb-4`} />
         <div className="flex items-center gap-2 mb-3">
           <Activity className="w-4 h-4 text-[#518C5B]" />
-          <h3 className="text-base font-bold text-slate-800">Índice de Massa Corporal (IMC)</h3>
+          <h3 className="text-base font-bold text-foreground">Índice de Massa Corporal (IMC)</h3>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-slate-800 tabular-nums">
+            <span className="text-4xl font-bold text-foreground tabular-nums">
               {bmi ? bmi.toFixed(1) : '-'}
             </span>
-            <span className="text-sm text-slate-400">kg/m²</span>
+            <span className="text-sm text-muted-foreground">kg/m²</span>
           </div>
           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${bmiInfo.bgClass} ${bmiInfo.textClass}`}>
             {bmiInfo.label}
           </span>
         </div>
         {last?.height && last?.weight && (
-          <p className="text-xs text-slate-400 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             Baseado em {last.weight}kg e {last.height}cm
           </p>
         )}
       </div>
 
       {first?.weight != null && last?.weight != null && (
-        <div className="pt-5 border-t border-slate-100">
+        <div className="pt-5 border-t border-border">
           <div className="flex items-center gap-2 mb-4">
             <Target className="w-4 h-4 text-[#518C5B]" />
-            <h3 className="text-base font-bold text-slate-800">Comparativo de Evolução</h3>
+            <h3 className="text-base font-bold text-foreground">Comparativo de Evolução</h3>
             {goal && (
-              <span className="ml-auto text-xs font-medium text-slate-500 border border-slate-200 px-2.5 py-1 rounded-full">
+              <span className="ml-auto text-xs font-medium text-muted-foreground border border-border px-2.5 py-1 rounded-full">
                 {goalLabels[goal] || goal}
               </span>
             )}
           </div>
           <div className="grid grid-cols-3 gap-4 items-center">
-            <div className="text-center p-4 rounded-2xl bg-slate-50">
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Inicial</p>
-              <p className="text-2xl font-bold text-slate-800 tabular-nums">{first.weight.toFixed(1)}</p>
-              <p className="text-xs text-slate-400">kg</p>
+            <div className="text-center p-4 rounded-2xl bg-secondary">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Inicial</p>
+              <p className="text-2xl font-bold text-foreground tabular-nums">{first.weight.toFixed(1)}</p>
+              <p className="text-xs text-muted-foreground">kg</p>
             </div>
             <div className="text-center">
               <div
                 className={`inline-flex items-center justify-center w-14 h-14 rounded-full ${
-                  isGoalPositive ? 'bg-[#518C5B]/10' : weightDiff !== 0 ? 'bg-[#C4764A]/10' : 'bg-slate-50'
+                  isGoalPositive ? 'bg-[#518C5B]/10' : weightDiff !== 0 ? 'bg-[#C4764A]/10' : 'bg-secondary'
                 }`}
               >
                 {weightDiff != null && weightDiff < 0 ? (
@@ -249,10 +249,10 @@ function EvolutionSummaryCard({
                 ) : weightDiff != null && weightDiff > 0 ? (
                   <TrendingUp className={`w-6 h-6 ${isGoalPositive ? 'text-[#518C5B]' : 'text-[#C4764A]'}`} />
                 ) : (
-                  <Minus className="w-6 h-6 text-slate-400" />
+                  <Minus className="w-6 h-6 text-muted-foreground" />
                 )}
               </div>
-              <p className={`text-lg font-bold mt-2 tabular-nums ${isGoalPositive ? 'text-[#518C5B]' : 'text-slate-800'}`}>
+              <p className={`text-lg font-bold mt-2 tabular-nums ${isGoalPositive ? 'text-[#518C5B]' : 'text-foreground'}`}>
                 {weightDiff != null && weightDiff > 0 ? '+' : ''}
                 {weightDiff != null ? weightDiff.toFixed(1) : '0'} kg
               </p>
@@ -266,22 +266,22 @@ function EvolutionSummaryCard({
             <div className="text-center p-4 rounded-2xl bg-[#518C5B]/10 border border-[#518C5B]/20">
               <p className="text-xs text-[#518C5B] uppercase tracking-wider mb-1">Atual</p>
               <p className="text-2xl font-bold text-[#518C5B] tabular-nums">{last.weight.toFixed(1)}</p>
-              <p className="text-xs text-slate-400">kg</p>
+              <p className="text-xs text-muted-foreground">kg</p>
             </div>
           </div>
 
           {first.body_fat_percentage != null && last.body_fat_percentage != null && (
-            <div className="mt-5 pt-4 border-t border-slate-100">
+            <div className="mt-5 pt-4 border-t border-border">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-400">Gordura Corporal</span>
+                <span className="text-muted-foreground">Gordura Corporal</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 tabular-nums">{first.body_fat_percentage.toFixed(1)}%</span>
+                  <span className="text-muted-foreground tabular-nums">{first.body_fat_percentage.toFixed(1)}%</span>
                   <span className="text-slate-300">→</span>
-                  <span className="font-medium text-slate-800 tabular-nums">{last.body_fat_percentage.toFixed(1)}%</span>
+                  <span className="font-medium text-foreground tabular-nums">{last.body_fat_percentage.toFixed(1)}%</span>
                   {bodyFatDiff != null && (
                     <span
                       className={`text-xs font-semibold px-2 py-0.5 rounded-full tabular-nums ${
-                        bodyFatDiff < 0 ? 'bg-[#518C5B]/10 text-[#518C5B]' : 'bg-slate-100 text-slate-500'
+                        bodyFatDiff < 0 ? 'bg-[#518C5B]/10 text-[#518C5B]' : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {bodyFatDiff > 0 ? '+' : ''}
@@ -447,12 +447,12 @@ export default function Evolucao() {
                 <Users className="w-6 h-6 text-[#518C5B]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pacientes</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Pacientes</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight tabular-nums"
+                  className="text-2xl font-bold text-foreground leading-tight tabular-nums"
                 >
                   {loading ? '—' : totalPatients}
                 </motion.p>
@@ -465,12 +465,12 @@ export default function Evolucao() {
                 <Scale className="w-6 h-6 text-[#C4764A]" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Medições</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Medições</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3, type: 'spring' }}
-                  className="text-2xl font-bold text-slate-800 leading-tight tabular-nums"
+                  className="text-2xl font-bold text-foreground leading-tight tabular-nums"
                 >
                   {pointsLoading ? '—' : points.length}
                 </motion.p>
@@ -483,12 +483,12 @@ export default function Evolucao() {
                 <Activity className="w-6 h-6 text-indigo-500" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Selecionado</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Selecionado</p>
                 <motion.p
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4, type: 'spring' }}
-                  className="text-base font-bold text-slate-800 leading-tight truncate"
+                  className="text-base font-bold text-foreground leading-tight truncate"
                 >
                   {selectedPatient?.full_name || '—'}
                 </motion.p>
@@ -500,16 +500,16 @@ export default function Evolucao() {
         <RichCard delay={0.35} padding="md">
           <div className="flex items-center gap-2 mb-4">
             <Target className="w-5 h-5 text-[#518C5B]" />
-            <h2 className="text-lg font-bold text-slate-800">Selecione um paciente</h2>
+            <h2 className="text-lg font-bold text-foreground">Selecione um paciente</h2>
           </div>
           {loading ? (
             <div className="flex gap-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-9 w-28 bg-slate-100 rounded-xl animate-pulse" />
+                <div key={i} className="h-9 w-28 bg-muted rounded-xl animate-pulse" />
               ))}
             </div>
           ) : patients.length === 0 ? (
-            <p className="text-sm text-slate-400 py-2">Nenhum paciente cadastrado ainda.</p>
+            <p className="text-sm text-muted-foreground py-2">Nenhum paciente cadastrado ainda.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {patients.map((p, i) => {
@@ -526,7 +526,7 @@ export default function Evolucao() {
                     className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
                       isActive
                         ? 'bg-gradient-to-r from-[#518C5B] to-[#3d7047] text-white shadow-lg shadow-emerald-500/20'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        : 'bg-muted text-muted-foreground hover:bg-border'
                     }`}
                   >
                     {p.full_name}
@@ -542,8 +542,8 @@ export default function Evolucao() {
             <RichCard delay={0.45} padding="lg">
               {pointsLoading ? (
                 <div className="space-y-4">
-                  <div className="h-24 bg-slate-100 rounded-2xl animate-pulse" />
-                  <div className="h-32 bg-slate-100 rounded-2xl animate-pulse" />
+                  <div className="h-24 bg-muted rounded-2xl animate-pulse" />
+                  <div className="h-32 bg-muted rounded-2xl animate-pulse" />
                 </div>
               ) : (
                 <EvolutionSummaryCard points={points} goal={selectedPatient.goal} />
@@ -554,10 +554,10 @@ export default function Evolucao() {
               <RichCard delay={0.55} padding="lg">
                 <div className="flex items-center gap-2 mb-4">
                   <Scale className="w-5 h-5 text-[#518C5B]" />
-                  <h3 className="text-base font-bold text-slate-800">Evolução de Peso</h3>
+                  <h3 className="text-base font-bold text-foreground">Evolução de Peso</h3>
                 </div>
                 {pointsLoading ? (
-                  <div className="h-56 bg-slate-100 rounded-2xl animate-pulse" />
+                  <div className="h-56 bg-muted rounded-2xl animate-pulse" />
                 ) : (
                   <EvolutionAreaChart
                     data={weightSeries}
@@ -571,10 +571,10 @@ export default function Evolucao() {
               <RichCard delay={0.65} padding="lg">
                 <div className="flex items-center gap-2 mb-4">
                   <Activity className="w-5 h-5 text-[#C4764A]" />
-                  <h3 className="text-base font-bold text-slate-800">Evolução de Gordura Corporal</h3>
+                  <h3 className="text-base font-bold text-foreground">Evolução de Gordura Corporal</h3>
                 </div>
                 {pointsLoading ? (
-                  <div className="h-56 bg-slate-100 rounded-2xl animate-pulse" />
+                  <div className="h-56 bg-muted rounded-2xl animate-pulse" />
                 ) : (
                   <EvolutionAreaChart
                     data={bodyFatSeries}

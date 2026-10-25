@@ -21,13 +21,13 @@ export function StatusIndicator({ service }: StatusIndicatorProps) {
   const label = statusLabels[service.status];
 
   return (
-    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200">
+    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary border border-border">
       <div
         className="w-2 h-2 rounded-full"
         style={{ backgroundColor: color }}
         aria-hidden="true"
       />
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <span className="text-sm font-medium text-foreground">{label}</span>
     </div>
   );
 }

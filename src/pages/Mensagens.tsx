@@ -130,7 +130,7 @@ export default function Mensagens() {
           <RichCard delay={0.1} padding="lg" className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <Search className="w-5 h-5 text-[#518C5B]" />
-              <h2 className="text-lg font-bold text-slate-800">Conversas</h2>
+              <h2 className="text-lg font-bold text-foreground">Conversas</h2>
               {totalUnread > 0 && (
                 <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                   {totalUnread}
@@ -147,14 +147,14 @@ export default function Mensagens() {
               {loading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />
+                    <div key={i} className="h-16 bg-muted rounded-xl animate-pulse" />
                   ))}
                 </div>
               ) : filteredConversations.length === 0 ? (
                 <div className="text-center py-12">
                   <MessageCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-500">Nenhuma conversa encontrada</p>
-                  <p className="text-sm text-slate-400 mt-1">
+                  <p className="text-muted-foreground">Nenhuma conversa encontrada</p>
+                  <p className="text-sm text-muted-foreground mt-1">
                     As conversas aparecem aqui quando seus pacientes enviarem mensagens pelo portal.
                   </p>
                 </div>
@@ -171,7 +171,7 @@ export default function Mensagens() {
                       className={`w-full text-left p-4 rounded-xl border transition-all ${
                         selectedConversation === conv.patient_id
                           ? 'bg-[#518C5B]/10 border-[#518C5B]/30'
-                          : 'bg-white border-slate-200 hover:border-[#518C5B]/20'
+                          : 'bg-card border-border hover:border-[#518C5B]/20'
                       }`}
                     >
                       <div className="flex items-start gap-3">
@@ -182,13 +182,13 @@ export default function Mensagens() {
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
-                            <h3 className="font-semibold text-slate-800 truncate">{conv.patient_name}</h3>
-                            <span className="text-xs text-slate-400 flex items-center gap-1">
+                            <h3 className="font-semibold text-foreground truncate">{conv.patient_name}</h3>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {formatTime(conv.last_message_at)}
                             </span>
                           </div>
-                          <p className="text-sm text-slate-500 truncate">{conv.last_message}</p>
+                          <p className="text-sm text-muted-foreground truncate">{conv.last_message}</p>
                           {conv.unread_count > 0 && (
                             <div className="flex items-center gap-2 mt-2">
                               <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
@@ -219,8 +219,8 @@ export default function Mensagens() {
               <div className="h-[500px] flex items-center justify-center text-center">
                 <div>
                   <MessageCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-slate-800 mb-2">Selecione uma conversa</h3>
-                  <p className="text-slate-500">
+                  <h3 className="text-xl font-bold text-foreground mb-2">Selecione uma conversa</h3>
+                  <p className="text-muted-foreground">
                     Escolha um paciente na lista para visualizar e responder as mensagens
                   </p>
                 </div>

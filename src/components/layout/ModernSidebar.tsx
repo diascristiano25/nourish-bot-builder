@@ -85,7 +85,7 @@ export function ModernSidebar() {
         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
         className="mb-8"
       >
-        <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-inner overflow-hidden">
+        <div className="w-12 h-12 rounded-2xl bg-card/15 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-inner overflow-hidden">
           <img src={logoImg} alt="NutriFlow" className="w-10 h-10 object-contain" />
         </div>
       </motion.div>
@@ -109,7 +109,7 @@ export function ModernSidebar() {
                   "relative flex items-center justify-center w-full h-12 rounded-2xl transition-all duration-300 group",
                   isActive
                     ? "shadow-lg"
-                    : "hover:bg-white/10"
+                    : "hover:bg-card/10"
                 )
               }
             >
@@ -118,7 +118,7 @@ export function ModernSidebar() {
                   {isActive && (
                     <motion.div
                       layoutId="sidebar-active"
-                      className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/10"
+                      className="absolute inset-0 bg-card/20 backdrop-blur-sm rounded-2xl border border-white/10"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       style={{
                         boxShadow: '0 0 20px rgba(255,255,255,0.15), inset 0 1px 0 rgba(255,255,255,0.2)'
@@ -146,7 +146,7 @@ export function ModernSidebar() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
-                      className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                      className="absolute left-full ml-3 px-3 py-1.5 bg-foreground/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
                     >
                       {item.name}
                       <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900/95" />
@@ -180,7 +180,7 @@ export function ModernSidebar() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
-              className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
+              className="absolute left-full ml-3 px-3 py-1.5 bg-foreground/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
             >
               {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
               <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900/95" />
@@ -202,7 +202,7 @@ export function ModernSidebar() {
               className={({ isActive }) =>
                 cn(
                   "relative flex items-center justify-center w-full h-12 rounded-2xl transition-all duration-300 group",
-                  isActive ? "shadow-lg" : "hover:bg-white/10"
+                  isActive ? "shadow-lg" : "hover:bg-card/10"
                 )
               }
             >
@@ -211,7 +211,7 @@ export function ModernSidebar() {
                   {isActive && (
                     <motion.div
                       layoutId="sidebar-active-admin"
-                      className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/10"
+                      className="absolute inset-0 bg-card/20 backdrop-blur-sm rounded-2xl border border-white/10"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
@@ -224,7 +224,7 @@ export function ModernSidebar() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
-                      className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                      className="absolute left-full ml-3 px-3 py-1.5 bg-foreground/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
                     >
                       Admin
                       <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900/95" />
@@ -251,7 +251,7 @@ export function ModernSidebar() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
-              className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
+              className="absolute left-full ml-3 px-3 py-1.5 bg-foreground/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
             >
               Ajuda (WhatsApp)
               <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900/95" />

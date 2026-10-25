@@ -25,18 +25,18 @@ export function PlanCard({ plan, onSelect, onDuplicate, onDelete }: PlanCardProp
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      <Card className="h-full overflow-hidden cursor-pointer transition-all bg-white/50 backdrop-blur-sm hover:border-orange-300 border border-gray-200">
+      <Card className="h-full overflow-hidden cursor-pointer transition-all bg-card/50 backdrop-blur-sm hover:border-orange-300 border border-border">
         <div className="p-6 space-y-4">
           {/* Header */}
           <div className="space-y-1">
-            <h3 className="font-bold text-lg text-gray-900 line-clamp-2">
+            <h3 className="font-bold text-lg text-foreground line-clamp-2">
               {plan.name}
             </h3>
-            <p className="text-sm text-gray-500">{formattedDate}</p>
+            <p className="text-sm text-muted-foreground">{formattedDate}</p>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-2">
             {plan.description || 'Sem descrição'}
           </p>
 
@@ -47,14 +47,14 @@ export function PlanCard({ plan, onSelect, onDuplicate, onDelete }: PlanCardProp
                 <Flame className="w-3 h-3" />
                 Calorias
               </div>
-              <p className="text-lg font-bold text-gray-900">{plan.calories}</p>
+              <p className="text-lg font-bold text-foreground">{plan.calories}</p>
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
                 <Wheat className="w-3 h-3" />
                 Refeições
               </div>
-              <p className="text-lg font-bold text-gray-900">{plan.meals}</p>
+              <p className="text-lg font-bold text-foreground">{plan.meals}</p>
             </div>
           </div>
 

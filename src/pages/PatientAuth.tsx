@@ -383,7 +383,7 @@ export default function PatientAuth() {
 
         {/* Glass Card */}
         <motion.div 
-          className="backdrop-blur-xl bg-white/70 rounded-3xl shadow-2xl shadow-emerald-900/10 border border-white/50 p-8"
+          className="backdrop-blur-xl bg-card/70 rounded-3xl shadow-2xl shadow-emerald-900/10 border border-white/50 p-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
@@ -405,7 +405,7 @@ export default function PatientAuth() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
+                      className="pl-12 h-14 text-base bg-card/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       disabled
                     />
                   </div>
@@ -419,7 +419,7 @@ export default function PatientAuth() {
                       placeholder="Mínimo 6 caracteres"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-12 pr-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
+                      className="pl-12 pr-12 h-14 text-base bg-card/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       required
                     />
                     <button
@@ -440,7 +440,7 @@ export default function PatientAuth() {
                       placeholder="Repita a senha"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="pl-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
+                      className="pl-12 h-14 text-base bg-card/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       required
                     />
                   </div>
@@ -489,7 +489,7 @@ export default function PatientAuth() {
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
+                      className="pl-12 h-14 text-base bg-card/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       required
                     />
                   </div>
@@ -503,7 +503,7 @@ export default function PatientAuth() {
                       placeholder="Sua senha"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-12 pr-12 h-14 text-base bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
+                      className="pl-12 pr-12 h-14 text-base bg-card/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/30 rounded-xl"
                       required
                     />
                     <button

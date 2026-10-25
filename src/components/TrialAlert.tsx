@@ -91,7 +91,7 @@ export function TrialAlert({ userId: propUserId }: TrialAlertProps) {
           }}
         />
       </div>
-      <p className="text-xs text-gray-400 mt-2">
+      <p className="text-xs text-muted-foreground mt-2">
         {trialStatus.daysUsed} de {TRIAL_DURATION_DAYS} dias usados
       </p>
     </Card>

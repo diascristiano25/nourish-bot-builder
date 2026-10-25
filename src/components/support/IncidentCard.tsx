@@ -32,7 +32,7 @@ export function IncidentCard({ incident }: IncidentCardProps) {
   };
 
   const severityConfig = {
-    low: { label: 'Baixa', color: 'bg-slate-100 text-slate-700' },
+    low: { label: 'Baixa', color: 'bg-muted text-foreground' },
     medium: { label: 'Média', color: 'bg-yellow-100 text-yellow-700' },
     high: { label: 'Alta', color: 'bg-red-100 text-red-700' },
   };
@@ -66,15 +66,15 @@ export function IncidentCard({ incident }: IncidentCardProps) {
             )}
           </div>
 
-          <h3 className="font-semibold text-slate-900">{incident.title}</h3>
+          <h3 className="font-semibold text-foreground">{incident.title}</h3>
 
           {incident.description && (
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {incident.description}
             </p>
           )}
 
-          <div className="flex items-center gap-4 text-xs text-slate-500 pt-1">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
             <span>{formatDate(incident.date)}</span>
             <span>•</span>
             <span>Duração: {incident.duration}</span>

@@ -179,7 +179,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     >
       {/* Nome Completo */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label htmlFor="fullName" className="text-sm font-medium text-slate-700">
+        <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
           Nome Completo
         </Label>
         <Input
@@ -187,30 +187,30 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           placeholder="Dr(a). Nome Sobrenome"
-          className="rounded-xl border-slate-200 focus:border-[#518C5B] focus:ring-[#518C5B]/20"
+          className="rounded-xl border-border focus:border-[#518C5B] focus:ring-[#518C5B]/20"
         />
       </motion.div>
 
       {/* Email (somente leitura) */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label htmlFor="email" className="text-sm font-medium text-slate-700">
+        <Label htmlFor="email" className="text-sm font-medium text-foreground">
           Email
         </Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             id="email"
             value={userEmail || 'Carregando...'}
             disabled
-            className="rounded-xl bg-slate-50 pl-10 text-slate-500"
+            className="rounded-xl bg-secondary pl-10 text-muted-foreground"
           />
         </div>
-        <p className="text-xs text-slate-400">O email não pode ser alterado.</p>
+        <p className="text-xs text-muted-foreground">O email não pode ser alterado.</p>
       </motion.div>
 
       {/* CRN */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label htmlFor="crn" className="text-sm font-medium text-slate-700">
+        <Label htmlFor="crn" className="text-sm font-medium text-foreground">
           CRN (Conselho Regional de Nutrição)
         </Label>
         <Input
@@ -218,13 +218,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           value={crn}
           onChange={(e) => setCrn(e.target.value)}
           placeholder="Ex: 12345"
-          className="rounded-xl border-slate-200 focus:border-[#518C5B] focus:ring-[#518C5B]/20"
+          className="rounded-xl border-border focus:border-[#518C5B] focus:ring-[#518C5B]/20"
         />
       </motion.div>
 
       {/* Telefone */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label htmlFor="phone" className="text-sm font-medium text-slate-700">
+        <Label htmlFor="phone" className="text-sm font-medium text-foreground">
           Telefone
         </Label>
         <Input
@@ -232,21 +232,21 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="(11) 99999-9999"
-          className="rounded-xl border-slate-200 focus:border-[#518C5B] focus:ring-[#518C5B]/20"
+          className="rounded-xl border-border focus:border-[#518C5B] focus:ring-[#518C5B]/20"
         />
       </motion.div>
 
       {/* Logo / Foto */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label className="text-sm font-medium text-slate-700">Logo / Foto de Perfil</Label>
+        <Label className="text-sm font-medium text-foreground">Logo / Foto de Perfil</Label>
         <div className="flex items-start gap-4">
           {logoUrl && (
-            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-200 shrink-0">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-border shrink-0">
               <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
             </div>
           )}
           <div className="flex-1">
-            <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-[#518C5B]/50 transition-colors cursor-pointer">
+            <div className="border-2 border-dashed border-border rounded-xl p-4 text-center hover:border-[#518C5B]/50 transition-colors cursor-pointer">
               <input
                 type="file"
                 id="photo-upload"
@@ -257,14 +257,14 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               />
               <label htmlFor="photo-upload" className="cursor-pointer block">
                 {uploadingPhoto ? (
-                  <Loader2 className="w-6 h-6 mx-auto text-slate-400 animate-spin" />
+                  <Loader2 className="w-6 h-6 mx-auto text-muted-foreground animate-spin" />
                 ) : (
                   <>
-                    <Upload className="w-6 h-6 mx-auto text-slate-400 mb-1" />
-                    <p className="text-sm text-slate-500">
+                    <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+                    <p className="text-sm text-muted-foreground">
                       Clique para selecionar
                     </p>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       PNG, JPG (máx. 2MB)
                     </p>
                   </>
@@ -286,7 +286,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
       {/* Assinatura de Email */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label htmlFor="emailSignature" className="text-sm font-medium text-slate-700">
+        <Label htmlFor="emailSignature" className="text-sm font-medium text-foreground">
           Assinatura de Email
         </Label>
         <Input
@@ -294,9 +294,9 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           value={emailSignature}
           onChange={(e) => setEmailSignature(e.target.value)}
           placeholder="Ex: Atenciosamente, Dra. Maria - CRN 12345"
-          className="rounded-xl border-slate-200 focus:border-[#518C5B] focus:ring-[#518C5B]/20"
+          className="rounded-xl border-border focus:border-[#518C5B] focus:ring-[#518C5B]/20"
         />
-        <p className="text-xs text-slate-400">Usada em emails enviados aos pacientes.</p>
+        <p className="text-xs text-muted-foreground">Usada em emails enviados aos pacientes.</p>
       </motion.div>
 
       {/* Botão Salvar */}

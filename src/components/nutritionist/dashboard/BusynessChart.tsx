@@ -26,7 +26,7 @@ export function BusynessChart({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.5 }}
       whileHover={{ y: -4 }}
-      className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-soft"
+      className="bg-card rounded-3xl p-6 border border-border/60 shadow-soft"
     >
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">

@@ -27,12 +27,12 @@ export function EmptyState({
         className={cn('text-center py-8', className)}
       >
         {icon && (
-          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
             {icon}
           </div>
         )}
-        <p className="text-sm font-medium text-slate-600">{title}</p>
-        {description && <p className="text-xs text-slate-400 mt-1">{description}</p>}
+        <p className="text-sm font-medium text-muted-foreground">{title}</p>
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
         {action && <div className="mt-4">{action}</div>}
       </motion.div>
     );
@@ -45,7 +45,7 @@ export function EmptyState({
       transition={{ duration: 0.5 }}
       className={cn(
         'flex flex-col items-center justify-center text-center py-12 px-6',
-        variant === 'illustrated' && 'bg-gradient-to-br from-[#518C5B]/5 to-[#C4764A]/5 rounded-3xl border border-dashed border-slate-200',
+        variant === 'illustrated' && 'bg-gradient-to-br from-[#518C5B]/5 to-[#C4764A]/5 rounded-3xl border border-dashed border-border',
         className
       )}
     >
@@ -83,7 +83,7 @@ export function EmptyState({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.1, type: 'spring' }}
-          className="w-16 h-16 mb-4 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400"
+          className="w-16 h-16 mb-4 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground"
         >
           {icon}
         </motion.div>
@@ -93,7 +93,7 @@ export function EmptyState({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="text-lg font-bold text-slate-800 mb-2"
+        className="text-lg font-bold text-foreground mb-2"
       >
         {title}
       </motion.h3>
@@ -103,7 +103,7 @@ export function EmptyState({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-sm text-slate-500 max-w-sm mb-6 leading-relaxed"
+          className="text-sm text-muted-foreground max-w-sm mb-6 leading-relaxed"
         >
           {description}
         </motion.p>

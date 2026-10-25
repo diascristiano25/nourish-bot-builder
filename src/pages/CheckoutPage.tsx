@@ -70,7 +70,7 @@ export default function CheckoutPage() {
             }`}
           >
             <h2 className="text-2xl font-bold mb-2">{plan.name}</h2>
-            <p className="text-gray-400 mb-6">
+            <p className="text-muted-foreground mb-6">
               {plan.amount === 0
                 ? 'Customizado'
                 : `R$ ${plan.amount.toFixed(0)}/mês`}
@@ -88,7 +88,7 @@ export default function CheckoutPage() {
               <Button
                 onClick={() => handleCheckout(plan.priceId)}
                 disabled={loading}
-                className="w-full bg-[#1CBFA5] hover:bg-[#0E9B8A] text-black font-semibold"
+                className="w-full bg-[#1CBFA5] hover:bg-[#0E9B8A] text-foreground font-semibold"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Assinar Agora'}
               </Button>

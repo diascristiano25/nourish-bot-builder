@@ -32,13 +32,13 @@ export function StatCard({
       initial="hidden"
       animate="visible"
       variants={fadeInScale}
-      className={`rounded-lg border border-slate-200 bg-white p-6 shadow-sm ${className}`}
+      className={`rounded-lg border border-border bg-card p-6 shadow-sm ${className}`}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-600">{label}</p>
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
           <div className="mt-2 flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-slate-900">{value}</p>
+            <p className="text-3xl font-bold text-foreground">{value}</p>
             {trend && (
               <div className={`flex items-center gap-1 ${trendBgColor} px-2 py-1 rounded`}>
                 {trend.direction === "up" ? (
@@ -53,7 +53,7 @@ export function StatCard({
             )}
           </div>
         </div>
-        <div className="text-slate-400">{icon}</div>
+        <div className="text-muted-foreground">{icon}</div>
       </div>
     </motion.div>
   );

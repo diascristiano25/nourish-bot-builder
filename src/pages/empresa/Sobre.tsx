@@ -6,34 +6,34 @@ export default function Sobre() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-slate-900 mb-6">
+          <h1 className="text-5xl font-bold text-foreground mb-6">
             Sobre o NutriFlow
           </h1>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Transformando a gestão nutricional com tecnologia inovadora e foco no cuidado humanizado
           </p>
         </div>
 
         {/* Mission & Vision Cards */}
         <div className="grid md:grid-cols-2 gap-8 mb-20">
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 hover:shadow-lg transition-all">
+          <div className="bg-card rounded-2xl p-8 shadow-sm border border-border hover:shadow-lg transition-all">
             <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-6">
               <Target className="w-7 h-7 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">Nossa Missão</h2>
-            <p className="text-slate-600 leading-relaxed">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Nossa Missão</h2>
+            <p className="text-muted-foreground leading-relaxed">
               Capacitar nutricionistas e profissionais de saúde com ferramentas inteligentes que
               otimizam o atendimento, permitindo que dediquem mais tempo ao que realmente importa:
               o cuidado com seus pacientes.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 hover:shadow-lg transition-all">
+          <div className="bg-card rounded-2xl p-8 shadow-sm border border-border hover:shadow-lg transition-all">
             <div className="w-14 h-14 bg-sky-100 rounded-xl flex items-center justify-center mb-6">
               <Award className="w-7 h-7 text-sky-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">Nossa Visão</h2>
-            <p className="text-slate-600 leading-relaxed">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Nossa Visão</h2>
+            <p className="text-muted-foreground leading-relaxed">
               Ser a plataforma de referência em gestão nutricional na América Latina,
               reconhecida pela inovação tecnológica e pelo impacto positivo na qualidade
               de vida de milhares de pessoas.
@@ -43,7 +43,7 @@ export default function Sobre() {
 
         {/* Values Section */}
         <div className="mb-20">
-          <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">
+          <h2 className="text-3xl font-bold text-foreground text-center mb-12">
             Nossos Valores
           </h2>
           <div className="grid md:grid-cols-4 gap-6">
@@ -71,24 +71,24 @@ export default function Sobre() {
             ].map((value, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl p-6 text-center shadow-sm border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all"
+                className="bg-card rounded-xl p-6 text-center shadow-sm border border-border hover:border-emerald-300 hover:shadow-md transition-all"
               >
                 <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <value.icon className="w-6 h-6 text-emerald-600" />
                 </div>
-                <h3 className="font-semibold text-slate-900 mb-2">{value.title}</h3>
-                <p className="text-sm text-slate-600">{value.description}</p>
+                <h3 className="font-semibold text-foreground mb-2">{value.title}</h3>
+                <p className="text-sm text-muted-foreground">{value.description}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Story Section */}
-        <div className="bg-white rounded-2xl p-12 shadow-sm border border-slate-200">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
+        <div className="bg-card rounded-2xl p-12 shadow-sm border border-border">
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
             Nossa História
           </h2>
-          <div className="max-w-3xl mx-auto space-y-6 text-slate-600 leading-relaxed">
+          <div className="max-w-3xl mx-auto space-y-6 text-muted-foreground leading-relaxed">
             <p>
               O NutriFlow nasceu da experiência real de nutricionistas que enfrentavam
               diariamente os desafios de gerenciar consultas, acompanhar pacientes e
@@ -122,7 +122,7 @@ export default function Sobre() {
           ].map((stat, index) => (
             <div key={index} className="text-center">
               <div className="text-4xl font-bold text-emerald-600 mb-2">{stat.value}</div>
-              <div className="text-slate-600">{stat.label}</div>
+              <div className="text-muted-foreground">{stat.label}</div>
             </div>
           ))}
         </div>
