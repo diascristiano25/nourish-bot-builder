@@ -115,7 +115,7 @@ export default function Prescricao() {
       </section>
 
       {/* Features List */}
-      <section className="py-16 px-6 bg-[#FAF8F5]">
+      <section className="py-16 px-6 bg-background">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-[#518C5B] text-center mb-12">
             Recursos de Prescrição

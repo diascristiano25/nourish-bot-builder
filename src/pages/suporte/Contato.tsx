@@ -77,7 +77,7 @@ export default function Contato() {
   );
 
   const publicContent = (
-    <div className="min-h-screen bg-[#FAF8F5]">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#518C5B] to-[#3d6b47] text-white py-16">
         <div className="container mx-auto px-4">
@@ -105,7 +105,7 @@ export default function Contato() {
   );
 
   const authContent = (
-    <div className="min-h-screen bg-[#FAF8F5]">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#518C5B] to-[#3d6b47] text-white py-16">
         <div className="container mx-auto px-4">

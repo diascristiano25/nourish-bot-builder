@@ -67,7 +67,7 @@ export default function Atendimento() {
       </section>
 
       {/* Pricing Table */}
-      <section className="py-16 px-6 bg-[#FAF8F5]">
+      <section className="py-16 px-6 bg-background">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-[#518C5B] text-center mb-12">
             Escolha seu Plano

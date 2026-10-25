@@ -27,7 +27,7 @@ function CentralAjudaPublicContent() {
         <FAQAccordion categories={publicFAQ.categories} />
 
         {/* CTA */}
-        <div className="bg-[#FAF8F5] border border-border rounded-lg p-8 text-center space-y-4">
+        <div className="bg-background border border-border rounded-lg p-8 text-center space-y-4">
           <h3 className="text-xl font-semibold text-foreground">
             Precisa de mais ajuda?
           </h3>
@@ -64,7 +64,7 @@ function CentralAjudaAuthContent() {
         <FAQAccordion categories={authFAQ.categories} />
 
         {/* Support Actions */}
-        <div className="bg-[#FAF8F5] border border-border rounded-lg p-8 space-y-4">
+        <div className="bg-background border border-border rounded-lg p-8 space-y-4">
           <h3 className="text-xl font-semibold text-foreground text-center">
             Precisa de mais ajuda?
           </h3>

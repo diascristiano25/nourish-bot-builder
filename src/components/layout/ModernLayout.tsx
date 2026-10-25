@@ -14,7 +14,7 @@ export function ModernLayout({ children }: ModernLayoutProps) {
   const [commandOpen, setCommandOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <ModernSidebar />

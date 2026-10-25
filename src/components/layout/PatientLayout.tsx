@@ -7,7 +7,7 @@ interface PatientLayoutProps {
 
 export function PatientLayout({ children }: PatientLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-background">
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
