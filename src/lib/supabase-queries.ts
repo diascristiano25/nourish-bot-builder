@@ -57,7 +57,10 @@ export interface MealPlan {
   description?: string;
   created_at: string;
   updated_at: string;
-  meals?: any[];
+  plan_data?: any;
+  total_calories?: number;
+  meals_per_day?: number;
+  is_active?: boolean;
 }
 
 export interface ProgressEntry {
@@ -254,8 +257,9 @@ export async function fetchCurrentMealPlan(patientId: string): Promise<MealPlan>
   try {
     const { data, error } = await supabase
       .from("meal_plans")
-      .select("id, patient_id, name, description, created_at, updated_at, meals")
+      .select("id, patient_id, name, description, created_at, updated_at, plan_data, total_calories, meals_per_day, is_active")
       .eq("patient_id", patientId)
+      .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
@@ -269,9 +273,16 @@ export async function fetchCurrentMealPlan(patientId: string): Promise<MealPlan>
       description: data.description,
       created_at: data.created_at,
       updated_at: data.updated_at,
-      meals: data.meals,
+      plan_data: data.plan_data,
+      total_calories: data.total_calories,
+      meals_per_day: data.meals_per_day,
+      is_active: data.is_active,
     };
   } catch (error) {
+    // Return null/empty object if no meal plan found (PGRST116 error for .single())
+    if (error instanceof Error && error.message.includes('PGRST116')) {
+      return {} as MealPlan;
+    }
     throw new Error(
       `Meal plan fetch error: ${error instanceof Error ? error.message : "Unknown error"}`
     );

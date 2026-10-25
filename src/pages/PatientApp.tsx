@@ -153,7 +153,21 @@ export default function PatientApp() {
   }
 
   const planData = mealPlan?.plan_data as any;
-  const meals = planData?.meals || planData?.refeicoes || [];
+  // Robust extraction: try multiple structures
+  let meals: any[] = [];
+  if (Array.isArray(planData?.meals)) meals = planData.meals;
+  else if (Array.isArray(planData?.refeicoes)) meals = planData.refeicoes;
+  else if (Array.isArray(planData) && planData.length > 0) {
+    const first = planData[0];
+    if (Array.isArray(first?.meals)) meals = first.meals;
+    else if (Array.isArray(first)) meals = first;
+  }
+  else if (planData?.days && Array.isArray(planData.days) && planData.days[0]?.meals) meals = planData.days[0].meals;
+  else {
+    const keys = ["cafe_da_manha","breakfast","almoco","lunch","lanche","snack","jantar","dinner"];
+    for (const k of keys) { if (planData?.[k]) { const v = planData[k]; if (Array.isArray(v)) { v.forEach((m:any,i:number) => meals.push({tipo:k, id:`${k}-${i}`, ...m})); } else { meals.push({tipo:k, id:k, ...v}); } } }
+  }
+  
 
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
