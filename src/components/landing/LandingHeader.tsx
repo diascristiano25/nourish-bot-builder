@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import logoImg from '@/assets/logo-nutriflow.png';
 
 export default function LandingHeader() {
@@ -21,7 +22,8 @@ export default function LandingHeader() {
           <a href="#planos" className="text-nf-text-muted hover:text-nf-text transition-colors text-sm font-medium">Planos</a>
         </nav>
 
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-3">
+          <ThemeToggle />
           <Link to="/auth">
             <Button variant="outline" className="border-nf-teal text-nf-teal hover:bg-nf-teal/10">
               Entrar
@@ -43,6 +45,10 @@ export default function LandingHeader() {
           <a href="#recursos" className="block text-nf-text-muted hover:text-nf-text" onClick={() => setMobileOpen(false)}>Recursos</a>
           <a href="#como-funciona" className="block text-nf-text-muted hover:text-nf-text" onClick={() => setMobileOpen(false)}>Como Funciona</a>
           <a href="#planos" className="block text-nf-text-muted hover:text-nf-text" onClick={() => setMobileOpen(false)}>Planos</a>
+          <div className="flex items-center justify-between">
+            <span className="text-nf-text-muted text-sm font-medium">Modo Escuro</span>
+            <ThemeToggle />
+          </div>
           <Link to="/auth" onClick={() => setMobileOpen(false)}>
             <Button variant="outline" className="w-full border-nf-teal text-nf-teal hover:bg-nf-teal/10">Entrar</Button>
           </Link>

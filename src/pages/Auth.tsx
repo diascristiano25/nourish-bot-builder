@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Loader2, Mail, Lock, User, ArrowRight, Sparkles, Activity, Users, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { z } from 'zod';
 import logoImg from '@/assets/logo-nutriflow.png';
@@ -227,6 +228,10 @@ export default function Auth() {
 
       {/* RIGHT PANEL - Form side (responsive) */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-12 py-6 md:py-12 relative overflow-y-auto">
+        {/* Theme toggle - top right corner */}
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+          <ThemeToggle />
+        </div>
         <div className="w-full max-w-md space-y-5 md:space-y-8 my-auto">
           {/* Mobile brand header with illustration */}
           <div className="lg:hidden space-y-4">
