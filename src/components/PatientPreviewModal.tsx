@@ -16,7 +16,8 @@ interface PatientPreviewModalProps {
 interface MealPlan {
   id: string;
   title: string;
-  plan_data: any;
+  meals?: any[]; // REAL schema column
+  plan_data?: any; // Legacy/alias
   total_calories: number | null;
   is_active: boolean;
 }
@@ -133,34 +134,38 @@ export function PatientPreviewModal({ open, onOpenChange, patientId, patientName
                     )}
                   </div>
                   
-                  {mealPlan.plan_data?.meals ? (
+                  {(() => {
+                    // Use real 'meals' column first, fallback to legacy plan_data.meals
+                    const mealsToRender = Array.isArray(mealPlan.meals) && mealPlan.meals.length > 0
+                      ? mealPlan.meals
+                      : (mealPlan.plan_data?.meals || []);
+                    return mealsToRender.length > 0 ? (
                     <div className="space-y-3">
-                      {mealPlan.plan_data.meals.map((meal: any, index: number) => (
+                      {mealsToRender.map((meal: any, index: number) => (
                         <div key={index} className="bg-muted/50 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="font-medium">{meal.name || meal.meal_name}</h4>
                             <span className="text-xs text-muted-foreground">{meal.time || meal.horario}</span>
                           </div>
                           <div className="space-y-1">
-                            {(meal.foods || meal.items || []).slice(0, 3).map((food: any, i: number) => (
+                            {(meal.items || meal.foods || []).slice(0, 3).map((food: any, i: number) => (
                               <p key={i} className="text-sm text-muted-foreground">
-                                • {food.name || food.food_name} {food.quantity && `- ${food.quantity}`}
+                                • {food.food || food.name || food.food_name}{(food.portion || food.quantity) ? ` — ${food.portion || food.quantity}` : ''}
                               </p>
                             ))}
-                            {(meal.foods || meal.items || []).length > 3 && (
+                            {(meal.items || meal.foods || []).length > 3 && (
                               <p className="text-xs text-muted-foreground">
-                                +{(meal.foods || meal.items).length - 3} mais itens...
+                                +{(meal.items || meal.foods).length - 3} mais itens...
                               </p>
                             )}
                           </div>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-center text-muted-foreground py-4">
-                      Dados do cardápio não disponíveis
-                    </p>
-                  )}
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-6">Nenhuma refeição detalhada neste cardápio.</p>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
