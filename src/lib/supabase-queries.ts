@@ -53,14 +53,21 @@ export interface FinancialRecord {
 export interface MealPlan {
   id: string;
   patient_id: string;
-  name: string;
+  title?: string;
   description?: string;
   created_at: string;
   updated_at: string;
-  plan_data?: any;
+  // REAL schema (verified via supabase db query): column is `meals` (jsonb array),
+  // structure: [{ name, time, totalCalories, items: [{ food, portion, calories, protein, carbs, fat }] }]
+  meals?: any[];
   total_calories?: number;
-  meals_per_day?: number;
+  protein_target?: number;
+  carbs_target?: number;
+  fat_target?: number;
+  ai_generated?: boolean;
   is_active?: boolean;
+  // Legacy alias kept for components that read plan_data — populated from `meals` at fetch time
+  plan_data?: any;
 }
 
 export interface ProgressEntry {
@@ -255,9 +262,14 @@ export async function fetchPatient(patientId: string): Promise<Patient> {
  */
 export async function fetchCurrentMealPlan(patientId: string): Promise<MealPlan> {
   try {
+    // REAL schema (verified via `supabase db query --linked`):
+    // meal_plans columns: id, patient_id, title, description, protein_target, carbs_target,
+    // fat_target, meals (jsonb array), ai_generated, created_at, updated_at,
+    // total_calories, is_active. There is NO `name` and NO `plan_data` column.
+    // `meals` structure: [{ name, time, totalCalories, items: [{ food, portion, calories, protein, carbs, fat }] }]
     const { data, error } = await supabase
       .from("meal_plans")
-      .select("id, patient_id, name, description, created_at, updated_at, plan_data, total_calories, meals_per_day, is_active")
+      .select("id, patient_id, title, description, created_at, updated_at, meals, total_calories, protein_target, carbs_target, fat_target, ai_generated, is_active")
       .eq("patient_id", patientId)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
@@ -266,20 +278,26 @@ export async function fetchCurrentMealPlan(patientId: string): Promise<MealPlan>
 
     if (error) throw new Error(`Failed to fetch meal plan: ${error.message}`);
 
+    const meals = Array.isArray(data.meals) ? data.meals : [];
     return {
       id: data.id,
       patient_id: data.patient_id,
-      name: data.name || "",
+      title: data.title || "",
       description: data.description,
       created_at: data.created_at,
       updated_at: data.updated_at,
-      plan_data: data.plan_data,
+      meals,
       total_calories: data.total_calories,
-      meals_per_day: data.meals_per_day,
+      protein_target: data.protein_target,
+      carbs_target: data.carbs_target,
+      fat_target: data.fat_target,
+      ai_generated: data.ai_generated,
       is_active: data.is_active,
+      // Legacy alias: components read plan_data.meals — mirror the real `meals` column here
+      plan_data: { meals, totalCalories: data.total_calories },
     };
   } catch (error) {
-    // Return null/empty object if no meal plan found (PGRST116 error for .single())
+    // Return empty object if no meal plan found (PGRST116 error for .single())
     if (error instanceof Error && error.message.includes('PGRST116')) {
       return {} as MealPlan;
     }
