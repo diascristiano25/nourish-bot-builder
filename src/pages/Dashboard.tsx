@@ -270,7 +270,7 @@ export default function Dashboard() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-slate-900 mb-2">Dashboard</h1>
-            <p className="text-slate-600">Bem-vindo de volta, {data.profile?.full_name?.split(' ')[0]}</p>
+            <p className="text-muted-foreground">Bem-vindo de volta, {data.profile?.full_name?.split(' ')[0]}</p>
           </div>
 
           {/* Stats Cards */}

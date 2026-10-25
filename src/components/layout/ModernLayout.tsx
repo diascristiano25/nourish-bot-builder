@@ -34,13 +34,13 @@ export function ModernLayout({ children }: ModernLayoutProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             onClick={() => setCommandOpen(true)}
-            className="hidden lg:flex items-center gap-3 w-full max-w-md mb-6 px-4 py-3 bg-white rounded-2xl border border-slate-200/60 shadow-soft hover:shadow-md hover:border-[#518C5B]/30 transition-all group"
+            className="hidden lg:flex items-center gap-3 w-full max-w-md mb-6 px-4 py-3 bg-card rounded-2xl border border-border/60 shadow-soft hover:shadow-md hover:border-[#518C5B]/30 transition-all group"
           >
-            <Search className="w-5 h-5 text-slate-400 group-hover:text-[#518C5B] transition-colors" />
-            <span className="text-sm text-slate-400 group-hover:text-slate-600 transition-colors flex-1 text-left">
+            <Search className="w-5 h-5 text-muted-foreground group-hover:text-[#518C5B] transition-colors" />
+            <span className="text-sm text-muted-foreground group-hover:text-muted-foreground transition-colors flex-1 text-left">
               Buscar pacientes, consultas, ações...
             </span>
-            <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-400 bg-slate-100 rounded-lg border border-slate-200">
+            <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-muted-foreground bg-muted rounded-lg border border-border">
               <span className="text-[10px]">⌘</span>K
             </kbd>
           </motion.button>

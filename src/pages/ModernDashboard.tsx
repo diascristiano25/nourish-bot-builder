@@ -268,7 +268,7 @@ export default function ModernDashboard() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setNotificationsOpen((v) => !v)}
-                className="w-12 h-12 rounded-2xl bg-white border border-slate-200/60 shadow-soft flex items-center justify-center hover:bg-slate-50 transition-colors relative"
+                className="w-12 h-12 rounded-2xl bg-card border border-border/60 shadow-soft flex items-center justify-center hover:bg-secondary transition-colors relative"
                 title="Central de Notificações"
               >
                 <Bell className="w-5 h-5 text-muted-foreground" />
@@ -281,13 +281,13 @@ export default function ModernDashboard() {
               {notificationsOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setNotificationsOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-80 max-h-[420px] overflow-y-auto bg-white rounded-2xl border border-slate-200/70 shadow-2xl z-50 p-2">
-                    <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                      <h3 className="font-serif font-bold text-slate-800 text-sm">Notificações</h3>
-                      <p className="text-[11px] text-slate-400">Agenda, mensagens e novidades</p>
+                  <div className="absolute right-0 mt-2 w-80 max-h-[420px] overflow-y-auto bg-card rounded-2xl border border-border/70 shadow-2xl z-50 p-2">
+                    <div className="px-3 py-2 border-b border-border mb-1">
+                      <h3 className="font-serif font-bold text-foreground text-sm">Notificações</h3>
+                      <p className="text-[11px] text-muted-foreground">Agenda, mensagens e novidades</p>
                     </div>
                     {notifications.length === 0 ? (
-                      <div className="px-4 py-8 text-center text-slate-400 text-sm">
+                      <div className="px-4 py-8 text-center text-muted-foreground text-sm">
                         Nenhuma notificação no momento
                       </div>
                     ) : (
@@ -298,17 +298,17 @@ export default function ModernDashboard() {
                             setNotificationsOpen(false);
                             if (n.href) navigate(n.href);
                           }}
-                          className="w-full text-left flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors"
+                          className="w-full text-left flex items-start gap-3 p-3 rounded-xl hover:bg-secondary transition-colors"
                         >
                           <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${n.tone}`}>
                             {n.icon}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="text-sm font-semibold text-slate-800 truncate">{n.title}</p>
-                              <span className="text-[10px] text-slate-400 flex-shrink-0">{n.time}</span>
+                              <p className="text-sm font-semibold text-foreground truncate">{n.title}</p>
+                              <span className="text-[10px] text-muted-foreground flex-shrink-0">{n.time}</span>
                             </div>
-                            <p className="text-xs text-slate-500 line-clamp-2">{n.body}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-2">{n.body}</p>
                             <span className={`inline-block mt-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${n.tagTone}`}>
                               {n.tag}
                             </span>
@@ -316,16 +316,16 @@ export default function ModernDashboard() {
                         </button>
                       ))
                     )}
-                    <div className="border-t border-slate-100 mt-1 pt-1 grid grid-cols-2 gap-1">
+                    <div className="border-t border-border mt-1 pt-1 grid grid-cols-2 gap-1">
                       <button
                         onClick={() => { setNotificationsOpen(false); navigate('/agenda'); }}
-                        className="text-xs font-medium text-slate-500 hover:text-[#518C5B] py-2 rounded-lg hover:bg-slate-50"
+                        className="text-xs font-medium text-muted-foreground hover:text-[#518C5B] py-2 rounded-lg hover:bg-secondary"
                       >
                         Ver Agenda
                       </button>
                       <button
                         onClick={() => { setNotificationsOpen(false); navigate('/mensagens'); }}
-                        className="text-xs font-medium text-slate-500 hover:text-[#518C5B] py-2 rounded-lg hover:bg-slate-50"
+                        className="text-xs font-medium text-muted-foreground hover:text-[#518C5B] py-2 rounded-lg hover:bg-secondary"
                       >
                         Ver Mensagens
                       </button>
@@ -338,7 +338,7 @@ export default function ModernDashboard() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/perfil')}
-              className="w-12 h-12 rounded-2xl bg-white border border-slate-200/60 shadow-soft flex items-center justify-center hover:bg-slate-50 transition-colors"
+              className="w-12 h-12 rounded-2xl bg-card border border-border/60 shadow-soft flex items-center justify-center hover:bg-secondary transition-colors"
               title="Configurações do Perfil"
             >
               <Settings className="w-5 h-5 text-muted-foreground" />
