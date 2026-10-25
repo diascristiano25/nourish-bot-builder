@@ -19,37 +19,43 @@ function trackPixel(event: string, params?: Record<string, any>) {
   } catch { /* silent fail */ }
 }
 
-// Quiz questions for gamification
+// Quiz questions — desafios clínicos reais para testar o nutricionista de verdade
 const quizQuestions = [
   {
     id: 1,
-    question: "Qual seu maior desafio hoje como nutricionista?",
+    category: 'Raciocínio Clínico',
+    question: "Paciente mulher, 62kg, sedentária, quer emagrecer. Qual TMB (Harris-Benedict) e GET você prescreveria para um déficit seguro?",
     options: [
-      { id: 'a', text: 'Criar cardápios personalizados leva horas', icon: Clock, points: 10 },
-      { id: 'b', text: 'Gestão de pacientes bagunçada', icon: Users, points: 10 },
-      { id: 'c', text: 'Falta de tempo para atender mais', icon: Target, points: 10 },
-      { id: 'd', text: 'Sistemas caros e complicados', icon: Zap, points: 10 },
-    ]
+      { id: 'a', text: 'TMB ~1.380 kcal • GET ~1.650 kcal (déficit de ~450 kcal/dia)', icon: Target, points: 25, correct: true },
+      { id: 'b', text: 'TMB ~1.700 kcal • GET ~2.550 kcal (manutenção, sem déficit)', icon: Zap, points: 5, correct: false },
+      { id: 'c', text: 'Dieta de 800 kcal/dia para resultado rápido', icon: Flame, points: 0, correct: false },
+      { id: 'd', text: 'Não calculo — uso cardápio padrão de 1.500 kcal para todas', icon: Clock, points: 5, correct: false },
+    ],
+    insight: 'Certo! TMB feminina ≈ 655 + (9,6×62) + (1,8×altura) − (4,7×idade). Com fator 1,2 (sedentária) e déficit de ~450 kcal, você perde gordura preservando massa magra. Dietas abaixo de 1.200 kcal ou "padrão para todos" sabotam a adesão e o metabolismo.'
   },
   {
     id: 2,
-    question: "Quantos pacientes você atende por mês?",
+    category: 'Gestão de Consultório',
+    question: "Você atende 40 pacientes/mês e gasta 2h montando cada cardápio do zero. Quantas horas/semana você PERDE só nisso — e quanto isso custa?",
     options: [
-      { id: 'a', text: 'Até 20 pacientes', icon: Users, points: 15 },
-      { id: 'b', text: '20 a 50 pacientes', icon: Users, points: 15 },
-      { id: 'c', text: '50 a 100 pacientes', icon: Users, points: 15 },
-      { id: 'd', text: 'Mais de 100 pacientes', icon: Users, points: 15 },
-    ]
+      { id: 'a', text: '~20h/semana • equivale a meio expediente jogado fora', icon: Clock, points: 25, correct: true },
+      { id: 'b', text: '~5h/semana, dá pra conciliar com o resto', icon: Target, points: 10, correct: false },
+      { id: 'c', text: 'Não sei, nunca medi meu tempo nessa tarefa', icon: Users, points: 5, correct: false },
+      { id: 'd', text: 'É o preço de ser nutricionista, faz parte', icon: Flame, points: 0, correct: false },
+    ],
+    insight: 'Exato. 40 pacientes × 2h = 80h/mês ≈ 20h/semana só montando cardápio. A R$ 150/hora, são R$ 3.000/mês de custo de oportunidade. Automatizar isso com IA libera esse tempo para atender MAIS pacientes ou descansar.'
   },
   {
     id: 3,
-    question: "O que você mais valoriza em um sistema?",
+    category: 'Retenção de Paciente',
+    question: "Seu paciente faltou ao retorno e disse: 'tava sem tempo, e o cardápio era difícil de seguir'. Qual é a causa RAIZ mais provável?",
     options: [
-      { id: 'a', text: 'IA que gera cardápios automaticamente', icon: Sparkles, points: 20 },
-      { id: 'b', text: 'App mobile para meus pacientes', icon: Target, points: 20 },
-      { id: 'c', text: 'Relatórios e evolução visual', icon: Trophy, points: 20 },
-      { id: 'd', text: 'Suporte humano e rápido', icon: MessageCircle, points: 20 },
-    ]
+      { id: 'a', text: 'Cardápio rígido demais + sem acompanhamento entre consultas', icon: Target, points: 25, correct: true },
+      { id: 'b', text: 'Falta de comprometimento do paciente', icon: Users, points: 5, correct: false },
+      { id: 'c', text: 'Preço da consulta muito alto', icon: Zap, points: 5, correct: false },
+      { id: 'd', text: 'Azar — alguns pacientes simplesmente somem', icon: Flame, points: 0, correct: false },
+    ],
+    insight: 'Isso! Estudos mostram que >60% das desistências vêm de planos inflexíveis + falta de suporte entre consultas. Um app mobile com cardápio ajustável, substituições e mensagens diretas reduz a evasão em até 40%. "Falta de comprometimento" é o sintoma, não a causa.'
   }
 ];
 
@@ -61,41 +67,52 @@ const badges = [
 ];
 
 export default function DesafioNutri() {
-  const [step, setStep] = useState(0); // 0=intro, 1-3=quiz, 4=result
+  const [step, setStep] = useState(0); // 0=intro, 1-3=quiz, 3.5=insight, 4=result
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [totalPoints, setTotalPoints] = useState(0);
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showInsight, setShowInsight] = useState(false);
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
 
   useEffect(() => {
     trackPixel('ViewContent');
   }, []);
 
-  const handleAnswer = (questionId: number, optionId: string, points: number) => {
+  const handleAnswer = (questionId: number, optionId: string, points: number, isCorrect: boolean) => {
     if (isAnimating) return;
     setIsAnimating(true);
 
     setAnswers(prev => ({ ...prev, [questionId]: optionId }));
     setTotalPoints(prev => prev + points);
+    setLastAnswerCorrect(isCorrect);
 
     // Unlock badges based on progress
     if (step === 1 && !unlockedBadges.includes('explorer')) {
       setUnlockedBadges(prev => [...prev, 'explorer']);
     }
-    if (step === 3 && !unlockedBadges.includes('thinker')) {
-      setUnlockedBadges(prev => [...prev, 'thinker']);
-    }
+
+    // Show insight after answering
+    setTimeout(() => {
+      setShowInsight(true);
+      setIsAnimating(false);
+    }, 400);
+  };
+
+  const handleNextQuestion = () => {
+    setIsAnimating(true);
+    setShowInsight(false);
 
     setTimeout(() => {
       if (step < 3) {
         setStep(prev => prev + 1);
       } else {
-        setUnlockedBadges(prev => [...prev, 'champion']);
+        setUnlockedBadges(prev => [...prev, 'thinker', 'champion']);
         setStep(4);
         trackPixel('Lead');
       }
       setIsAnimating(false);
-    }, 600);
+    }, 300);
   };
 
   const handleStartTest = () => {
@@ -266,60 +283,151 @@ export default function DesafioNutri() {
         </div>
 
         {/* Question */}
-        <div className="pt-32 pb-12 px-6">
+        <div className="pt-28 pb-12 px-6">
           <div className="max-w-2xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
-                key={step}
+                key={`${step}-${showInsight ? 'insight' : 'question'}`}
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
               >
-                <h2 className="font-serif text-3xl md:text-4xl font-bold text-center mb-12">
-                  {currentQuestion.question}
-                </h2>
+                {!showInsight ? (
+                  <>
+                    {/* Category badge */}
+                    <div className="flex justify-center mb-6">
+                      <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C4764A]/20 border border-[#C4764A]/30 text-[#C4764A] text-xs font-bold uppercase tracking-wider">
+                        <Target className="w-3.5 h-3.5" />
+                        {currentQuestion.category}
+                      </span>
+                    </div>
 
-                <div className="space-y-4">
-                  {currentQuestion.options.map((option, i) => {
-                    const isSelected = answers[currentQuestion.id] === option.id;
+                    <h2 className="font-serif text-2xl md:text-3xl font-bold text-center mb-10 leading-snug">
+                      {currentQuestion.question}
+                    </h2>
 
-                    return (
-                      <motion.button
-                        key={option.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        whileHover={{ scale: 1.02, x: 10 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleAnswer(currentQuestion.id, option.id, option.points)}
-                        disabled={isAnimating}
-                        className={`w-full p-6 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 ${
-                          isSelected
+                    <div className="space-y-3">
+                      {currentQuestion.options.map((option, i) => {
+                        const isSelected = answers[currentQuestion.id] === option.id;
+                        const answered = !!answers[currentQuestion.id];
+                        const isCorrectOption = (option as any).correct === true;
+
+                        let optionStyle = 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20';
+                        if (answered && isSelected) {
+                          optionStyle = isCorrectOption
                             ? 'bg-[#518C5B]/20 border-[#518C5B] shadow-lg shadow-[#518C5B]/20'
-                            : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
-                        }`}
-                      >
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          isSelected ? 'bg-[#518C5B]' : 'bg-white/10'
-                        }`}>
-                          <option.icon className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-white/60'}`} />
-                        </div>
-                        <span className="text-lg font-medium flex-1">{option.text}</span>
-                        {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-8 h-8 rounded-full bg-[#518C5B] flex items-center justify-center"
+                            : 'bg-red-500/20 border-red-500 shadow-lg shadow-red-500/20';
+                        } else if (answered && isCorrectOption) {
+                          optionStyle = 'bg-[#518C5B]/10 border-[#518C5B]/50';
+                        } else if (answered) {
+                          optionStyle = 'bg-white/5 border-white/10 opacity-50';
+                        }
+
+                        return (
+                          <motion.button
+                            key={option.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.08 }}
+                            whileHover={!answered ? { scale: 1.02, x: 8 } : {}}
+                            whileTap={!answered ? { scale: 0.98 } : {}}
+                            onClick={() => handleAnswer(currentQuestion.id, option.id, option.points, (option as any).correct === true)}
+                            disabled={answered || isAnimating}
+                            className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 ${optionStyle}`}
                           >
-                            <Check className="w-5 h-5 text-white" />
-                          </motion.div>
+                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                              answered && isSelected
+                                ? (isCorrectOption ? 'bg-[#518C5B]' : 'bg-red-500')
+                                : answered && isCorrectOption
+                                ? 'bg-[#518C5B]/80'
+                                : 'bg-white/10'
+                            }`}>
+                              <option.icon className={`w-5 h-5 ${
+                                (answered && (isSelected || isCorrectOption)) ? 'text-white' : 'text-white/60'
+                              }`} />
+                            </div>
+                            <span className="text-base md:text-lg font-medium flex-1 leading-snug">{option.text}</span>
+                            {answered && isSelected && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                  isCorrectOption ? 'bg-[#518C5B]' : 'bg-red-500'
+                                }`}
+                              >
+                                {isCorrectOption ? <Check className="w-4 h-4 text-white" /> : <span className="text-white text-sm font-bold">✕</span>}
+                              </motion.div>
+                            )}
+                            {answered && !isSelected && isCorrectOption && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="w-7 h-7 rounded-full bg-[#518C5B] flex items-center justify-center flex-shrink-0"
+                              >
+                                <Check className="w-4 h-4 text-white" />
+                              </motion.div>
+                            )}
+                            {!answered && <ChevronRight className="w-5 h-5 text-white/30 flex-shrink-0" />}
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  /* Insight / feedback after answering */
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center"
+                  >
+                    <div className={`inline-flex items-center gap-2 px-5 py-2 rounded-full mb-6 ${
+                      lastAnswerCorrect
+                        ? 'bg-[#518C5B]/20 border border-[#518C5B]/40 text-[#518C5B]'
+                        : 'bg-[#C4764A]/20 border border-[#C4764A]/40 text-[#C4764A]'
+                    }`}>
+                      {lastAnswerCorrect ? (
+                        <><Check className="w-4 h-4" /><span className="font-bold">Resposta correta! +{quizQuestions[step - 1].options.find(o => (o as any).correct)?.points || 0} pts</span></>
+                      ) : (
+                        <><Flame className="w-4 h-4" /><span className="font-bold">Quase lá — veja a explicação</span></>
+                      )}
+                    </div>
+
+                    <Card className="bg-white/5 border-white/10 backdrop-blur-sm text-left mb-8">
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                            lastAnswerCorrect ? 'bg-[#518C5B]/20' : 'bg-[#C4764A]/20'
+                          }`}>
+                            <Sparkles className={`w-5 h-5 ${lastAnswerCorrect ? 'text-[#518C5B]' : 'text-[#C4764A]'}`} />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-lg mb-2">
+                              {lastAnswerCorrect ? 'Você acertou!' : 'A resposta ideal era outra'}
+                            </h3>
+                            <p className="text-white/70 leading-relaxed text-sm md:text-base">
+                              {currentQuestion.insight}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        onClick={handleNextQuestion}
+                        size="lg"
+                        className="gap-2 bg-gradient-to-r from-[#518C5B] to-[#3d7047] hover:from-[#3d7047] hover:to-[#518C5B] text-white text-base px-8 h-14 rounded-2xl shadow-xl shadow-[#518C5B]/30"
+                      >
+                        {step < 3 ? (
+                          <>Próxima Pergunta <ArrowRight className="w-5 h-5" /></>
+                        ) : (
+                          <>Ver Minhas Recompensas <Trophy className="w-5 h-5" /></>
                         )}
-                        <ChevronRight className={`w-5 h-5 ${isSelected ? 'text-[#518C5B]' : 'text-white/30'}`} />
-                      </motion.button>
-                    );
-                  })}
-                </div>
+                      </Button>
+                    </motion.div>
+                  </motion.div>
+                )}
               </motion.div>
             </AnimatePresence>
           </div>
