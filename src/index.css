@@ -48,7 +48,7 @@
   .dark {
     --background: 222 25% 8%;
     --foreground: 40 20% 98%;
-    --card: 222 25% 12%;
+    --card: 222 25% 14%;
     --card-foreground: 40 20% 98%;
     --popover: 222 25% 12%;
     --popover-foreground: 40 20% 98%;
@@ -75,7 +75,7 @@
     --sidebar-ring: 143 25% 42%;
     /* NutriFlow Launch LP Dark Tokens */
     --nf-bg-primary: 222 25% 8%;
-    --nf-bg-secondary: 222 25% 12%;
+    --nf-bg-secondary: 222 25% 14%;
     --nf-text-primary: 40 20% 98%;
     --nf-text-secondary: 220 9% 60%;
     --nf-accent-teal: 168 65% 43%;
@@ -103,42 +103,42 @@
 
 @supports (animation-timeline: view()) {
   .scroll-fade-up {
-    animation: nfFadeUp linear both;
+    animation: nfFadeUp linear forwards;
     animation-timeline: view();
     animation-range: entry 0% entry 40%;
   }
   .scroll-slide-left {
-    animation: nfSlideLeft linear both;
+    animation: nfSlideLeft linear forwards;
     animation-timeline: view();
     animation-range: entry 0% entry 50%;
   }
   .scroll-slide-right {
-    animation: nfSlideRight linear both;
+    animation: nfSlideRight linear forwards;
     animation-timeline: view();
     animation-range: entry 0% entry 50%;
   }
   .scroll-scale-in {
-    animation: nfScaleIn linear both;
+    animation: nfScaleIn linear forwards;
     animation-timeline: view();
     animation-range: entry 0% entry 40%;
   }
   .scroll-parallax-y {
-    animation: nfParallaxY linear both;
+    animation: nfParallaxY linear forwards;
     animation-timeline: scroll();
     animation-range: 0% 100%;
   }
   .scroll-line-grow {
-    animation: nfLineGrow linear both;
+    animation: nfLineGrow linear forwards;
     animation-timeline: view();
     animation-range: entry 0% cover 50%;
   }
   .scroll-rotate-in {
-    animation: nfRotateIn linear both;
+    animation: nfRotateIn linear forwards;
     animation-timeline: view();
     animation-range: entry 0% entry 50%;
   }
   .scroll-blur-in {
-    animation: nfBlurIn linear both;
+    animation: nfBlurIn linear forwards;
     animation-timeline: view();
     animation-range: entry 0% entry 40%;
   }
