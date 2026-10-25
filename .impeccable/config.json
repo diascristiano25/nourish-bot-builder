@@ -131,6 +131,15 @@
         ],
         "createdAt": "2026-10-21T04:05:39.644Z",
         "reason": "user confirmed: placeholders are intentional for user to replace with real screenshots, opacity 0.9 is for glass effect"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/pages/DesafioNutri.tsx"
+        ],
+        "createdAt": "2026-10-25T23:27:52.841Z",
+        "reason": "intentional campaign landing hero accent for gamification page, user explicitly requested creative design distinct from clinical app"
       }
     ]
   }

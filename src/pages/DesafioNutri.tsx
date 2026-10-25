@@ -1,228 +1,522 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Sparkles, Zap, Users, Clock, ShieldCheck, ArrowRight, MessageCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import {
+  Sparkles, Zap, Trophy, Target, Clock, Users,
+  ArrowRight, Check, Star, Flame, Award, ChevronRight,
+  MessageCircle, Play
+} from 'lucide-react';
 import logoImg from '@/assets/logo-nutriflow.png';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const WHATSAPP_TESTE =
-  'https://wa.me/5513996205253?text=' +
-  encodeURIComponent('Olá! Quero começar meu teste grátis de 14 dias no NutriFlow pelo Desafio Nutri.');
-
-// Dispara eventos de conversão do Meta Pixel nesta landing de campanha
-function trackPixel(event: string) {
+// Pixel tracking helper
+function trackPixel(event: string, params?: Record<string, any>) {
   try {
-    // @ts-ignore - fbq injected by index.html
-    if (typeof window !== 'undefined' && window.fbq) {
-      // @ts-ignore
-      window.fbq('track', event);
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', event, params);
     }
-  } catch {
-    /* pixel indisponível — não bloqueia a página */
-  }
+  } catch { /* silent fail */ }
 }
 
-const benefits = [
-  { icon: Sparkles, title: 'Cardápios com IA em segundos', text: 'Gere planos personalizados a partir da anamnese, exames e preferências do paciente.' },
-  { icon: Users, title: 'Gestão completa de pacientes', text: 'Prontuário, evolução, agenda e mensagens em um só lugar. Chega de abas infinitas.' },
-  { icon: Clock, title: 'Economize 15h por semana', text: 'Automatize o que te toma tempo e foque no atendimento que realmente importa.' },
-  { icon: ShieldCheck, title: 'LGPD e segurança', text: 'Dados criptografados, isolamento por nutricionista e conformidade com a LGPD.' },
+// Quiz questions for gamification
+const quizQuestions = [
+  {
+    id: 1,
+    question: "Qual seu maior desafio hoje como nutricionista?",
+    options: [
+      { id: 'a', text: 'Criar cardápios personalizados leva horas', icon: Clock, points: 10 },
+      { id: 'b', text: 'Gestão de pacientes bagunçada', icon: Users, points: 10 },
+      { id: 'c', text: 'Falta de tempo para atender mais', icon: Target, points: 10 },
+      { id: 'd', text: 'Sistemas caros e complicados', icon: Zap, points: 10 },
+    ]
+  },
+  {
+    id: 2,
+    question: "Quantos pacientes você atende por mês?",
+    options: [
+      { id: 'a', text: 'Até 20 pacientes', icon: Users, points: 15 },
+      { id: 'b', text: '20 a 50 pacientes', icon: Users, points: 15 },
+      { id: 'c', text: '50 a 100 pacientes', icon: Users, points: 15 },
+      { id: 'd', text: 'Mais de 100 pacientes', icon: Users, points: 15 },
+    ]
+  },
+  {
+    id: 3,
+    question: "O que você mais valoriza em um sistema?",
+    options: [
+      { id: 'a', text: 'IA que gera cardápios automaticamente', icon: Sparkles, points: 20 },
+      { id: 'b', text: 'App mobile para meus pacientes', icon: Target, points: 20 },
+      { id: 'c', text: 'Relatórios e evolução visual', icon: Trophy, points: 20 },
+      { id: 'd', text: 'Suporte humano e rápido', icon: MessageCircle, points: 20 },
+    ]
+  }
 ];
 
-const steps = [
-  { n: '1', title: 'Clique no botão abaixo', text: 'Fale conosco pelo WhatsApp em segundos.' },
-  { n: '2', title: 'Ative seu teste grátis', text: '14 dias completos, sem cartão de crédito.' },
-  { n: '3', title: 'Gere seu primeiro cardápio', text: 'Com IA, em menos de 1 minuto.' },
+// Badges to unlock
+const badges = [
+  { id: 'explorer', name: 'Explorador', icon: Star, description: 'Começou o desafio', unlocked: false },
+  { id: 'thinker', name: 'Estrategista', icon: Target, description: 'Respondeu todas as perguntas', unlocked: false },
+  { id: 'champion', name: 'Campeão', icon: Trophy, description: 'Completou o desafio', unlocked: false },
 ];
 
 export default function DesafioNutri() {
+  const [step, setStep] = useState(0); // 0=intro, 1-3=quiz, 4=result
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
+  const [isAnimating, setIsAnimating] = useState(false);
+
   useEffect(() => {
     trackPixel('ViewContent');
   }, []);
 
-  const handleStartTest = () => {
-    trackPixel('StartTrial');
-    trackPixel('Lead');
-    window.open(WHATSAPP_TESTE, '_blank', 'noopener,noreferrer');
+  const handleAnswer = (questionId: number, optionId: string, points: number) => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+
+    setAnswers(prev => ({ ...prev, [questionId]: optionId }));
+    setTotalPoints(prev => prev + points);
+
+    // Unlock badges based on progress
+    if (step === 1 && !unlockedBadges.includes('explorer')) {
+      setUnlockedBadges(prev => [...prev, 'explorer']);
+    }
+    if (step === 3 && !unlockedBadges.includes('thinker')) {
+      setUnlockedBadges(prev => [...prev, 'thinker']);
+    }
+
+    setTimeout(() => {
+      if (step < 3) {
+        setStep(prev => prev + 1);
+      } else {
+        setUnlockedBadges(prev => [...prev, 'champion']);
+        setStep(4);
+        trackPixel('Lead');
+      }
+      setIsAnimating(false);
+    }, 600);
   };
 
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header simples */}
-      <header className="border-b border-border/60">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2">
-            <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
-            <span className="font-serif text-xl font-bold">NutriFlow</span>
-          </a>
-          <Button
-            onClick={handleStartTest}
-            className="gap-2 bg-[#518C5B] hover:bg-[#3d7047] text-white rounded-xl"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Teste Grátis
-          </Button>
-        </div>
-      </header>
+  const handleStartTest = () => {
+    trackPixel('StartTrial');
+    trackPixel('CompleteRegistration');
+    window.location.href = '/auth';
+  };
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#518C5B]/10 via-transparent to-transparent pointer-events-none" />
-        <div className="relative max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#518C5B]/10 text-[#518C5B] text-xs font-bold uppercase tracking-widest mb-6 border border-[#518C5B]/20">
-            <Zap className="w-3.5 h-3.5" />
-            Desafio Nutri • Lançamento
-          </span>
-          <h1 className="font-serif text-4xl md:text-6xl font-bold leading-[1.08] mb-6">
-            Cardápios com IA em segundos.{' '}
-            <span className="text-[#518C5B]">
-              Sua clínica inteira em uma plataforma.
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
-            Esqueça planilhas e sistemas travados. O NutriFlow gera cardápios personalizados,
-            gestiona pacientes, agenda e financeiro — tudo integrado.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
-            <Button
-              onClick={handleStartTest}
-              size="lg"
-              className="gap-2 bg-[#518C5B] hover:bg-[#3d7047] text-white text-base px-8 h-14 rounded-xl shadow-lg shadow-[#518C5B]/20"
-            >
-              <MessageCircle className="w-5 h-5" />
-              Começar Teste Grátis de 14 Dias
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground flex items-center justify-center gap-4 flex-wrap">
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-[#518C5B]" /> Sem cartão de crédito</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-[#518C5B]" /> Cancele quando quiser</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-[#518C5B]" /> Suporte humano</span>
-          </p>
-        </div>
-      </section>
+  const progress = step === 0 ? 0 : step === 4 ? 100 : (step / 3) * 100;
 
-      {/* Preços de lançamento */}
-      <section className="max-w-5xl mx-auto px-6 py-12">
-        <div className="text-center mb-10">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-3">Preços especiais de lançamento</h2>
-          <p className="text-muted-foreground">Garanta o valor de lançamento enquanto durar a campanha.</p>
+  // Intro screen
+  if (step === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] text-white overflow-hidden">
+        {/* Animated background elements */}
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-[#518C5B]/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#C4764A]/20 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#518C5B]/10 rounded-full blur-3xl" />
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { name: 'Starter', price: '39,90', desc: 'Para começar a inovar', features: ['Até 20 pacientes ativos', 'Gerador de cardápios com IA', 'App mobile do paciente', 'Suporte por email'], highlighted: false },
-            { name: 'Pro', price: '69,90', desc: 'Para crescer com IA', features: ['Até 100 pacientes ativos', 'IA avançada Gemini 2.5', 'Agendamento online', 'Notificações WhatsApp', 'Suporte prioritário 24/7'], highlighted: true },
-            { name: 'Enterprise', price: '109,90', desc: 'Solução para clínicas', features: ['Pacientes ilimitados', 'IA customizada e treinada', 'API integrada', 'White-label disponível', 'Gerente de sucesso dedicado'], highlighted: false },
-          ].map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative rounded-2xl p-7 flex flex-col ${
-                plan.highlighted
-                  ? 'border-2 border-[#518C5B] bg-[#518C5B]/[0.04] shadow-lg shadow-[#518C5B]/10'
-                  : 'border border-border/60 bg-card'
-              }`}
-            >
-              {plan.highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#518C5B] text-white text-xs font-bold">
-                  Mais Popular
-                </span>
-              )}
-              <h3 className="font-serif text-xl font-bold mb-1">{plan.name}</h3>
-              <p className="text-sm text-muted-foreground mb-5">{plan.desc}</p>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-sm text-muted-foreground">R$</span>
-                <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
-                <span className="text-muted-foreground">/mês</span>
-              </div>
-              <ul className="space-y-2.5 mb-7 flex-1">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-[#518C5B] flex-shrink-0 mt-0.5" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                onClick={handleStartTest}
-                className={`w-full rounded-xl ${
-                  plan.highlighted
-                    ? 'bg-[#518C5B] hover:bg-[#3d7047] text-white'
-                    : 'border-border/60 hover:border-[#518C5B]/50'
-                }`}
-                variant={plan.highlighted ? 'default' : 'outline'}
-              >
-                Começar Teste Grátis
-              </Button>
+
+        <div className="relative z-10 max-w-4xl mx-auto px-6 py-12">
+          {/* Header */}
+          <header className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-3">
+              <img src={logoImg} alt="NutriFlow" className="h-10 w-auto" />
+              <span className="font-serif text-2xl font-bold">NutriFlow</span>
             </div>
-          ))}
-        </div>
-      </section>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#518C5B]/20 border border-[#518C5B]/30">
+              <Flame className="w-4 h-4 text-[#518C5B]" />
+              <span className="text-sm font-semibold text-[#518C5B]">Desafio Nutri</span>
+            </div>
+          </header>
 
-      {/* Benefícios */}
-      <section className="max-w-5xl mx-auto px-6 py-12">
-        <div className="grid md:grid-cols-2 gap-5">
-          {benefits.map((b) => {
-            const Icon = b.icon;
-            return (
-              <div key={b.title} className="bg-card border border-border/60 rounded-2xl p-6 flex gap-4">
-                <div className="w-11 h-11 rounded-xl bg-[#518C5B]/10 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-5 h-5 text-[#518C5B]" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-1">{b.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{b.text}</p>
-                </div>
+          {/* Hero */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#518C5B]/20 to-[#C4764A]/20 border border-[#518C5B]/30 mb-8"
+            >
+              <Trophy className="w-5 h-5 text-[#518C5B]" />
+              <span className="font-bold text-lg">Desafio Nutri • Lançamento 2026</span>
+            </motion.div>
+
+            <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight mb-6">
+              Transforme sua clínica em{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#518C5B] to-[#C4764A]">
+                60 segundos
+              </span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-white/70 max-w-2xl mx-auto mb-8 leading-relaxed">
+              Responda 3 perguntas rápidas, descubra seu perfil e ganhe{' '}
+              <span className="text-[#518C5B] font-bold">14 dias grátis</span> + bônus exclusivos
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-4 mb-12">
+              {[
+                { icon: Zap, text: 'Cardápios com IA' },
+                { icon: Users, text: 'Gestão completa' },
+                { icon: Clock, text: 'Economize 15h/semana' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + i * 0.1 }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10"
+                >
+                  <item.icon className="w-4 h-4 text-[#518C5B]" />
+                  <span className="text-sm font-medium">{item.text}</span>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                onClick={() => setStep(1)}
+                size="lg"
+                className="gap-3 bg-gradient-to-r from-[#518C5B] to-[#3d7047] hover:from-[#3d7047] hover:to-[#518C5B] text-white text-lg px-10 h-16 rounded-2xl shadow-2xl shadow-[#518C5B]/30"
+              >
+                <Play className="w-5 h-5" />
+                Começar Desafio
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </motion.div>
+
+            <p className="mt-6 text-sm text-white/50">
+              ⚡ Leva menos de 1 minuto • 🎁 Ganhe bônus exclusivos
+            </p>
+          </motion.div>
+
+          {/* Social proof */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="grid md:grid-cols-3 gap-6 mt-16"
+          >
+            {[
+              { number: '500+', label: 'Nutris já usam' },
+              { number: '15h', label: 'Economizadas/semana' },
+              { number: '4.9★', label: 'Avaliação média' },
+            ].map((stat, i) => (
+              <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-sm">
+                <CardContent className="p-6 text-center">
+                  <p className="text-3xl font-bold text-[#518C5B] mb-2">{stat.number}</p>
+                  <p className="text-sm text-white/60">{stat.label}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // Quiz screens
+  if (step >= 1 && step <= 3) {
+    const currentQuestion = quizQuestions[step - 1];
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] text-white">
+        {/* Progress bar */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0f]/80 backdrop-blur-sm border-b border-white/10">
+          <div className="max-w-4xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-white/60">
+                Pergunta {step} de 3
+              </span>
+              <div className="flex items-center gap-2">
+                <Flame className="w-4 h-4 text-[#C4764A]" />
+                <span className="text-sm font-bold text-[#C4764A]">{totalPoints} pts</span>
               </div>
+            </div>
+            <Progress value={progress} className="h-2 bg-white/10" />
+          </div>
+        </div>
+
+        {/* Badges */}
+        <div className="fixed top-20 right-6 z-40 flex flex-col gap-2">
+          {badges.map((badge) => {
+            const isUnlocked = unlockedBadges.includes(badge.id);
+            return (
+              <motion.div
+                key={badge.id}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: isUnlocked ? 1 : 0.8, opacity: isUnlocked ? 1 : 0.3 }}
+                className={`p-3 rounded-xl border ${
+                  isUnlocked
+                    ? 'bg-[#518C5B]/20 border-[#518C5B]/50'
+                    : 'bg-white/5 border-white/10'
+                }`}
+              >
+                <badge.icon className={`w-5 h-5 ${isUnlocked ? 'text-[#518C5B]' : 'text-white/30'}`} />
+              </motion.div>
             );
           })}
         </div>
-      </section>
 
-      {/* Como funciona */}
-      <section className="max-w-4xl mx-auto px-6 py-12">
-        <h2 className="font-serif text-3xl font-bold text-center mb-10">Comece em 3 passos</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {steps.map((s) => (
-            <div key={s.n} className="text-center">
-              <div className="w-12 h-12 rounded-full bg-[#518C5B] text-white font-bold text-lg flex items-center justify-center mx-auto mb-4">
-                {s.n}
-              </div>
-              <h3 className="font-semibold mb-1.5">{s.title}</h3>
-              <p className="text-sm text-muted-foreground">{s.text}</p>
+        {/* Question */}
+        <div className="pt-32 pb-12 px-6">
+          <div className="max-w-2xl mx-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h2 className="font-serif text-3xl md:text-4xl font-bold text-center mb-12">
+                  {currentQuestion.question}
+                </h2>
+
+                <div className="space-y-4">
+                  {currentQuestion.options.map((option, i) => {
+                    const isSelected = answers[currentQuestion.id] === option.id;
+
+                    return (
+                      <motion.button
+                        key={option.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        whileHover={{ scale: 1.02, x: 10 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleAnswer(currentQuestion.id, option.id, option.points)}
+                        disabled={isAnimating}
+                        className={`w-full p-6 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 ${
+                          isSelected
+                            ? 'bg-[#518C5B]/20 border-[#518C5B] shadow-lg shadow-[#518C5B]/20'
+                            : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          isSelected ? 'bg-[#518C5B]' : 'bg-white/10'
+                        }`}>
+                          <option.icon className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-white/60'}`} />
+                        </div>
+                        <span className="text-lg font-medium flex-1">{option.text}</span>
+                        {isSelected && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-8 h-8 rounded-full bg-[#518C5B] flex items-center justify-center"
+                          >
+                            <Check className="w-5 h-5 text-white" />
+                          </motion.div>
+                        )}
+                        <ChevronRight className={`w-5 h-5 ${isSelected ? 'text-[#518C5B]' : 'text-white/30'}`} />
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Result screen
+  if (step === 4) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] text-white overflow-hidden">
+        {/* Celebration background */}
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#518C5B]/30 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#C4764A]/30 rounded-full blur-3xl animate-pulse delay-500" />
+        </div>
+
+        <div className="relative z-10 max-w-4xl mx-auto px-6 py-12">
+          {/* Header */}
+          <header className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-3">
+              <img src={logoImg} alt="NutriFlow" className="h-10 w-auto" />
+              <span className="font-serif text-2xl font-bold">NutriFlow</span>
             </div>
-          ))}
-        </div>
-      </section>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#C4764A]/20 border border-[#C4764A]/30">
+              <Award className="w-4 h-4 text-[#C4764A]" />
+              <span className="text-sm font-semibold text-[#C4764A]">{totalPoints} pontos</span>
+            </div>
+          </header>
 
-      {/* CTA final */}
-      <section className="max-w-3xl mx-auto px-6 py-16 text-center">
-        <div className="bg-gradient-to-br from-[#518C5B] to-[#3d7047] rounded-3xl p-10 text-white">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-            Pronto para transformar sua clínica?
-          </h2>
-          <p className="text-white/80 mb-8 max-w-xl mx-auto">
-            Junte-se aos nutricionistas que já economizam horas toda semana com o NutriFlow.
-            Teste grátis por 14 dias.
-          </p>
-          <Button
-            onClick={handleStartTest}
-            size="lg"
-            className="gap-2 bg-white text-[#3d7047] hover:bg-white/90 text-base px-8 h-14 rounded-xl"
+          {/* Victory message */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, type: "spring" }}
+            className="text-center mb-12"
           >
-            <MessageCircle className="w-5 h-5" />
-            Começar Meu Teste Grátis Agora
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </div>
-      </section>
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="inline-block mb-6"
+            >
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#518C5B] to-[#C4764A] flex items-center justify-center mx-auto shadow-2xl shadow-[#518C5B]/50">
+                <Trophy className="w-12 h-12 text-white" />
+              </div>
+            </motion.div>
 
-      {/* Footer */}
-      <footer className="border-t border-border/60 py-8">
-        <div className="max-w-5xl mx-auto px-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} NutriFlow • Dúvidas?{' '}
-          <a href={WHATSAPP_TESTE} target="_blank" rel="noopener noreferrer" className="text-[#518C5B] hover:underline">
-            Fale conosco no WhatsApp
-          </a>
+            <h1 className="font-serif text-5xl md:text-6xl font-bold mb-4">
+              Parabéns! 🎉
+            </h1>
+            <p className="text-xl text-white/70 mb-8">
+              Você completou o Desafio Nutri e desbloqueou recompensas exclusivas
+            </p>
+
+            {/* Unlocked badges */}
+            <div className="flex justify-center gap-4 mb-12">
+              {badges.map((badge) => (
+                <motion.div
+                  key={badge.id}
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.5 + badges.indexOf(badge) * 0.2, type: "spring" }}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#518C5B] to-[#3d7047] flex items-center justify-center shadow-lg shadow-[#518C5B]/30">
+                    <badge.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <span className="text-xs font-medium text-white/60">{badge.name}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Rewards */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="grid md:grid-cols-2 gap-6 mb-12"
+          >
+            <Card className="bg-gradient-to-br from-[#518C5B]/20 to-[#518C5B]/5 border-[#518C5B]/30 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#518C5B] flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">14 Dias Grátis</h3>
+                    <p className="text-sm text-white/60">Acesso completo ao NutriFlow</p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {[
+                    'Cardápios ilimitados com IA',
+                    'Até 100 pacientes ativos',
+                    'App mobile para pacientes',
+                    'Suporte prioritário',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <Check className="w-4 h-4 text-[#518C5B]" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-[#C4764A]/20 to-[#C4764A]/5 border-[#C4764A]/30 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#C4764A] flex items-center justify-center">
+                    <Award className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Bônus Exclusivo</h3>
+                    <p className="text-sm text-white/60">Só para quem completou o desafio</p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {[
+                    'Treinamento personalizado 1:1',
+                    'Templates de cardápios premium',
+                    'Guia de precificação 2026',
+                    'Acesso à comunidade VIP',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <Star className="w-4 h-4 text-[#C4764A]" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+            className="text-center"
+          >
+            <div className="bg-gradient-to-br from-[#518C5B] to-[#3d7047] rounded-3xl p-10 mb-8">
+              <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+                Pronto para começar?
+              </h2>
+              <p className="text-white/80 mb-8 max-w-xl mx-auto">
+                Suas recompensas estão esperando. Ative seu teste grátis agora e transforme sua clínica com IA.
+              </p>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  onClick={handleStartTest}
+                  size="lg"
+                  className="gap-3 bg-white text-[#3d7047] hover:bg-white/90 text-lg px-10 h-16 rounded-2xl shadow-2xl"
+                >
+                  <Zap className="w-5 h-5" />
+                  Ativar Meu Teste Grátis
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </motion.div>
+              <p className="mt-4 text-sm text-white/60">
+                ⚡ Sem cartão de crédito • Cancele quando quiser
+              </p>
+            </div>
+
+            {/* Pricing teaser */}
+            <div className="grid md:grid-cols-3 gap-4 mt-12">
+              {[
+                { name: 'Starter', price: '39,90', popular: false },
+                { name: 'Pro', price: '69,90', popular: true },
+                { name: 'Enterprise', price: '109,90', popular: false },
+              ].map((plan, i) => (
+                <Card key={i} className={`bg-white/5 border-white/10 ${plan.popular ? 'border-[#518C5B]/50' : ''}`}>
+                  <CardContent className="p-6 text-center">
+                    {plan.popular && (
+                      <span className="inline-block px-3 py-1 rounded-full bg-[#518C5B] text-white text-xs font-bold mb-3">
+                        Mais Popular
+                      </span>
+                    )}
+                    <h3 className="font-bold text-lg mb-2">{plan.name}</h3>
+                    <p className="text-3xl font-bold text-[#518C5B] mb-1">
+                      R$ {plan.price}
+                    </p>
+                    <p className="text-xs text-white/50">/mês após o teste</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </motion.div>
         </div>
-      </footer>
-    </div>
-  );
+      </div>
+    );
+  }
+
+  return null;
 }
