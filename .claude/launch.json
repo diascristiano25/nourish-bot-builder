@@ -27,6 +27,12 @@
     {
       "name": "production",
       "url": "https://nutriflow.inf.br"
+    },
+    {
+      "name": "production-local",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "dist", "-l", "3000", "--no-clipboard"],
+      "port": 3000
     }
   ]
 }
