@@ -73,6 +73,14 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 222 25% 16%;
     --sidebar-ring: 143 25% 42%;
+    /* NutriFlow Launch LP Dark Tokens */
+    --nf-bg-primary: 222 25% 8%;
+    --nf-bg-secondary: 222 25% 12%;
+    --nf-text-primary: 40 20% 98%;
+    --nf-text-secondary: 220 9% 60%;
+    --nf-accent-teal: 168 65% 43%;
+    --nf-accent-coral: 12 80% 67%;
+    --nf-border: 222 25% 18%;
   }
 }
 
