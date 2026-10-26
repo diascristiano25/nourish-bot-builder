@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import {
   Sparkles, Zap, Trophy, Target, Clock, Users,
   ArrowRight, Check, Star, Flame, Award, ChevronRight,
-  MessageCircle, Play
+  MessageCircle, Play, TrendingDown, DollarSign, Heart, Gift
 } from 'lucide-react';
 import logoImg from '@/assets/logo-nutriflow.png';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,80 +19,75 @@ function trackPixel(event: string, params?: Record<string, any>) {
   } catch { /* silent fail */ }
 }
 
-// Quiz questions — desafios clínicos reais para testar o nutricionista de verdade
+// Quiz questions — Diagnóstico de Potencial Perdido (foco em dor/desejo, não em teste técnico)
 const quizQuestions = [
   {
     id: 1,
-    category: 'Raciocínio Clínico',
-    question: "Paciente mulher, 62kg, sedentária, quer emagrecer. Qual TMB (Harris-Benedict) e GET você prescreveria para um déficit seguro?",
+    category: 'Sua Rotina',
+    question: "Sendo bem sincero(a): quantas horas por semana você perde montando cardápios manualmente ou ajustando planilhas?",
     options: [
-      { id: 'a', text: 'TMB ~1.380 kcal • GET ~1.650 kcal (déficit de ~450 kcal/dia)', icon: Target, points: 25, correct: true },
-      { id: 'b', text: 'TMB ~1.700 kcal • GET ~2.550 kcal (manutenção, sem déficit)', icon: Zap, points: 5, correct: false },
-      { id: 'c', text: 'Dieta de 800 kcal/dia para resultado rápido', icon: Flame, points: 0, correct: false },
-      { id: 'd', text: 'Não calculo — uso cardápio padrão de 1.500 kcal para todas', icon: Clock, points: 5, correct: false },
+      { id: 'a', text: 'Menos de 5h (sou organizado/a)', icon: Clock, points: 10, lostHours: 5, lostMoney: 750 },
+      { id: 'b', text: 'Entre 5h e 10h (é cansativo)', icon: Clock, points: 15, lostHours: 10, lostMoney: 1500 },
+      { id: 'c', text: 'Mais de 10h (vivo apagando incêndio)', icon: Flame, points: 20, lostHours: 15, lostMoney: 2250 },
+      { id: 'd', text: 'Perdi a conta... é meu dia todo', icon: TrendingDown, points: 25, lostHours: 20, lostMoney: 3000 },
     ],
-    insight: 'Certo! TMB feminina ≈ 655 + (9,6×62) + (1,8×altura) − (4,7×idade). Com fator 1,2 (sedentária) e déficit de ~450 kcal, você perde gordura preservando massa magra. Dietas abaixo de 1.200 kcal ou "padrão para todos" sabotam a adesão e o metabolismo.'
+    insight: 'Cada hora gasta em tarefa repetitiva é uma hora que você NÃO está atendendo (R$ 150/h) ou descansando. Automatizar isso com IA libera sua agenda imediatamente.'
   },
   {
     id: 2,
-    category: 'Gestão de Consultório',
-    question: "Você atende 40 pacientes/mês e gasta 2h montando cada cardápio do zero. Quantas horas/semana você PERDE só nisso — e quanto isso custa?",
+    category: 'Retenção de Pacientes',
+    question: "Quando seu paciente termina a consulta e vai para casa, como você garante que ele vai seguir o plano até o retorno?",
     options: [
-      { id: 'a', text: '~20h/semana • equivale a meio expediente jogado fora', icon: Clock, points: 25, correct: true },
-      { id: 'b', text: '~5h/semana, dá pra conciliar com o resto', icon: Target, points: 10, correct: false },
-      { id: 'c', text: 'Não sei, nunca medi meu tempo nessa tarefa', icon: Users, points: 5, correct: false },
-      { id: 'd', text: 'É o preço de ser nutricionista, faz parte', icon: Flame, points: 0, correct: false },
+      { id: 'a', text: 'Entrego o PDF e torço pelo melhor', icon: Target, points: 10, retentionLoss: 40 },
+      { id: 'b', text: 'Mando mensagem no WhatsApp manual', icon: MessageCircle, points: 15, retentionLoss: 25 },
+      { id: 'c', text: 'Ele tem um app com lembretes e chat', icon: Sparkles, points: 25, retentionLoss: 5 },
+      { id: 'd', text: 'Não faço nada, muitos não voltam', icon: TrendingDown, points: 5, retentionLoss: 60 },
     ],
-    insight: 'Exato. 40 pacientes × 2h = 80h/mês ≈ 20h/semana só montando cardápio. A R$ 150/hora, são R$ 3.000/mês de custo de oportunidade. Automatizar isso com IA libera esse tempo para atender MAIS pacientes ou descansar.'
+    insight: 'Estudos mostram que sem acompanhamento digital (app/lembretes), a adesão ao tratamento cai até 60%. Paciente que não vê resultado, não renova o pacote. O app do paciente é sua máquina de retenção.'
   },
   {
     id: 3,
-    category: 'Retenção de Paciente',
-    question: "Seu paciente faltou ao retorno e disse: 'tava sem tempo, e o cardápio era difícil de seguir'. Qual é a causa RAIZ mais provável?",
+    category: 'Seu Futuro',
+    question: "Se o NutriFlow te devolvesse 10 horas livres por semana a partir de amanhã, o que você faria com esse tempo?",
     options: [
-      { id: 'a', text: 'Cardápio rígido demais + sem acompanhamento entre consultas', icon: Target, points: 25, correct: true },
-      { id: 'b', text: 'Falta de comprometimento do paciente', icon: Users, points: 5, correct: false },
-      { id: 'c', text: 'Preço da consulta muito alto', icon: Zap, points: 5, correct: false },
-      { id: 'd', text: 'Azar — alguns pacientes simplesmente somem', icon: Flame, points: 0, correct: false },
+      { id: 'a', text: 'Atenderia mais pacientes (mais lucro)', icon: DollarSign, points: 20, desire: 'money' },
+      { id: 'b', text: 'Ficaria com minha família / descansaria', icon: Heart, points: 20, desire: 'time' },
+      { id: 'c', text: 'Estudaria e me especializaria mais', icon: Star, points: 20, desire: 'growth' },
+      { id: 'd', text: 'Focaria em marketing para crescer', icon: TrendingDown, points: 20, desire: 'growth' },
     ],
-    insight: 'Isso! Estudos mostram que >60% das desistências vêm de planos inflexíveis + falta de suporte entre consultas. Um app mobile com cardápio ajustável, substituições e mensagens diretas reduz a evasão em até 40%. "Falta de comprometimento" é o sintoma, não a causa.'
+    insight: 'Essa é a verdadeira promessa do NutriFlow: não é só um software, é liberdade. Seja para ganhar mais ou viver melhor, a tecnologia deve trabalhar para você, não o contrário.'
   }
-];
-
-// Badges to unlock
-const badges = [
-  { id: 'explorer', name: 'Explorador', icon: Star, description: 'Começou o desafio', unlocked: false },
-  { id: 'thinker', name: 'Estrategista', icon: Target, description: 'Respondeu todas as perguntas', unlocked: false },
-  { id: 'champion', name: 'Campeão', icon: Trophy, description: 'Completou o desafio', unlocked: false },
 ];
 
 export default function DesafioNutri() {
   const [step, setStep] = useState(0); // 0=intro, 1-3=quiz, 3.5=insight, 4=result
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [totalPoints, setTotalPoints] = useState(0);
-  const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showInsight, setShowInsight] = useState(false);
-  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
+
+  // Calculated metrics for the result
+  const [metrics, setMetrics] = useState({ lostHours: 0, lostMoney: 0, retentionLoss: 0, desire: '' });
 
   useEffect(() => {
     trackPixel('ViewContent');
   }, []);
 
-  const handleAnswer = (questionId: number, optionId: string, points: number, isCorrect: boolean) => {
+  const handleAnswer = (questionId: number, optionId: string, points: number, optionData: any) => {
     if (isAnimating) return;
     setIsAnimating(true);
 
     setAnswers(prev => ({ ...prev, [questionId]: optionId }));
     setTotalPoints(prev => prev + points);
-    setLastAnswerCorrect(isCorrect);
 
-    // Unlock badges based on progress
-    if (step === 1 && !unlockedBadges.includes('explorer')) {
-      setUnlockedBadges(prev => [...prev, 'explorer']);
-    }
+    // Accumulate metrics for the final result
+    setMetrics(prev => ({
+      lostHours: prev.lostHours + (optionData.lostHours || 0),
+      lostMoney: prev.lostMoney + (optionData.lostMoney || 0),
+      retentionLoss: optionData.retentionLoss !== undefined ? optionData.retentionLoss : prev.retentionLoss,
+      desire: optionData.desire || prev.desire
+    }));
 
-    // Show insight after answering
     setTimeout(() => {
       setShowInsight(true);
       setIsAnimating(false);
@@ -102,12 +97,10 @@ export default function DesafioNutri() {
   const handleNextQuestion = () => {
     setIsAnimating(true);
     setShowInsight(false);
-
     setTimeout(() => {
       if (step < 3) {
         setStep(prev => prev + 1);
       } else {
-        setUnlockedBadges(prev => [...prev, 'thinker', 'champion']);
         setStep(4);
         trackPixel('Lead');
       }
@@ -121,7 +114,7 @@ export default function DesafioNutri() {
     window.location.href = '/auth';
   };
 
-  const progress = step === 0 ? 0 : step === 4 ? 100 : (step / 3) * 100;
+  const progress = step === 0 ? 0 : step === 4 ? 100 : ((step - (showInsight ? 0 : 1)) / 3) * 100 + (showInsight ? 33 : 0);
 
   // Intro screen
   if (step === 0) {
@@ -131,11 +124,9 @@ export default function DesafioNutri() {
         <div className="fixed inset-0 pointer-events-none">
           <div className="absolute top-20 left-10 w-72 h-72 bg-[#518C5B]/20 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#C4764A]/20 rounded-full blur-3xl animate-pulse delay-1000" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#518C5B]/10 rounded-full blur-3xl" />
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 py-12">
-          {/* Header */}
           <header className="flex items-center justify-between mb-12">
             <div className="flex items-center gap-3">
               <img src={logoImg} alt="NutriFlow" className="h-10 w-auto" />
@@ -143,11 +134,10 @@ export default function DesafioNutri() {
             </div>
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#518C5B]/20 border border-[#518C5B]/30">
               <Flame className="w-4 h-4 text-[#518C5B]" />
-              <span className="text-sm font-semibold text-[#518C5B]">Desafio Nutri</span>
+              <span className="text-sm font-semibold text-[#518C5B]">Diagnóstico Gratuito</span>
             </div>
           </header>
 
-          {/* Hero */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -160,26 +150,25 @@ export default function DesafioNutri() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#518C5B]/20 to-[#C4764A]/20 border border-[#518C5B]/30 mb-8"
             >
               <Trophy className="w-5 h-5 text-[#518C5B]" />
-              <span className="font-bold text-lg">Desafio Nutri • Lançamento 2026</span>
+              <span className="font-bold text-lg">Descubra seu Potencial Perdido</span>
             </motion.div>
 
             <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight mb-6">
-              Transforme sua clínica em{' '}
+              Quanto dinheiro você está{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#518C5B] to-[#C4764A]">
-                60 segundos
+                deixando na mesa?
               </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-white/70 max-w-2xl mx-auto mb-8 leading-relaxed">
-              Responda 3 perguntas rápidas, descubra seu perfil e ganhe{' '}
-              <span className="text-[#518C5B] font-bold">14 dias grátis</span> + bônus exclusivos
+              Responda 3 perguntas rápidas sobre sua rotina e descubra exatamente quantas horas e reais você pode recuperar com o NutriFlow.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 mb-12">
               {[
-                { icon: Zap, text: 'Cardápios com IA' },
-                { icon: Users, text: 'Gestão completa' },
-                { icon: Clock, text: 'Economize 15h/semana' },
+                { icon: Zap, text: 'Diagnóstico em 60s' },
+                { icon: DollarSign, text: 'Relatório personalizado' },
+                { icon: Gift, text: '14 dias grátis no final' },
               ].map((item, i) => (
                 <motion.div
                   key={i}
@@ -194,45 +183,17 @@ export default function DesafioNutri() {
               ))}
             </div>
 
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={() => setStep(1)}
                 size="lg"
                 className="gap-3 bg-gradient-to-r from-[#518C5B] to-[#3d7047] hover:from-[#3d7047] hover:to-[#518C5B] text-white text-lg px-10 h-16 rounded-2xl shadow-2xl shadow-[#518C5B]/30"
               >
                 <Play className="w-5 h-5" />
-                Começar Desafio
+                Começar Diagnóstico
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </motion.div>
-
-            <p className="mt-6 text-sm text-white/50">
-              ⚡ Leva menos de 1 minuto • 🎁 Ganhe bônus exclusivos
-            </p>
-          </motion.div>
-
-          {/* Social proof */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="grid md:grid-cols-3 gap-6 mt-16"
-          >
-            {[
-              { number: '500+', label: 'Nutris já usam' },
-              { number: '15h', label: 'Economizadas/semana' },
-              { number: '4.9★', label: 'Avaliação média' },
-            ].map((stat, i) => (
-              <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-sm">
-                <CardContent className="p-6 text-center">
-                  <p className="text-3xl font-bold text-[#518C5B] mb-2">{stat.number}</p>
-                  <p className="text-sm text-white/60">{stat.label}</p>
-                </CardContent>
-              </Card>
-            ))}
           </motion.div>
         </div>
       </div>
@@ -242,7 +203,6 @@ export default function DesafioNutri() {
   // Quiz screens
   if (step >= 1 && step <= 3) {
     const currentQuestion = quizQuestions[step - 1];
-
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] text-white">
         {/* Progress bar */}
@@ -257,32 +217,10 @@ export default function DesafioNutri() {
                 <span className="text-sm font-bold text-[#C4764A]">{totalPoints} pts</span>
               </div>
             </div>
-            <Progress value={progress} className="h-2 bg-white/10" />
+            <Progress value={(step / 3) * 100} className="h-2 bg-white/10" />
           </div>
         </div>
 
-        {/* Badges */}
-        <div className="fixed top-20 right-6 z-40 flex flex-col gap-2">
-          {badges.map((badge) => {
-            const isUnlocked = unlockedBadges.includes(badge.id);
-            return (
-              <motion.div
-                key={badge.id}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: isUnlocked ? 1 : 0.8, opacity: isUnlocked ? 1 : 0.3 }}
-                className={`p-3 rounded-xl border ${
-                  isUnlocked
-                    ? 'bg-[#518C5B]/20 border-[#518C5B]/50'
-                    : 'bg-white/5 border-white/10'
-                }`}
-              >
-                <badge.icon className={`w-5 h-5 ${isUnlocked ? 'text-[#518C5B]' : 'text-white/30'}`} />
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Question */}
         <div className="pt-28 pb-12 px-6">
           <div className="max-w-2xl mx-auto">
             <AnimatePresence mode="wait">
@@ -295,7 +233,6 @@ export default function DesafioNutri() {
               >
                 {!showInsight ? (
                   <>
-                    {/* Category badge */}
                     <div className="flex justify-center mb-6">
                       <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C4764A]/20 border border-[#C4764A]/30 text-[#C4764A] text-xs font-bold uppercase tracking-wider">
                         <Target className="w-3.5 h-3.5" />
@@ -311,18 +248,6 @@ export default function DesafioNutri() {
                       {currentQuestion.options.map((option, i) => {
                         const isSelected = answers[currentQuestion.id] === option.id;
                         const answered = !!answers[currentQuestion.id];
-                        const isCorrectOption = (option as any).correct === true;
-
-                        let optionStyle = 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20';
-                        if (answered && isSelected) {
-                          optionStyle = isCorrectOption
-                            ? 'bg-[#518C5B]/20 border-[#518C5B] shadow-lg shadow-[#518C5B]/20'
-                            : 'bg-red-500/20 border-red-500 shadow-lg shadow-red-500/20';
-                        } else if (answered && isCorrectOption) {
-                          optionStyle = 'bg-[#518C5B]/10 border-[#518C5B]/50';
-                        } else if (answered) {
-                          optionStyle = 'bg-white/5 border-white/10 opacity-50';
-                        }
 
                         return (
                           <motion.button
@@ -332,39 +257,26 @@ export default function DesafioNutri() {
                             transition={{ delay: i * 0.08 }}
                             whileHover={!answered ? { scale: 1.02, x: 8 } : {}}
                             whileTap={!answered ? { scale: 0.98 } : {}}
-                            onClick={() => handleAnswer(currentQuestion.id, option.id, option.points, (option as any).correct === true)}
+                            onClick={() => handleAnswer(currentQuestion.id, option.id, option.points, option)}
                             disabled={answered || isAnimating}
-                            className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 ${optionStyle}`}
+                            className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 ${
+                              answered && isSelected
+                                ? 'bg-[#518C5B]/20 border-[#518C5B] shadow-lg shadow-[#518C5B]/20'
+                                : answered
+                                ? 'bg-white/5 border-white/10 opacity-50'
+                                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                            }`}
                           >
                             <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                              answered && isSelected
-                                ? (isCorrectOption ? 'bg-[#518C5B]' : 'bg-red-500')
-                                : answered && isCorrectOption
-                                ? 'bg-[#518C5B]/80'
-                                : 'bg-white/10'
+                              answered && isSelected ? 'bg-[#518C5B]' : 'bg-white/10'
                             }`}>
                               <option.icon className={`w-5 h-5 ${
-                                (answered && (isSelected || isCorrectOption)) ? 'text-white' : 'text-white/60'
+                                answered && isSelected ? 'text-white' : 'text-white/60'
                               }`} />
                             </div>
                             <span className="text-base md:text-lg font-medium flex-1 leading-snug">{option.text}</span>
                             {answered && isSelected && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                  isCorrectOption ? 'bg-[#518C5B]' : 'bg-red-500'
-                                }`}
-                              >
-                                {isCorrectOption ? <Check className="w-4 h-4 text-white" /> : <span className="text-white text-sm font-bold">✕</span>}
-                              </motion.div>
-                            )}
-                            {answered && !isSelected && isCorrectOption && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="w-7 h-7 rounded-full bg-[#518C5B] flex items-center justify-center flex-shrink-0"
-                              >
+                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-7 h-7 rounded-full bg-[#518C5B] flex items-center justify-center flex-shrink-0">
                                 <Check className="w-4 h-4 text-white" />
                               </motion.div>
                             )}
@@ -375,36 +287,20 @@ export default function DesafioNutri() {
                     </div>
                   </>
                 ) : (
-                  /* Insight / feedback after answering */
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center"
-                  >
-                    <div className={`inline-flex items-center gap-2 px-5 py-2 rounded-full mb-6 ${
-                      lastAnswerCorrect
-                        ? 'bg-[#518C5B]/20 border border-[#518C5B]/40 text-[#518C5B]'
-                        : 'bg-[#C4764A]/20 border border-[#C4764A]/40 text-[#C4764A]'
-                    }`}>
-                      {lastAnswerCorrect ? (
-                        <><Check className="w-4 h-4" /><span className="font-bold">Resposta correta! +{quizQuestions[step - 1].options.find(o => (o as any).correct)?.points || 0} pts</span></>
-                      ) : (
-                        <><Flame className="w-4 h-4" /><span className="font-bold">Quase lá — veja a explicação</span></>
-                      )}
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+                    <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-6 bg-[#518C5B]/20 border border-[#518C5B]/40 text-[#518C5B]">
+                      <Check className="w-4 h-4" />
+                      <span className="font-bold">Resposta registrada! +{quizQuestions[step - 1].options.find(o => o.id === answers[currentQuestion.id])?.points || 0} pts</span>
                     </div>
 
                     <Card className="bg-white/5 border-white/10 backdrop-blur-sm text-left mb-8">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                            lastAnswerCorrect ? 'bg-[#518C5B]/20' : 'bg-[#C4764A]/20'
-                          }`}>
-                            <Sparkles className={`w-5 h-5 ${lastAnswerCorrect ? 'text-[#518C5B]' : 'text-[#C4764A]'}`} />
+                          <div className="w-10 h-10 rounded-xl bg-[#518C5B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Sparkles className="w-5 h-5 text-[#518C5B]" />
                           </div>
                           <div>
-                            <h3 className="font-bold text-lg mb-2">
-                              {lastAnswerCorrect ? 'Você acertou!' : 'A resposta ideal era outra'}
-                            </h3>
+                            <h3 className="font-bold text-lg mb-2">Você sabia?</h3>
                             <p className="text-white/70 leading-relaxed text-sm md:text-base">
                               {currentQuestion.insight}
                             </p>
@@ -422,7 +318,7 @@ export default function DesafioNutri() {
                         {step < 3 ? (
                           <>Próxima Pergunta <ArrowRight className="w-5 h-5" /></>
                         ) : (
-                          <>Ver Minhas Recompensas <Trophy className="w-5 h-5" /></>
+                          <>Ver Meu Resultado <Trophy className="w-5 h-5" /></>
                         )}
                       </Button>
                     </motion.div>
@@ -440,14 +336,12 @@ export default function DesafioNutri() {
   if (step === 4) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] text-white overflow-hidden">
-        {/* Celebration background */}
         <div className="fixed inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#518C5B]/30 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#C4764A]/30 rounded-full blur-3xl animate-pulse delay-500" />
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 py-12">
-          {/* Header */}
           <header className="flex items-center justify-between mb-12">
             <div className="flex items-center gap-3">
               <img src={logoImg} alt="NutriFlow" className="h-10 w-auto" />
@@ -459,7 +353,6 @@ export default function DesafioNutri() {
             </div>
           </header>
 
-          {/* Victory message */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -476,119 +369,76 @@ export default function DesafioNutri() {
               </div>
             </motion.div>
 
-            <h1 className="font-serif text-5xl md:text-6xl font-bold mb-4">
-              Parabéns! 🎉
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
+              Seu Diagnóstico Está Pronto
             </h1>
             <p className="text-xl text-white/70 mb-8">
-              Você completou o Desafio Nutri e desbloqueou recompensas exclusivas
+              Com base nas suas respostas, calculamos seu potencial de recuperação.
             </p>
-
-            {/* Unlocked badges */}
-            <div className="flex justify-center gap-4 mb-12">
-              {badges.map((badge) => (
-                <motion.div
-                  key={badge.id}
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: 0.5 + badges.indexOf(badge) * 0.2, type: "spring" }}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#518C5B] to-[#3d7047] flex items-center justify-center shadow-lg shadow-[#518C5B]/30">
-                    <badge.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <span className="text-xs font-medium text-white/60">{badge.name}</span>
-                </motion.div>
-              ))}
-            </div>
           </motion.div>
 
-          {/* Rewards */}
+          {/* Metrics Cards */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
+            transition={{ delay: 0.4 }}
             className="grid md:grid-cols-2 gap-6 mb-12"
           >
-            <Card className="bg-gradient-to-br from-[#518C5B]/20 to-[#518C5B]/5 border-[#518C5B]/30 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#518C5B] flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">14 Dias Grátis</h3>
-                    <p className="text-sm text-white/60">Acesso completo ao NutriFlow</p>
-                  </div>
+            <Card className="bg-gradient-to-br from-red-500/20 to-red-500/5 border-red-500/30 backdrop-blur-sm">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                  <TrendingDown className="w-8 h-8 text-red-400" />
                 </div>
-                <ul className="space-y-2">
-                  {[
-                    'Cardápios ilimitados com IA',
-                    'Até 100 pacientes ativos',
-                    'App mobile para pacientes',
-                    'Suporte prioritário',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <Check className="w-4 h-4 text-[#518C5B]" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+                <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider mb-2">Potencial Perdido / Mês</h3>
+                <p className="text-4xl font-bold text-white mb-2">
+                  R$ {metrics.lostMoney.toLocaleString('pt-BR')}
+                </p>
+                <p className="text-sm text-white/60">
+                  Equivale a {metrics.lostHours} horas de trabalho jogadas fora mensalmente.
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-[#C4764A]/20 to-[#C4764A]/5 border-[#C4764A]/30 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#C4764A] flex items-center justify-center">
-                    <Award className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">Bônus Exclusivo</h3>
-                    <p className="text-sm text-white/60">Só para quem completou o desafio</p>
-                  </div>
+            <Card className="bg-gradient-to-br from-[#518C5B]/20 to-[#518C5B]/5 border-[#518C5B]/30 backdrop-blur-sm">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-[#518C5B]/20 flex items-center justify-center mx-auto mb-4">
+                  <TrendingDown className="w-8 h-8 text-[#518C5B] rotate-180" />
                 </div>
-                <ul className="space-y-2">
-                  {[
-                    'Treinamento personalizado 1:1',
-                    'Templates de cardápios premium',
-                    'Guia de precificação 2026',
-                    'Acesso à comunidade VIP',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <Star className="w-4 h-4 text-[#C4764A]" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+                <h3 className="text-sm font-bold text-[#518C5B] uppercase tracking-wider mb-2">Risco de Evasão</h3>
+                <p className="text-4xl font-bold text-white mb-2">
+                  {metrics.retentionLoss}%
+                </p>
+                <p className="text-sm text-white/60">
+                  Chance de pacientes não renovarem sem acompanhamento digital.
+                </p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* CTA */}
+          {/* Solution & CTA */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
+            transition={{ delay: 0.6 }}
             className="text-center"
           >
             <div className="bg-gradient-to-br from-[#518C5B] to-[#3d7047] rounded-3xl p-10 mb-8">
               <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-                Pronto para começar?
+                Vamos recuperar esse tempo?
               </h2>
               <p className="text-white/80 mb-8 max-w-xl mx-auto">
-                Suas recompensas estão esperando. Ative seu teste grátis agora e transforme sua clínica com IA.
+                O NutriFlow automatiza seus cardápios, fideliza pacientes com o app mobile e organiza sua gestão.
+                <strong> Recupere R$ {metrics.lostMoney.toLocaleString('pt-BR')}/mês</strong> começando hoje.
               </p>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
                   onClick={handleStartTest}
                   size="lg"
                   className="gap-3 bg-white text-[#3d7047] hover:bg-white/90 text-lg px-10 h-16 rounded-2xl shadow-2xl"
                 >
                   <Zap className="w-5 h-5" />
-                  Ativar Meu Teste Grátis
+                  Ativar Meus 14 Dias Grátis
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </motion.div>
@@ -597,7 +447,6 @@ export default function DesafioNutri() {
               </p>
             </div>
 
-            {/* Pricing teaser */}
             <div className="grid md:grid-cols-3 gap-4 mt-12">
               {[
                 { name: 'Starter', price: '39,90', popular: false },
