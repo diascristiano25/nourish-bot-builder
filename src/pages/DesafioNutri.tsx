@@ -223,109 +223,110 @@ export default function DesafioNutri() {
 
         <div className="pt-28 pb-12 px-6">
           <div className="max-w-2xl mx-auto">
-            <AnimatePresence mode="wait">
+            {!showInsight ? (
               <motion.div
-                key={`${step}-${showInsight ? 'insight' : 'question'}`}
+                key={`question-${step}`}
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
               >
-                {!showInsight ? (
-                  <>
-                    <div className="flex justify-center mb-6">
-                      <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C4764A]/20 border border-[#C4764A]/30 text-[#C4764A] text-xs font-bold uppercase tracking-wider">
-                        <Target className="w-3.5 h-3.5" />
-                        {currentQuestion.category}
-                      </span>
-                    </div>
+                <div className="flex justify-center mb-6">
+                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C4764A]/20 border border-[#C4764A]/30 text-[#C4764A] text-xs font-bold uppercase tracking-wider">
+                    <Target className="w-3.5 h-3.5" />
+                    {currentQuestion.category}
+                  </span>
+                </div>
 
-                    <h2 className="font-serif text-2xl md:text-3xl font-bold text-center mb-10 leading-snug">
-                      {currentQuestion.question}
-                    </h2>
+                <h2 className="font-serif text-2xl md:text-3xl font-bold text-center mb-10 leading-snug">
+                  {currentQuestion.question}
+                </h2>
 
-                    <div className="space-y-3">
-                      {currentQuestion.options.map((option, i) => {
-                        const isSelected = answers[currentQuestion.id] === option.id;
-                        const answered = !!answers[currentQuestion.id];
+                <div className="space-y-3">
+                  {currentQuestion.options.map((option, i) => {
+                    const isSelected = answers[currentQuestion.id] === option.id;
+                    const answered = !!answers[currentQuestion.id];
 
-                        return (
-                          <motion.button
-                            key={option.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.08 }}
-                            whileHover={!answered ? { scale: 1.02, x: 8 } : {}}
-                            whileTap={!answered ? { scale: 0.98 } : {}}
-                            onClick={() => handleAnswer(currentQuestion.id, option.id, option.points, option)}
-                            disabled={answered || isAnimating}
-                            className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 ${
-                              answered && isSelected
-                                ? 'bg-[#518C5B]/20 border-[#518C5B] shadow-lg shadow-[#518C5B]/20'
-                                : answered
-                                ? 'bg-white/5 border-white/10 opacity-50'
-                                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
-                            }`}
-                          >
-                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                              answered && isSelected ? 'bg-[#518C5B]' : 'bg-white/10'
-                            }`}>
-                              <option.icon className={`w-5 h-5 ${
-                                answered && isSelected ? 'text-white' : 'text-white/60'
-                              }`} />
-                            </div>
-                            <span className="text-base md:text-lg font-medium flex-1 leading-snug">{option.text}</span>
-                            {answered && isSelected && (
-                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-7 h-7 rounded-full bg-[#518C5B] flex items-center justify-center flex-shrink-0">
-                                <Check className="w-4 h-4 text-white" />
-                              </motion.div>
-                            )}
-                            {!answered && <ChevronRight className="w-5 h-5 text-white/30 flex-shrink-0" />}
-                          </motion.button>
-                        );
-                      })}
-                    </div>
-                  </>
-                ) : (
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-                    <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-6 bg-[#518C5B]/20 border border-[#518C5B]/40 text-[#518C5B]">
-                      <Check className="w-4 h-4" />
-                      <span className="font-bold">Resposta registrada! +{quizQuestions[step - 1].options.find(o => o.id === answers[currentQuestion.id])?.points || 0} pts</span>
-                    </div>
-
-                    <Card className="bg-white/5 border-white/10 backdrop-blur-sm text-left mb-8">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-[#518C5B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <Sparkles className="w-5 h-5 text-[#518C5B]" />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-lg mb-2">Você sabia?</h3>
-                            <p className="text-white/70 leading-relaxed text-sm md:text-base">
-                              {currentQuestion.insight}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button
-                        onClick={handleNextQuestion}
-                        size="lg"
-                        className="gap-2 bg-gradient-to-r from-[#518C5B] to-[#3d7047] hover:from-[#3d7047] hover:to-[#518C5B] text-white text-base px-8 h-14 rounded-2xl shadow-xl shadow-[#518C5B]/30"
+                    return (
+                      <motion.button
+                        key={option.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.08 }}
+                        whileHover={!answered ? { scale: 1.02, x: 8 } : {}}
+                        whileTap={!answered ? { scale: 0.98 } : {}}
+                        onClick={() => handleAnswer(currentQuestion.id, option.id, option.points, option)}
+                        disabled={answered || isAnimating}
+                        className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 ${
+                          answered && isSelected
+                            ? 'bg-[#518C5B]/20 border-[#518C5B] shadow-lg shadow-[#518C5B]/20'
+                            : answered
+                            ? 'bg-white/5 border-white/10 opacity-50'
+                            : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                        }`}
                       >
-                        {step < 3 ? (
-                          <>Próxima Pergunta <ArrowRight className="w-5 h-5" /></>
-                        ) : (
-                          <>Ver Meu Resultado <Trophy className="w-5 h-5" /></>
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                          answered && isSelected ? 'bg-[#518C5B]' : 'bg-white/10'
+                        }`}>
+                          <option.icon className={`w-5 h-5 ${
+                            answered && isSelected ? 'text-white' : 'text-white/60'
+                          }`} />
+                        </div>
+                        <span className="text-base md:text-lg font-medium flex-1 leading-snug">{option.text}</span>
+                        {answered && isSelected && (
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-7 h-7 rounded-full bg-[#518C5B] flex items-center justify-center flex-shrink-0">
+                            <Check className="w-4 h-4 text-white" />
+                          </motion.div>
                         )}
-                      </Button>
-                    </motion.div>
-                  </motion.div>
-                )}
+                        {!answered && <ChevronRight className="w-5 h-5 text-white/30 flex-shrink-0" />}
+                      </motion.button>
+                    );
+                  })}
+                </div>
               </motion.div>
-            </AnimatePresence>
+            ) : (
+              <motion.div
+                key={`insight-${step}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="text-center"
+              >
+                <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-6 bg-[#518C5B]/20 border border-[#518C5B]/40 text-[#518C5B]">
+                  <Check className="w-4 h-4" />
+                  <span className="font-bold">Resposta registrada! +{quizQuestions[step - 1].options.find(o => o.id === answers[currentQuestion.id])?.points || 0} pts</span>
+                </div>
+
+                <Card className="bg-white/5 border-white/10 backdrop-blur-sm text-left mb-8">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#518C5B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Sparkles className="w-5 h-5 text-[#518C5B]" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg mb-2">Você sabia?</h3>
+                        <p className="text-white/70 leading-relaxed text-sm md:text-base">
+                          {currentQuestion.insight}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={handleNextQuestion}
+                    size="lg"
+                    className="gap-2 bg-gradient-to-r from-[#518C5B] to-[#3d7047] hover:from-[#3d7047] hover:to-[#518C5B] text-white text-base px-8 h-14 rounded-2xl shadow-xl shadow-[#518C5B]/30"
+                  >
+                    {step < 3 ? (
+                      <>Próxima Pergunta <ArrowRight className="w-5 h-5" /></>
+                    ) : (
+                      <>Ver Meu Resultado <Trophy className="w-5 h-5" /></>
+                    )}
+                  </Button>
+                </motion.div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
