@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-  ArrowRight, Check, ChevronRight, TrendingDown, ArrowUpRight,
-  Clock, MessageCircle, Heart, DollarSign, Star, Activity, ShieldAlert
+  ArrowRight, Check, ChevronRight, ArrowUpRight,
+  Clock, MessageCircle, Heart, Activity, ShieldAlert
 } from 'lucide-react';
 import logoImg from '@/assets/logo-nutriflow.png';
 import { motion } from 'framer-motion';
@@ -19,18 +19,18 @@ function trackPixel(event: string, params?: Record<string, any>) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Brand tokens — NutriFlow SaaS palette                               */
+/* Brand tokens — NutriFlow SaaS palette · LIGHT surface               */
 /* ------------------------------------------------------------------ */
 const GREEN = '#518C5B';
 const GREEN_DEEP = '#3d7047';
 const CORAL = '#C4764A';
-const INK = '#0c0e12';        // page background — near-black, slightly warm
-const SURFACE = '#14171d';    // raised surface
-const SURFACE_2 = '#1b1f27';  // secondary raised surface
-const HAIRLINE = '#262b35';   // 1px borders
-const TEXT = '#eef1f4';
-const TEXT_MUTED = '#9aa3b0';
-const TEXT_DIM = '#6b7280';
+const PAPER = '#f7f6f2';     // page background — warm off-white
+const SURFACE = '#ffffff';   // raised surface
+const SURFACE_2 = '#f1efe9'; // secondary raised surface
+const HAIRLINE = '#e4e1d8';  // 1px borders
+const INK = '#1c1f24';       // primary text — near-black
+const TEXT_MUTED = '#5b616b';
+const TEXT_DIM = '#9aa0a8';
 
 /* One authored entrance — exponential ease-out, reused everywhere */
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -135,13 +135,13 @@ export default function DesafioNutri() {
   /* ================================================================ */
   if (step === 0) {
     return (
-      <div className="min-h-screen text-white" style={{ background: INK }}>
+      <div className="min-h-screen" style={{ background: PAPER, color: INK }}>
         <div className="mx-auto max-w-5xl px-6 py-10">
           {/* masthead */}
           <header className="flex items-center justify-between border-b pb-6" style={{ borderColor: HAIRLINE }}>
             <div className="flex items-center gap-2.5">
               <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
-              <span className="font-serif text-xl font-semibold tracking-tight">NutriFlow</span>
+              <span className="font-serif text-xl font-semibold tracking-tight" style={{ color: INK }}>NutriFlow</span>
             </div>
             <span className="text-xs font-medium uppercase tracking-[0.18em]" style={{ color: TEXT_DIM }}>
               Diagnóstico gratuito
@@ -158,7 +158,7 @@ export default function DesafioNutri() {
               <p className="mb-6 text-sm font-medium" style={{ color: CORAL }}>
                 Para nutricionistas que querem parar de perder tempo
               </p>
-              <h1 className="font-serif text-[2.7rem] font-semibold leading-[1.04] tracking-[-0.02em] sm:text-6xl md:text-[4.4rem]">
+              <h1 className="font-serif text-[2.7rem] font-semibold leading-[1.04] tracking-[-0.02em] sm:text-6xl md:text-[4.4rem]" style={{ color: INK }}>
                 Quanto da sua semana
                 <br />
                 some montando
@@ -201,7 +201,7 @@ export default function DesafioNutri() {
                 { k: '14 dias', v: 'grátis, sem cartão de crédito' },
               ].map((row, i) => (
                 <div key={i} className="flex items-baseline justify-between gap-4 px-6 py-5" style={{ background: SURFACE }}>
-                  <span className="font-serif text-2xl font-semibold tabular-nums" style={{ color: TEXT }}>{row.k}</span>
+                  <span className="font-serif text-2xl font-semibold tabular-nums" style={{ color: INK }}>{row.k}</span>
                   <span className="text-right text-sm leading-snug" style={{ color: TEXT_MUTED }}>{row.v}</span>
                 </div>
               ))}
@@ -222,9 +222,9 @@ export default function DesafioNutri() {
     const earned = q.options.find(o => o.id === answeredId)?.points || 0;
 
     return (
-      <div className="min-h-screen text-white" style={{ background: INK }}>
+      <div className="min-h-screen" style={{ background: PAPER, color: INK }}>
         {/* progress rail */}
-        <div className="sticky top-0 z-50 border-b backdrop-blur" style={{ borderColor: HAIRLINE, background: 'rgba(12,14,18,0.85)' }}>
+        <div className="sticky top-0 z-50 border-b backdrop-blur" style={{ borderColor: HAIRLINE, background: 'rgba(247,246,242,0.85)' }}>
           <div className="mx-auto flex max-w-3xl items-center gap-4 px-6 py-4">
             <span className="text-xs font-medium tabular-nums" style={{ color: TEXT_DIM }}>
               {String(step).padStart(2, '0')} <span style={{ color: HAIRLINE }}>/</span> 03
@@ -244,7 +244,7 @@ export default function DesafioNutri() {
               <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: CORAL }}>
                 {q.category}
               </p>
-              <h2 className="font-serif text-2xl font-semibold leading-snug tracking-[-0.01em] sm:text-[2rem]">
+              <h2 className="font-serif text-2xl font-semibold leading-snug tracking-[-0.01em] sm:text-[2rem]" style={{ color: INK }}>
                 {q.question}
               </h2>
 
@@ -278,7 +278,7 @@ export default function DesafioNutri() {
                           ? <Check className="h-4 w-4 text-white" />
                           : <Glyph className="h-4 w-4" style={{ color: TEXT_DIM }} />}
                       </span>
-                      <span className="flex-1 text-base font-medium leading-snug" style={{ color: TEXT }}>
+                      <span className="flex-1 text-base font-medium leading-snug" style={{ color: INK }}>
                         {option.text}
                       </span>
                       {!answeredId && (
@@ -300,7 +300,7 @@ export default function DesafioNutri() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: CORAL }}>
                   Você sabia?
                 </p>
-                <p className="mt-3 text-lg leading-relaxed" style={{ color: TEXT }}>
+                <p className="mt-3 text-lg leading-relaxed" style={{ color: INK }}>
                   {q.insight}
                 </p>
               </div>
@@ -326,17 +326,17 @@ export default function DesafioNutri() {
   }
 
   /* ================================================================ */
-  /* RESULT — editorial, asymmetric, no pastel metric cards            */
+  /* RESULT — editorial, asymmetric, light surface, no pricing         */
   /* ================================================================ */
   if (step === 4) {
     return (
-      <div className="min-h-screen text-white" style={{ background: INK }}>
+      <div className="min-h-screen" style={{ background: PAPER, color: INK }}>
         <div className="mx-auto max-w-5xl px-6 py-10">
           {/* masthead */}
           <header className="flex items-center justify-between border-b pb-6" style={{ borderColor: HAIRLINE }}>
             <div className="flex items-center gap-2.5">
               <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
-              <span className="font-serif text-xl font-semibold tracking-tight">NutriFlow</span>
+              <span className="font-serif text-xl font-semibold tracking-tight" style={{ color: INK }}>NutriFlow</span>
             </div>
             <span className="text-xs font-medium tabular-nums uppercase tracking-[0.18em]" style={{ color: TEXT_DIM }}>
               Seu resultado · {totalPoints} pts
@@ -352,7 +352,7 @@ export default function DesafioNutri() {
             <p className="mb-5 text-sm font-medium" style={{ color: CORAL }}>
               Diagnóstico concluído
             </p>
-            <h1 className="font-serif text-4xl font-semibold leading-[1.05] tracking-[-0.02em] sm:text-5xl">
+            <h1 className="font-serif text-4xl font-semibold leading-[1.05] tracking-[-0.02em] sm:text-5xl" style={{ color: INK }}>
               Este é o custo silencioso
               <br />
               da sua clínica hoje.
@@ -374,7 +374,7 @@ export default function DesafioNutri() {
                 R$ {brl(metrics.lostMoney)}
               </p>
               <p className="mt-5 max-w-md text-base leading-relaxed" style={{ color: TEXT_MUTED }}>
-                Equivale a <span className="font-semibold tabular-nums" style={{ color: TEXT }}>{metrics.lostHours} horas</span> por semana
+                Equivale a <span className="font-semibold tabular-nums" style={{ color: INK }}>{metrics.lostHours} horas</span> por semana
                 gastas em tarefas que a IA do NutriFlow faz em segundos — tempo que poderia virar atendimento, estudo ou descanso.
               </p>
             </div>
@@ -386,7 +386,7 @@ export default function DesafioNutri() {
                   <ShieldAlert className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.16em]">Risco de evasão</span>
                 </div>
-                <p className="mt-4 font-serif text-5xl font-semibold tabular-nums" style={{ color: TEXT }}>
+                <p className="mt-4 font-serif text-5xl font-semibold tabular-nums" style={{ color: INK }}>
                   {metrics.retentionLoss}%
                 </p>
                 <p className="mt-3 text-sm leading-relaxed" style={{ color: TEXT_MUTED }}>
@@ -428,53 +428,16 @@ export default function DesafioNutri() {
             </p>
           </motion.div>
 
-          {/* pricing — restrained table-like row, not three glowing cards */}
-          <motion.div
-            {...fadeUp}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.26 }}
-            className="mt-16"
-          >
-            <p className="mb-6 text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: TEXT_DIM }}>
-              Após o teste · preços de lançamento
-            </p>
-            <div className="overflow-hidden rounded-2xl border" style={{ borderColor: HAIRLINE }}>
-              {[
-                { name: 'Starter', price: '39,90', note: 'Até 20 pacientes · cardápios com IA', popular: false },
-                { name: 'Pro', price: '69,90', note: 'Até 100 pacientes · IA avançada + agendamento', popular: true },
-                { name: 'Enterprise', price: '109,90', note: 'Pacientes ilimitados · API + white-label', popular: false },
-              ].map((plan, i) => (
-                <div
-                  key={plan.name}
-                  className="flex items-center justify-between gap-4 px-6 py-5"
-                  style={{ background: plan.popular ? 'rgba(81,140,91,0.08)' : i % 2 ? SURFACE : SURFACE_2, borderTop: i ? `1px solid ${HAIRLINE}` : 'none' }}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="font-serif text-lg font-semibold" style={{ color: TEXT }}>{plan.name}</span>
-                    {plan.popular && (
-                      <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white" style={{ background: GREEN }}>
-                        Mais escolhido
-                      </span>
-                    )}
-                    <span className="hidden text-sm sm:inline" style={{ color: TEXT_DIM }}>{plan.note}</span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-sm" style={{ color: TEXT_MUTED }}>R$</span>
-                    <span className="font-serif text-2xl font-semibold tabular-nums" style={{ color: plan.popular ? GREEN : TEXT }}>{plan.price}</span>
-                    <span className="text-xs" style={{ color: TEXT_DIM }}>/mês</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
           <footer className="mt-16 border-t pt-8 text-sm" style={{ borderColor: HAIRLINE, color: TEXT_DIM }}>
             © {new Date().getFullYear()} NutriFlow · Dúvidas?{' '}
             <a
               href="https://wa.me/5513996205253?text=Ol%C3%A1!%20Fiz%20o%20diagn%C3%B3stico%20e%20quero%20saber%20mais."
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium transition-colors hover:text-white"
+              className="font-medium transition-colors"
               style={{ color: GREEN }}
+              onMouseEnter={e => (e.currentTarget.style.color = GREEN_DEEP)}
+              onMouseLeave={e => (e.currentTarget.style.color = GREEN)}
             >
               Fale conosco no WhatsApp
             </a>
