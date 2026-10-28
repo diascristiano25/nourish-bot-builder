@@ -218,8 +218,9 @@ export default function GenerateMealPlan() {
           nutritionist_id: patient.nutritionist_id,
           title: planTitle || `Cardápio - ${patient.full_name}`,
           description: additionalNotes || null,
-          total_calories: data.totalCalories || calculatedCalories || calculateTDEE() || null,
-          plan_data: data.mealPlan,
+          total_calories: data.totalCalories || data.mealPlan?.totalCalories || calculatedCalories || calculateTDEE() || null,
+          meals: data.mealPlan,
+          ai_generated: true,
           is_active: true,
         })
         .select('id')
