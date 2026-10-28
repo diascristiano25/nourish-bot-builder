@@ -238,11 +238,12 @@ export default function MealPlanView() {
   };
 
   const handleShare = async () => {
-    if (!mealPlan || !patient || !id) return;
+    if (!mealPlan || !patient || !mealPlanId) return;
 
     setSharing(true);
     try {
-      const portalUrl = `https://nutriflow.inf.br/paciente/${id}`;
+      // Share the meal plan view URL directly so the patient sees this specific plan
+      const portalUrl = `https://nutriflow.inf.br/cardapio/${mealPlanId}`;
       const shareText = `Seu Plano Alimentar por ${nutritionist?.full_name || 'seu nutricionista'}: ${portalUrl}`;
       
       if (navigator.share && navigator.canShare && navigator.canShare({ text: shareText, url: portalUrl })) {
