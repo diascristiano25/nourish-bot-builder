@@ -140,7 +140,7 @@ export function NewAppointmentDialog({
           scheduled_at: dateTime.toISOString(),
           notes: notes || null,
           status: 'scheduled',
-          type: appointmentType === 'online' ? 'online' : 'in_person',
+          type: 'consultation',
         });
 
       if (error) {
