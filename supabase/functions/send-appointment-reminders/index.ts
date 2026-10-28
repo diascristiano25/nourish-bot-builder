@@ -140,6 +140,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         const emailResponse = await res.json();
 
+        // Throw on email send failure — this prevents reminder_sent_at from being updated below, ensuring failed sends are retried on next cron run
         if (!res.ok) {
           console.error("Resend API error:", emailResponse);
           throw new Error(emailResponse.message || "Failed to send email");
