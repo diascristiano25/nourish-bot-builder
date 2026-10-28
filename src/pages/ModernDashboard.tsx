@@ -113,7 +113,7 @@ export default function ModernDashboard() {
 
       const { data: todayAppointments } = await supabase
         .from('appointments')
-        .select(`id, scheduled_at, patient:patients(id, full_name), status, appointment_type`)
+        .select(`id, scheduled_at, patient:patients(id, full_name), status, type`)
         .eq('nutritionist_id', nutritionistId)
         .gte('scheduled_at', dayStart.toISOString())
         .lte('scheduled_at', dayEnd.toISOString())
