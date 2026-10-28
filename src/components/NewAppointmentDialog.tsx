@@ -141,7 +141,6 @@ export function NewAppointmentDialog({
           notes: notes || null,
           status: 'scheduled',
           type: appointmentType === 'online' ? 'online' : 'presencial',
-          appointment_type: appointmentType === 'online' ? 'online' : 'presencial',
         });
 
       if (error) {

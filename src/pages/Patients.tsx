@@ -53,7 +53,9 @@ const Patients = () => {
     const matchesSearch =
       patient.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (patient.email && patient.email.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = statusFilter === 'all' || patient.status === statusFilter;
+    // Treat null/undefined status as 'active' for filtering
+    const effectiveStatus = patient.status || 'active';
+    const matchesStatus = statusFilter === 'all' || effectiveStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -157,7 +159,7 @@ const Patients = () => {
             <PatientTable
               patients={filteredPatients}
               onSelectPatient={(id) => navigate(`/pacientes/${id}`)}
-              onEdit={(id) => navigate(`/pacientes/${id}/editar`)}
+              onEdit={(id) => navigate(`/editar-paciente/${id}`)}
               isLoading={isLoading}
             />
           </div>

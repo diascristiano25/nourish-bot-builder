@@ -12,7 +12,34 @@ import { useToast } from '@/hooks/use-toast';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { NeonText } from '@/components/ui/NeonText';
 import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
-import { ArrowLeft, Loader2, Plus, X, User, Activity, Heart, Scale, Save, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, X, User, Activity, Heart, Scale, Save, AlertTriangle, Calculator } from 'lucide-react';
+import { differenceInYears, parseISO } from 'date-fns';
+
+/**
+ * CUN-BAE formula: estimates body fat % from BMI, age and sex.
+ * Source: Gómez-Ambrosi et al., Obesity (2012). Widely used in clinical nutrition
+ * when skinfold / BIA measurements are unavailable.
+ *   BF% = -44.988 + 0.503*age + 10.689*sex + 3.172*BMI - 0.026*BMI^2 + 0.181*BMI*sex - 0.02*BMI*age - 0.005*BMI^2*sex + 0.00021*BMI^2*age
+ *   sex: male = 0, female = 1
+ */
+function estimateBodyFatCunBae(weightKg: number, heightCm: number, ageYears: number, gender: string): number | null {
+  if (!weightKg || !heightCm || !ageYears || ageYears < 1) return null;
+  const heightM = heightCm / 100;
+  const bmi = weightKg / (heightM * heightM);
+  if (!isFinite(bmi) || bmi < 10 || bmi > 80) return null;
+  const sex = (gender === 'female' || gender === 'feminino') ? 1 : 0;
+  const bf = -44.988
+    + 0.503 * ageYears
+    + 10.689 * sex
+    + 3.172 * bmi
+    - 0.026 * bmi * bmi
+    + 0.181 * bmi * sex
+    - 0.02 * bmi * ageYears
+    - 0.005 * bmi * bmi * sex
+    + 0.00021 * bmi * bmi * ageYears;
+  const clamped = Math.max(3, Math.min(60, bf));
+  return Math.round(clamped * 10) / 10;
+}
 
 const commonAllergies = ['Glúten', 'Lactose', 'Amendoim', 'Nozes', 'Soja', 'Ovos', 'Frutos do mar', 'Mariscos'];
 const commonRestrictions = ['Vegetariano', 'Vegano', 'Sem carne vermelha', 'Kosher', 'Halal', 'Low carb', 'Cetogênica'];
@@ -422,7 +449,45 @@ export default function EditPatient() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="bodyFat">Gordura Corporal (%)</Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label htmlFor="bodyFat">Gordura Corporal (%)</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const w = parseFloat(weight);
+                        const h = parseFloat(height);
+                        if (!w || !h || !birthDate || !gender) {
+                          toast({
+                            title: "Dados insuficientes",
+                            description: "Preencha Peso, Altura, Data de Nascimento e Sexo para calcular automaticamente.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        const age = differenceInYears(new Date(), parseISO(birthDate));
+                        const estimated = estimateBodyFatCunBae(w, h, age, gender);
+                        if (estimated == null) {
+                          toast({
+                            title: "Não foi possível calcular",
+                            description: "Verifique os valores de peso e altura.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        setBodyFat(estimated.toString());
+                        toast({
+                          title: "% Gordura estimado",
+                          description: `Valor calculado pela fórmula CUN-BAE: ${estimated}%. Ajuste se tiver medida direta (dobras/bioimpedância).`,
+                        });
+                      }}
+                      className="h-7 px-2 text-xs gap-1 text-primary hover:bg-primary/10"
+                    >
+                      <Calculator className="w-3 h-3" />
+                      Calcular
+                    </Button>
+                  </div>
                   <Input
                     id="bodyFat"
                     type="number"
@@ -432,6 +497,9 @@ export default function EditPatient() {
                     placeholder="20"
                     className="bg-background/50 border-border/50 focus:border-primary"
                   />
+                  <p className="text-[10px] text-muted-foreground leading-tight">
+                    Sem medida direta? Use "Calcular" — estima via IMC, idade e sexo (CUN-BAE).
+                  </p>
                 </div>
               </div>
             </div>
