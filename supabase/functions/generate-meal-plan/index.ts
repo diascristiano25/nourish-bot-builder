@@ -15,6 +15,7 @@ const MODELFLARE_BASE_URL = 'https://modelflare.dev/v1';
 // Try models in order — many OpenAI-compatible proxies require the provider prefix (google/).
 // If the first fails with a model-not-found error, we fall back to the next.
 const GEMINI_MODELS = [
+  'gemini-3.5-flash-lite',
   'google/gemini-2.0-flash',
   'gemini-2.0-flash',
   'google/gemini-1.5-flash',
