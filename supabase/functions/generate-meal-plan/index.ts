@@ -7,6 +7,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Modelflare API config (OpenAI-compatible endpoint)
+// API key is read from Supabase Edge Function secrets — set it once with:
+//   supabase secrets set MODELFLARE_API_KEY=sk-yvhM5XiFjVUBWWumcIHiKZpT10ZUUCj46BTgVk9iqbQ8c6O3
+const MODELFLARE_API_KEY = Deno.env.get('MODELFLARE_API_KEY') || '';
+const MODELFLARE_BASE_URL = 'https://modelflare.dev/v1';
+const GEMINI_MODEL = 'gemini-2.0-flash';
+
 // Zod schema for strict input validation
 const PatientDataSchema = z.object({
   name: z.string()
@@ -30,10 +37,9 @@ const PatientDataSchema = z.object({
 // Sanitize text to prevent prompt injection
 function sanitizeText(text: string): string {
   if (!text) return "";
-  // Remove potential command overrides and excessive repetition
   return text
     .replace(/\b(ignore|forget|disregard|override|system|assistant|user)[\s:]+/gi, "")
-    .replace(/(.)\1{10,}/g, "$1$1$1") // Limit repeated chars
+    .replace(/(.)\1{10,}/g, "$1$1$1")
     .slice(0, 1000);
 }
 
@@ -58,13 +64,12 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // Create Supabase client with user's token to verify auth
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: `Bearer ${token}` } }
     });
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
       console.error('Auth verification failed:', authError?.message);
       return new Response(
@@ -80,14 +85,6 @@ serve(async (req) => {
     try {
       rawBody = await req.json();
       console.log('Request body keys:', Object.keys(rawBody));
-      console.log('Request body sample:', {
-        name: rawBody.name,
-        hasAge: !!rawBody.age,
-        hasWeight: !!rawBody.weight,
-        hasTargetCalories: !!rawBody.targetCalories,
-        allergiesCount: rawBody.allergies?.length || 0,
-        restrictionsCount: rawBody.dietaryRestrictions?.length || 0
-      });
     } catch {
       return new Response(
         JSON.stringify({ error: 'Invalid JSON in request body' }),
@@ -113,22 +110,7 @@ serve(async (req) => {
 
     const patientData = validationResult.data;
 
-    console.log('Validated patient data:', {
-      name: patientData.name,
-      age: patientData.age,
-      gender: patientData.gender,
-      weight: patientData.weight,
-      height: patientData.height,
-      targetCalories: patientData.targetCalories,
-      goal: patientData.goal,
-      activityLevel: patientData.activityLevel,
-      allergiesCount: patientData.allergies.length,
-      restrictionsCount: patientData.dietaryRestrictions.length,
-      hasMedicalConditions: !!patientData.medicalConditions,
-      hasAdditionalNotes: !!patientData.additionalNotes
-    });
-
-    // Sanitize text fields to prevent prompt injection
+    // Sanitize text fields
     patientData.additionalNotes = sanitizeText(patientData.additionalNotes);
     if (patientData.medicalConditions) {
       patientData.medicalConditions = sanitizeText(patientData.medicalConditions);
@@ -136,19 +118,17 @@ serve(async (req) => {
 
     console.log('Generating meal plan for patient:', patientData.name);
 
-    // Build the prompt with TACO table reference
-    const systemPrompt = `Você é um nutricionista especializado em criar cardápios alimentares personalizados.
+    // Build the prompt
+    const systemPrompt = `Você é um nutricionista especializado em criar cardápios alimentares personalizados para pacientes brasileiros.
 
-IMPORTANTE: Você deve usar a Tabela Brasileira de Composição de Alimentos (TACO) como referência para todos os valores nutricionais. A Tabela TACO é a principal referência de composição nutricional de alimentos consumidos no Brasil.
-
-Ao criar o cardápio:
+REGRAS OBRIGATÓRIAS:
 1. Use alimentos comuns na dieta brasileira
-2. Os valores de calorias, proteínas, carboidratos e gorduras devem ser baseados na Tabela TACO
-3. As porções devem ser em medidas caseiras (colher de sopa, xícara, unidade, fatia, etc.)
-4. Considere as restrições alimentares e alergias do paciente
-5. Adapte o cardápio ao objetivo nutricional do paciente
+2. Valores nutricionais baseados na Tabela TACO (Tabela Brasileira de Composição de Alimentos)
+3. Porções em medidas caseiras (colher de sopa, xícara, unidade, fatia, etc.)
+4. Respeite TODAS as restrições alimentares e alergias
+5. Adapte ao objetivo nutricional do paciente
 
-Você DEVE retornar APENAS um objeto JSON válido, sem nenhum texto adicional, no seguinte formato exato:
+FORMATO DE RESPOSTA: Retorne APENAS um objeto JSON válido, sem nenhum texto adicional, markdown ou explicação. Formato exato:
 {
   "meals": [
     {
@@ -195,38 +175,29 @@ ${patientData.dietaryRestrictions.length > 0 ? `RESTRIÇÕES ALIMENTARES: ${pati
 ${patientData.medicalConditions ? `CONDIÇÕES MÉDICAS: ${patientData.medicalConditions}` : ''}
 ${patientData.additionalNotes ? `INSTRUÇÕES ADICIONAIS: ${patientData.additionalNotes}` : ''}
 
-Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS o JSON, sem texto adicional.`;
+Use a Tabela TACO como referência. Retorne APENAS o JSON válido, sem texto adicional.`;
 
-    // Use Anthropic Claude API
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    // === CALL MODELFLARE API (OpenAI-compatible with Gemini) ===
+    console.log('Calling Modelflare API with Gemini model...');
 
-    if (!ANTHROPIC_API_KEY) {
-      throw new Error('Anthropic API key not configured');
-    }
-
-    console.log('Calling Anthropic Claude API...');
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(`${MODELFLARE_BASE_URL}/chat/completions`, {
       method: 'POST',
       headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${MODELFLARE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-haiku-20241022',
-        max_tokens: 4096,
-        system: systemPrompt,
+        model: GEMINI_MODEL,
         messages: [
-          {
-            role: 'user',
-            content: userPrompt
-          }
-        ]
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 4096,
+        temperature: 0.7,
       }),
     });
 
-    console.log('Anthropic response status:', response.status);
+    console.log('Modelflare response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -237,46 +208,44 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
         errorDetail = errorText;
       }
 
-      console.error('Anthropic API error:', {
+      console.error('Modelflare API error:', {
         status: response.status,
         statusText: response.statusText,
-        errorDetail: errorDetail
+        errorDetail
       });
 
       if (response.status === 429) {
-        console.error('Rate limit hit - check Anthropic usage dashboard');
         return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again in a few moments.' }),
+          JSON.stringify({ error: 'Limite de requisições atingido. Aguarde alguns minutos e tente novamente.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
       if (response.status === 401) {
-        console.error('Anthropic authentication failed - verify API key');
         return new Response(
-          JSON.stringify({ error: 'AI service authentication failed. Please contact support.' }),
+          JSON.stringify({ error: 'Erro de autenticação com o serviço de IA. Contate o suporte.' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      throw new Error(`Anthropic API failed: ${response.status} - ${JSON.stringify(errorDetail)}`);
+      throw new Error(`Modelflare API failed: ${response.status} - ${JSON.stringify(errorDetail)}`);
     }
 
     const aiResponse = await response.json();
     console.log('AI response received');
 
-    // Extract content from Anthropic response format
-    const content = aiResponse.content?.find((c: any) => c.type === 'text')?.text;
+    // Extract content from OpenAI-compatible response format
+    const content = aiResponse.choices?.[0]?.message?.content;
 
     if (!content) {
-      console.error('Unexpected Anthropic response:', JSON.stringify(aiResponse));
-      throw new Error('No content in Anthropic response');
+      console.error('Unexpected Modelflare response:', JSON.stringify(aiResponse));
+      throw new Error('No content in AI response');
     }
 
     // Parse the JSON from the response
     let mealPlan;
     try {
-      // Try to extract JSON from the response (in case there's extra text)
+      // Try to extract JSON from the response (in case there's extra text/markdown)
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         mealPlan = JSON.parse(jsonMatch[0]);
@@ -284,7 +253,7 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
         throw new Error('No valid JSON found in response');
       }
     } catch (parseError) {
-      console.error('Failed to parse AI response:', content);
+      console.error('Failed to parse AI response:', content.slice(0, 500));
       throw new Error('Failed to parse meal plan from AI response');
     }
 
@@ -304,8 +273,6 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
       timestamp,
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
-      errorType: error?.constructor?.name,
-      errorDetails: error
     });
 
     return new Response(
