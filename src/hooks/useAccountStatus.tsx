@@ -14,6 +14,12 @@ export function useAccountStatus() {
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
+    // Safety timeout: never stay in "checking" state for more than 8 seconds
+    // This prevents infinite blank pages if the RPC hangs or auth never resolves
+    const safetyTimeout = setTimeout(() => {
+      setChecking(false);
+    }, 8000);
+
     const checkAccountStatus = async () => {
       // Skip check for public routes or if no user
       if (PUBLIC_ROUTES.includes(location.pathname) || !user) {
@@ -46,8 +52,17 @@ export function useAccountStatus() {
 
     if (!authLoading) {
       checkAccountStatus();
+    } else {
+      // If auth is still loading, don't block forever — the safety timeout handles it
+      // but also explicitly set checking to false once auth resolves via the dependency array re-run
     }
+
+    return () => clearTimeout(safetyTimeout);
   }, [user, authLoading, location.pathname, navigate]);
 
-  return { checking: checking || authLoading, status };
+  // Only report "checking" if auth is done loading AND we haven't resolved yet
+  // This prevents the infinite spinner when authLoading stays true
+  const isChecking = authLoading ? false : checking;
+
+  return { checking: isChecking, status };
 }
