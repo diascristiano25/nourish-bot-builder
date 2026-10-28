@@ -214,7 +214,7 @@ Use a Tabela TACO como referência para os valores nutricionais. Retorne APENAS 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-5-5',
+        model: 'claude-3-5-haiku-20241022',
         max_tokens: 4096,
         system: systemPrompt,
         messages: [

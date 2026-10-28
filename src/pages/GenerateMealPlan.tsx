@@ -271,7 +271,20 @@ export default function GenerateMealPlan() {
     );
   }
 
-  if (!patient) return null;
+  if (!patient) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
+            <h2 className="text-xl font-bold">Paciente não encontrado</h2>
+            <p className="text-muted-foreground">Não foi possível carregar os dados do paciente.</p>
+            <Button onClick={() => navigate('/pacientes')}>Voltar para Pacientes</Button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   let age: number | null = null;
   if (patient.birth_date) {
