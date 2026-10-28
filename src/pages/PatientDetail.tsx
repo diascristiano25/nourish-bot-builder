@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -162,6 +163,30 @@ export default function PatientDetail() {
   
   const { permission, requestPermission, isSupported } = useNotifications(nutritionistId);
 
+  // Real-time subscriptions for patient data
+  const realtimeAnthropometrics = useSupabaseRealtime<any>('anthropometrics', { column: 'patient_id', value: id! });
+  const realtimeFoodIntake = useSupabaseRealtime<any>('food_intake_logs', { column: 'patient_id', value: id! });
+  const realtimeMessages = useSupabaseRealtime<any>('messages', { column: 'patient_id', value: id! });
+
+  // Refetch data when realtime updates arrive
+  useEffect(() => {
+    if (realtimeAnthropometrics.data.length > 0) {
+      fetchPatientData();
+    }
+  }, [realtimeAnthropometrics.data]);
+
+  useEffect(() => {
+    if (realtimeFoodIntake.data.length > 0) {
+      fetchPatientData();
+    }
+  }, [realtimeFoodIntake.data]);
+
+  useEffect(() => {
+    if (realtimeMessages.data.length > 0) {
+      fetchUnreadMessages();
+    }
+  }, [realtimeMessages.data]);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -174,31 +199,6 @@ export default function PatientDetail() {
       fetchUnreadMessages();
     }
   }, [user, id]);
-
-  // Subscribe to new messages for unread count
-  useEffect(() => {
-    if (!id || !nutritionistId) return;
-
-    const channel = supabase
-      .channel(`unread-${id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-          filter: `patient_id=eq.${id}`,
-        },
-        () => {
-          fetchUnreadMessages();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [id, nutritionistId]);
 
   const fetchUnreadMessages = async () => {
     if (!id || !nutritionistId) return;

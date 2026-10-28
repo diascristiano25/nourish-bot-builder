@@ -11,6 +11,7 @@ import { PatientRegistro } from '@/components/patient-mobile/PatientRegistro';
 import { PatientEvolucao } from '@/components/patient-mobile/PatientEvolucao';
 import { PatientPerfil } from '@/components/patient-mobile/PatientPerfil';
 import { ChatWidget } from '@/components/patient/dashboard/ChatWidget';
+import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
 
 export interface PatientData {
   id: string;
@@ -61,6 +62,30 @@ export default function PatientMobileApp() {
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [waterLog, setWaterLog] = useState({ currentMl: 0, goalMl: 2000 });
   const [loading, setLoading] = useState(true);
+
+  // Real-time subscriptions for patient data (multi-device sync)
+  const realtimeWaterLogs = useSupabaseRealtime<any>('water_logs', { column: 'patient_id', value: patient?.id || '' });
+  const realtimeMealPlans = useSupabaseRealtime<any>('meal_plans', { column: 'patient_id', value: patient?.id || '' });
+  const realtimeMessages = useSupabaseRealtime<any>('messages', { column: 'patient_id', value: patient?.id || '' });
+
+  // Refetch data when realtime updates arrive
+  useEffect(() => {
+    if (realtimeWaterLogs.data.length > 0 && patient) {
+      fetchPatientData();
+    }
+  }, [realtimeWaterLogs.data]);
+
+  useEffect(() => {
+    if (realtimeMealPlans.data.length > 0 && patient) {
+      fetchPatientData();
+    }
+  }, [realtimeMealPlans.data]);
+
+  useEffect(() => {
+    if (realtimeMessages.data.length > 0 && patient) {
+      fetchPatientData();
+    }
+  }, [realtimeMessages.data]);
 
   useEffect(() => {
     if (!authLoading && !user) {
