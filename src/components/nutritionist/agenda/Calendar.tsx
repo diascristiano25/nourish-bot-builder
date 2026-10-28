@@ -123,7 +123,7 @@ export function Calendar({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeInScale {
           from {
             opacity: 0;
