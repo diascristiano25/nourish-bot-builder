@@ -1,0 +1,8 @@
+[
+  { "type": "walking", "met": 3.5, "label": "Caminhada" },
+  { "type": "running", "met": 8.0, "label": "Corrida" },
+  { "type": "cycling", "met": 7.5, "label": "Ciclismo" },
+  { "type": "swimming", "met": 6.0, "label": "Natação" },
+  { "type": "yoga", "met": 2.5, "label": "Yoga" },
+  { "type": "strength_training", "met": 5.0, "label": "Musculação" }
+]
