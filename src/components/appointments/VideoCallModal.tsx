@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { generateRoomId } from "@/lib/jitsi";
 
 interface VideoCallModalProps {
   appointmentId: string;
@@ -8,7 +10,7 @@ interface VideoCallModalProps {
 }
 
 export function VideoCallModal({ appointmentId, isOpen, onClose }: VideoCallModalProps) {
-  const roomId = crypto.randomUUID();
+  const roomId = useMemo(() => generateRoomId(appointmentId), [appointmentId]);
   const jitsiUrl = `https://meet.jit.si/${roomId}`;
 
   return (
