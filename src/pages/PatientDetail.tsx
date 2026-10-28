@@ -383,11 +383,52 @@ export default function PatientDetail() {
   };
 
   const handleCopyPortalLink = () => {
-    const portalUrl = `https://nutriflow.inf.br/paciente/${patient?.id}`;
-    navigator.clipboard.writeText(portalUrl);
+    if (!patient?.id) {
+      toast({ title: "Paciente sem ID", description: "Não foi possível gerar o link de acesso.", variant: "destructive" });
+      return;
+    }
+    const portalUrl = `https://nutriflow.inf.br/paciente/${patient.id}`;
+    const patientName = patient.full_name?.split(' ')[0] || 'paciente';
+    const message = `Olá ${patientName}! 👋
+
+Seu portal exclusivo da NutriFlow está pronto! 🥗
+
+Acesse agora para acompanhar seu plano alimentar, evolução e conversar comigo:
+
+🔗 ${portalUrl}
+
+No primeiro acesso, você cria sua própria senha de forma segura.
+
+Qualquer dúvida, estou à disposição! 💚`;
+
+    // Copy to clipboard as a fallback / convenience
+    navigator.clipboard.writeText(`${message}\n\n${portalUrl}`).catch(() => {});
+
+    // Build wa.me URL — use patient phone when available (strip non-digits, ensure country code)
+    let phoneParam = '';
+    if (patient.phone) {
+      const digits = patient.phone.replace(/\D/g, '');
+      // If it starts with 0 or is 10/11 digits (BR local), prepend 55
+      if (digits.length === 10 || digits.length === 11) {
+        phoneParam = `55${digits}`;
+      } else if (digits.length >= 11 && !digits.startsWith('55')) {
+        phoneParam = `55${digits}`;
+      } else {
+        phoneParam = digits;
+      }
+    }
+
+    const whatsappUrl = phoneParam
+      ? `https://wa.me/${phoneParam}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+
     toast({
-      title: "Link copiado!",
-      description: "Link de acesso seguro gerado via infraestrutura NutriFlow.",
+      title: "Abrindo WhatsApp... 💬",
+      description: patient.phone
+        ? `Mensagem pronta para ${patient.full_name}. Confira e envie!`
+        : "Mensagem pronta com o link do portal. Escolha o contato e envie!",
     });
   };
 
