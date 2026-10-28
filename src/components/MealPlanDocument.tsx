@@ -195,13 +195,14 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
             
             {/* Logo */}
             <div style={{ marginBottom: '60px' }}>
-              <img 
-                src={nutritionist.logo_url || logo} 
-                alt="NutriFlow" 
-                style={{ 
-                  height: '120px', 
+              <img
+                src={nutritionist.logo_url || logo}
+                alt={nutritionist.logo_url ? "Logo do nutricionista" : "NutriFlow"}
+                style={{
+                  maxWidth: '40mm',
+                  maxHeight: '20mm',
                   objectFit: 'contain',
-                  filter: theme === 'dark' ? 'drop-shadow(0 0 30px rgba(223, 255, 0, 0.3))' : 'none'
+                  filter: theme === 'dark' && nutritionist.logo_url ? 'drop-shadow(0 0 30px rgba(223, 255, 0, 0.3))' : 'none'
                 }}
               />
             </div>

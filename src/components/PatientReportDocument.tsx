@@ -194,25 +194,11 @@ const PatientReportDocument = forwardRef<HTMLDivElement, PatientReportDocumentPr
           <div style={{ position: 'relative', zIndex: 10, padding: '48px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
               {nutritionist.logo_url ? (
-                <div 
-                  style={{ 
-                    width: '80px', 
-                    height: '80px', 
-                    borderRadius: '20px',
-                    background: `linear-gradient(135deg, ${NEON_GREEN}30, ${VIOLET}30)`,
-                    border: `1px solid ${NEON_GREEN}40`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '12px',
-                  }}
-                >
-                  <img 
-                    src={nutritionist.logo_url} 
-                    alt="Logo" 
-                    style={{ maxHeight: '60px', objectFit: 'contain' }}
-                  />
-                </div>
+                <img
+                  src={nutritionist.logo_url}
+                  alt="Logo do nutricionista"
+                  style={{ maxWidth: '40mm', maxHeight: '20mm', objectFit: 'contain' }}
+                />
               ) : (
                 <div 
                   style={{ 

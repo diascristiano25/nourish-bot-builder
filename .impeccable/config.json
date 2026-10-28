@@ -140,6 +140,15 @@
         ],
         "createdAt": "2026-10-25T23:27:52.841Z",
         "reason": "intentional campaign landing hero accent for gamification page, user explicitly requested creative design distinct from clinical app"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "supabase/functions/send-appointment-reminders/index.ts"
+        ],
+        "createdAt": "2026-10-28T13:54:43.376Z",
+        "reason": "false positive: inline HTML email template border-left for info highlight block, not a UI card component"
       }
     ]
   }

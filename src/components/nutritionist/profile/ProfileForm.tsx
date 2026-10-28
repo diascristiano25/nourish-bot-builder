@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Save, Upload, Mail } from 'lucide-react';
+import { LogoUploader } from '@/components/profile/LogoUploader';
 
 interface NutritionistProfile {
   id: string;
@@ -236,52 +237,12 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         />
       </motion.div>
 
-      {/* Logo / Foto */}
+      {/* Logo Upload */}
       <motion.div className="space-y-2" variants={itemVariants}>
-        <Label className="text-sm font-medium text-foreground">Logo / Foto de Perfil</Label>
-        <div className="flex items-start gap-4">
-          {logoUrl && (
-            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-border shrink-0">
-              <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
-            </div>
-          )}
-          <div className="flex-1">
-            <div className="border-2 border-dashed border-border rounded-xl p-4 text-center hover:border-[#518C5B]/50 transition-colors cursor-pointer">
-              <input
-                type="file"
-                id="photo-upload"
-                accept="image/*"
-                className="hidden"
-                onChange={handlePhotoUpload}
-                disabled={uploadingPhoto}
-              />
-              <label htmlFor="photo-upload" className="cursor-pointer block">
-                {uploadingPhoto ? (
-                  <Loader2 className="w-6 h-6 mx-auto text-muted-foreground animate-spin" />
-                ) : (
-                  <>
-                    <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
-                    <p className="text-sm text-muted-foreground">
-                      Clique para selecionar
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      PNG, JPG (máx. 2MB)
-                    </p>
-                  </>
-                )}
-              </label>
-            </div>
-            {logoUrl && (
-              <button
-                type="button"
-                onClick={() => setLogoUrl('')}
-                className="text-xs text-red-500 hover:underline mt-2"
-              >
-                Remover foto
-              </button>
-            )}
-          </div>
-        </div>
+        <LogoUploader
+          currentLogoUrl={logoUrl || undefined}
+          onUploadComplete={(url) => setLogoUrl(url)}
+        />
       </motion.div>
 
       {/* Assinatura de Email */}
