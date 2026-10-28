@@ -128,9 +128,18 @@ export default function MealPlanView() {
 
       if (planError) throw planError;
       
+      // Live DB uses 'meals' column (jsonb), not 'plan_data'.
+      // The AI returns { meals: [...], totalCalories, macros, notes } — map it to MealPlanData.
+      const rawMeals = (planData.meals ?? planData.plan_data) as any;
+      const mealPlanData: MealPlanData = Array.isArray(rawMeals)
+        ? { meals: rawMeals }
+        : (rawMeals && typeof rawMeals === 'object' && Array.isArray(rawMeals.meals))
+          ? rawMeals
+          : { meals: [] };
+
       const transformedPlan: MealPlan = {
         ...planData,
-        plan_data: planData.plan_data as unknown as MealPlanData,
+        plan_data: mealPlanData,
       };
       setMealPlan(transformedPlan);
 
@@ -275,7 +284,7 @@ export default function MealPlanView() {
       const { error } = await supabase
         .from('meal_plans')
         .update({
-          plan_data: updatedData as any,
+          meals: updatedData as any,
           total_calories: updatedData.totalCalories,
           updated_at: new Date().toISOString(),
         })
@@ -431,18 +440,18 @@ export default function MealPlanView() {
                 </div>
               </div>
 
-              {planData.macros && (
+              {planData.macros && planData.macros.protein != null && (
                 <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border/30">
                   <div className="text-center">
-                    <p className="text-xl font-bold text-info">{planData.macros.protein}g</p>
+                    <p className="text-xl font-bold text-info">{planData.macros.protein ?? 0}g</p>
                     <p className="text-xs text-muted-foreground">Proteínas</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xl font-bold text-warning">{planData.macros.carbs}g</p>
+                    <p className="text-xl font-bold text-warning">{planData.macros.carbs ?? 0}g</p>
                     <p className="text-xs text-muted-foreground">Carboidratos</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xl font-bold text-success">{planData.macros.fat}g</p>
+                    <p className="text-xl font-bold text-success">{planData.macros.fat ?? 0}g</p>
                     <p className="text-xs text-muted-foreground">Gorduras</p>
                   </div>
                 </div>
