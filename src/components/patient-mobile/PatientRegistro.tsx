@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { calculateMealMacros, FoodItem } from '@/lib/nutrition-calculator';
 
 const mealOptions = [
   { id: 'cafe', name: 'Café da Manhã', icon: '☕' },
@@ -32,6 +33,16 @@ const hungerLevels = [
   { value: 5, label: 'Extrema', icon: Smile },
 ];
 
+// Mock food database for demonstration (in production, this would come from Supabase)
+const mockFoodDatabase: FoodItem[] = [
+  { food_id: '1', quantity_g: 100, calories_per_100g: 52, protein_per_100g: 0.3, carbs_per_100g: 14, fat_per_100g: 0.2 }, // Apple
+  { food_id: '2', quantity_g: 150, calories_per_100g: 165, protein_per_100g: 31, carbs_per_100g: 0, fat_per_100g: 3.6 }, // Chicken breast
+  { food_id: '3', quantity_g: 200, calories_per_100g: 130, protein_per_100g: 5, carbs_per_100g: 28, fat_per_100g: 1 }, // Rice
+  { food_id: '4', quantity_g: 100, calories_per_100g: 116, protein_per_100g: 3, carbs_per_100g: 23, fat_per_100g: 1.2 }, // Potato
+];
+
+const mockFoodNames = ['Maçã', 'Peito de Frango', 'Arroz', 'Batata'];
+
 export function PatientRegistro() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -41,6 +52,25 @@ export function PatientRegistro() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // State for food items and macro calculation
+  const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
+  const [macroTotals, setMacroTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+  // Calculate macros whenever selected foods change
+  useEffect(() => {
+    const totals = calculateMealMacros(selectedFoods);
+    setMacroTotals(totals);
+  }, [selectedFoods]);
+
+  const handleAddFood = (foodIndex: number) => {
+    const newFood = { ...mockFoodDatabase[foodIndex] };
+    setSelectedFoods(prev => [...prev, newFood]);
+  };
+
+  const handleRemoveFood = (index: number) => {
+    setSelectedFoods(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -256,6 +286,73 @@ export function PatientRegistro() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Food Selector */}
+      <Card className="border-border/50 mb-4">
+        <CardContent className="p-4">
+          <h2 className="text-sm font-medium text-muted-foreground mb-3">
+            Adicionar alimentos
+          </h2>
+          <div className="space-y-2">
+            {mockFoodNames.map((name, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => handleAddFood(index)}
+              >
+                + {name}
+              </Button>
+            ))}
+          </div>
+          {selectedFoods.length > 0 && (
+            <div className="mt-3 space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Alimentos selecionados:</p>
+              {selectedFoods.map((food, index) => (
+                <div key={index} className="flex items-center justify-between text-xs">
+                  <span>{mockFoodNames[parseInt(food.food_id) - 1]} ({food.quantity_g}g)</span>
+                  <button
+                    onClick={() => handleRemoveFood(index)}
+                    className="text-destructive hover:text-destructive/80"
+                  >
+                    Remover
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Macro Summary Bar */}
+      {selectedFoods.length > 0 && (
+        <Card className="border-primary/30 bg-primary/5 mb-4">
+          <CardContent className="p-4">
+            <h2 className="text-sm font-semibold text-foreground mb-2">
+              Totais da Refeição
+            </h2>
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <div>
+                <p className="text-lg font-bold text-primary">{macroTotals.calories}</p>
+                <p className="text-xs text-muted-foreground">kcal</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-primary">{macroTotals.protein}g</p>
+                <p className="text-xs text-muted-foreground">Proteína</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-primary">{macroTotals.carbs}g</p>
+                <p className="text-xs text-muted-foreground">Carbos</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-primary">{macroTotals.fat}g</p>
+                <p className="text-xs text-muted-foreground">Gordura</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Submit Button */}
       <Button
