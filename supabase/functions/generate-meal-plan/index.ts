@@ -12,7 +12,14 @@ const corsHeaders = {
 //   supabase secrets set MODELFLARE_API_KEY=sk-yvhM5XiFjVUBWWumcIHiKZpT10ZUUCj46BTgVk9iqbQ8c6O3
 const MODELFLARE_API_KEY = Deno.env.get('MODELFLARE_API_KEY') || '';
 const MODELFLARE_BASE_URL = 'https://modelflare.dev/v1';
-const GEMINI_MODEL = 'gemini-2.0-flash';
+// Try models in order — many OpenAI-compatible proxies require the provider prefix (google/).
+// If the first fails with a model-not-found error, we fall back to the next.
+const GEMINI_MODELS = [
+  'google/gemini-2.0-flash',
+  'gemini-2.0-flash',
+  'google/gemini-1.5-flash',
+  'gemini-1.5-flash',
+];
 
 // Zod schema for strict input validation
 const PatientDataSchema = z.object({
@@ -178,61 +185,76 @@ ${patientData.additionalNotes ? `INSTRUÇÕES ADICIONAIS: ${patientData.addition
 Use a Tabela TACO como referência. Retorne APENAS o JSON válido, sem texto adicional.`;
 
     // === CALL MODELFLARE API (OpenAI-compatible with Gemini) ===
-    console.log('Calling Modelflare API with Gemini model...');
+    // Try models in sequence — many proxies require provider prefix (google/).
+    // If one fails with model-not-found, fall back to the next.
+    console.log('Calling Modelflare API with Gemini model fallback chain...');
 
-    const response = await fetch(`${MODELFLARE_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MODELFLARE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: GEMINI_MODEL,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        max_tokens: 4096,
-        temperature: 0.7,
-      }),
-    });
+    let aiResponse: any = null;
+    let lastError: any = null;
 
-    console.log('Modelflare response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorDetail;
+    for (const model of GEMINI_MODELS) {
+      console.log(`Trying model: ${model}`);
       try {
-        errorDetail = JSON.parse(errorText);
-      } catch {
-        errorDetail = errorText;
+        const response = await fetch(`${MODELFLARE_BASE_URL}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${MODELFLARE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt }
+            ],
+            max_tokens: 4096,
+            temperature: 0.7,
+          }),
+        });
+
+        console.log(`Model ${model} response status:`, response.status);
+
+        if (response.ok) {
+          aiResponse = await response.json();
+          console.log(`AI response received using model: ${model}`);
+          break; // Success — exit the loop
+        }
+
+        const errorText = await response.text();
+        let errorDetail;
+        try { errorDetail = JSON.parse(errorText); } catch { errorDetail = errorText; }
+
+        console.error(`Model ${model} failed:`, { status: response.status, errorDetail });
+        lastError = { status: response.status, errorDetail };
+
+        // 429 = rate limit — stop trying, return immediately
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: 'Limite de requisições atingido. Aguarde alguns minutos e tente novamente.' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // 401 = auth error — stop trying, return immediately
+        if (response.status === 401) {
+          return new Response(
+            JSON.stringify({ error: 'Erro de autenticação com o serviço de IA. Verifique a chave API.' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // For other errors (e.g. 404 model not found), try the next model
+      } catch (fetchError) {
+        console.error(`Fetch error for model ${model}:`, fetchError);
+        lastError = fetchError;
+        // Continue to next model
       }
-
-      console.error('Modelflare API error:', {
-        status: response.status,
-        statusText: response.statusText,
-        errorDetail
-      });
-
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Limite de requisições atingido. Aguarde alguns minutos e tente novamente.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      if (response.status === 401) {
-        return new Response(
-          JSON.stringify({ error: 'Erro de autenticação com o serviço de IA. Contate o suporte.' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      throw new Error(`Modelflare API failed: ${response.status} - ${JSON.stringify(errorDetail)}`);
     }
 
-    const aiResponse = await response.json();
-    console.log('AI response received');
+    if (!aiResponse) {
+      console.error('All models failed. Last error:', lastError);
+      throw new Error(`Todos os modelos de IA falharam. Último erro: ${JSON.stringify(lastError)}`);
+    }
 
     // Extract content from OpenAI-compatible response format
     const content = aiResponse.choices?.[0]?.message?.content;
