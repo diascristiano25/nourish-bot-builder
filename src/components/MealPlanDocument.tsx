@@ -319,9 +319,10 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
             ))}
           </div>
 
-          {/* Notes — quiet panel with coral left rule */}
+          {/* Notes — quiet panel with subtle coral top-tab accent (no side-rule AI tell) */}
           {planData.notes && (
-            <div style={{ marginTop: '48px', padding: '28px 32px', background: C.raised, borderLeft: `3px solid ${C.coral}`, borderTop: `1px solid ${C.hairline}`, borderRight: `1px solid ${C.hairline}`, borderBottom: `1px solid ${C.hairline}` }}>
+            <div style={{ marginTop: '48px', padding: '28px 32px', background: C.raised, border: `1px solid ${C.hairline}`, position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '-1px', left: '32px', width: '40px', height: '3px', background: C.coral }} />
               <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: C.coral, fontWeight: 600, marginBottom: '14px' }}>
                 Observações clínicas
               </p>
