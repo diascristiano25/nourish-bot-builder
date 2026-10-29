@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import {
   Camera,
@@ -9,20 +10,22 @@ import {
   Frown,
   Meh,
   Loader2,
+  Search,
+  X,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { calculateMealMacros, FoodItem } from '@/lib/nutrition-calculator';
 
 const mealOptions = [
-  { id: 'cafe', name: 'Café da Manhã', icon: '☕' },
-  { id: 'lanche-manha', name: 'Lanche da Manhã', icon: '🍎' },
-  { id: 'almoco', name: 'Almoço', icon: '🍽️' },
-  { id: 'lanche-tarde', name: 'Lanche da Tarde', icon: '🥤' },
-  { id: 'jantar', name: 'Jantar', icon: '🌙' },
-  { id: 'ceia', name: 'Ceia', icon: '🫖' },
+  { id: 'cafe', name: 'Café da Manhã', icon: '☕', dbValue: 'breakfast' },
+  { id: 'lanche-manha', name: 'Lanche da Manhã', icon: '🍎', dbValue: 'snack' },
+  { id: 'almoco', name: 'Almoço', icon: '🍽️', dbValue: 'lunch' },
+  { id: 'lanche-tarde', name: 'Lanche da Tarde', icon: '🥤', dbValue: 'snack' },
+  { id: 'jantar', name: 'Jantar', icon: '🌙', dbValue: 'dinner' },
+  { id: 'ceia', name: 'Ceia', icon: '🫖', dbValue: 'snack' },
 ];
 
 const hungerLevels = [
@@ -33,15 +36,28 @@ const hungerLevels = [
   { value: 5, label: 'Extrema', icon: Smile },
 ];
 
-// Mock food database for demonstration (in production, this would come from Supabase)
-const mockFoodDatabase: FoodItem[] = [
-  { food_id: '1', quantity_g: 100, calories_per_100g: 52, protein_per_100g: 0.3, carbs_per_100g: 14, fat_per_100g: 0.2 }, // Apple
-  { food_id: '2', quantity_g: 150, calories_per_100g: 165, protein_per_100g: 31, carbs_per_100g: 0, fat_per_100g: 3.6 }, // Chicken breast
-  { food_id: '3', quantity_g: 200, calories_per_100g: 130, protein_per_100g: 5, carbs_per_100g: 28, fat_per_100g: 1 }, // Rice
-  { food_id: '4', quantity_g: 100, calories_per_100g: 116, protein_per_100g: 3, carbs_per_100g: 23, fat_per_100g: 1.2 }, // Potato
-];
+interface FoodDBItem {
+  id: string;
+  name: string;
+  category: string | null;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  portion_grams: number | null;
+  portion_description: string | null;
+  is_supplement: boolean;
+}
 
-const mockFoodNames = ['Maçã', 'Peito de Frango', 'Arroz', 'Batata'];
+interface SelectedFood {
+  id: string;
+  name: string;
+  grams: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
 
 export function PatientRegistro() {
   const { user } = useAuth();
@@ -53,19 +69,72 @@ export function PatientRegistro() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // State for food items and macro calculation
-  const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
-  const [macroTotals, setMacroTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+  // Food search state
+  const [foodSearch, setFoodSearch] = useState('');
+  const [foodResults, setFoodResults] = useState<FoodDBItem[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [selectedFoods, setSelectedFoods] = useState<SelectedFood[]>([]);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Calculate macros whenever selected foods change
+  // Macro totals
+  const macroTotals = selectedFoods.reduce(
+    (acc, f) => ({
+      calories: acc.calories + f.calories,
+      protein: acc.protein + f.protein,
+      carbs: acc.carbs + f.carbs,
+      fat: acc.fat + f.fat,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  );
+
+  // Debounced food search against the real food_database (546 items)
   useEffect(() => {
-    const totals = calculateMealMacros(selectedFoods);
-    setMacroTotals(totals);
-  }, [selectedFoods]);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (foodSearch.trim().length < 2) {
+      setFoodResults([]);
+      return;
+    }
+    setSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('food_database')
+          .select('id, name, category, calories, protein, carbs, fat, portion_grams, portion_description, is_supplement')
+          .ilike('name', `%${foodSearch.trim()}%`)
+          .order('name')
+          .limit(20);
+        if (error) throw error;
+        setFoodResults(data || []);
+      } catch (err) {
+        console.error('Food search error:', err);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [foodSearch]);
 
-  const handleAddFood = (foodIndex: number) => {
-    const newFood = { ...mockFoodDatabase[foodIndex] };
-    setSelectedFoods(prev => [...prev, newFood]);
+  const handleAddFood = (food: FoodDBItem) => {
+    const grams = food.portion_grams || 100;
+    const ratio = grams / 100;
+    setSelectedFoods(prev => [
+      ...prev,
+      {
+        id: food.id,
+        name: food.name,
+        grams,
+        calories: Math.round((food.calories || 0) * ratio),
+        protein: Math.round((food.protein || 0) * ratio * 10) / 10,
+        carbs: Math.round((food.carbs || 0) * ratio * 10) / 10,
+        fat: Math.round((food.fat || 0) * ratio * 10) / 10,
+      },
+    ]);
+    setFoodSearch('');
+    setFoodResults([]);
+    setShowSearch(false);
   };
 
   const handleRemoveFood = (index: number) => {
@@ -121,15 +190,31 @@ export function PatientRegistro() {
         'ceia': 'snack',
       };
 
-      // Persist to food_intake_logs (schema: patient_id, meal_type, food_name,
-      // quantity, unit, calories, protein, carbs, fats, logged_at, notes)
+      // Build notes with food details + hunger/satiety + macros
+      const foodList = selectedFoods.length > 0
+        ? selectedFoods.map(f => `${f.name} (${f.grams}g)`).join(', ')
+        : 'Nenhum alimento especificado';
+      const notesText = [
+        `Alimentos: ${foodList}`,
+        `Fome antes: ${hungerBefore[0]}/5`,
+        `Saciedade após: ${satietyAfter[0]}/5`,
+        selectedFoods.length > 0
+          ? `Totais: ${Math.round(macroTotals.calories)}kcal | P:${Math.round(macroTotals.protein)}g C:${Math.round(macroTotals.carbs)}g G:${Math.round(macroTotals.fat)}g`
+          : '',
+        photoUrl ? 'Foto registrada' : '',
+      ].filter(Boolean).join(' | ');
+
+      // Persist to food_intake_logs — REAL schema columns only:
+      // id, patient_id, meal_type, hunger_before, satiety_after,
+      // photo_url, notes, logged_at, created_at
+      // NO food_name, quantity, unit, calories columns exist!
       const { error: logErr } = await supabase.from('food_intake_logs').insert({
         patient_id: patientRow.id,
         meal_type: mealTypeMap[selectedMeal] || 'snack',
-        food_name: mealOptions.find(m => m.id === selectedMeal)?.name || selectedMeal,
-        quantity: 1,
-        unit: 'porção',
-        notes: `Fome antes: ${hungerBefore[0]}/5 | Saciedade após: ${satietyAfter[0]}/5${photoUrl ? ' | Foto registrada' : ''}`,
+        hunger_before: hungerBefore[0],
+        satiety_after: satietyAfter[0],
+        photo_url: photoUrl,
+        notes: notesText,
         logged_at: new Date().toISOString(),
       });
       if (logErr) throw logErr;
@@ -140,6 +225,8 @@ export function PatientRegistro() {
       setSatietyAfter([3]);
       setImagePreview(null);
       setImageFile(null);
+      setSelectedFoods([]);
+      setFoodSearch('');
     } catch (error: any) {
       console.error('Error registering meal:', error);
       toast({
@@ -287,40 +374,115 @@ export function PatientRegistro() {
         </CardContent>
       </Card>
 
-      {/* Food Selector */}
+      {/* Food Selector — uses real food_database (546 items) */}
       <Card className="border-border/50 mb-4">
         <CardContent className="p-4">
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">
-            Adicionar alimentos
-          </h2>
-          <div className="space-y-2">
-            {mockFoodNames.map((name, index) => (
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-medium text-muted-foreground">
+              Adicionar alimentos
+            </h2>
+            {!showSearch && (
               <Button
-                key={index}
                 variant="outline"
                 size="sm"
-                className="w-full justify-start"
-                onClick={() => handleAddFood(index)}
+                className="gap-1 text-xs"
+                onClick={() => setShowSearch(true)}
               >
-                + {name}
+                <Search className="w-3 h-3" />
+                Buscar
               </Button>
-            ))}
+            )}
           </div>
+
+          {showSearch && (
+            <div className="space-y-2 mb-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={foodSearch}
+                  onChange={(e) => setFoodSearch(e.target.value)}
+                  placeholder="Digite o nome do alimento..."
+                  className="pl-9 h-10"
+                  autoFocus
+                />
+                {foodSearch && (
+                  <button
+                    onClick={() => { setFoodSearch(''); setFoodResults([]); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+
+              {searching && (
+                <div className="flex items-center justify-center py-3">
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                </div>
+              )}
+
+              {!searching && foodSearch.length >= 2 && foodResults.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-2">
+                  Nenhum alimento encontrado
+                </p>
+              )}
+
+              {foodResults.length > 0 && (
+                <div className="max-h-48 overflow-y-auto space-y-1 border border-border/50 rounded-lg p-1">
+                  {foodResults.map((food) => (
+                    <button
+                      key={food.id}
+                      onClick={() => handleAddFood(food)}
+                      className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-primary/5 transition-colors text-left"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{food.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {food.portion_description || `${food.portion_grams || 100}g`} · {food.calories || 0} kcal
+                          {food.is_supplement && ' · Suplemento'}
+                        </p>
+                      </div>
+                      <Plus className="w-4 h-4 text-primary flex-shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-muted-foreground"
+                onClick={() => { setShowSearch(false); setFoodSearch(''); setFoodResults([]); }}
+              >
+                Fechar busca
+              </Button>
+            </div>
+          )}
+
+          {/* Selected foods list */}
           {selectedFoods.length > 0 && (
-            <div className="mt-3 space-y-1">
+            <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground">Alimentos selecionados:</p>
               {selectedFoods.map((food, index) => (
-                <div key={index} className="flex items-center justify-between text-xs">
-                  <span>{mockFoodNames[parseInt(food.food_id) - 1]} ({food.quantity_g}g)</span>
+                <div key={`${food.id}-${index}`} className="flex items-center justify-between text-xs py-1 border-b border-border/30 last:border-0">
+                  <span className="text-foreground">
+                    {food.name} ({food.grams}g) · {food.calories}kcal
+                  </span>
                   <button
                     onClick={() => handleRemoveFood(index)}
-                    className="text-destructive hover:text-destructive/80"
+                    className="text-destructive hover:text-destructive/80 ml-2 flex-shrink-0"
                   >
                     Remover
                   </button>
                 </div>
               ))}
             </div>
+          )}
+
+          {selectedFoods.length === 0 && !showSearch && (
+            <p className="text-xs text-muted-foreground text-center py-2">
+              Toque em "Buscar" para adicionar alimentos da base completa
+            </p>
           )}
         </CardContent>
       </Card>
@@ -334,19 +496,19 @@ export function PatientRegistro() {
             </h2>
             <div className="grid grid-cols-4 gap-2 text-center">
               <div>
-                <p className="text-lg font-bold text-primary">{macroTotals.calories}</p>
+                <p className="text-lg font-bold text-primary">{Math.round(macroTotals.calories)}</p>
                 <p className="text-xs text-muted-foreground">kcal</p>
               </div>
               <div>
-                <p className="text-lg font-bold text-primary">{macroTotals.protein}g</p>
+                <p className="text-lg font-bold text-primary">{Math.round(macroTotals.protein)}g</p>
                 <p className="text-xs text-muted-foreground">Proteína</p>
               </div>
               <div>
-                <p className="text-lg font-bold text-primary">{macroTotals.carbs}g</p>
+                <p className="text-lg font-bold text-primary">{Math.round(macroTotals.carbs)}g</p>
                 <p className="text-xs text-muted-foreground">Carbos</p>
               </div>
               <div>
-                <p className="text-lg font-bold text-primary">{macroTotals.fat}g</p>
+                <p className="text-lg font-bold text-primary">{Math.round(macroTotals.fat)}g</p>
                 <p className="text-xs text-muted-foreground">Gordura</p>
               </div>
             </div>
