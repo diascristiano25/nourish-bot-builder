@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { format, getDaysInMonth, startOfMonth, addDays } from 'date-fns';
+import { format, getDaysInMonth, startOfMonth, addDays, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -11,13 +11,26 @@ export interface CalendarProps {
   isLoading?: boolean;
 }
 
+// Comparação segura por componentes locais (evita problemas de fuso/toDateString)
+const dateKey = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 export function Calendar({
   selectedDate,
   onSelectDate,
   appointmentDates = [],
   isLoading = false
 }: CalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(selectedDate));
+
+  // Sincroniza o mês visível sempre que selectedDate muda (ex: ao agendar para
+  // novembro via dialog, o calendário passa a mostrar novembro automaticamente)
+  useEffect(() => {
+    const target = startOfMonth(selectedDate);
+    if (target.getTime() !== currentMonth.getTime()) {
+      setCurrentMonth(target);
+    }
+  }, [selectedDate]);
 
   // Get all days in current month
   const monthStart = startOfMonth(currentMonth);
@@ -28,15 +41,18 @@ export function Calendar({
     );
   }, [monthStart, daysInMonth]);
 
-  // Convert appointment dates to date strings for easy comparison
-  const appointmentDateStrings = useMemo(() =>
-    new Set(appointmentDates.map(d => d.toDateString())),
+  // Convert appointment dates to stable YYYY-MM-DD keys (timezone-safe)
+  const appointmentDateKeys = useMemo(() =>
+    new Set(appointmentDates.map(d => dateKey(new Date(d)))),
     [appointmentDates]
   );
 
-  const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
-  const isSelected = (date: Date) => date.toDateString() === selectedDate.toDateString();
-  const hasAppointment = (date: Date) => appointmentDateStrings.has(date.toDateString());
+  const todayKey = useMemo(() => dateKey(new Date()), []);
+  const selectedKey = dateKey(selectedDate);
+
+  const isToday = (date: Date) => dateKey(date) === todayKey;
+  const isSelected = (date: Date) => dateKey(date) === selectedKey;
+  const hasAppointment = (date: Date) => appointmentDateKeys.has(dateKey(date));
 
   const handlePrevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
