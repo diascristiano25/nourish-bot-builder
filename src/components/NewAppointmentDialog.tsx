@@ -133,6 +133,9 @@ export function NewAppointmentDialog({
       // duration_minutes, status, type, notes, reminder_sent, created_at, updated_at.
       // KEY: the date column is `scheduled_at` (NOT date_time). `type` exists.
       const isOnline = appointmentType === 'online';
+      // LIVE DB constraint appointments_type_check ONLY accepts:
+      // 'consultation', 'follow_up', 'initial' — NOT 'online'/'in_person'.
+      // Verified via: npx supabase db query --linked on pg_constraint.
       const { error } = await supabase
         .from('appointments')
         .insert({
@@ -141,7 +144,7 @@ export function NewAppointmentDialog({
           scheduled_at: dateTime.toISOString(),
           notes: notes || null,
           status: 'scheduled',
-          type: isOnline ? 'online' : 'in_person',
+          type: 'consultation',
           is_video_enabled: isOnline,
         });
 

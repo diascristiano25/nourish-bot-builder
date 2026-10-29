@@ -68,12 +68,19 @@ export default function Agenda() {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-      const start = startOfDay(selectedDate).toISOString();
-      const end = endOfDay(selectedDate).toISOString();
-      // REAL schema (verified via `supabase db query --linked` against the live DB):
-      // appointments columns: id, patient_id, nutritionist_id, scheduled_at,
-      // duration_minutes, status, type, notes, reminder_sent, created_at, updated_at.
-      // KEY: the date column is `scheduled_at` (NOT date_time).
+      // FIX: usar fuso LOCAL para o intervalo do dia. Antes usávamos
+      // startOfDay(selectedDate).toISOString() que convertia para UTC e deslocava
+      // o intervalo, puxando consultas do dia anterior/posterior ("agendas de outros
+      // dias apareciam como do dia"). Construímos strings ISO com offset local.
+      const dayStart = new Date(selectedDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(selectedDate);
+      dayEnd.setHours(23, 59, 59, 999);
+      // toISOString() aqui é seguro porque já fixamos horas locais; o Supabase
+      // compara timestamptz corretamente quando ambos os lados têm zona.
+      const start = dayStart.toISOString();
+      const end = dayEnd.toISOString();
+
       const { data, error } = await supabase
         .from('appointments')
         .select(`
@@ -90,7 +97,14 @@ export default function Agenda() {
         .lte('scheduled_at', end)
         .order('scheduled_at');
       if (error) throw error;
-      const formattedData = (data || []).map(item => ({
+
+      // Dupla garantia: filtrar no cliente por dia local exato, eliminando qualquer
+      // consulta que o banco tenha retornado de outro dia por arredondamento de fuso.
+      const filtered = (data || []).filter(item =>
+        isSameDay(new Date(item.scheduled_at), selectedDate)
+      );
+
+      const formattedData = filtered.map(item => ({
         ...item,
         patient: Array.isArray(item.patient) ? item.patient[0] : item.patient
       }));
