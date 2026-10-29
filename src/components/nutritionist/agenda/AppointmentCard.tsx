@@ -9,6 +9,7 @@ export interface Appointment {
   scheduled_at: string;
   notes: string | null;
   status: string;
+  type?: string;
   is_video_enabled?: boolean;
   patient: {
     id: string;
@@ -80,7 +81,7 @@ export function AppointmentCard({
             {status.label}
           </span>
 
-          {appointment.is_video_enabled && (
+          {(appointment.is_video_enabled || appointment.type === 'online') && (
             <Button
               variant="ghost"
               size="icon"
@@ -119,7 +120,7 @@ export function AppointmentCard({
           )}
         </div>
 
-        <style jsx>{`
+        <style>{`
           @keyframes slideInLeft {
             from {
               opacity: 0;

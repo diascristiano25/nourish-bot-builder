@@ -132,6 +132,7 @@ export function NewAppointmentDialog({
       // appointments columns: id, patient_id, nutritionist_id, scheduled_at,
       // duration_minutes, status, type, notes, reminder_sent, created_at, updated_at.
       // KEY: the date column is `scheduled_at` (NOT date_time). `type` exists.
+      const isOnline = appointmentType === 'online';
       const { error } = await supabase
         .from('appointments')
         .insert({
@@ -140,7 +141,8 @@ export function NewAppointmentDialog({
           scheduled_at: dateTime.toISOString(),
           notes: notes || null,
           status: 'scheduled',
-          type: 'consultation',
+          type: isOnline ? 'online' : 'in_person',
+          is_video_enabled: isOnline,
         });
 
       if (error) {

@@ -19,6 +19,8 @@ interface Appointment {
   scheduled_at: string;
   notes: string | null;
   status: string;
+  type: string;
+  is_video_enabled: boolean;
   patient: {
     id: string;
     full_name: string;
@@ -79,6 +81,8 @@ export default function Agenda() {
           scheduled_at,
           notes,
           status,
+          type,
+          is_video_enabled,
           patient:patients(id, full_name)
         `)
         .eq('nutritionist_id', nutritionistId)
