@@ -63,7 +63,7 @@ export const pricingPlans: PricingPlan[] = [
     ],
     highlighted: false,
     ctaText: 'Começar Teste Grátis',
-    ctaLink: 'https://wa.me/5513996205253?text=' + encodeURIComponent('Olá! Quero começar meu teste grátis de 14 dias no NutriFlow.')
+    ctaLink: '/auth'
   },
   {
     id: 'pro',
@@ -82,7 +82,7 @@ export const pricingPlans: PricingPlan[] = [
     ],
     highlighted: true,
     ctaText: 'Começar Teste Grátis',
-    ctaLink: 'https://wa.me/5513996205253?text=' + encodeURIComponent('Olá! Quero começar meu teste grátis de 14 dias no NutriFlow.')
+    ctaLink: '/auth'
   },
   {
     id: 'elite',
@@ -101,7 +101,7 @@ export const pricingPlans: PricingPlan[] = [
     ],
     highlighted: false,
     ctaText: 'Começar Teste Grátis',
-    ctaLink: 'https://wa.me/5513996205253?text=' + encodeURIComponent('Olá! Quero começar meu teste grátis de 14 dias no NutriFlow (plano Enterprise).')
+    ctaLink: '/auth'
   }
 ];
 

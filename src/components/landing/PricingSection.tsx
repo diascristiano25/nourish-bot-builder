@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Check, Sparkles, ArrowRight, Zap } from 'lucide-react';
 
-const WHATSAPP_CHECKOUT = 'https://wa.me/5513996205253?text=' + encodeURIComponent('Olá! Quero começar meu teste grátis de 14 dias no NutriFlow.');
+const WHATSAPP_CHECKOUT = '/auth';
 
 const plans = [
   {

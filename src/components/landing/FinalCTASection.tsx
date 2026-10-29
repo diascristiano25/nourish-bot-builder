@@ -33,7 +33,7 @@ export default function FinalCTASection() {
 
         {/* CTA Button */}
         <div className="scroll-fade-up scroll-stagger-3 mb-12">
-          <a href="https://wa.me/5513996205253?text=Ol%C3%A1!%20Quero%20come%C3%A7ar%20meu%20teste%20gr%C3%A1tis%20de%2014%20dias%20no%20NutriFlow." target="_blank" rel="noopener noreferrer">
+          <a href="/auth">
             <Button className="bg-nf-coral hover:bg-nf-coral/90 text-white font-bold px-12 py-5 text-xl rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover-lift group relative overflow-hidden">
               <span className="relative z-10 flex items-center gap-3">
                 Começar Teste Grátis
