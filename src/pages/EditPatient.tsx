@@ -12,8 +12,10 @@ import { useToast } from '@/hooks/use-toast';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { NeonText } from '@/components/ui/NeonText';
 import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
-import { ArrowLeft, Loader2, Plus, X, User, Activity, Heart, Scale, Save, AlertTriangle, Calculator } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, X, User, Activity, Heart, Scale, Save, AlertTriangle, Calculator, FlaskConical, TrendingUp } from 'lucide-react';
 import { differenceInYears, parseISO } from 'date-fns';
+import { calculateNutritionalNeeds, classifyBMI, calculateBodyFatFromSkinfolds } from '@/lib/nutritional-calculations';
+import { LabResultsPanel } from '@/components/LabResultsPanel';
 
 /**
  * CUN-BAE formula: estimates body fat % from BMI, age and sex.
@@ -72,6 +74,15 @@ export default function EditPatient() {
   const [hip, setHip] = useState('');
   const [bodyFat, setBodyFat] = useState('');
 
+  // Dobras cutâneas
+  const [tricepsSkinfold, setTricepsSkinfold] = useState('');
+  const [bicepsSkinfold, setBicepsSkinfold] = useState('');
+  const [subscapularSkinfold, setSubscapularSkinfold] = useState('');
+  const [suprailiacSkinfold, setSuprailiacSkinfold] = useState('');
+  const [abdominalSkinfold, setAbdominalSkinfold] = useState('');
+  const [thighSkinfold, setThighSkinfold] = useState('');
+  const [chestSkinfold, setChestSkinfold] = useState('');
+
   const [customAllergy, setCustomAllergy] = useState('');
   const [customRestriction, setCustomRestriction] = useState('');
 
@@ -124,6 +135,14 @@ export default function EditPatient() {
         setWaist(anthroData.waist_cm?.toString() || '');
         setHip(anthroData.hip_cm?.toString() || '');
         setBodyFat(anthroData.body_fat_percentage?.toString() || '');
+        // Dobras cutâneas
+        setTricepsSkinfold(anthroData.triceps_skinfold_mm?.toString() || '');
+        setBicepsSkinfold(anthroData.biceps_skinfold_mm?.toString() || '');
+        setSubscapularSkinfold(anthroData.subscapular_skinfold_mm?.toString() || '');
+        setSuprailiacSkinfold(anthroData.suprailiac_skinfold_mm?.toString() || '');
+        setAbdominalSkinfold(anthroData.abdominal_skinfold_mm?.toString() || '');
+        setThighSkinfold(anthroData.thigh_skinfold_mm?.toString() || '');
+        setChestSkinfold(anthroData.chest_skinfold_mm?.toString() || '');
       }
     } catch (error: any) {
       toast({
@@ -210,7 +229,7 @@ export default function EditPatient() {
 
       if (error) throw error;
 
-      const hasAnyMeasurement = weight || height || waist || hip || bodyFat;
+      const hasAnyMeasurement = weight || height || waist || hip || bodyFat || tricepsSkinfold || bicepsSkinfold || subscapularSkinfold || suprailiacSkinfold || abdominalSkinfold || thighSkinfold || chestSkinfold;
       if (hasAnyMeasurement) {
         await supabase
           .from('anthropometrics')
@@ -221,6 +240,13 @@ export default function EditPatient() {
             waist_cm: waist ? parseFloat(waist) : null,
             hip_cm: hip ? parseFloat(hip) : null,
             body_fat_percentage: bodyFat ? parseFloat(bodyFat) : null,
+            triceps_skinfold_mm: tricepsSkinfold ? parseFloat(tricepsSkinfold) : null,
+            biceps_skinfold_mm: bicepsSkinfold ? parseFloat(bicepsSkinfold) : null,
+            subscapular_skinfold_mm: subscapularSkinfold ? parseFloat(subscapularSkinfold) : null,
+            suprailiac_skinfold_mm: suprailiacSkinfold ? parseFloat(suprailiacSkinfold) : null,
+            abdominal_skinfold_mm: abdominalSkinfold ? parseFloat(abdominalSkinfold) : null,
+            thigh_skinfold_mm: thighSkinfold ? parseFloat(thighSkinfold) : null,
+            chest_skinfold_mm: chestSkinfold ? parseFloat(chestSkinfold) : null,
             notes: 'Atualizado via edição de perfil',
           });
 
@@ -552,6 +578,159 @@ export default function EditPatient() {
               </div>
             </div>
           </GlassCard>
+
+          {/* Nutritional Calculations (TMB/GET/VET) */}
+          {weight && height && birthDate && gender && activityLevel && (() => {
+            const age = differenceInYears(new Date(), parseISO(birthDate));
+            const w = parseFloat(weight);
+            const h = parseFloat(height);
+            if (!w || !h || age < 1) return null;
+
+            // Mapear valores do Select para o formato esperado pela função
+            const genderMap: Record<string, 'male' | 'female'> = { male: 'male', female: 'female', masculino: 'male', feminino: 'female' };
+            const activityMap: Record<string, 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active'> = {
+              sedentary: 'sedentary', light: 'lightly_active', moderate: 'moderately_active', active: 'very_active', very_active: 'extremely_active',
+              lightly_active: 'lightly_active', moderately_active: 'moderately_active', extremely_active: 'extremely_active'
+            };
+            const goalMap: Record<string, 'weight_loss' | 'muscle_gain' | 'maintenance' | 'health_improvement' | 'sports_performance'> = {
+              weight_loss: 'weight_loss', hypertrophy: 'muscle_gain', maintenance: 'maintenance', health: 'health_improvement', performance: 'sports_performance',
+              muscle_gain: 'muscle_gain', health_improvement: 'health_improvement', sports_performance: 'sports_performance'
+            };
+
+            const results = calculateNutritionalNeeds({
+              weightKg: w,
+              heightCm: h,
+              ageYears: age,
+              gender: genderMap[gender] || 'female',
+              activityLevel: activityMap[activityLevel] || 'sedentary',
+              goal: goalMap[goal] || 'maintenance'
+            });
+
+            const bmiClass = classifyBMI(results.imc);
+
+            return (
+              <GlassCard className="p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-cyber-lime/10 flex items-center justify-center">
+                    <Calculator className="w-5 h-5 text-cyber-lime" />
+                  </div>
+                  <div>
+                    <NeonText as="h2" color="primary" className="font-semibold">
+                      Cálculos Nutricionais
+                    </NeonText>
+                    <p className="text-xs text-muted-foreground">TMB, GET e VET calculados automaticamente</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="p-4 rounded-xl bg-muted/30 border border-border/50 text-center">
+                    <p className="text-xs text-muted-foreground mb-1">TMB (Basal)</p>
+                    <p className="text-2xl font-bold text-cyber-lime">{results.tmb}</p>
+                    <p className="text-[10px] text-muted-foreground">kcal/dia</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-muted/30 border border-border/50 text-center">
+                    <p className="text-xs text-muted-foreground mb-1">GET (Total)</p>
+                    <p className="text-2xl font-bold text-cyber-lime">{results.get}</p>
+                    <p className="text-[10px] text-muted-foreground">kcal/dia</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-muted/30 border border-border/50 text-center">
+                    <p className="text-xs text-muted-foreground mb-1">VET (Meta)</p>
+                    <p className="text-2xl font-bold" style={{ color: '#C4764A' }}>{results.vet}</p>
+                    <p className="text-[10px] text-muted-foreground">kcal/dia</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/50 text-sm">
+                  <div className="flex items-center gap-4">
+                    <span><strong>IMC:</strong> {results.imc}</span>
+                    <Badge variant="outline" style={{ borderColor: bmiClass.color, color: bmiClass.color }}>
+                      {bmiClass.category}
+                    </Badge>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Método: {results.method}</span>
+                </div>
+              </GlassCard>
+            );
+          })()}
+
+          {/* Skinfold Measurements (Dobras Cutâneas) */}
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-electric-violet/10 flex items-center justify-center">
+                <Activity className="w-5 h-5 text-electric-violet" />
+              </div>
+              <div>
+                <NeonText as="h2" color="primary" className="font-semibold">
+                  Dobras Cutâneas
+                </NeonText>
+                <p className="text-xs text-muted-foreground">Medidas em milímetros (mm) para cálculo de % gordura</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="triceps" className="text-xs">Tríceps</Label>
+                <Input id="triceps" type="number" step="0.1" value={tricepsSkinfold} onChange={(e) => setTricepsSkinfold(e.target.value)} placeholder="mm" className="h-9 text-sm bg-background/50 border-border/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="biceps" className="text-xs">Bíceps</Label>
+                <Input id="biceps" type="number" step="0.1" value={bicepsSkinfold} onChange={(e) => setBicepsSkinfold(e.target.value)} placeholder="mm" className="h-9 text-sm bg-background/50 border-border/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="subscapular" className="text-xs">Subescapular</Label>
+                <Input id="subscapular" type="number" step="0.1" value={subscapularSkinfold} onChange={(e) => setSubscapularSkinfold(e.target.value)} placeholder="mm" className="h-9 text-sm bg-background/50 border-border/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="suprailiac" className="text-xs">Supra-ilíaca</Label>
+                <Input id="suprailiac" type="number" step="0.1" value={suprailiacSkinfold} onChange={(e) => setSuprailiacSkinfold(e.target.value)} placeholder="mm" className="h-9 text-sm bg-background/50 border-border/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="abdominal" className="text-xs">Abdominal</Label>
+                <Input id="abdominal" type="number" step="0.1" value={abdominalSkinfold} onChange={(e) => setAbdominalSkinfold(e.target.value)} placeholder="mm" className="h-9 text-sm bg-background/50 border-border/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="thigh" className="text-xs">Coxa</Label>
+                <Input id="thigh" type="number" step="0.1" value={thighSkinfold} onChange={(e) => setThighSkinfold(e.target.value)} placeholder="mm" className="h-9 text-sm bg-background/50 border-border/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="chest" className="text-xs">Peitoral</Label>
+                <Input id="chest" type="number" step="0.1" value={chestSkinfold} onChange={(e) => setChestSkinfold(e.target.value)} placeholder="mm" className="h-9 text-sm bg-background/50 border-border/50" />
+              </div>
+              <div className="flex items-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (!birthDate || !gender) {
+                      toast({ title: "Dados insuficientes", description: "Preencha Data de Nascimento e Sexo.", variant: "destructive" });
+                      return;
+                    }
+                    const age = differenceInYears(new Date(), parseISO(birthDate));
+                    const isMale = gender === 'male' || gender === 'masculino';
+                    const bf = calculateBodyFatFromSkinfolds({
+                      triceps: parseFloat(tricepsSkinfold) || undefined,
+                      suprailiac: parseFloat(suprailiacSkinfold) || undefined,
+                      thigh: parseFloat(thighSkinfold) || undefined,
+                      chest: parseFloat(chestSkinfold) || undefined,
+                      abdominal: parseFloat(abdominalSkinfold) || undefined
+                    }, age, isMale);
+
+                    if (bf) {
+                      setBodyFat(bf.toString());
+                      toast({ title: "% Gordura calculado", description: `Protocolo Jackson-Pollock: ${bf}%` });
+                    } else {
+                      toast({ title: "Não foi possível calcular", description: "Preencha as dobras necessárias (Tríceps+Supra+Coxa ou Peito+Abdominal+Coxa).", variant: "destructive" });
+                    }
+                  }}
+                  className="w-full h-9 text-xs gap-1"
+                >
+                  <Calculator className="w-3 h-3" />
+                  Calcular %G
+                </Button>
+              </div>
+            </div>
+          </GlassCard>
+
+          {/* Lab Results */}
+          {id && <LabResultsPanel patientId={id} />}
 
           {/* Critical Tags */}
           <GlassCard className="p-6 border-destructive/30">
