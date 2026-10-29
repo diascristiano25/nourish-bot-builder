@@ -1,4 +1,4 @@
-import { Home, UtensilsCrossed, Plus, TrendingUp, User, MessageCircle } from 'lucide-react';
+import { Home, UtensilsCrossed, Plus, TrendingUp, User, MessageCircle, CalendarDays } from 'lucide-react';
 import { TabType } from '@/pages/PatientMobileApp';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -8,6 +8,7 @@ onTabChange: (tab: TabType) => void;
 }
 const navItems: { id: TabType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
 { id: 'inicio', label: 'Início', icon: Home },
+{ id: 'agenda', label: 'Agenda', icon: CalendarDays },
 { id: 'plano', label: 'Plano', icon: UtensilsCrossed },
 { id: 'registro', label: '', icon: Plus },
 { id: 'mensagens', label: 'Chat', icon: MessageCircle },

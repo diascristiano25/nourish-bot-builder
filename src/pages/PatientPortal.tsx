@@ -17,6 +17,7 @@ import { RichCard } from '@/components/shared/RichCard';
 import { Target, Calendar, Activity, Heart, Leaf, FlaskConical } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { LabResultsPanel } from '@/components/LabResultsPanel';
+import { PatientAgenda } from '@/components/patient-mobile/PatientAgenda';
 
 export default function PatientPortal() {
 const { user, loading: authLoading } = useAuth();
@@ -155,6 +156,28 @@ transition={{ delay: 0.5, duration: 0.5 }}
 <TodaysMeals mealPlan={mealPlan} />
 </RichCard>
 </motion.div>
+
+{/* Agenda do Paciente com Videochamada */}
+{patientData?.id && (
+<motion.div
+initial={{ opacity: 0, y: 20 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ delay: 0.45, duration: 0.5 }}
+>
+<RichCard delay={0.45} padding="lg">
+<div className="flex items-center gap-2 mb-4">
+<div className="w-9 h-9 rounded-xl bg-[#518C5B]/10 flex items-center justify-center">
+<Calendar className="w-5 h-5 text-[#518C5B]" />
+</div>
+<div>
+<h2 className="text-lg font-bold text-foreground">Minha Agenda</h2>
+<p className="text-xs text-muted-foreground">Suas consultas e teleconsultas — entre na videochamada direto daqui</p>
+</div>
+</div>
+<PatientAgenda patientId={patientData.id} />
+</RichCard>
+</motion.div>
+)}
 
 {/* Lab Results - Patient Upload */}
 {patientData?.id && (

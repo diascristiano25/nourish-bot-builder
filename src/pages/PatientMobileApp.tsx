@@ -10,6 +10,7 @@ import { PatientPlano } from '@/components/patient-mobile/PatientPlano';
 import { PatientRegistro } from '@/components/patient-mobile/PatientRegistro';
 import { PatientEvolucao } from '@/components/patient-mobile/PatientEvolucao';
 import { PatientPerfil } from '@/components/patient-mobile/PatientPerfil';
+import { PatientAgenda } from '@/components/patient-mobile/PatientAgenda';
 import { ChatWidget } from '@/components/patient/dashboard/ChatWidget';
 import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
 
@@ -50,7 +51,7 @@ export interface MealPlan {
   created_at: string;
 }
 
-export type TabType = 'inicio' | 'plano' | 'registro' | 'evolucao' | 'mensagens' | 'perfil';
+export type TabType = 'inicio' | 'agenda' | 'plano' | 'registro' | 'evolucao' | 'mensagens' | 'perfil';
 
 export default function PatientMobileApp() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -266,12 +267,15 @@ export default function PatientMobileApp() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {activeTab === 'inicio' && (
-        <PatientDashboard 
+        <PatientDashboard
           patient={patient!}
           mealPlan={mealPlan}
           waterLog={waterLog}
           onAddWater={handleAddWater}
         />
+      )}
+      {activeTab === 'agenda' && patient && (
+        <PatientAgenda patientId={patient.id} />
       )}
       {activeTab === 'plano' && (
         <PatientPlano 
