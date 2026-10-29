@@ -4,17 +4,18 @@ import { ptBR } from 'date-fns/locale';
 import logo from '@/assets/logo.png';
 
 // ═══════════════════════════════════════════════════════════════
-// TEXT SANITIZATION FUNCTION - Removes LaTeX, non-UTF8, fixes encoding
+// NutriFlow Editorial Clinical PDF — aligned with the system rebrand
+// Palette: paper #f7f6f2 · ink #1c1f24 · green #518C5B · deep #3d704A · coral #C4764A
+// Type: Playfair Display (serif display) + system sans (body) · tabular numerals
+// Layout: asymmetric editorial, hairline borders, no gradients, no neon
 // ═══════════════════════════════════════════════════════════════
+
 function sanitizeText(text: string | null | undefined): string {
   if (!text) return '';
-  
   return text
-    // Remove LaTeX-style formatting
     .replace(/\\[a-zA-Z]+\{[^}]*\}/g, '')
     .replace(/\$[^$]*\$/g, '')
     .replace(/\\[a-zA-Z]+/g, '')
-    // Fix common encoding issues
     .replace(/â€"/g, '–')
     .replace(/â€™/g, "'")
     .replace(/â€œ/g, '"')
@@ -29,28 +30,28 @@ function sanitizeText(text: string | null | undefined): string {
     .replace(/Ã‚/g, 'Â')
     .replace(/Ãª/g, 'ê')
     .replace(/Ã´/g, 'ô')
-    // Remove any remaining non-printable characters except common ones
-    .replace(/[^\x20-\x7E\u00C0-\u00FF\u0100-\u017F]/g, '')
-    // Normalize whitespace
+    .replace(/[^\x20-\x7EÀ-ÿĀ-ſ]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-// Fixed column widths - HARDCODED (60% food, 25% portion, 15% calories)
-const COLUMN_WIDTHS = {
-  food: '60%',      // Alimento: 60% - MAXIMUM space for text
-  portion: '25%',   // Porção: 25%
-  calories: '15%',  // Calorias: 15% - numbers take less space
+// NutriFlow brand tokens
+const C = {
+  paper: '#f7f6f2',
+  raised: '#ffffff',
+  ink: '#1c1f24',
+  inkSoft: '#4a4f57',
+  inkMuted: '#8a8f98',
+  hairline: '#e3e1da',
+  hairlineStrong: '#cfccc2',
+  green: '#518C5B',
+  greenDeep: '#3d704A',
+  coral: '#C4764A',
 };
 
-// PDF Font sizes - REDUCED to prevent line breaking
-const PDF_FONT_SIZES = {
-  foodItem: '9px',     // Was 14px - now 9px
-  portion: '9px',      // Was 13px - now 9px
-  calories: '9px',     // Was 13px - now 9px
-  mealTitle: '14px',   // Reduced from 18px
-  mealTime: '10px',    // Reduced from 12px
-};
+const SERIF = "'Playfair Display', 'Georgia', 'Times New Roman', serif";
+const SANS = "'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif";
+const TABULAR = { fontVariantNumeric: 'tabular-nums', fontFeatureSettings: '"tnum" 1' } as const;
 
 interface MealItem {
   food: string;
@@ -71,11 +72,7 @@ interface Meal {
 interface MealPlanData {
   meals: Meal[];
   totalCalories?: number;
-  macros?: {
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
+  macros?: { protein: number; carbs: number; fat: number };
   notes?: string;
 }
 
@@ -101,132 +98,66 @@ interface MealPlanDocumentProps {
   theme?: 'dark' | 'light';
 }
 
-// Theme color palettes
-const themes = {
-  dark: {
-    background: '#1a1a1f',
-    cardBg: '#2a2a32',
-    cardBgLight: '#3a3a44',
-    text: '#ffffff',
-    textMuted: 'rgba(255,255,255,0.5)',
-    textSubtle: 'rgba(255,255,255,0.3)',
-    accent: '#DFFF00', // Neon Green
-    accentDark: '#A3E635',
-    border: 'rgba(255,255,255,0.08)',
-  },
-  light: {
-    background: '#F8F9FA',
-    cardBg: '#FFFFFF',
-    cardBgLight: '#F0F0F5',
-    text: '#111827',
-    textMuted: 'rgba(17,24,39,0.6)',
-    textSubtle: 'rgba(17,24,39,0.4)',
-    accent: '#65A30D', // Darker green for readability
-    accentDark: '#4D7C0F',
-    border: 'rgba(0,0,0,0.08)',
-  },
-};
-
 const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
-  ({ mealPlan, patientName, nutritionist, theme = 'dark' }, ref) => {
-    const colors = themes[theme];
-    const secondaryColor = nutritionist.secondary_color || '#8b5cf6';
+  ({ mealPlan, patientName, nutritionist }, ref) => {
     const planData = mealPlan.plan_data;
+    const dateLabel = format(new Date(mealPlan.created_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR });
+    const totalKcal = mealPlan.total_calories || planData.totalCalories;
 
     return (
-      <div 
+      <div
         ref={ref}
-        className="min-w-[800px] max-w-[800px]"
-        style={{ 
-          fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+        style={{
+          width: '794px',
+          background: C.paper,
+          color: C.ink,
+          fontFamily: SANS,
           WebkitFontSmoothing: 'antialiased',
         }}
       >
-        {/* ═══════════════════════════════════════════════════════════════
-            CAPA - FULL PAGE MAGAZINE STYLE
-        ═══════════════════════════════════════════════════════════════ */}
-        <div 
-          style={{ 
-            background: colors.background,
-            height: '1100px',
+        {/* ═══════════════════════════════════════════════════════════
+            COVER — editorial masthead
+        ═══════════════════════════════════════════════════════════ */}
+        <div
+          style={{
+            height: '1123px',
+            padding: '72px 64px',
+            display: 'flex',
+            flexDirection: 'column',
             position: 'relative',
-            overflow: 'hidden',
             pageBreakAfter: 'always',
+            boxSizing: 'border-box',
           }}
         >
-          {/* Background Pattern */}
-          <div 
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: theme === 'dark' 
-                ? `radial-gradient(circle at 20% 30%, ${colors.accent}08 0%, transparent 40%),
-                   radial-gradient(circle at 80% 70%, ${secondaryColor}08 0%, transparent 40%)`
-                : `radial-gradient(circle at 20% 30%, ${colors.accent}15 0%, transparent 40%),
-                   radial-gradient(circle at 80% 70%, ${secondaryColor}10 0%, transparent 40%)`,
-              opacity: 0.5,
-            }}
-          />
-          
-          {/* Accent lines */}
-          <div 
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '4px',
-              background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)`,
-            }}
-          />
-          <div 
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '4px',
-              background: `linear-gradient(90deg, transparent, ${colors.accent}60, transparent)`,
-            }}
-          />
-
-          {/* Content */}
-          <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '60px' }}>
-            
-            {/* Logo */}
-            <div style={{ marginBottom: '60px' }}>
-              <img
-                src={nutritionist.logo_url || logo}
-                alt={nutritionist.logo_url ? "Logo do nutricionista" : "NutriFlow"}
-                style={{
-                  maxWidth: '40mm',
-                  maxHeight: '20mm',
-                  objectFit: 'contain',
-                  filter: theme === 'dark' && nutritionist.logo_url ? 'drop-shadow(0 0 30px rgba(223, 255, 0, 0.3))' : 'none'
-                }}
-              />
+          {/* Top rule + brand lockup */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.hairlineStrong}`, paddingBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <img src={nutritionist.logo_url || logo} alt="NutriFlow" style={{ height: '34px', width: 'auto', objectFit: 'contain' }} />
+              <span style={{ fontFamily: SERIF, fontSize: '22px', fontWeight: 600, color: C.ink, letterSpacing: '-0.2px' }}>
+                Nutri<span style={{ color: C.green }}>Flow</span>
+              </span>
             </div>
+            <span style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: C.inkMuted, ...TABULAR }}>
+              Plano Alimentar
+            </span>
+          </div>
 
-            {/* Decorative line */}
-            <div style={{ 
-              width: '200px', 
-              height: '2px', 
-              background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)`,
-              marginBottom: '60px'
-            }} />
+          {/* Eyebrow */}
+          <div style={{ marginTop: 'auto' }}>
+            <p style={{ fontSize: '12px', letterSpacing: '4px', textTransform: 'uppercase', color: C.coral, fontWeight: 600, marginBottom: '28px' }}>
+              Prescrição nutricional personalizada
+            </p>
 
-            {/* Patient Name - GIANT */}
-            <h1 
-              style={{ 
-                fontSize: '72px',
-                fontWeight: 800,
-                color: colors.accent,
-                textAlign: 'center',
+            {/* Patient name — oversized serif */}
+            <h1
+              style={{
+                fontFamily: SERIF,
+                fontSize: '84px',
+                lineHeight: 0.98,
+                fontWeight: 700,
+                color: C.ink,
                 letterSpacing: '-2px',
-                textShadow: theme === 'dark' ? `0 0 60px ${colors.accent}60, 0 0 120px ${colors.accent}30` : 'none',
-                lineHeight: 1.1,
-                marginBottom: '30px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                margin: 0,
                 wordBreak: 'keep-all',
                 overflowWrap: 'normal',
                 hyphens: 'none',
@@ -235,314 +166,178 @@ const MealPlanDocument = forwardRef<HTMLDivElement, MealPlanDocumentProps>(
               {sanitizeText(patientName)}
             </h1>
 
-            {/* Plan Title */}
-            <p style={{ 
-              fontSize: '24px',
-              color: colors.textMuted,
-              textAlign: 'center',
-              fontWeight: 300,
-              letterSpacing: '8px',
-              textTransform: 'uppercase',
-              marginBottom: '80px',
-            }}>
-              Plano Alimentar
-            </p>
+            {/* Hairline divider */}
+            <div style={{ width: '120px', height: '3px', background: C.green, margin: '40px 0' }} />
 
-            {/* Nutritionist Info */}
-            <div style={{ 
-              textAlign: 'center',
-              padding: '30px 50px',
-              background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
-              borderRadius: '20px',
-              border: `1px solid ${colors.border}`,
-            }}>
-              <p style={{ color: colors.accent, fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
+            {/* Plan title + meta */}
+            <p style={{ fontFamily: SERIF, fontSize: '30px', fontStyle: 'italic', color: C.greenDeep, margin: '0 0 12px 0', fontWeight: 500 }}>
+              {sanitizeText(mealPlan.title) || 'Plano alimentar'}
+            </p>
+            <p style={{ fontSize: '14px', color: C.inkSoft, margin: 0, ...TABULAR }}>
+              Emitido em {dateLabel}
+            </p>
+          </div>
+
+          {/* Bottom band — nutritionist + headline kcal */}
+          <div style={{ marginTop: 'auto', paddingTop: '40px', borderTop: `1px solid ${C.hairlineStrong}`, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <div>
+              <p style={{ fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', color: C.inkMuted, marginBottom: '8px' }}>
+                Responsável técnico
+              </p>
+              <p style={{ fontFamily: SERIF, fontSize: '22px', color: C.ink, margin: '0 0 4px 0', fontWeight: 600 }}>
                 {nutritionist.full_name}
               </p>
               {nutritionist.crn && (
-                <p style={{ color: colors.textMuted, fontSize: '14px' }}>{nutritionist.crn}</p>
+                <p style={{ fontSize: '13px', color: C.inkSoft, margin: 0, ...TABULAR }}>{nutritionist.crn}</p>
               )}
               {nutritionist.phone && (
-                <p style={{ color: colors.textSubtle, fontSize: '13px', marginTop: '4px' }}>{nutritionist.phone}</p>
+                <p style={{ fontSize: '13px', color: C.inkMuted, margin: '2px 0 0 0', ...TABULAR }}>{nutritionist.phone}</p>
               )}
             </div>
 
-            {/* Date */}
-            <p style={{ 
-              position: 'absolute',
-              bottom: '60px',
-              color: colors.textSubtle,
-              fontSize: '14px',
-              letterSpacing: '2px',
-            }}>
-              {format(new Date(mealPlan.created_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-            </p>
+            {totalKcal != null && (
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', color: C.inkMuted, marginBottom: '6px' }}>
+                  Meta diária
+                </p>
+                <p style={{ fontFamily: SERIF, fontSize: '64px', lineHeight: 1, color: C.green, margin: 0, fontWeight: 700, ...TABULAR }}>
+                  {totalKcal}
+                </p>
+                <p style={{ fontSize: '13px', color: C.inkSoft, margin: '4px 0 0 0', letterSpacing: '1px' }}>kcal / dia</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* ═══════════════════════════════════════════════════════════════
-            INTERIOR - MAGAZINE LAYOUT
-        ═══════════════════════════════════════════════════════════════ */}
-        <div style={{ background: colors.background, padding: '50px', color: colors.text }}>
-          
-          {/* Section Title */}
-          <div style={{ marginBottom: '40px', textAlign: 'center' }}>
-            <h2 style={{ 
-              color: colors.accent, 
-              fontSize: '14px', 
-              letterSpacing: '6px', 
-              textTransform: 'uppercase',
-              marginBottom: '16px',
-            }}>
-              ◆ {mealPlan.title} ◆
+        {/* ═══════════════════════════════════════════════════════════
+            INTERIOR — macro summary + meals
+        ═══════════════════════════════════════════════ */}
+        <div style={{ padding: '56px 64px', background: C.paper }}>
+          {/* Section header */}
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', borderBottom: `2px solid ${C.ink}`, paddingBottom: '14px', marginBottom: '36px' }}>
+            <h2 style={{ fontFamily: SERIF, fontSize: '32px', fontWeight: 700, color: C.ink, margin: 0, letterSpacing: '-0.5px' }}>
+              Composição do plano
             </h2>
-            {mealPlan.description && (
-              <p style={{ color: colors.textMuted, fontSize: '16px' }}>{mealPlan.description}</p>
-            )}
+            <span style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: C.inkMuted }}>
+              Distribuição diária
+            </span>
           </div>
 
-          {/* Macro Summary */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(4, 1fr)', 
-            gap: '16px',
-            marginBottom: '50px',
-          }}>
-            <div style={{
-              background: colors.cardBg,
-              borderRadius: '16px',
-              padding: '24px',
-              textAlign: 'center',
-              boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-            }}>
-              <p style={{ fontSize: '36px', fontWeight: 700, color: colors.accent, fontFamily: 'monospace' }}>
-                {mealPlan.total_calories || planData.totalCalories || '—'}
+          {/* Macro strip — asymmetric: big kcal left, three macros right */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 2fr', gap: '32px', marginBottom: '48px', alignItems: 'stretch' }}>
+            <div style={{ background: C.green, color: '#fff', padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', opacity: 0.85, marginBottom: '12px' }}>
+                Energia total
               </p>
-              <p style={{ color: colors.textMuted, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Calorias</p>
+              <p style={{ fontFamily: SERIF, fontSize: '56px', lineHeight: 1, margin: 0, fontWeight: 700, ...TABULAR }}>
+                {totalKcal ?? '—'}
+              </p>
+              <p style={{ fontSize: '13px', opacity: 0.85, margin: '6px 0 0 0', letterSpacing: '1px' }}>kcal / dia</p>
             </div>
-            
-            {planData.macros && (
-              <>
-                <div style={{
-                  background: colors.cardBg,
-                  borderRadius: '16px',
-                  padding: '24px',
-                  textAlign: 'center',
-                  boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-                }}>
-                  <p style={{ fontSize: '36px', fontWeight: 700, color: '#60a5fa', fontFamily: 'monospace' }}>
-                    {planData.macros.protein}g
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: C.hairline, border: `1px solid ${C.hairline}` }}>
+              {[
+                { label: 'Proteínas', value: planData.macros?.protein, unit: 'g', accent: C.greenDeep },
+                { label: 'Carboidratos', value: planData.macros?.carbs, unit: 'g', accent: C.coral },
+                { label: 'Gorduras', value: planData.macros?.fat, unit: 'g', accent: C.ink },
+              ].map((m) => (
+                <div key={m.label} style={{ background: C.raised, padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <p style={{ fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', color: C.inkMuted, marginBottom: '10px' }}>
+                    {m.label}
                   </p>
-                  <p style={{ color: colors.textMuted, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Proteínas</p>
-                </div>
-                <div style={{
-                  background: colors.cardBg,
-                  borderRadius: '16px',
-                  padding: '24px',
-                  textAlign: 'center',
-                  boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-                }}>
-                  <p style={{ fontSize: '36px', fontWeight: 700, color: '#fbbf24', fontFamily: 'monospace' }}>
-                    {planData.macros.carbs}g
+                  <p style={{ fontFamily: SERIF, fontSize: '38px', lineHeight: 1, color: m.accent, margin: 0, fontWeight: 700, ...TABULAR }}>
+                    {m.value != null ? `${m.value}${m.unit}` : '—'}
                   </p>
-                  <p style={{ color: colors.textMuted, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Carboidratos</p>
                 </div>
-                <div style={{
-                  background: colors.cardBg,
-                  borderRadius: '16px',
-                  padding: '24px',
-                  textAlign: 'center',
-                  boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-                }}>
-                  <p style={{ fontSize: '36px', fontWeight: 700, color: '#f472b6', fontFamily: 'monospace' }}>
-                    {planData.macros.fat}g
-                  </p>
-                  <p style={{ color: colors.textMuted, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Gorduras</p>
-                </div>
-              </>
-            )}
+              ))}
+            </div>
           </div>
 
-          {/* ═══════════════════════════════════════════════════════════
-              MEALS - CARD LAYOUT (Wide food column, no word breaking)
-          ═══════════════════════════════════════════════════════════ */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          {/* Meals — editorial list, full-width rows with hairline separators */}
+          <div style={{ marginBottom: '24px' }}>
             {planData.meals?.map((meal, index) => (
-              <div 
-                key={index}
-                style={{
-                  background: colors.cardBg,
-                  borderRadius: '20px',
-                  overflow: 'hidden',
-                  boxShadow: theme === 'light' ? '0 4px 12px rgba(0,0,0,0.08)' : 'none',
-                }}
-              >
-                {/* Meal Header */}
-                <div style={{
-                  padding: '20px 24px',
-                  background: theme === 'dark' 
-                    ? `linear-gradient(135deg, ${colors.cardBgLight}, ${colors.cardBg})`
-                    : colors.cardBgLight,
-                  borderBottom: `1px solid ${colors.border}`,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '10px',
-                      background: colors.accent,
-                      color: theme === 'dark' ? colors.background : '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 700,
-                      fontSize: '14px',
-                    }}>
-                      {index + 1}
+              <div key={index} style={{ marginBottom: '40px', pageBreakInside: 'avoid' }}>
+                {/* Meal header row */}
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', borderBottom: `1px solid ${C.ink}`, paddingBottom: '10px', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '18px' }}>
+                    <span style={{ fontFamily: SERIF, fontSize: '15px', color: C.coral, fontWeight: 700, ...TABULAR }}>
+                      {String(index + 1).padStart(2, '0')}
                     </span>
-                    <div>
-                      <h3 style={{ 
-                        color: colors.accent, 
-                        fontSize: PDF_FONT_SIZES.mealTitle, 
-                        fontWeight: 600,
-                        margin: 0,
-                      }}>
-                        {meal.name}
-                      </h3>
-                      {meal.time && (
-                        <p style={{ color: colors.textMuted, fontSize: PDF_FONT_SIZES.mealTime, margin: 0 }}>{meal.time}</p>
-                      )}
-                    </div>
+                    <h3 style={{ fontFamily: SERIF, fontSize: '24px', fontWeight: 700, color: C.ink, margin: 0, letterSpacing: '-0.3px' }}>
+                      {sanitizeText(meal.name)}
+                    </h3>
+                    {meal.time && (
+                      <span style={{ fontSize: '13px', color: C.inkMuted, ...TABULAR }}>{meal.time}</span>
+                    )}
                   </div>
-                  {meal.totalCalories && (
-                    <span style={{
-                      color: colors.accent,
-                      fontSize: '16px',
-                      fontWeight: 700,
-                      fontFamily: 'monospace',
-                    }}>
-                      {meal.totalCalories} kcal
+                  {meal.totalCalories != null && (
+                    <span style={{ fontFamily: SERIF, fontSize: '20px', color: C.greenDeep, fontWeight: 700, ...TABULAR }}>
+                      {meal.totalCalories} <span style={{ fontSize: '12px', color: C.inkMuted, fontFamily: SANS, letterSpacing: '1px' }}>kcal</span>
                     </span>
                   )}
                 </div>
 
-                {/* Food Items - TABLE LAYOUT with HARDCODED widths */}
-                <div style={{ padding: '16px 24px' }}>
-                  <table style={{ 
-                    width: '100%', 
-                    borderCollapse: 'collapse',
-                    tableLayout: 'fixed', // CRITICAL: Forces fixed column widths
-                  }}>
-                    <colgroup>
-                      <col style={{ width: COLUMN_WIDTHS.food }} />
-                      <col style={{ width: COLUMN_WIDTHS.portion }} />
-                      <col style={{ width: COLUMN_WIDTHS.calories }} />
-                    </colgroup>
-                    <tbody>
-                      {meal.items?.map((item, itemIndex) => (
-                        <tr key={itemIndex}>
-                          {/* ALIMENTO - 60% - SMALL FONT 9px, NO WORD BREAK */}
-                          <td style={{ 
-                            padding: '5px 5px 5px 0',
-                            verticalAlign: 'top',
-                            color: colors.text, 
-                            fontSize: PDF_FONT_SIZES.foodItem,
-                            fontWeight: 500,
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            wordBreak: 'keep-all',
-                            overflowWrap: 'normal',
-                            whiteSpace: 'normal',
-                            hyphens: 'none',
-                            lineHeight: 1.3,
-                          }}>
-                            {sanitizeText(item.food)}
-                          </td>
-                          {/* PORÇÃO - 25% */}
-                          <td style={{ 
-                            padding: '5px 5px',
-                            verticalAlign: 'top',
-                            color: colors.textMuted, 
-                            fontSize: PDF_FONT_SIZES.portion,
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            wordBreak: 'keep-all',
-                            overflowWrap: 'normal',
-                            whiteSpace: 'normal',
-                            hyphens: 'none',
-                            lineHeight: 1.3,
-                          }}>
-                            {sanitizeText(item.portion)}
-                          </td>
-                          {/* CALORIAS - 15% */}
-                          <td style={{ 
-                            padding: '5px 0 5px 5px',
-                            verticalAlign: 'top',
-                            color: colors.accent, 
-                            fontSize: PDF_FONT_SIZES.calories,
-                            fontFamily: 'monospace',
-                            textAlign: 'right',
-                            whiteSpace: 'nowrap',
-                            fontWeight: 600,
-                            lineHeight: 1.3,
-                          }}>
-                            {item.calories ? `${item.calories}` : '—'}
-                          </td>
-                        </tr>
+                {/* Items table */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col style={{ width: '52%' }} />
+                    <col style={{ width: '26%' }} />
+                    <col style={{ width: '11%' }} />
+                    <col style={{ width: '11%' }} />
+                  </colgroup>
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${C.hairlineStrong}` }}>
+                      {['Alimento', 'Porção', 'kcal', 'P · C · G'].map((h) => (
+                        <th key={h} style={{ textAlign: h === 'Alimento' || h === 'Porção' ? 'left' : 'right', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: C.inkMuted, fontWeight: 600, padding: '10px 8px 10px 0' }}>
+                          {h}
+                        </th>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {meal.items?.map((item, i) => (
+                      <tr key={i} style={{ borderBottom: `1px solid ${C.hairline}` }}>
+                        <td style={{ padding: '12px 8px 12px 0', fontSize: '13px', color: C.ink, fontWeight: 500, lineHeight: 1.4, wordBreak: 'keep-all', overflowWrap: 'normal', hyphens: 'none' }}>
+                          {sanitizeText(item.food)}
+                        </td>
+                        <td style={{ padding: '12px 8px', fontSize: '12px', color: C.inkSoft, lineHeight: 1.4, wordBreak: 'keep-all', overflowWrap: 'normal', hyphens: 'none' }}>
+                          {sanitizeText(item.portion)}
+                        </td>
+                        <td style={{ padding: '12px 8px', fontSize: '13px', color: C.ink, textAlign: 'right', fontWeight: 600, ...TABULAR }}>
+                          {item.calories ?? '—'}
+                        </td>
+                        <td style={{ padding: '12px 0 12px 8px', fontSize: '11px', color: C.inkMuted, textAlign: 'right', ...TABULAR }}>
+                          {item.protein != null || item.carbs != null || item.fat != null
+                            ? `${item.protein ?? 0}·${item.carbs ?? 0}·${item.fat ?? 0}`
+                            : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ))}
           </div>
 
-          {/* Notes */}
+          {/* Notes — quiet panel with coral left rule */}
           {planData.notes && (
-            <div style={{
-              marginTop: '40px',
-              padding: '30px',
-              background: colors.cardBg,
-              borderRadius: '20px',
-              borderLeft: `4px solid ${secondaryColor}`,
-              boxShadow: theme === 'light' ? '0 4px 12px rgba(0,0,0,0.08)' : 'none',
-            }}>
-              <h3 style={{ 
-                color: secondaryColor, 
-                fontSize: '14px', 
-                fontWeight: 600,
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-                marginBottom: '16px',
-              }}>
-                ◆ Observações
-              </h3>
-              <p style={{ 
-                color: colors.textMuted, 
-                fontSize: '15px', 
-                lineHeight: 1.7,
-                whiteSpace: 'pre-line',
-                margin: 0,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                wordBreak: 'keep-all',
-                overflowWrap: 'normal',
-                hyphens: 'none',
-              }}>
+            <div style={{ marginTop: '48px', padding: '28px 32px', background: C.raised, borderLeft: `3px solid ${C.coral}`, borderTop: `1px solid ${C.hairline}`, borderRight: `1px solid ${C.hairline}`, borderBottom: `1px solid ${C.hairline}` }}>
+              <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: C.coral, fontWeight: 600, marginBottom: '14px' }}>
+                Observações clínicas
+              </p>
+              <p style={{ fontSize: '14px', lineHeight: 1.7, color: C.inkSoft, margin: 0, whiteSpace: 'pre-line', wordBreak: 'keep-all', overflowWrap: 'normal', hyphens: 'none' }}>
                 {sanitizeText(planData.notes)}
               </p>
             </div>
           )}
 
           {/* Footer */}
-          <div style={{ 
-            marginTop: '60px', 
-            paddingTop: '30px', 
-            borderTop: `1px solid ${colors.border}`,
-            textAlign: 'center',
-          }}>
-            <p style={{ color: colors.textSubtle, fontSize: '12px', margin: 0 }}>
-              Documento gerado por <span style={{ color: colors.accent }}>NutriFlow</span> • Plano exclusivo e personalizado
+          <div style={{ marginTop: '56px', paddingTop: '24px', borderTop: `1px solid ${C.hairlineStrong}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ fontSize: '11px', color: C.inkMuted, margin: 0, letterSpacing: '0.5px' }}>
+              Documento gerado por <span style={{ color: C.green, fontWeight: 600 }}>NutriFlow</span> · Plano exclusivo e personalizado
+            </p>
+            <p style={{ fontSize: '11px', color: C.inkMuted, margin: 0, letterSpacing: '2px', textTransform: 'uppercase', ...TABULAR }}>
+              {dateLabel}
             </p>
           </div>
         </div>
