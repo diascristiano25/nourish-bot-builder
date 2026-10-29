@@ -187,35 +187,69 @@ export default function MealPlanView() {
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
-      const canvas = await html2canvas(documentRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       });
 
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      let heightLeft = imgHeight;
-      let position = 0;
+      const PAGE_W_MM = 210;
+      const PAGE_H_MM = 297;
+      const SCALE = 2;
+      const canvasOpts = { scale: SCALE, useCORS: true, logging: false, backgroundColor: '#f7f6f2' };
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Render one DOM element to a PNG data URL + its height in mm at full page width.
+      const renderBlock = async (el: HTMLElement): Promise<{ dataUrl: string; heightMm: number } | null> => {
+        if (!el) return null;
+        const canvas = await html2canvas(el, canvasOpts);
+        const heightMm = (canvas.height * PAGE_W_MM) / canvas.width;
+        return { dataUrl: canvas.toDataURL('image/png'), heightMm };
+      };
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
+      let cursorMm = 0; // vertical position on the current page
+
+      const ensureSpace = (neededMm: number) => {
+        if (cursorMm + neededMm > PAGE_H_MM + 0.5) {
+          pdf.addPage();
+          cursorMm = 0;
+        }
+      };
+
+      const placeBlock = (block: { dataUrl: string; heightMm: number }) => {
+        pdf.addImage(block.dataUrl, 'PNG', 0, cursorMm, PAGE_W_MM, block.heightMm);
+        cursorMm += block.heightMm;
+      };
+
+      const root = documentRef.current;
+      const coverEl = root.children[0] as HTMLElement;
+      const interiorEl = root.children[1] as HTMLElement;
+
+      // Cover always gets its own full page.
+      const cover = await renderBlock(coverEl);
+      if (cover) {
+        pdf.addImage(cover.dataUrl, 'PNG', 0, 0, PAGE_W_MM, cover.heightMm);
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        cursorMm = 0;
+      }
+
+      // Interior: walk children. The meals wrapper holds many meal blocks — paginate each
+      // meal separately so a page break never lands inside a meal's text/table.
+      const interiorChildren = Array.from(interiorEl.children) as HTMLElement[];
+      for (const child of interiorChildren) {
+        const isMealsWrapper = child.querySelector('table') !== null && child.children.length > 1;
+        const blocksToPlace = isMealsWrapper ? Array.from(child.children) : [child];
+        for (const el of blocksToPlace) {
+          const block = await renderBlock(el as HTMLElement);
+          if (!block) continue;
+          if (block.heightMm > PAGE_H_MM) {
+            // Oversized block fallback (rare, e.g. very long notes): place at current cursor.
+            ensureSpace(PAGE_H_MM);
+            placeBlock(block);
+            continue;
+          }
+          ensureSpace(block.heightMm);
+          placeBlock(block);
+        }
       }
 
       const fileName = `cardapio_${patient.full_name.replace(/\s+/g, '_')}_${format(new Date(), 'dd-MM-yyyy')}.pdf`;
