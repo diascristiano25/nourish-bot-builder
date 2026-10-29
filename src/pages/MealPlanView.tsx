@@ -187,69 +187,94 @@ export default function MealPlanView() {
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
+      // Single-canvas render of the whole editorial document, then sliced into A4 pages.
+      // To avoid slicing mid-text, the document lays out as one continuous flow (no fixed
+      // page heights) and we only cut at row boundaries by post-processing: we render once,
+      // then walk down the canvas in page-sized steps but snap each cut upward to the nearest
+      // "safe" horizontal band (a row of near-uniform background = whitespace/gap between
+      // meals) so no line of text is ever bisected.
+      const canvas = await html2canvas(documentRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#f7f6f2',
+      });
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       });
 
-      const PAGE_W_MM = 210;
-      const PAGE_H_MM = 297;
-      const SCALE = 2;
-      const canvasOpts = { scale: SCALE, useCORS: true, logging: false, backgroundColor: '#f7f6f2' };
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pxPerPage = (pageHeight / imgHeight) * canvas.height;
 
-      // Render one DOM element to a PNG data URL + its height in mm at full page width.
-      const renderBlock = async (el: HTMLElement): Promise<{ dataUrl: string; heightMm: number } | null> => {
-        if (!el) return null;
-        const canvas = await html2canvas(el, canvasOpts);
-        const heightMm = (canvas.height * PAGE_W_MM) / canvas.width;
-        return { dataUrl: canvas.toDataURL('image/png'), heightMm };
-      };
-
-      let cursorMm = 0; // vertical position on the current page
-
-      const ensureSpace = (neededMm: number) => {
-        if (cursorMm + neededMm > PAGE_H_MM + 0.5) {
-          pdf.addPage();
-          cursorMm = 0;
+      // Build a "safeness" score per canvas row: a row is safe to cut across if it is
+      // horizontally uniform (low variance) — i.e. background gap, not text. Sample every
+      // 4th pixel for speed.
+      const ctx = canvas.getContext('2d');
+      const fullImageData = ctx ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null;
+      const W = canvas.width;
+      const rowVariance = (y: number): number => {
+        if (!fullImageData) return 1;
+        const data = fullImageData.data;
+        let sum = 0, sumSq = 0, n = 0;
+        const rowOffset = y * W * 4;
+        for (let x = 0; x < W; x += 4) {
+          const i = rowOffset + x * 4;
+          // luminance
+          const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          sum += lum; sumSq += lum * lum; n++;
         }
+        if (n === 0) return 1;
+        const mean = sum / n;
+        return sumSq / n - mean * mean;
       };
 
-      const placeBlock = (block: { dataUrl: string; heightMm: number }) => {
-        pdf.addImage(block.dataUrl, 'PNG', 0, cursorMm, PAGE_W_MM, block.heightMm);
-        cursorMm += block.heightMm;
-      };
-
-      const root = documentRef.current;
-      const coverEl = root.children[0] as HTMLElement;
-      const interiorEl = root.children[1] as HTMLElement;
-
-      // Cover always gets its own full page.
-      const cover = await renderBlock(coverEl);
-      if (cover) {
-        pdf.addImage(cover.dataUrl, 'PNG', 0, 0, PAGE_W_MM, cover.heightMm);
-        pdf.addPage();
-        cursorMm = 0;
-      }
-
-      // Interior: walk children. The meals wrapper holds many meal blocks — paginate each
-      // meal separately so a page break never lands inside a meal's text/table.
-      const interiorChildren = Array.from(interiorEl.children) as HTMLElement[];
-      for (const child of interiorChildren) {
-        const isMealsWrapper = child.querySelector('table') !== null && child.children.length > 1;
-        const blocksToPlace = isMealsWrapper ? Array.from(child.children) : [child];
-        for (const el of blocksToPlace) {
-          const block = await renderBlock(el as HTMLElement);
-          if (!block) continue;
-          if (block.heightMm > PAGE_H_MM) {
-            // Oversized block fallback (rare, e.g. very long notes): place at current cursor.
-            ensureSpace(PAGE_H_MM);
-            placeBlock(block);
-            continue;
-          }
-          ensureSpace(block.heightMm);
-          placeBlock(block);
+      // For a target cut position, search a window above it for the most uniform row.
+      const findSafeCut = (targetY: number): number => {
+        const searchUp = Math.min(Math.floor(pxPerPage * 0.18), 220); // look up to ~18% of a page
+        let bestY = targetY;
+        let bestVar = Infinity;
+        for (let y = targetY; y >= targetY - searchUp && y >= 0; y--) {
+          const v = rowVariance(y);
+          if (v < bestVar) { bestVar = v; bestY = y; }
+          if (bestVar < 25) break; // effectively flat background — good enough
         }
+        return bestY;
+      };
+
+      let yOffsetPx = 0;
+      let pageIndex = 0;
+      const totalPx = canvas.height;
+
+      while (yOffsetPx < totalPx) {
+        const rawEndPx = Math.min(yOffsetPx + pxPerPage, totalPx);
+        // Snap the cut upward to a safe row unless this is the final slice.
+        const endPx = rawEndPx >= totalPx ? totalPx : findSafeCut(Math.floor(rawEndPx));
+        const sliceHeightPx = endPx - yOffsetPx;
+        if (sliceHeightPx <= 0) break;
+
+        // Copy the slice into a fresh canvas so addImage gets a clean image.
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = W;
+        sliceCanvas.height = sliceHeightPx;
+        const sctx = sliceCanvas.getContext('2d');
+        if (sctx) {
+          sctx.fillStyle = '#f7f6f2';
+          sctx.fillRect(0, 0, W, sliceHeightPx);
+          sctx.drawImage(canvas, 0, yOffsetPx, W, sliceHeightPx, 0, 0, W, sliceHeightPx);
+        }
+
+        const sliceHeightMm = (sliceHeightPx * imgWidth) / W;
+        if (pageIndex > 0) pdf.addPage();
+        pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, sliceHeightMm);
+
+        if (endPx >= totalPx) break;
+        yOffsetPx = endPx;
+        pageIndex++;
       }
 
       const fileName = `cardapio_${patient.full_name.replace(/\s+/g, '_')}_${format(new Date(), 'dd-MM-yyyy')}.pdf`;
