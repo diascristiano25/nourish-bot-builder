@@ -172,6 +172,7 @@ export function LabResultsPanel({ patientId }: LabResultsPanelProps) {
             Exames Laboratoriais
           </CardTitle>
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => setShowForm(!showForm)}
@@ -250,6 +251,7 @@ export function LabResultsPanel({ patientId }: LabResultsPanelProps) {
               />
             </div>
             <Button
+              type="button"
               onClick={handleSave}
               disabled={saving}
               className="w-full h-9 text-sm"
