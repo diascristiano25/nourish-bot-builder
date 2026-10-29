@@ -81,18 +81,16 @@ export function AppointmentCard({
             {status.label}
           </span>
 
-          {appointment.is_video_enabled && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-cyber-lime hover:text-cyber-lime hover:bg-cyber-lime/10"
-              onClick={() => setVideoOpen(true)}
-              title="Chamada de vídeo"
-              aria-label="Abrir chamada de vídeo"
-            >
-              <Video className="w-4 h-4" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-cyber-lime hover:text-cyber-lime hover:bg-cyber-lime/10"
+            onClick={() => setVideoOpen(true)}
+            title="Chamada de vídeo"
+            aria-label="Abrir chamada de vídeo"
+          >
+            <Video className="w-4 h-4" />
+          </Button>
 
           {appointment.status === 'scheduled' && (
             <div className="flex gap-1">
