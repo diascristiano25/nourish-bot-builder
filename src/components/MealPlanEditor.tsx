@@ -31,6 +31,14 @@ interface MealItem {
   protein?: number;
   carbs?: number;
   fat?: number;
+  // Base nutritional values per portion_grams — used for auto-recalculation when grams change
+  base_portion_grams?: number;
+  base_calories?: number;
+  base_protein?: number;
+  base_carbs?: number;
+  base_fat?: number;
+  // Current grams (editable) — when changed, calories/macros recalculate proportionally
+  grams?: number;
 }
 
 interface Meal {
@@ -98,8 +106,20 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
   const updateMealItem = (mealIndex: number, itemIndex: number, field: keyof MealItem, value: string | number) => {
     const newData = { ...editedData };
     const item = newData.meals[mealIndex].items[itemIndex];
-    
-    if (field === 'calories' || field === 'protein' || field === 'carbs' || field === 'fat') {
+
+    if (field === 'grams') {
+      // Auto-recalculate calories and macros proportionally when grams change
+      const newGrams = value === '' ? 0 : Number(value);
+      item.grams = newGrams;
+      if (item.base_portion_grams && item.base_portion_grams > 0) {
+        const ratio = newGrams / item.base_portion_grams;
+        item.calories = Math.round((item.base_calories || 0) * ratio);
+        item.protein = Math.round((item.base_protein || 0) * ratio * 10) / 10;
+        item.carbs = Math.round((item.base_carbs || 0) * ratio * 10) / 10;
+        item.fat = Math.round((item.base_fat || 0) * ratio * 10) / 10;
+        item.portion = `${newGrams}g`;
+      }
+    } else if (field === 'calories' || field === 'protein' || field === 'carbs' || field === 'fat') {
       item[field] = value === '' ? undefined : Number(value);
     } else {
       (item as any)[field] = value;
@@ -145,15 +165,23 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
     setEditedData(newData);
   };
 
-  const addFoodFromSearch = (mealIndex: number, food: { name: string; portion_description: string; calories: number; protein: number; carbs: number; fat: number }) => {
+  const addFoodFromSearch = (mealIndex: number, food: any) => {
     const newData = { ...editedData };
+    // Store base nutritional values for auto-recalculation when grams change
+    const baseGrams = food.portion_grams || 100;
     newData.meals[mealIndex].items.push({
       food: food.name,
-      portion: food.portion_description,
+      portion: food.portion_description || `${baseGrams}g`,
       calories: food.calories,
       protein: food.protein,
       carbs: food.carbs,
       fat: food.fat,
+      base_portion_grams: baseGrams,
+      base_calories: food.calories,
+      base_protein: food.protein,
+      base_carbs: food.carbs,
+      base_fat: food.fat,
+      grams: baseGrams,
     });
     
     newData.meals[mealIndex].totalCalories = newData.meals[mealIndex].items.reduce(
@@ -319,21 +347,35 @@ export default function MealPlanEditor({ planData, onSave, onCancel, saving, pat
                       className="h-9 bg-input border-border"
                     />
                   </div>
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <Input
                       value={item.portion}
                       onChange={(e) => updateMealItem(mealIndex, itemIndex, 'portion', e.target.value)}
                       placeholder="Porção"
-                      className="h-9 bg-input border-border"
+                      className="h-9 bg-input border-border text-xs"
                     />
                   </div>
-                  <div className="col-span-3">
+                  <div className="col-span-2">
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        value={item.grams ?? ''}
+                        onChange={(e) => updateMealItem(mealIndex, itemIndex, 'grams', e.target.value)}
+                        placeholder="g"
+                        className="h-9 bg-input border-border font-mono pr-8 text-xs"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground pointer-events-none">g</span>
+                    </div>
+                  </div>
+                  <div className="col-span-2">
                     <Input
                       type="number"
                       value={item.calories || ''}
                       onChange={(e) => updateMealItem(mealIndex, itemIndex, 'calories', e.target.value)}
                       placeholder="kcal"
-                      className="h-9 bg-input border-border font-mono"
+                      className="h-9 bg-input border-border font-mono text-xs"
+                      readOnly={!!item.base_portion_grams}
+                      title={item.base_portion_grams ? 'Calculado automaticamente a partir dos gramas' : undefined}
                     />
                   </div>
                   <div className="col-span-1">
