@@ -247,7 +247,7 @@ export default function GenerateMealPlan() {
       if (isRateLimitError || isFunctionError) {
         toast({
           title: "Limite de requisições atingido",
-          description: "A API da OpenAI está temporariamente indisponível. Por favor, aguarde alguns minutos e tente novamente.",
+          description: "A API de IA está temporariamente indisponível. Por favor, aguarde alguns minutos e tente novamente.",
           variant: "destructive",
         });
       } else {

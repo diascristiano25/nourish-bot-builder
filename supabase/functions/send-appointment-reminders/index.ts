@@ -13,9 +13,15 @@ const corsHeaders = {
 interface Appointment {
   id: string;
   patient_id: string;
-  start_time: string;
+  scheduled_at: string;
   status: string;
-  reminder_sent_at: string | null;
+  reminder_sent: boolean | null;
+}
+
+interface Patient {
+  id: string;
+  full_name: string;
+  user_id: string | null;
 }
 
 interface Profile {
@@ -43,9 +49,9 @@ const handler = async (req: Request): Promise<Response> => {
       .from("appointments")
       .select("*")
       .eq("status", "scheduled")
-      .is("reminder_sent_at", null)
-      .gte("start_time", now.toISOString())
-      .lte("start_time", twentyFourHoursFromNow.toISOString());
+      .or("reminder_sent.is.null,reminder_sent.eq.false")
+      .gte("scheduled_at", now.toISOString())
+      .lte("scheduled_at", twentyFourHoursFromNow.toISOString());
 
     if (queryError) {
       console.error("Error querying appointments:", queryError);
@@ -58,20 +64,38 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const appointment of appointments || []) {
       try {
-        // Get patient profile for email
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("email, full_name")
+        // Get patient record first, then join to profiles for email
+        const { data: patient, error: patientError } = await supabase
+          .from("patients")
+          .select("id, full_name, user_id")
           .eq("id", appointment.patient_id)
           .single();
 
-        if (profileError || !profile?.email) {
-          console.warn(`No email found for patient ${appointment.patient_id}`);
+        if (patientError || !patient) {
+          console.warn(`Patient not found: ${appointment.patient_id}`);
           continue;
         }
 
-        const firstName = profile.full_name?.split(" ")[0] || "Paciente";
-        const appointmentDate = new Date(appointment.start_time).toLocaleString("pt-BR", {
+        // Patients don't have email directly — look up via user_id in profiles
+        let email: string | null = null;
+        let firstName = patient.full_name?.split(" ")[0] || "Paciente";
+
+        if (patient.user_id) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("email, full_name")
+            .eq("user_id", patient.user_id)
+            .maybeSingle();
+          email = profile?.email || null;
+          if (profile?.full_name) firstName = profile.full_name.split(" ")[0];
+        }
+
+        if (!email) {
+          console.warn(`No email found for patient ${appointment.patient_id} (user_id: ${patient.user_id})`);
+          continue;
+        }
+
+        const appointmentDate = new Date(appointment.scheduled_at).toLocaleString("pt-BR", {
           weekday: "long",
           day: "2-digit",
           month: "long",
@@ -148,16 +172,16 @@ const handler = async (req: Request): Promise<Response> => {
 
         console.log(`Reminder email sent to ${profile.email} for appointment ${appointment.id}`);
 
-        // Update reminder_sent_at after successful send
+        // Update reminder_sent flag after successful send
         const { error: updateError } = await supabase
           .from("appointments")
-          .update({ reminder_sent_at: new Date().toISOString() })
+          .update({ reminder_sent: true })
           .eq("id", appointment.id);
 
         if (updateError) {
-          console.error(`Error updating reminder_sent_at for appointment ${appointment.id}:`, updateError);
+          console.error(`Error updating reminder_sent for appointment ${appointment.id}:`, updateError);
         } else {
-          console.log(`Updated reminder_sent_at for appointment ${appointment.id}`);
+          console.log(`Updated reminder_sent for appointment ${appointment.id}`);
         }
 
         results.push({

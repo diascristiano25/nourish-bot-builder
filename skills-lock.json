@@ -31,6 +31,12 @@
       "skillPath": "skills/ask-sonner/SKILL.md",
       "computedHash": "0168a6a129ba0a3561ccbda3a3d8d0dc0af1d556f373e315e9479e3364420dd3"
     },
+    "brag": {
+      "source": "latent-spaces/brag",
+      "sourceType": "github",
+      "skillPath": "skills/brag/SKILL.md",
+      "computedHash": "3865fa44d0af6f8483c4e3229ae369390a21c96e3bd8485ee49b88b5bffcd833"
+    },
     "break-ui": {
       "source": "emilkowalski/skills",
       "sourceType": "github",

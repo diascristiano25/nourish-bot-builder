@@ -251,6 +251,7 @@ export default function Consultation() {
           nutritionist_id: nutri.id,
           scheduled_at: new Date().toISOString(),
           status: 'completed',
+          type: 'consultation',
           notes: consultationNotes
         });
 

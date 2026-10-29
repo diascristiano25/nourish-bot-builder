@@ -1,0 +1,12 @@
+// Tudo o que um slide precisa, num import só:  import { Moldura, Titulo, Revela, ... } from "../base";
+export * from "./tempo";
+export * from "./contexto";
+export * from "./Moldura";
+export * from "./Titulo";
+export * from "./Camadas";
+export * from "./Icones";
+export * from "./verbos/Revelar";
+export * from "./verbos/Contar";
+export * from "./verbos/Comparar";
+export * from "./verbos/Transformar";
+export * from "./verbos/Apontar";

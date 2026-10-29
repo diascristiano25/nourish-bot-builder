@@ -1,0 +1,27 @@
+{
+  "name": "carrossel-animado",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Carrossel animado para o Instagram: um vídeo curto em loop por slide (1080 × 1350).",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "node scripts/render.mjs",
+    "conferir": "node scripts/conferir.mjs",
+    "tsc": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.527",
+    "@remotion/cli": "4.0.527",
+    "@remotion/fonts": "4.0.527",
+    "@remotion/google-fonts": "4.0.527",
+    "@remotion/renderer": "4.0.527",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.527"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3"
+  }
+}

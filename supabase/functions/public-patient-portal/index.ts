@@ -106,7 +106,7 @@ serve(async (req) => {
     // Fetch active meal plan - RLS enforced via user's token
     const { data: mealPlan, error: mealPlanError } = await supabase
       .from('meal_plans')
-      .select('id, title, description, total_calories, plan_data, created_at')
+      .select('id, title, description, total_calories, meals, created_at')
       .eq('patient_id', patientId)
       .eq('is_active', true)
       .order('created_at', { ascending: false })

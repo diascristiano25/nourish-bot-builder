@@ -1,0 +1,7 @@
+{
+  "_leia": "Trilha opcional. arquivo = caminho dentro de assets/ (ex.: \"trilha.mp3\") ou null para sem trilha. inicio = segundo da música onde começa o slide 01 (de preferência numa batida forte, depois da introdução). passo = quantos segundos a música anda por slide (6 = trechos seguidos). ganho = volume em dB (de -14 a -9 fica por baixo dos efeitos).",
+  "arquivo": null,
+  "inicio": 0,
+  "passo": 6,
+  "ganho": -11
+}

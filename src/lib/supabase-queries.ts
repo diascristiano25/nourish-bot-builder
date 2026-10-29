@@ -160,12 +160,16 @@ export async function fetchAppointments(
       .eq("nutritionist_id", nutritionistId);
 
     if (date) {
-      const startOfDay = new Date(date).toISOString().split("T")[0];
-      const endOfDay = new Date(date);
-      endOfDay.setDate(endOfDay.getDate() + 1);
+      // FIX: use local-timezone day boundaries instead of naive UTC strings.
+      // The old code built "YYYY-MM-DDT00:00:00" (no offset) which Postgres
+      // interprets as UTC midnight — 3h off for Brazil, pulling wrong-day rows.
+      const dayStart = new Date(date);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(date);
+      dayEnd.setHours(23, 59, 59, 999);
       query = query
-        .gte("scheduled_at", `${startOfDay}T00:00:00`)
-        .lt("scheduled_at", endOfDay.toISOString());
+        .gte("scheduled_at", dayStart.toISOString())
+        .lte("scheduled_at", dayEnd.toISOString());
     }
 
     const { data, error } = await query;

@@ -81,7 +81,7 @@ export function AppointmentCard({
             {status.label}
           </span>
 
-          {(appointment.is_video_enabled || appointment.type === 'online') && (
+          {appointment.is_video_enabled && (
             <Button
               variant="ghost"
               size="icon"
