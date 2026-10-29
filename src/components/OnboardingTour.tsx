@@ -61,10 +61,10 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="text-lg">👥</span>
-            <h3 className="font-semibold text-cyber-lime">Pacientes</h3>
+            <h3 className="font-semibold text-cyber-lime">Pacientes + Exames + Cálculos</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            Gerencie todos os seus pacientes em um só lugar. Cadastre, edite e acompanhe a evolução de cada um.
+            Gerencie pacientes com <span className="text-electric-violet font-medium">60+ exames laboratoriais</span> (o paciente faz upload pelo app!), <span className="text-electric-violet font-medium">cálculos automáticos TMB/GET/VET</span> e dobras cutâneas com %G via Jackson-Pollock.
           </p>
         </div>
       ),
@@ -78,10 +78,10 @@ export function OnboardingTour({ nutritionistId, onComplete, forceStart = false 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="text-lg">📅</span>
-            <h3 className="font-semibold text-cyber-lime">Agenda</h3>
+            <h3 className="font-semibold text-cyber-lime">Agenda + Videochamada</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            Organize suas consultas com o calendário interativo. Agende, reagende e marque consultas como realizadas.
+            Organize suas consultas e faça <span className="text-electric-violet font-medium">teleconsultas nativas</span> — um clique no ícone de vídeo abre a sala Jitsi direto na agenda, sem links externos.
           </p>
         </div>
       ),
