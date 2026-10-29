@@ -584,8 +584,14 @@ export default function MealPlanView() {
         )}
       </main>
 
-      {/* Hidden PDF Document - Elite Magazine Layout (Synced with Theme) */}
-      <div className="absolute left-[-9999px] top-0">
+      {/* Hidden PDF Document — ALWAYS editorial light palette, isolated from the app's
+          dark-mode context so html2canvas never captures a dark/neon render. The PDF is a
+          printed clinical document and must look identical regardless of the user's UI theme. */}
+      <div
+        className="absolute left-[-9999px] top-0"
+        style={{ background: '#f7f6f2', colorScheme: 'light' }}
+        data-theme="light"
+      >
         <MealPlanDocument
           ref={documentRef}
           mealPlan={{
@@ -604,7 +610,7 @@ export default function MealPlanView() {
             primary_color: nutritionist?.primary_color || null,
             secondary_color: nutritionist?.secondary_color || null,
           }}
-          theme={theme}
+          theme="light"
         />
       </div>
     </div>
