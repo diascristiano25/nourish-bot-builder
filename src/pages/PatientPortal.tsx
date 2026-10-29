@@ -14,8 +14,9 @@ import { TodaysMeals } from '@/components/patient/dashboard/TodaysMeals';
 import { ChatWidget } from '@/components/patient/dashboard/ChatWidget';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { RichCard } from '@/components/shared/RichCard';
-import { Target, Calendar, Activity, Heart, Leaf } from 'lucide-react';
+import { Target, Calendar, Activity, Heart, Leaf, FlaskConical } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { LabResultsPanel } from '@/components/LabResultsPanel';
 
 export default function PatientPortal() {
 const { user, loading: authLoading } = useAuth();
@@ -154,6 +155,28 @@ transition={{ delay: 0.5, duration: 0.5 }}
 <TodaysMeals mealPlan={mealPlan} />
 </RichCard>
 </motion.div>
+
+{/* Lab Results - Patient Upload */}
+{patientData?.id && (
+<motion.div
+initial={{ opacity: 0, y: 20 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ delay: 0.55, duration: 0.5 }}
+>
+<RichCard delay={0.55} padding="lg">
+<div className="flex items-center gap-2 mb-4">
+<div className="w-9 h-9 rounded-xl bg-[#C4764A]/10 flex items-center justify-center">
+<FlaskConical className="w-5 h-5 text-[#C4764A]" />
+</div>
+<div>
+<h2 className="text-lg font-bold text-foreground">Meus Exames</h2>
+<p className="text-xs text-muted-foreground">Envie seus exames — seu nutricionista vê na hora, sem precisar de consulta</p>
+</div>
+</div>
+<LabResultsPanel patientId={patientData.id} />
+</RichCard>
+</motion.div>
+)}
 
 {/* Chat Widget */}
 <motion.div
