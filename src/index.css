@@ -7,80 +7,94 @@
 @layer base {
   :root,
   .light {
-    --background: 40 20% 98%;
-    --foreground: 222 25% 14%;
+    --background: 150 15% 97%;
+    --foreground: 200 15% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 222 25% 14%;
+    --card-foreground: 200 15% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 25% 14%;
-    --primary: 168 65% 43%;
+    --popover-foreground: 200 15% 15%;
+    --primary: 168 76% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 38 18% 96%;
-    --secondary-foreground: 222 25% 14%;
-    --muted: 38 18% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 12 80% 67%;
+    --secondary: 155 40% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 150 10% 94%;
+    --muted-foreground: 200 8% 50%;
+    --accent: 28 90% 52%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 35 15% 90%;
-    --input: 35 15% 90%;
-    --ring: 168 65% 43%;
+    --border: 150 10% 88%;
+    --input: 150 10% 88%;
+    --ring: 168 76% 36%;
     --radius: 0.75rem;
-    --sidebar-background: 38 18% 96%;
-    --sidebar-foreground: 222 25% 14%;
-    --sidebar-primary: 168 65% 43%;
+    --sidebar-background: 150 10% 94%;
+    --sidebar-foreground: 200 15% 15%;
+    --sidebar-primary: 168 76% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 12 80% 67%;
+    --sidebar-accent: 28 90% 52%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 35 18% 88%;
-    --sidebar-ring: 143 25% 42%;
-    /* NutriFlow Launch LP Tokens */
-    --nf-bg-primary: 40 20% 98%;
-    --nf-bg-secondary: 38 18% 96%;
-    --nf-text-primary: 222 25% 14%;
-    --nf-text-secondary: 220 9% 46%;
-    --nf-accent-teal: 168 65% 43%;
-    --nf-accent-coral: 12 80% 67%;
-    --nf-border: 35 15% 90%;
+    --sidebar-border: 150 10% 88%;
+    --sidebar-ring: 168 76% 36%;
+    /* NutriFlow Rebrand Tokens */
+    --nf-bg-primary: 150 15% 97%;
+    --nf-bg-secondary: 150 10% 94%;
+    --nf-text-primary: 200 15% 15%;
+    --nf-text-secondary: 200 8% 50%;
+    --nf-accent-teal: 168 76% 36%;
+    --nf-accent-purple: 280 55% 58%;
+    --nf-accent-orange: 28 90% 52%;
+    --nf-border: 150 10% 88%;
+    --info: 205 85% 55%;
+    --success: 155 70% 42%;
+    /* Glassmorphism Tokens */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-blur: 12px;
   }
 
   .dark {
-    --background: 222 25% 6%;
-    --foreground: 40 20% 98%;
-    --card: 220 20% 13%;
-    --card-foreground: 40 20% 98%;
-    --popover: 220 20% 11%;
-    --popover-foreground: 40 20% 98%;
-    --primary: 168 65% 43%;
+    --background: 200 12% 8%;
+    --foreground: 150 10% 95%;
+    --card: 200 10% 12%;
+    --card-foreground: 150 10% 95%;
+    --popover: 200 10% 10%;
+    --popover-foreground: 150 10% 95%;
+    --primary: 168 76% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 18% 18%;
-    --secondary-foreground: 40 20% 98%;
-    --muted: 220 18% 18%;
-    --muted-foreground: 220 9% 65%;
-    --accent: 12 80% 67%;
+    --secondary: 155 40% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 200 8% 18%;
+    --muted-foreground: 200 8% 55%;
+    --accent: 28 90% 58%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 18% 22%;
-    --input: 220 18% 22%;
-    --ring: 168 65% 43%;
-    --sidebar-background: 222 25% 8%;
-    --sidebar-foreground: 40 20% 98%;
-    --sidebar-primary: 168 65% 43%;
+    --border: 200 8% 20%;
+    --input: 200 8% 20%;
+    --ring: 168 76% 45%;
+    --sidebar-background: 200 10% 10%;
+    --sidebar-foreground: 150 10% 95%;
+    --sidebar-primary: 168 76% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 12 80% 67%;
+    --sidebar-accent: 28 90% 58%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 18% 18%;
-    --sidebar-ring: 143 25% 42%;
-    /* NutriFlow Launch LP Dark Tokens */
-    --nf-bg-primary: 222 25% 6%;
-    --nf-bg-secondary: 222 25% 14%;
-    --nf-text-primary: 40 20% 98%;
-    --nf-text-secondary: 220 9% 60%;
-    --nf-accent-teal: 168 65% 43%;
-    --nf-accent-coral: 12 80% 67%;
-    --nf-border: 222 25% 18%;
+    --sidebar-border: 200 8% 18%;
+    --sidebar-ring: 168 76% 45%;
+    /* NutriFlow Rebrand Dark Tokens */
+    --nf-bg-primary: 200 12% 8%;
+    --nf-bg-secondary: 200 8% 18%;
+    --nf-text-primary: 150 10% 95%;
+    --nf-text-secondary: 200 8% 55%;
+    --nf-accent-teal: 168 76% 45%;
+    --nf-accent-purple: 280 55% 65%;
+    --nf-accent-orange: 28 90% 58%;
+    --nf-border: 200 8% 20%;
+    --info: 205 85% 60%;
+    --success: 155 70% 50%;
+    /* Glassmorphism Dark Tokens */
+    --glass-bg: rgba(26, 26, 26, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-blur: 12px;
   }
 }
 
@@ -93,6 +107,9 @@
     font-family: 'Outfit', sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+  .font-display {
     font-family: 'Playfair Display', serif;
   }
 }
