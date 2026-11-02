@@ -30,7 +30,7 @@ export function CircularWaterTracker({ currentMl, goalMl, onAddWater }: Circular
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#10B981', '#34D399', '#6EE7B7', '#22C55E'],
+        colors: ['#0D9488', '#14B8A6', '#5EEAD4', '#2DD4BF'],
       });
       setCelebrated(true);
     }

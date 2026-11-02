@@ -68,22 +68,22 @@ const mealIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   dinner: Moon,
 };
 
-// Clean clinical accent per meal type — muted, not neon
+// Rebrand accent per meal type — using new palette tokens
 const mealAccent: Record<string, string> = {
-  'Café da Manhã': 'text-amber-600 bg-amber-500/10',
-  'Lanche da Manhã': 'text-orange-600 bg-orange-500/10',
-  'Almoço': 'text-[#518C5B] bg-[#518C5B]/10',
-  'Lanche da Tarde': 'text-sky-600 bg-sky-500/10',
-  'Jantar': 'text-indigo-600 bg-indigo-500/10',
+  'Café da Manhã': 'text-accent bg-accent/10',
+  'Lanche da Manhã': 'text-nf-orange bg-nf-orange/10',
+  'Almoço': 'text-primary bg-primary/10',
+  'Lanche da Tarde': 'text-[hsl(280,55%,58%)] bg-[hsl(280,55%,58%)]/10',
+  'Jantar': 'text-secondary bg-secondary/10',
   'Ceia': 'text-muted-foreground bg-muted',
-  cafe_da_manha: 'text-amber-600 bg-amber-500/10',
-  breakfast: 'text-amber-600 bg-amber-500/10',
-  almoco: 'text-[#518C5B] bg-[#518C5B]/10',
-  lunch: 'text-[#518C5B] bg-[#518C5B]/10',
-  lanche: 'text-sky-600 bg-sky-500/10',
-  snack: 'text-sky-600 bg-sky-500/10',
-  jantar: 'text-indigo-600 bg-indigo-500/10',
-  dinner: 'text-indigo-600 bg-indigo-500/10',
+  cafe_da_manha: 'text-accent bg-accent/10',
+  breakfast: 'text-accent bg-accent/10',
+  almoco: 'text-primary bg-primary/10',
+  lunch: 'text-primary bg-primary/10',
+  lanche: 'text-[hsl(280,55%,58%)] bg-[hsl(280,55%,58%)]/10',
+  snack: 'text-[hsl(280,55%,58%)] bg-[hsl(280,55%,58%)]/10',
+  jantar: 'text-secondary bg-secondary/10',
+  dinner: 'text-secondary bg-secondary/10',
 };
 
 const defaultAccent = 'text-muted-foreground bg-muted';
@@ -238,10 +238,10 @@ export function PatientPlano({ mealPlan }: PatientPlanoProps) {
       </header>
 
       {totalCalories != null && (
-        <Card className="border-border/60 mb-4 bg-[#518C5B]/[0.06]">
+        <Card className="border-border/60 mb-4 bg-primary/[0.06]">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#518C5B]/15 flex items-center justify-center flex-shrink-0">
-              <Flame className="w-5 h-5 text-[#518C5B]" />
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+              <Flame className="w-5 h-5 text-primary" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Meta diária</p>
@@ -347,7 +347,7 @@ export function PatientPlano({ mealPlan }: PatientPlanoProps) {
                         {(mealSubstitutes[meal.name] || mealSubstitutes['Almoço']).map((sub, i) => (
                           <Card
                             key={i}
-                            className="border-border/60 hover:border-[#518C5B]/40 transition-colors cursor-pointer"
+                            className="border-border/60 hover:border-primary/40 transition-colors cursor-pointer"
                           >
                             <CardContent className="p-3.5 flex items-center justify-between gap-3">
                               <div className="min-w-0">

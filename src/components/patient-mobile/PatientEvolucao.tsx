@@ -95,8 +95,8 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
         <Card className="border-border/60">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-[#518C5B]/10 flex items-center justify-center">
-                <Scale className="w-4 h-4 text-[#518C5B]" />
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Scale className="w-4 h-4 text-primary" />
               </div>
               <span className="text-xs font-medium text-muted-foreground">Peso atual</span>
             </div>
@@ -111,20 +111,20 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                totalDiff === 0 ? 'bg-muted' : isLosing ? 'bg-[#518C5B]/10' : 'bg-[#C4764A]/10'
+                totalDiff === 0 ? 'bg-muted' : isLosing ? 'bg-primary/10' : 'bg-accent/10'
               }`}>
                 {totalDiff === 0 ? (
                   <Scale className="w-4 h-4 text-muted-foreground" />
                 ) : isLosing ? (
-                  <TrendingDown className="w-4 h-4 text-[#518C5B]" />
+                  <TrendingDown className="w-4 h-4 text-primary" />
                 ) : (
-                  <TrendingUp className="w-4 h-4 text-[#C4764A]" />
+                  <TrendingUp className="w-4 h-4 text-accent" />
                 )}
               </div>
               <span className="text-xs font-medium text-muted-foreground">Variação</span>
             </div>
             <p className={`text-2xl font-semibold leading-none tabular-nums ${
-              totalDiff === 0 ? 'text-foreground' : isLosing ? 'text-[#518C5B]' : 'text-[#C4764A]'
+              totalDiff === 0 ? 'text-foreground' : isLosing ? 'text-primary' : 'text-accent'
             }`}>
               {totalDiff === 0 ? '0.0' : `${totalDiff > 0 ? '+' : ''}${totalDiff.toFixed(1)}`}
               <span className="text-sm font-normal text-muted-foreground"> kg</span>
@@ -154,8 +154,8 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
                 <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                   <defs>
                     <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#518C5B" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#518C5B" stopOpacity={0} />
+                      <stop offset="5%" stopColor="hsl(168, 76%, 36%)" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="hsl(168, 76%, 36%)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis
@@ -174,11 +174,11 @@ export function PatientEvolucao({ patientId }: PatientEvolucaoProps) {
                   <Area
                     type="monotone"
                     dataKey="weight"
-                    stroke="#518C5B"
+                    stroke="hsl(168, 76%, 36%)"
                     strokeWidth={2}
                     fill="url(#weightGradient)"
-                    dot={{ r: 3, fill: '#518C5B' }}
-                    activeDot={{ r: 5, fill: '#518C5B' }}
+                    dot={{ r: 3, fill: 'hsl(168, 76%, 36%)' }}
+                    activeDot={{ r: 5, fill: 'hsl(168, 76%, 36%)' }}
                   />
                 </AreaChart>
               </ResponsiveContainer>

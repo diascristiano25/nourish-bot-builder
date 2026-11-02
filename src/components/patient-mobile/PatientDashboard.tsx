@@ -179,8 +179,8 @@ export function PatientDashboard({ patient, mealPlan, waterLog, onAddWater, onNa
 
         <div className="bg-card rounded-2xl border border-border/60 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Droplets className="w-4 h-4 text-blue-500" />
+            <div className="w-8 h-8 rounded-lg bg-info/10 flex items-center justify-center">
+              <Droplets className="w-4 h-4 text-info" />
             </div>
             <span className="text-xs font-medium text-muted-foreground">Água</span>
           </div>
@@ -201,8 +201,8 @@ export function PatientDashboard({ patient, mealPlan, waterLog, onAddWater, onNa
       >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Droplets className="w-4 h-4 text-blue-500" />
+            <div className="w-8 h-8 rounded-lg bg-info/10 flex items-center justify-center">
+              <Droplets className="w-4 h-4 text-info" />
             </div>
             <h2 className="text-sm font-semibold text-foreground">Hidratação</h2>
           </div>
