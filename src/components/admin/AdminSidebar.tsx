@@ -8,7 +8,8 @@ import {
   ChevronLeft,
   LogOut,
   Shield,
-  ArrowLeft
+  ArrowLeft,
+  BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,7 @@ interface NavItem {
 
 const adminNavItems: NavItem[] = [
   { label: 'Visão Geral', icon: LayoutDashboard, href: '/admin' },
+  { label: 'Analytics', icon: BarChart3, href: '/admin/analytics' },
   { label: 'Nutricionistas', icon: Users, href: '/admin/nutris' },
   { label: 'Suporte', icon: MessageSquare, href: '/admin/suporte' },
   { label: 'Financeiro', icon: DollarSign, href: '/admin/financeiro' },

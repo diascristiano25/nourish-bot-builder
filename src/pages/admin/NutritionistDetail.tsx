@@ -19,6 +19,7 @@ import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { logAdminAction } from '@/lib/admin-audit';
+import { AuditLogTimeline } from '@/components/admin/AuditLogTimeline';
 import { motion } from 'framer-motion';
 
 interface ProfileData {
@@ -333,23 +334,7 @@ export default function NutritionistDetail() {
 
           {/* Logs Tab */}
           <TabsContent value="logs">
-            <GlassCard className="p-6">
-              <NeonText as="h3" color="primary" className="font-semibold mb-4">Audit Log</NeonText>
-              <Table>
-                <TableHeader><TableRow className="bg-muted/30"><TableHead>Ação</TableHead><TableHead>Detalhes</TableHead><TableHead>Data</TableHead></TableRow></TableHeader>
-                <TableBody>
-                  {auditLogs.length === 0 ? (
-                    <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Nenhum registro</TableCell></TableRow>
-                  ) : auditLogs.map(l => (
-                    <TableRow key={l.id}>
-                      <TableCell className="font-medium">{l.action}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{l.details ? JSON.stringify(l.details) : '-'}</TableCell>
-                      <TableCell>{format(new Date(l.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </GlassCard>
+            <AuditLogTimeline logs={auditLogs} />
           </TabsContent>
         </Tabs>
       </div>

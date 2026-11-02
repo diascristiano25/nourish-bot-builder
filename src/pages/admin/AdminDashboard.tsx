@@ -1,14 +1,14 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { NeonText } from '@/components/ui/NeonText';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Users, Clock, DollarSign, MessageSquare, TrendingUp, AlertTriangle, CheckCircle, UserPlus } from 'lucide-react';
+import { Shield, Users, Clock, DollarSign, MessageSquare, TrendingUp, AlertTriangle, UserPlus, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { format, subDays, startOfDay, differenceInDays } from 'date-fns';
+import { format, subMonths, startOfMonth, endOfMonth, isToday, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, AreaChart, Area } from 'recharts';
 import { motion } from 'framer-motion';
 
 interface DashboardStats {
@@ -19,19 +19,21 @@ interface DashboardStats {
   pendingTickets: number;
   newToday: number;
   monthlyRevenue: number;
+  activationRate: number;
 }
 
-const COLORS = ['#518C5B', '#E76F51', '#2A9D8F', '#E9C46A', '#264653'];
+const COLORS = ['#2A9D8F', '#E76F51', '#518C5B', '#E9C46A', '#264653'];
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalNutris: 0, activeNutris: 0, trialNutris: 0, inactiveNutris: 0,
-    pendingTickets: 0, newToday: 0, monthlyRevenue: 0,
+    pendingTickets: 0, newToday: 0, monthlyRevenue: 0, activationRate: 0,
   });
   const [loading, setLoading] = useState(true);
   const [evolutionData, setEvolutionData] = useState<{ month: string; count: number }[]>([]);
   const [planDistribution, setPlanDistribution] = useState<{ name: string; value: number }[]>([]);
   const [alerts, setAlerts] = useState<{ type: 'warning' | 'danger'; message: string }[]>([]);
+  const [revenueTrend, setRevenueTrend] = useState<{ month: string; income: number }[]>([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -40,10 +42,9 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const today = startOfDay(new Date());
-      const thirtyDaysAgo = subDays(today, 30);
+      const today = new Date();
+      const currentMonthStart = startOfMonth(today);
 
-      // Fetch all profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, created_at, is_active, account_status, trial_ends_at, subscription_plan');
@@ -51,45 +52,68 @@ export default function AdminDashboard() {
       if (profilesError) throw profilesError;
 
       const nonAdminProfiles = (profiles || []).filter(p => !p.is_admin);
-      const activeCount = nonAdminProfiles.filter(p => p.is_active).length;
+
+      const activeCount = nonAdminProfiles.filter(p => {
+        if (!p.is_active) return false;
+        if (p.account_status === 'active') return true;
+        if (p.trial_ends_at && new Date(p.trial_ends_at) > today) return true;
+        return false;
+      }).length;
+
       const trialCount = nonAdminProfiles.filter(p =>
-        p.trial_ends_at && new Date(p.trial_ends_at) > today && p.account_status === 'trial'
-      ).length;
-      const newTodayCount = nonAdminProfiles.filter(p =>
-        startOfDay(new Date(p.created_at)).getTime() === today.getTime()
+        p.account_status === 'trial' && p.trial_ends_at && new Date(p.trial_ends_at) > today
       ).length;
 
-      // Pending tickets
+      const newTodayCount = nonAdminProfiles.filter(p => isToday(new Date(p.created_at))).length;
+
       const { count: ticketCount } = await supabase
         .from('support_tickets')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'open');
 
-      // Monthly revenue (financial_records)
       const { data: financialRecords } = await supabase
         .from('financial_records')
-        .select('amount, record_type, record_date')
-        .gte('record_date', thirtyDaysAgo.toISOString())
-        .eq('record_type', 'income');
+        .select('amount, transaction_type, created_at')
+        .gte('created_at', currentMonthStart.toISOString())
+        .in('transaction_type', ['payment', 'subscription', 'income']);
 
       const monthlyRevenue = (financialRecords || []).reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
 
-      // Evolution data (last 6 months)
       const evolution = [];
       for (let i = 5; i >= 0; i--) {
-        const monthStart = subDays(today, i * 30);
-        const monthEnd = subDays(today, (i - 1) * 30);
+        const mStart = startOfMonth(subMonths(today, i));
+        const mEnd = endOfMonth(subMonths(today, i));
         const count = nonAdminProfiles.filter(p => {
           const d = new Date(p.created_at);
-          return d >= monthStart && d < monthEnd;
+          return d >= mStart && d <= mEnd;
         }).length;
         evolution.push({
-          month: format(monthStart, 'MMM', { locale: ptBR }),
+          month: format(mStart, 'MMM', { locale: ptBR }),
           count,
         });
       }
 
-      // Plan distribution
+      const sixMonthsAgo = startOfMonth(subMonths(today, 5));
+      const { data: allFinancialRecords } = await supabase
+        .from('financial_records')
+        .select('amount, transaction_type, created_at')
+        .gte('created_at', sixMonthsAgo.toISOString())
+        .in('transaction_type', ['payment', 'subscription', 'income']);
+
+      const revTrend = [];
+      for (let i = 5; i >= 0; i--) {
+        const mStart = startOfMonth(subMonths(today, i));
+        const mEnd = endOfMonth(subMonths(today, i));
+        const income = (allFinancialRecords || []).filter(r => {
+          const d = new Date(r.created_at);
+          return d >= mStart && d <= mEnd;
+        }).reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+        revTrend.push({
+          month: format(mStart, 'MMM', { locale: ptBR }),
+          income,
+        });
+      }
+
       const planMap: Record<string, number> = {};
       nonAdminProfiles.forEach(p => {
         const plan = p.subscription_plan || 'free';
@@ -97,7 +121,6 @@ export default function AdminDashboard() {
       });
       const planDist = Object.entries(planMap).map(([name, value]) => ({ name, value }));
 
-      // Alerts
       const newAlerts: { type: 'warning' | 'danger'; message: string }[] = [];
       const expiringTrials = nonAdminProfiles.filter(p =>
         p.trial_ends_at && differenceInDays(new Date(p.trial_ends_at), today) <= 3 && differenceInDays(new Date(p.trial_ends_at), today) > 0
@@ -109,17 +132,24 @@ export default function AdminDashboard() {
         newAlerts.push({ type: 'danger', message: `${ticketCount} ticket(s) de suporte pendente(s)` });
       }
 
+      const relevantBase = nonAdminProfiles.filter(p =>
+        p.is_active || (p.trial_ends_at && new Date(p.trial_ends_at) < today) || p.account_status === 'expired'
+      ).length;
+      const activationRate = relevantBase > 0 ? Math.round((activeCount / relevantBase) * 100) : 0;
+
       setStats({
         totalNutris: nonAdminProfiles.length,
         activeNutris: activeCount,
         trialNutris: trialCount,
-        inactiveNutris: nonAdminProfiles.length - activeCount,
+        inactiveNutris: nonAdminProfiles.length - activeCount - trialCount,
         pendingTickets: ticketCount || 0,
         newToday: newTodayCount,
         monthlyRevenue,
+        activationRate,
       });
       setEvolutionData(evolution);
       setPlanDistribution(planDist);
+      setRevenueTrend(revTrend);
       setAlerts(newAlerts);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -134,7 +164,7 @@ export default function AdminDashboard() {
     { label: 'Receita Mensal', value: `R$ ${stats.monthlyRevenue.toLocaleString('pt-BR')}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100' },
     { label: 'Tickets Pendentes', value: stats.pendingTickets, icon: MessageSquare, color: 'text-red-600', bg: 'bg-red-100' },
     { label: 'Novos Hoje', value: stats.newToday, icon: UserPlus, color: 'text-purple-600', bg: 'bg-purple-100' },
-    { label: 'Taxa Ativação', value: stats.totalNutris > 0 ? `${Math.round((stats.activeNutris / stats.totalNutris) * 100)}%` : '0%', icon: TrendingUp, color: 'text-teal-600', bg: 'bg-teal-100' },
+    { label: 'Taxa Ativação', value: `${stats.activationRate}%`, icon: TrendingUp, color: 'text-teal-600', bg: 'bg-teal-100' },
   ];
 
   if (loading) {
@@ -159,7 +189,6 @@ export default function AdminDashboard() {
           icon={<Shield className="w-7 h-7 text-white" />}
         />
 
-        {/* Alerts */}
         {alerts.length > 0 && (
           <div className="space-y-2">
             {alerts.map((alert, i) => (
@@ -178,7 +207,6 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {statCards.map((card, i) => (
             <motion.div
@@ -202,25 +230,48 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GlassCard className="p-6">
             <NeonText as="h3" color="primary" className="font-semibold mb-4">
               Evolução de Nutricionistas (6 meses)
             </NeonText>
             <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={evolutionData}>
+              <AreaChart data={evolutionData}>
+                <defs>
+                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2A9D8F" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#2A9D8F" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
-                <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                />
-                <Line type="monotone" dataKey="count" stroke="#518C5B" strokeWidth={3} dot={{ fill: '#518C5B', r: 4 }} />
-              </LineChart>
+                <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} allowDecimals={false} />
+                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
+                <Area type="monotone" dataKey="count" stroke="#2A9D8F" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" dot={{ fill: '#2A9D8F', r: 4 }} />
+              </AreaChart>
             </ResponsiveContainer>
           </GlassCard>
 
+          <GlassCard className="p-6">
+            <NeonText as="h3" color="primary" className="font-semibold mb-4">
+              Receita Mensal (6 meses)
+            </NeonText>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={revenueTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} tickFormatter={(v) => `R$${v}`} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                  formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR')}`, 'Receita']}
+                />
+                <Bar dataKey="income" fill="#518C5B" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </GlassCard>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GlassCard className="p-6">
             <NeonText as="h3" color="primary" className="font-semibold mb-4">
               Distribuição por Plano
@@ -243,23 +294,39 @@ export default function AdminDashboard() {
               </div>
             )}
           </GlassCard>
-        </div>
 
-        {/* Summary Footer */}
-        <GlassCard className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-4">
               <NeonText as="h3" color="primary" className="font-semibold">Resumo da Plataforma</NeonText>
-              <p className="text-sm text-muted-foreground mt-1">
-                Total de {stats.totalNutris} nutricionistas registrados • {stats.inactiveNutris} inativos
-              </p>
+              <Badge variant="outline" className="border-primary/30 text-primary">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Sistema Operacional
+              </Badge>
             </div>
-            <Badge variant="outline" className="border-primary/30 text-primary">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Sistema Operacional
-            </Badge>
-          </div>
-        </GlassCard>
+            <div className="space-y-3">
+              <div className="flex justify-between py-2 border-b border-border/30">
+                <span className="text-sm text-muted-foreground">Total de Nutris</span>
+                <span className="text-sm font-medium">{stats.totalNutris}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-border/30">
+                <span className="text-sm text-muted-foreground">Ativos</span>
+                <span className="text-sm font-medium text-emerald-600">{stats.activeNutris}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-border/30">
+                <span className="text-sm text-muted-foreground">Em Trial</span>
+                <span className="text-sm font-medium text-blue-600">{stats.trialNutris}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-border/30">
+                <span className="text-sm text-muted-foreground">Inativos</span>
+                <span className="text-sm font-medium text-red-600">{stats.inactiveNutris}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">Taxa de Ativação</span>
+                <span className="text-sm font-medium text-teal-600">{stats.activationRate}%</span>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
       </div>
     </AdminLayout>
   );
