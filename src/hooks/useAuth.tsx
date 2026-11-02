@@ -13,12 +13,18 @@ interface Session {
   user: User;
 }
 
+interface SignUpOptions {
+  phone?: string;
+  crn?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, options?: SignUpOptions) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -70,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, options?: SignUpOptions) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -78,6 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: {
           data: {
             full_name: fullName,
+            phone: options?.phone || null,
+            crn: options?.crn || null,
           },
           emailRedirectTo: `${window.location.origin}/auth`,
         },
@@ -134,6 +142,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth`,
+        },
+      });
+
+      if (error) {
+        return { error: new Error(error.message) };
+      }
+
+      return { error: null };
+    } catch (error) {
+      return { error: error instanceof Error ? error : new Error('Google sign in failed') };
+    }
+  };
+
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -151,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
