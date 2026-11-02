@@ -86,6 +86,60 @@ function PageLoader() {
   );
 }
 
+// Error boundary that auto-reloads on chunk load failures (stale deploy cache)
+class LazyErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    const isChunkError =
+      error.message.includes('Failed to fetch dynamically imported module') ||
+      error.message.includes('Importing a named export') ||
+      error.message.includes('Loading chunk') ||
+      error.message.includes('Loading CSS chunk');
+
+    if (isChunkError) {
+      const reloadKey = '__nf_chunk_reload';
+      if (!sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, '1');
+        window.location.reload();
+        return;
+      }
+      // Already reloaded once this session — clear the flag so next stale deploy can retry
+      sessionStorage.removeItem(reloadKey);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          <div className="text-center max-w-md space-y-4">
+            <Loader2 className="w-10 h-10 animate-spin text-emerald-500 mx-auto" />
+            <h2 className="text-xl font-semibold text-foreground">Atualizando aplicação...</h2>
+            <p className="text-sm text-muted-foreground">
+              Uma nova versão foi publicada. Se esta mensagem persistir, limpe o cache do navegador e recarregue.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Recarregar agora
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // Optimized QueryClient with aggressive caching
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -114,9 +168,10 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
+            <LazyErrorBoundary>
+              <BrowserRouter>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
                   {patientDomain ? (
                     <>
                       <Route path="/" element={<PatientMobileApp />} />
@@ -238,6 +293,7 @@ function App() {
                 </Routes>
               </Suspense>
             </BrowserRouter>
+            </LazyErrorBoundary>
           </TooltipProvider>
         </AuthProvider>
       </ThemeProvider>
