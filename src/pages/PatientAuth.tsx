@@ -271,12 +271,20 @@ export default function PatientAuth() {
 
     try {
       loginSchema.shape.email.parse(email);
-      
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/patient-auth`,
-      });
 
-      if (error) throw error;
+      const response = await fetch(
+        'https://nwenbxqmfpyspxpibgwp.supabase.co/functions/v1/send-password-reset-email',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Falha ao enviar email de recuperação');
+      }
 
       toast({
         title: "Email enviado!",
@@ -285,7 +293,7 @@ export default function PatientAuth() {
     } catch (err) {
       toast({
         title: "Erro",
-        description: "Não foi possível enviar o email. Tente novamente.",
+        description: err instanceof Error ? err.message : "Não foi possível enviar o email. Tente novamente.",
         variant: "destructive",
       });
     }

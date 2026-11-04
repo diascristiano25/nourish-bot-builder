@@ -336,25 +336,74 @@ export default function PatientDetail() {
   };
 
   const handleGenerateAccess = async () => {
-    // The Edge Function send-patient-magic-link is not deployed; copy the portal
-    // link to clipboard directly (reliable, no backend dependency).
     if (!patient?.id) {
       toast({ title: "Paciente sem ID", description: "Não foi possível gerar o link de acesso.", variant: "destructive" });
       return;
     }
+
+    // Validate required fields before generating access
+    const missingFields: string[] = [];
+    if (!patient.email) missingFields.push("email");
+    if (!patient.full_name) missingFields.push("nome completo");
+    if (!patient.phone) missingFields.push("telefone");
+
+    if (missingFields.length > 0) {
+      toast({
+        title: "Dados incompletos",
+        description: `Cadastre ${missingFields.join(", ")} do paciente antes de gerar o acesso ao portal.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSendingMagicLink(true);
     try {
-      const portalLink = `${window.location.origin}/paciente/${patient.id}`;
-      await navigator.clipboard.writeText(portalLink);
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      if (!token) {
+        throw new Error("Sessão expirada. Faça login novamente.");
+      }
+
+      // Get nutritionist name for the welcome email
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", user?.id)
+        .maybeSingle();
+
+      const response = await fetch(
+        `https://nwenbxqmfpyspxpibgwp.supabase.co/functions/v1/send-patient-welcome-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            email: patient.email!,
+            name: patient.full_name!,
+            phone: patient.phone || undefined,
+            nutritionistName: profile?.full_name || undefined,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Falha ao enviar email de boas-vindas");
+      }
+
       toast({
-        title: "Link do portal copiado! 📋",
-        description: patient?.email
-          ? `Envie este link para ${patient.email} por WhatsApp ou email. No primeiro acesso o paciente cria a própria senha.`
-          : "Envie este link ao paciente por WhatsApp ou email. No primeiro acesso ele cria a própria senha.",
+        title: "Portal gerado com sucesso! 🎉",
+        description: `Email de boas-vindas enviado para ${patient.email}. O paciente pode acessar pelo link em "Copiar Link Portal".`,
       });
-    } catch {
-      const portalLink = `${window.location.origin}/paciente/${patient.id}`;
-      toast({ title: "Link do portal", description: `Não foi possível copiar automaticamente. Link: ${portalLink}`, variant: "destructive" });
+    } catch (error) {
+      toast({
+        title: "Erro ao gerar acesso",
+        description: error instanceof Error ? error.message : "Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       setSendingMagicLink(false);
     }
@@ -699,9 +748,9 @@ Qualquer dúvida, estou à disposição! 💚`;
         <GlassCard className="p-4">
           <div className="flex flex-wrap items-center gap-3">
             {/* Botão principal de gerar acesso - destacado */}
-            <Button 
+            <Button
               onClick={handleGenerateAccess}
-              disabled={sendingMagicLink || !patient.email}
+              disabled={sendingMagicLink}
               className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg"
             >
               {sendingMagicLink ? (
