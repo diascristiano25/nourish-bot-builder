@@ -53,28 +53,44 @@ export default function AdminDashboard() {
 
       const nonAdminProfiles = (profiles || []).filter(p => !p.is_admin);
 
+      // Active: is_active=true AND has valid subscription (paid plan OR unexpired trial)
       const activeCount = nonAdminProfiles.filter(p => {
         if (!p.is_active) return false;
+        if (p.subscription_plan && p.subscription_plan !== 'free') return true;
         if (p.account_status === 'active') return true;
         if (p.trial_ends_at && new Date(p.trial_ends_at) > today) return true;
         return false;
       }).length;
 
+      // Trial: account_status='trial' AND trial not expired AND is_active
       const trialCount = nonAdminProfiles.filter(p =>
-        p.account_status === 'trial' && p.trial_ends_at && new Date(p.trial_ends_at) > today
+        p.is_active &&
+        p.account_status === 'trial' &&
+        p.trial_ends_at &&
+        new Date(p.trial_ends_at) > today
       ).length;
 
-      const newTodayCount = nonAdminProfiles.filter(p => isToday(new Date(p.created_at))).length;
+      // New today: created_at within today's calendar day (local timezone)
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+      const newTodayCount = nonAdminProfiles.filter(p => {
+        const d = new Date(p.created_at);
+        return d >= todayStart && d < todayEnd;
+      }).length;
 
       const { count: ticketCount } = await supabase
         .from('support_tickets')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'open');
 
+      // Use local timezone for month boundaries to avoid UTC offset issues
+      const localMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+      const localMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 1);
       const { data: financialRecords } = await supabase
         .from('financial_records')
         .select('amount, transaction_type, created_at')
-        .gte('created_at', currentMonthStart.toISOString())
+        .gte('created_at', localMonthStart.toISOString())
+        .lt('created_at', localMonthEnd.toISOString())
         .in('transaction_type', ['payment', 'subscription', 'income']);
 
       const monthlyRevenue = (financialRecords || []).reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
