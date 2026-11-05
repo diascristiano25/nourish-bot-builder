@@ -230,6 +230,14 @@ export default function PatientAuth() {
           .from('patients')
           .update({ user_id: signUpData.user.id })
           .eq('id', patient.id);
+
+        // Fire-and-forget patient welcome email
+        supabase.functions.invoke('send-patient-welcome-email', {
+          body: {
+            email,
+            name: patient.full_name,
+          },
+        }).catch((err) => console.error('Patient welcome email failed:', err));
       }
 
       toast({
