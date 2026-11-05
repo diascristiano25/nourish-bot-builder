@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
-const RESEND_API_KEY = "re_FjkR93Le_3kHDjEzjU7Sxa5G8bod8GPq4";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 
 // Domínio verificado - modo produção ativo
 const TEST_MODE = false;
