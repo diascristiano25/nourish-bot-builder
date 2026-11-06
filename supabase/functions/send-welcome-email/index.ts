@@ -28,6 +28,42 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Email is required");
     }
 
+    // This function is callable without a session (signup with email
+    // confirmation), so only send to a real, not-yet-welcomed account
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const respond = (status: number, body: Record<string, unknown>) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+
+    if (!user_id) {
+      return respond(400, { success: false, error: "user_id is required" });
+    }
+
+    const { data: profileRow } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .eq("user_id", user_id)
+      .maybeSingle();
+    const { data: authEmails } = await supabase.rpc("get_auth_emails", { user_ids: [user_id] });
+    if (!profileRow || authEmails?.[0]?.email?.toLowerCase() !== email.toLowerCase()) {
+      return respond(403, { success: false, error: "Forbidden" });
+    }
+
+    const { data: alreadySent } = await supabase
+      .from("email_logs")
+      .select("id")
+      .eq("user_id", user_id)
+      .eq("email_type", "welcome")
+      .maybeSingle();
+    if (alreadySent) {
+      return respond(200, { success: true, already_sent: true });
+    }
+
     const firstName = name?.split(" ")[0] || "Nutricionista";
 
     const htmlContent = `
@@ -115,16 +151,10 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Welcome email sent successfully to ${email}`);
 
     // Record the send so the backfill and cron never email this user again
-    if (user_id) {
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-      );
-      const { error: logError } = await supabase
-        .from("email_logs")
-        .insert({ user_id, email_type: "welcome", metadata: { email_id: emailResponse.id } });
-      if (logError) console.error("Failed to log email:", logError);
-    }
+    const { error: logError } = await supabase
+      .from("email_logs")
+      .insert({ user_id, email_type: "welcome", metadata: { email_id: emailResponse.id } });
+    if (logError) console.error("Failed to log email:", logError);
 
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
