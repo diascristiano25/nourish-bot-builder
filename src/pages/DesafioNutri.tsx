@@ -1,22 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
-  ArrowRight, Check, ChevronRight, ArrowUpRight,
-  Clock, MessageCircle, Heart, Activity, ShieldAlert, Mail
+  ArrowRight, Check, ChevronRight,
+  Clock, MessageCircle, Heart, Activity, Sparkles, Smartphone, Users,
 } from 'lucide-react';
 import logoImg from '@/assets/logo-nutriflow.png';
 import { motion } from 'framer-motion';
 
 /* ------------------------------------------------------------------ */
 /* Pixel tracking                                                      */
+/*  - Lead: o diagnóstico foi concluído (resultado na tela)            */
+/*  - CompleteRegistration / StartTrial: disparam em Auth.tsx, quando  */
+/*    a conta é criada de verdade                                      */
 /* ------------------------------------------------------------------ */
-function trackPixel(event: string, params?: Record<string, any>) {
+function fb(kind: 'track' | 'trackCustom', event: string, params?: Record<string, unknown>) {
   try {
-    if (typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', event, params);
-    }
+    const f = typeof window !== 'undefined' ? (window as unknown as { fbq?: (...a: unknown[]) => void }).fbq : undefined;
+    if (f) f(kind, event, params);
   } catch { /* silent fail */ }
 }
 
@@ -26,150 +27,133 @@ function trackPixel(event: string, params?: Record<string, any>) {
 const GREEN = '#518C5B';
 const GREEN_DEEP = '#3d7047';
 const CORAL = '#C4764A';
-const PAPER = '#f7f6f2';     // page background — warm off-white
-const SURFACE = '#ffffff';   // raised surface
-const SURFACE_2 = '#f1efe9'; // secondary raised surface
-const HAIRLINE = '#e4e1d8';  // 1px borders
-const INK = '#1c1f24';       // primary text — near-black
+const PAPER = '#f7f6f2';
+const SURFACE = '#ffffff';
+const SURFACE_2 = '#f1efe9';
+const HAIRLINE = '#e4e1d8';
+const INK = '#1c1f24';
 const TEXT_MUTED = '#5b616b';
 const TEXT_DIM = '#9aa0a8';
 
-/* One authored entrance — exponential ease-out, reused everywhere */
 const EASE = [0.16, 1, 0.3, 1] as const;
 const fadeUp = {
   initial: { opacity: 0, y: 14 },
   animate: { opacity: 1, y: 0 },
 };
 
+const HOURLY_RATE = 150;      // R$ por hora de atendimento, usado na estimativa
+const SHARE_TO_CARE = 0.5;    // só metade das horas liberadas vira atendimento (estimativa conservadora)
+
 /* ------------------------------------------------------------------ */
-/* Quiz — Diagnóstico de Potencial Perdido (dor / desejo)              */
+/* Quiz — 3 perguntas, uma toque cada (avança sozinho)                  */
 /* ------------------------------------------------------------------ */
-const quizQuestions = [
+type QuizOption = { id: string; text: string; lostHours?: number };
+type QuizQuestion = { id: number; category: string; question: string; options: QuizOption[] };
+
+const quizQuestions: QuizQuestion[] = [
   {
     id: 1,
-    category: 'Sua Rotina',
-    question: 'Sendo bem sincero(a): quantas horas por semana você perde montando cardápios manualmente ou ajustando planilhas?',
+    category: 'Sua rotina',
+    question: 'Quantas horas por semana você gasta montando cardápios ou ajustando planilhas?',
     options: [
-      { id: 'a', text: 'Menos de 5h — sou organizado(a)', points: 10, lostHours: 5, lostMoney: 750 },
-      { id: 'b', text: 'Entre 5h e 10h — é cansativo', points: 15, lostHours: 10, lostMoney: 1500 },
-      { id: 'c', text: 'Mais de 10h — vivo apagando incêndio', points: 20, lostHours: 15, lostMoney: 2250 },
-      { id: 'd', text: 'Perdi a conta… é o meu dia todo', points: 25, lostHours: 20, lostMoney: 3000 },
+      { id: 'a', text: 'Menos de 5 horas', lostHours: 5 },
+      { id: 'b', text: 'Entre 5 e 10 horas', lostHours: 10 },
+      { id: 'c', text: 'Mais de 10 horas', lostHours: 15 },
+      { id: 'd', text: 'Perdi a conta… é o meu dia todo', lostHours: 20 },
     ],
-    insight: 'Cada hora em tarefa repetitiva é uma hora que você não está atendendo (R$ 150/h) nem descansando. Automatizar isso com IA libera sua agenda imediatamente.',
   },
   {
     id: 2,
-    category: 'Retenção de Pacientes',
-    question: 'Quando seu paciente sai da consulta, como você garante que ele vai seguir o plano até o retorno?',
+    category: 'Acompanhamento',
+    question: 'Depois da consulta, como o paciente recebe e segue o plano?',
     options: [
-      { id: 'a', text: 'Entrego o PDF e torço pelo melhor', points: 10, retentionLoss: 40 },
-      { id: 'b', text: 'Mando mensagem no WhatsApp, na mão', points: 15, retentionLoss: 25 },
-      { id: 'c', text: 'Ele tem um app com lembretes e chat', points: 25, retentionLoss: 5 },
-      { id: 'd', text: 'Não faço nada — muitos não voltam', points: 5, retentionLoss: 60 },
+      { id: 'a', text: 'Entrego um PDF' },
+      { id: 'b', text: 'Mando pelo WhatsApp, na mão' },
+      { id: 'c', text: 'Ele tem um app com lembretes' },
+      { id: 'd', text: 'Não tenho um processo fixo' },
     ],
-    insight: 'Sem acompanhamento digital (app + lembretes), a adesão ao tratamento cai até 60%. Paciente que não vê resultado não renova o pacote. O app do paciente é a sua máquina de retenção.',
   },
   {
     id: 3,
-    category: 'Seu Futuro',
-    question: 'Se o NutriFlow te devolvesse 10 horas livres por semana a partir de amanhã, o que você faria com esse tempo?',
+    category: 'Seu futuro',
+    question: 'Se você ganhasse 10 horas livres por semana, o que faria com esse tempo?',
     options: [
-      { id: 'a', text: 'Atenderia mais pacientes — mais lucro', points: 20, desire: 'money' },
-      { id: 'b', text: 'Ficaria com minha família / descansaria', points: 20, desire: 'time' },
-      { id: 'c', text: 'Estudaria e me especializaria mais', points: 20, desire: 'growth' },
-      { id: 'd', text: 'Focaria em marketing para crescer', points: 20, desire: 'growth' },
+      { id: 'a', text: 'Atenderia mais pacientes' },
+      { id: 'b', text: 'Descansaria e ficaria com a família' },
+      { id: 'c', text: 'Estudaria e me especializaria' },
+      { id: 'd', text: 'Investiria em marketing' },
     ],
-    insight: 'Essa é a verdadeira promessa do NutriFlow: não é só um software, é liberdade. Seja para ganhar mais ou viver melhor, a tecnologia deve trabalhar para você — não o contrário.',
   },
 ];
 
-const optionGlyph: Record<string, typeof Clock> = {
-  1: Clock, 2: MessageCircle, 3: Heart,
-};
+const optionGlyph: Record<number, typeof Clock> = { 1: Clock, 2: MessageCircle, 3: Heart };
+
+const SIGNUP_UTMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
 
 /* ------------------------------------------------------------------ */
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 export default function DesafioNutri() {
-  const [step, setStep] = useState(0); // 0 intro · 1–3 quiz · 4 result
-  const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [totalPoints, setTotalPoints] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [showInsight, setShowInsight] = useState(false);
-  const [metrics, setMetrics] = useState({ lostHours: 0, lostMoney: 0, retentionLoss: 0, desire: '' });
-  const [captureEmail, setCaptureEmail] = useState('');
-  const [captureStatus, setCaptureStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const navigate = useNavigate();
+  const [step, setStep] = useState(0); // 0 intro · 1–3 quiz · 4 resultado
+  const [selected, setSelected] = useState<string | null>(null);
+  const [locked, setLocked] = useState(false);
+  const [lostHours, setLostHours] = useState(0);
+  const leadFired = useRef(false);
 
-  useEffect(() => { trackPixel('ViewContent'); }, []);
-
-  const handleEmailCapture = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!captureEmail || captureStatus === 'sending' || captureStatus === 'sent') return;
-    setCaptureStatus('sending');
-    try {
-      // Send lead to Supabase edge function or API endpoint
-      // For now, store locally and redirect to auth with email pre-filled
-      const params = new URLSearchParams({
-        mode: 'signup',
-        source: 'desafio-nutri',
-        email: captureEmail,
-        points: String(totalPoints),
-        lostMoney: String(metrics.lostMoney),
-        lostHours: String(metrics.lostHours),
-        desire: metrics.desire,
-        captured: 'email-only',
-      });
-      trackPixel('Lead', { content_type: 'email_capture', value: metrics.lostMoney });
-      setCaptureStatus('sent');
-      // Optional: also send to backend here via fetch('/api/capture-lead', ...)
-      // For immediate effect, redirect after short delay so user sees confirmation
-      setTimeout(() => {
-        window.location.href = `/auth?${params.toString()}`;
-      }, 1200);
-    } catch {
-      setCaptureStatus('error');
-    }
-  };
-
-  const handleAnswer = (questionId: number, optionId: string, points: number, optionData: any) => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setAnswers(prev => ({ ...prev, [questionId]: optionId }));
-    setTotalPoints(prev => prev + points);
-    setMetrics(prev => ({
-      lostHours: prev.lostHours + (optionData.lostHours || 0),
-      lostMoney: prev.lostMoney + (optionData.lostMoney || 0),
-      retentionLoss: optionData.retentionLoss !== undefined ? optionData.retentionLoss : prev.retentionLoss,
-      desire: optionData.desire || prev.desire,
-    }));
-    setTimeout(() => { setShowInsight(true); setIsAnimating(false); }, 380);
-  };
-
-  const handleNextQuestion = () => {
-    setIsAnimating(true);
-    setShowInsight(false);
-    setTimeout(() => {
-      if (step < 3) setStep(prev => prev + 1);
-      else { setStep(4); trackPixel('ViewContent', { content_type: 'diagnostic_result' }); }
-      setIsAnimating(false);
-    }, 280);
-  };
-
-  const handleStartTest = () => {
-    // Only fire StartTrial here; CompleteRegistration fires on actual signup in Auth.tsx
-    trackPixel('StartTrial');
-    const params = new URLSearchParams({
-      mode: 'signup',
-      source: 'desafio-nutri',
-      points: String(totalPoints),
-      lostMoney: String(metrics.lostMoney),
-      lostHours: String(metrics.lostHours),
-      desire: metrics.desire,
-    });
-    window.location.href = `/auth?${params.toString()}`;
-  };
+  useEffect(() => { fb('track', 'ViewContent'); }, []);
 
   const brl = (n: number) => n.toLocaleString('pt-BR');
+
+  const handleStart = () => {
+    fb('trackCustom', 'QuizStart');
+    setStep(1);
+  };
+
+  const handleAnswer = (option: QuizOption) => {
+    if (locked) return;
+    setLocked(true);
+    setSelected(option.id);
+    const nextHours = lostHours + (option.lostHours ?? 0);
+    setLostHours(nextHours);
+    window.setTimeout(() => {
+      setSelected(null);
+      setLocked(false);
+      if (step < 3) {
+        setStep(step + 1);
+      } else {
+        setStep(4);
+        if (!leadFired.current) {
+          leadFired.current = true;
+          fb('track', 'Lead', { content_name: 'diagnostico_desafio_nutri' });
+        }
+      }
+    }, 380);
+  };
+
+  const handleSignup = () => {
+    fb('trackCustom', 'SignupClick', { source: 'desafio-nutri' });
+    const current = new URLSearchParams(window.location.search);
+    const out = new URLSearchParams({ mode: 'signup', source: 'desafio-nutri' });
+    SIGNUP_UTMS.forEach((k) => {
+      const v = current.get(k);
+      if (v) out.set(k, v);
+    });
+    navigate(`/auth?${out.toString()}`);
+  };
+
+  const hoursPerMonth = lostHours * 4;                                   // mês = 4 semanas
+  const recoverable = Math.round(hoursPerMonth * SHARE_TO_CARE * HOURLY_RATE);
+
+  const Masthead = ({ right }: { right: string }) => (
+    <header className="flex items-center justify-between border-b pb-5" style={{ borderColor: HAIRLINE }}>
+      <div className="flex items-center gap-2.5">
+        <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
+        <span className="font-serif text-xl font-semibold tracking-tight" style={{ color: INK }}>NutriFlow</span>
+      </div>
+      <span className="text-[11px] font-medium uppercase tracking-[0.16em]" style={{ color: TEXT_DIM }}>{right}</span>
+    </header>
+  );
 
   /* ================================================================ */
   /* INTRO                                                             */
@@ -177,87 +161,61 @@ export default function DesafioNutri() {
   if (step === 0) {
     return (
       <div className="min-h-screen" style={{ background: PAPER, color: INK }}>
-        <div className="mx-auto max-w-5xl px-6 py-10">
-          {/* masthead */}
-          <header className="flex items-center justify-between border-b pb-6" style={{ borderColor: HAIRLINE }}>
-            <div className="flex items-center gap-2.5">
-              <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
-              <span className="font-serif text-xl font-semibold tracking-tight" style={{ color: INK }}>NutriFlow</span>
-            </div>
-            <span className="text-xs font-medium uppercase tracking-[0.18em]" style={{ color: TEXT_DIM }}>
-              Diagnóstico gratuito
-            </span>
-          </header>
+        <div className="mx-auto max-w-5xl px-6 py-8">
+          <Masthead right="Diagnóstico grátis" />
 
-          {/* hero — editorial, left-aligned, asymmetric */}
-          <div className="grid gap-12 pt-20 pb-24 md:grid-cols-12 md:pt-28">
-            <motion.div
-              {...fadeUp}
-              transition={{ duration: 0.7, ease: EASE }}
-              className="md:col-span-7"
-            >
-              <p className="mb-6 text-sm font-medium" style={{ color: CORAL }}>
+          <div className="grid gap-10 pt-10 pb-16 md:grid-cols-12 md:pt-20 md:pb-24">
+            <motion.div {...fadeUp} transition={{ duration: 0.6, ease: EASE }} className="md:col-span-7">
+              <p className="mb-4 text-sm font-medium" style={{ color: CORAL }}>
                 Para nutricionistas que querem parar de perder tempo
               </p>
-              <h1 className="font-serif text-[2.7rem] font-semibold leading-[1.04] tracking-[-0.02em] sm:text-6xl md:text-[4.4rem]" style={{ color: INK }}>
-                Quanto da sua semana
-                <br />
-                some montando
-                <br />
-                <span style={{ color: GREEN }}>cardápio na mão?</span>
+              <h1 className="font-serif text-[2.4rem] font-semibold leading-[1.06] tracking-[-0.02em] sm:text-6xl md:text-[4.2rem]" style={{ color: INK }}>
+                Quanto da sua semana some montando
+                {' '}<span style={{ color: GREEN }}>cardápio na mão?</span>
               </h1>
-              <p className="mt-8 max-w-md text-lg leading-relaxed" style={{ color: TEXT_MUTED }}>
-                Três perguntas rápidas sobre a sua rotina. No final, um número honesto:
-                quantas horas e quantos reais você pode recuperar com o NutriFlow.
+              <p className="mt-6 max-w-md text-lg leading-relaxed" style={{ color: TEXT_MUTED }}>
+                Responda 3 perguntas rápidas e veja uma estimativa de quantas horas e quantos reais você pode recuperar com o NutriFlow.
               </p>
 
-              <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+              <div className="mt-8 flex flex-col items-start gap-4">
                 <Button
-                  onClick={() => setStep(1)}
+                  onClick={handleStart}
                   size="lg"
-                  className="group h-14 gap-2.5 rounded-xl px-8 text-base font-semibold text-white transition-colors"
+                  className="group h-14 w-full gap-2.5 rounded-xl px-8 text-base font-semibold text-white transition-colors sm:w-auto"
                   style={{ background: GREEN }}
-                  onMouseEnter={e => (e.currentTarget.style.background = GREEN_DEEP)}
-                  onMouseLeave={e => (e.currentTarget.style.background = GREEN)}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = GREEN_DEEP)}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = GREEN)}
                 >
-                  Descobrir quanto posso recuperar
+                  Fazer o diagnóstico grátis
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
                 <span className="text-sm" style={{ color: TEXT_DIM }}>
-                  Leva menos de 1 minuto · +2.000 nutricionistas já usaram
+                  Leva menos de 1 minuto · Sem cadastro para começar
                 </span>
               </div>
             </motion.div>
 
-            {/* side column — app mockup + metrics */}
-            <motion.div
-              {...fadeUp}
-              transition={{ duration: 0.7, ease: EASE, delay: 0.12 }}
-              className="flex flex-col gap-6 md:col-span-5"
-            >
-              {/* CSS-only app mockup — shows the product generating a meal plan */}
+            <motion.div {...fadeUp} transition={{ duration: 0.6, ease: EASE, delay: 0.1 }} className="flex flex-col gap-5 md:col-span-5">
+              {/* mockup do produto: o plano alimentar gerado pela IA */}
               <div className="relative overflow-hidden rounded-2xl border shadow-lg" style={{ borderColor: HAIRLINE, background: SURFACE }}>
-                {/* mockup header bar */}
                 <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: HAIRLINE, background: SURFACE_2 }}>
                   <div className="h-2.5 w-2.5 rounded-full" style={{ background: CORAL }} />
                   <div className="h-2.5 w-2.5 rounded-full" style={{ background: '#e8c94a' }} />
                   <div className="h-2.5 w-2.5 rounded-full" style={{ background: GREEN }} />
                   <span className="ml-2 text-[10px] font-medium tracking-wide" style={{ color: TEXT_DIM }}>NutriFlow · Cardápio IA</span>
                 </div>
-                {/* mockup body — simulated meal plan card */}
                 <div className="p-4">
                   <div className="mb-3 flex items-center justify-between">
                     <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: GREEN }}>Almoço · Terça</span>
-                    <span className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ background: GREEN }}>IA ✓</span>
+                    <span className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ background: GREEN }}>IA</span>
                   </div>
                   <div className="space-y-2">
                     {[
                       { name: 'Frango grelhado', grams: '150g', kcal: '248 kcal' },
                       { name: 'Arroz integral', grams: '100g', kcal: '124 kcal' },
                       { name: 'Brócolis no vapor', grams: '80g', kcal: '28 kcal' },
-                      { name: 'Azeite extra virgem', grams: '5ml', kcal: '45 kcal' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: PAPER }}>
+                    ].map((item) => (
+                      <div key={item.name} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: PAPER }}>
                         <span className="text-sm font-medium" style={{ color: INK }}>{item.name}</span>
                         <div className="flex gap-3 text-xs tabular-nums" style={{ color: TEXT_MUTED }}>
                           <span>{item.grams}</span>
@@ -266,23 +224,18 @@ export default function DesafioNutri() {
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3 flex items-center justify-between border-t pt-3" style={{ borderColor: HAIRLINE }}>
-                    <span className="text-xs" style={{ color: TEXT_DIM }}>Total da refeição</span>
-                    <span className="text-sm font-bold tabular-nums" style={{ color: INK }}>445 kcal · 38g prot</span>
-                  </div>
                 </div>
               </div>
 
-              {/* metrics strip below mockup */}
               <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl" style={{ background: HAIRLINE }}>
                 {[
-                  { k: '15h', v: '/semana' },
-                  { k: 'R$3k', v: '/mês' },
-                  { k: '14d', v: 'grátis' },
-                ].map((row, i) => (
-                  <div key={i} className="flex flex-col items-center justify-center py-3" style={{ background: SURFACE }}>
-                    <span className="font-serif text-lg font-semibold tabular-nums" style={{ color: GREEN }}>{row.k}</span>
-                    <span className="text-[10px]" style={{ color: TEXT_DIM }}>{row.v}</span>
+                  { icon: Sparkles, label: 'Cardápio por IA' },
+                  { icon: Smartphone, label: 'App do paciente' },
+                  { icon: Check, label: '14 dias grátis' },
+                ].map((row) => (
+                  <div key={row.label} className="flex flex-col items-center justify-center gap-1 py-3" style={{ background: SURFACE }}>
+                    <row.icon className="h-4 w-4" style={{ color: GREEN }} />
+                    <span className="text-[11px] font-medium" style={{ color: TEXT_MUTED }}>{row.label}</span>
                   </div>
                 ))}
               </div>
@@ -299,336 +252,165 @@ export default function DesafioNutri() {
   if (step >= 1 && step <= 3) {
     const q = quizQuestions[step - 1];
     const Glyph = optionGlyph[q.id] || Activity;
-    const answeredId = answers[q.id];
-    const earned = q.options.find(o => o.id === answeredId)?.points || 0;
 
     return (
       <div className="min-h-screen" style={{ background: PAPER, color: INK }}>
-        {/* progress rail */}
-        <div className="sticky top-0 z-50 border-b backdrop-blur" style={{ borderColor: HAIRLINE, background: 'rgba(247,246,242,0.85)' }}>
+        <div className="sticky top-0 z-50 border-b backdrop-blur" style={{ borderColor: HAIRLINE, background: 'rgba(247,246,242,0.88)' }}>
           <div className="mx-auto flex max-w-3xl items-center gap-4 px-6 py-4">
             <span className="text-xs font-medium tabular-nums" style={{ color: TEXT_DIM }}>
               {String(step).padStart(2, '0')} <span style={{ color: HAIRLINE }}>/</span> 03
             </span>
-            <div className="h-px flex-1" style={{ background: HAIRLINE }}>
-              <div className="h-px transition-all duration-500" style={{ width: `${(step / 3) * 100}%`, background: GREEN }} />
+            <div className="h-1 flex-1 rounded-full" style={{ background: HAIRLINE }}>
+              <div className="h-1 rounded-full transition-all duration-500" style={{ width: `${(step / 3) * 100}%`, background: GREEN }} />
             </div>
-            <span className="text-xs font-medium tabular-nums" style={{ color: TEXT_MUTED }}>
-              {totalPoints} pts
-            </span>
           </div>
         </div>
 
-        <div className="mx-auto max-w-3xl px-6 pb-16 pt-14">
-          {!showInsight ? (
-            <motion.div key={`q-${step}`} {...fadeUp} transition={{ duration: 0.45, ease: EASE }}>
-              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: CORAL }}>
-                {q.category}
-              </p>
-              <h2 className="font-serif text-2xl font-semibold leading-snug tracking-[-0.01em] sm:text-[2rem]" style={{ color: INK }}>
-                {q.question}
-              </h2>
+        <div className="mx-auto max-w-3xl px-6 pb-16 pt-10">
+          <motion.div key={`q-${step}`} {...fadeUp} transition={{ duration: 0.4, ease: EASE }}>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: CORAL }}>{q.category}</p>
+            <h2 className="font-serif text-2xl font-semibold leading-snug tracking-[-0.01em] sm:text-[2rem]" style={{ color: INK }}>
+              {q.question}
+            </h2>
 
-              <div className="mt-9 space-y-3">
-                {q.options.map((option, i) => {
-                  const selected = answeredId === option.id;
-                  const dimmed = !!answeredId && !selected;
-                  return (
-                    <motion.button
-                      key={option.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.06 * i, duration: 0.4, ease: EASE }}
-                      onClick={() => handleAnswer(q.id, option.id, option.points, option)}
-                      disabled={!!answeredId || isAnimating}
-                      className="group flex w-full items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200"
-                      style={{
-                        borderColor: selected ? GREEN : HAIRLINE,
-                        background: selected ? 'rgba(81,140,91,0.10)' : SURFACE,
-                        opacity: dimmed ? 0.45 : 1,
-                      }}
+            <div className="mt-8 space-y-3">
+              {q.options.map((option, i) => {
+                const isSelected = selected === option.id;
+                const dimmed = selected !== null && !isSelected;
+                return (
+                  <motion.button
+                    key={option.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: dimmed ? 0.45 : 1, y: 0 }}
+                    transition={{ delay: 0.05 * i, duration: 0.35, ease: EASE }}
+                    onClick={() => handleAnswer(option)}
+                    disabled={locked}
+                    className="group flex min-h-[64px] w-full items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200 active:scale-[0.99]"
+                    style={{
+                      borderColor: isSelected ? GREEN : HAIRLINE,
+                      background: isSelected ? 'rgba(81,140,91,0.10)' : SURFACE,
+                    }}
+                  >
+                    <span
+                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border transition-colors"
+                      style={{ borderColor: isSelected ? GREEN : HAIRLINE, background: isSelected ? GREEN : 'transparent' }}
                     >
-                      <span
-                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border transition-colors"
-                        style={{
-                          borderColor: selected ? GREEN : HAIRLINE,
-                          background: selected ? GREEN : 'transparent',
-                        }}
-                      >
-                        {selected
-                          ? <Check className="h-4 w-4 text-white" />
-                          : <Glyph className="h-4 w-4" style={{ color: TEXT_DIM }} />}
-                      </span>
-                      <span className="flex-1 text-base font-medium leading-snug" style={{ color: INK }}>
-                        {option.text}
-                      </span>
-                      {!answeredId && (
-                        <ChevronRight className="h-4 w-4 flex-shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: TEXT_DIM }} />
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div key={`i-${step}`} {...fadeUp} transition={{ duration: 0.45, ease: EASE }}>
-              <div className="flex items-center gap-2 text-sm font-medium" style={{ color: GREEN }}>
-                <Check className="h-4 w-4" />
-                Resposta registrada · +{earned} pts
-              </div>
-
-              <div className="mt-6 rounded-2xl border p-7" style={{ borderColor: HAIRLINE, background: SURFACE }}>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: CORAL }}>
-                  Você sabia?
-                </p>
-                <p className="mt-3 text-lg leading-relaxed" style={{ color: INK }}>
-                  {q.insight}
-                </p>
-              </div>
-
-              <div className="mt-8">
-                <Button
-                  onClick={handleNextQuestion}
-                  size="lg"
-                  className="group h-14 gap-2.5 rounded-xl px-8 text-base font-semibold text-white transition-colors"
-                  style={{ background: GREEN }}
-                  onMouseEnter={e => (e.currentTarget.style.background = GREEN_DEEP)}
-                  onMouseLeave={e => (e.currentTarget.style.background = GREEN)}
-                >
-                  {step < 3 ? 'Próxima pergunta' : 'Ver meu resultado'}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </div>
-            </motion.div>
-          )}
+                      {isSelected ? <Check className="h-4 w-4 text-white" /> : <Glyph className="h-4 w-4" style={{ color: TEXT_DIM }} />}
+                    </span>
+                    <span className="flex-1 text-base font-medium leading-snug" style={{ color: INK }}>{option.text}</span>
+                    {selected === null && (
+                      <ChevronRight className="h-4 w-4 flex-shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: TEXT_DIM }} />
+                    )}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
         </div>
       </div>
     );
   }
 
   /* ================================================================ */
-  /* RESULT — editorial, asymmetric, light surface, no pricing         */
+  /* RESULTADO — um número, um botão                                    */
   /* ================================================================ */
-  if (step === 4) {
-    return (
-      <div className="min-h-screen" style={{ background: PAPER, color: INK }}>
-        <div className="mx-auto max-w-5xl px-6 py-10">
-          {/* masthead */}
-          <header className="flex items-center justify-between border-b pb-6" style={{ borderColor: HAIRLINE }}>
-            <div className="flex items-center gap-2.5">
-              <img src={logoImg} alt="NutriFlow" className="h-8 w-auto" />
-              <span className="font-serif text-xl font-semibold tracking-tight" style={{ color: INK }}>NutriFlow</span>
-            </div>
-            <span className="text-xs font-medium tabular-nums uppercase tracking-[0.18em]" style={{ color: TEXT_DIM }}>
-              Seu resultado · {totalPoints} pts
-            </span>
-          </header>
+  return (
+    <div className="min-h-screen pb-32 md:pb-0" style={{ background: PAPER, color: INK }}>
+      <div className="mx-auto max-w-3xl px-6 py-8">
+        <Masthead right="Seu diagnóstico" />
 
-          {/* headline row */}
-          <motion.div
-            {...fadeUp}
-            transition={{ duration: 0.6, ease: EASE }}
-            className="max-w-2xl pt-16"
+        <motion.div {...fadeUp} transition={{ duration: 0.5, ease: EASE }} className="pt-10">
+          <p className="mb-3 text-sm font-medium" style={{ color: CORAL }}>Diagnóstico concluído</p>
+          <h1 className="font-serif text-3xl font-semibold leading-[1.1] tracking-[-0.02em] sm:text-5xl" style={{ color: INK }}>
+            Montar cardápio na mão leva cerca de
+          </h1>
+          <p
+            className="mt-4 font-serif font-semibold leading-none tracking-[-0.03em] tabular-nums"
+            style={{ color: GREEN, fontSize: 'clamp(3.4rem, 15vw, 7rem)' }}
           >
-            <p className="mb-5 text-sm font-medium" style={{ color: CORAL }}>
-              Diagnóstico concluído
-            </p>
-            <h1 className="font-serif text-4xl font-semibold leading-[1.05] tracking-[-0.02em] sm:text-5xl" style={{ color: INK }}>
-              Este é o custo silencioso
-              <br />
-              da sua clínica hoje.
-            </h1>
-          </motion.div>
+            {brl(hoursPerMonth)}
+            <span className="ml-2 text-2xl font-medium tracking-normal sm:text-3xl" style={{ color: TEXT_MUTED }}>horas/mês</span>
+          </p>
+          <p className="mt-5 max-w-lg text-base leading-relaxed" style={{ color: TEXT_MUTED }}>
+            São cerca de <span className="font-semibold tabular-nums" style={{ color: INK }}>{lostHours} horas por semana</span> em
+            uma tarefa que o NutriFlow automatiza: a IA monta o plano e você só revisa.
+          </p>
+          <p className="mt-4 inline-block rounded-xl px-4 py-3 text-sm leading-relaxed" style={{ background: 'rgba(81,140,91,0.10)', color: GREEN_DEEP }}>
+            Se metade desse tempo virar atendimento, são cerca de <span className="font-semibold tabular-nums">R$ {brl(recoverable)}</span> a mais por mês.
+          </p>
+          <p className="mt-2 text-xs" style={{ color: TEXT_DIM }}>
+            Estimativa com base nas suas respostas e em R$ {HOURLY_RATE} por hora de atendimento.
+          </p>
 
-          {/* THE number — big editorial figure, asymmetric two-column */}
-          <motion.div
-            {...fadeUp}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.1 }}
-            className="mt-14 grid gap-10 border-t pt-12 md:grid-cols-12"
-            style={{ borderColor: HAIRLINE }}
-          >
-            <div className="md:col-span-7">
-              <p className="text-sm font-medium" style={{ color: TEXT_MUTED }}>
-                Potencial deixado na mesa, por mês
-              </p>
-              <p className="mt-3 font-serif font-semibold leading-none tracking-[-0.03em] tabular-nums" style={{ color: GREEN, fontSize: 'clamp(4rem, 12vw, 8.5rem)' }}>
-                R$ {brl(metrics.lostMoney)}
-              </p>
-              <p className="mt-5 max-w-md text-base leading-relaxed" style={{ color: TEXT_MUTED }}>
-                Equivale a <span className="font-semibold tabular-nums" style={{ color: INK }}>{metrics.lostHours} horas</span> por semana
-                gastas em tarefas que a IA do NutriFlow faz em segundos — tempo que poderia virar atendimento, estudo ou descanso.
-              </p>
-            </div>
-
-            {/* secondary metric — quiet, right-aligned, not a twin card */}
-            <div className="flex flex-col justify-end md:col-span-5">
-              <div className="rounded-2xl border p-7" style={{ borderColor: HAIRLINE, background: SURFACE }}>
-                <div className="flex items-center gap-2.5" style={{ color: CORAL }}>
-                  <ShieldAlert className="h-4 w-4" />
-                  <span className="text-xs font-semibold uppercase tracking-[0.16em]">Risco de evasão</span>
-                </div>
-                <p className="mt-4 font-serif text-5xl font-semibold tabular-nums" style={{ color: INK }}>
-                  {metrics.retentionLoss}%
-                </p>
-                <p className="mt-3 text-sm leading-relaxed" style={{ color: TEXT_MUTED }}>
-                  Chance estimada de pacientes não renovarem sem acompanhamento digital entre as consultas.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Email capture — saves lead even if user doesn't sign up now */}
-          <motion.div
-            {...fadeUp}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.15 }}
-            className="mt-12 rounded-2xl border p-7 sm:p-9"
-            style={{ borderColor: HAIRLINE, background: SURFACE }}
-          >
-            {captureStatus === 'sent' ? (
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full" style={{ background: 'rgba(81,140,91,0.12)' }}>
-                  <Check className="h-5 w-5" style={{ color: GREEN }} />
-                </div>
-                <div>
-                  <p className="text-base font-semibold" style={{ color: INK }}>Diagnóstico enviado!</p>
-                  <p className="text-sm" style={{ color: TEXT_MUTED }}>Redirecionando para seu cadastro...</p>
-                </div>
-              </div>
-            ) : (
-              <>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: CORAL }}>
-                  Não quer criar conta agora?
-                </p>
-                <h3 className="mt-3 font-serif text-xl font-semibold leading-snug sm:text-2xl" style={{ color: INK }}>
-                  Receba seu diagnóstico por email e continue depois.
-                </h3>
-                <form onSubmit={handleEmailCapture} className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
-                  <div className="flex-1 space-y-1.5">
-                    <Label htmlFor="capture-email" className="text-sm font-medium" style={{ color: TEXT_MUTED }}>
-                      Seu melhor email
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: TEXT_DIM }} />
-                      <Input
-                        id="capture-email"
-                        type="email"
-                        placeholder="seu@email.com"
-                        value={captureEmail}
-                        onChange={(e) => setCaptureEmail(e.target.value)}
-                        required
-                        className="h-12 pl-10 rounded-xl border bg-nf-bg-alt/50 focus:border-nf-teal focus:ring-nf-teal/20"
-                        style={{ borderColor: HAIRLINE }}
-                      />
-                    </div>
-                  </div>
-                  <Button
-                    type="submit"
-                    size="lg"
-                    disabled={!captureEmail || captureStatus === 'sending'}
-                    className="group h-12 gap-2 rounded-xl px-6 text-sm font-semibold text-white transition-colors"
-                    style={{ background: captureStatus === 'error' ? CORAL : GREEN }}
-                    onMouseEnter={e => { if (captureStatus !== 'error') e.currentTarget.style.background = GREEN_DEEP; }}
-                    onMouseLeave={e => { if (captureStatus !== 'error') e.currentTarget.style.background = GREEN; }}
-                  >
-                    {captureStatus === 'sending' ? 'Enviando...' : captureStatus === 'error' ? 'Tentar novamente' : 'Enviar diagnóstico'}
-                    {!captureStatus || captureStatus === 'idle' || captureStatus === 'error' ? (
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    ) : null}
-                  </Button>
-                </form>
-                <p className="mt-3 text-xs" style={{ color: TEXT_DIM }}>
-                  Sem spam. Você pode criar sua conta quando quiser.
-                </p>
-              </>
-            )}
-          </motion.div>
-
-          {/* product proof + CTA band */}
-          <motion.div
-            {...fadeUp}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.22 }}
-            className="mt-6 overflow-hidden rounded-2xl px-8 py-12 sm:px-12"
-            style={{ background: GREEN }}
-          >
-            <div className="grid gap-10 md:grid-cols-12 md:items-center">
-              <div className="md:col-span-7">
-                <h2 className="font-serif text-3xl font-semibold leading-tight tracking-[-0.01em] text-white sm:text-4xl">
-                  O NutriFlow faz isso por você.
-                </h2>
-                <p className="mt-4 text-base leading-relaxed text-white/85">
-                  Cardápios gerados com IA em segundos, app do paciente com lembretes e chat,
-                  e gestão completa da clínica. Recupere{' '}
-                  <span className="font-semibold text-white tabular-nums">R$ {brl(metrics.lostMoney)}/mês</span>{' '}
-                  a partir de hoje.
-                </p>
-                <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                  <Button
-                    onClick={handleStartTest}
-                    size="lg"
-                    className="group h-14 flex-shrink-0 gap-2.5 rounded-xl bg-white px-8 text-base font-semibold transition-transform hover:scale-[1.03]"
-                    style={{ color: GREEN_DEEP }}
-                  >
-                    Começar teste grátis agora
-                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  </Button>
-                  <span className="text-sm text-white/70">
-                    14 dias grátis · sem cartão
-                  </span>
-                </div>
-              </div>
-
-              {/* mini mockup — reinforces the product on the result screen */}
-              <div className="md:col-span-5">
-                <div className="overflow-hidden rounded-xl border border-white/20 shadow-xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
-                  <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-2.5" style={{ background: SURFACE_2 }}>
-                    <div className="h-2 w-2 rounded-full" style={{ background: CORAL }} />
-                    <div className="h-2 w-2 rounded-full" style={{ background: '#e8c94a' }} />
-                    <div className="h-2 w-2 rounded-full" style={{ background: GREEN }} />
-                    <span className="ml-1.5 text-[9px] font-medium tracking-wide" style={{ color: TEXT_DIM }}>NutriFlow · Paciente</span>
-                  </div>
-                  <div className="p-4">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-widest" style={{ color: GREEN }}>Hoje · Almoço</span>
-                      <span className="rounded-full px-2 py-0.5 text-[9px] font-bold text-white" style={{ background: GREEN }}>Gerado ✓</span>
-                    </div>
-                    {[
-                      { name: 'Salmão grelhado', detail: '150g · 280 kcal' },
-                      { name: 'Quinoa tricolor', detail: '80g · 96 kcal' },
-                      { name: 'Mix de folhas verdes', detail: '60g · 12 kcal' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: PAPER }}>
-                        <span className="text-xs font-medium" style={{ color: INK }}>{item.name}</span>
-                        <span className="text-[10px] tabular-nums" style={{ color: TEXT_MUTED }}>{item.detail}</span>
-                      </div>
-                    ))}
-                    <div className="mt-2.5 flex items-center gap-2 rounded-lg px-3 py-2" style={{ background: 'rgba(81,140,91,0.08)' }}>
-                      <MessageCircle className="h-3.5 w-3.5" style={{ color: GREEN }} />
-                      <span className="text-[10px] font-medium" style={{ color: GREEN }}>Lembrete enviado ao paciente</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <footer className="mt-16 border-t pt-8 text-sm" style={{ borderColor: HAIRLINE, color: TEXT_DIM }}>
-            © {new Date().getFullYear()} NutriFlow · Dúvidas?{' '}
-            <a
-              href="https://wa.me/5513996205253?text=Ol%C3%A1!%20Fiz%20o%20diagn%C3%B3stico%20e%20quero%20saber%20mais."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium transition-colors"
-              style={{ color: GREEN }}
-              onMouseEnter={e => (e.currentTarget.style.color = GREEN_DEEP)}
-              onMouseLeave={e => (e.currentTarget.style.color = GREEN)}
+          <div className="mt-8 hidden md:block">
+            <Button
+              onClick={handleSignup}
+              size="lg"
+              className="group h-14 gap-2.5 rounded-xl px-8 text-base font-semibold text-white transition-colors"
+              style={{ background: GREEN }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = GREEN_DEEP)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = GREEN)}
             >
-              Fale conosco no WhatsApp
-            </a>
-          </footer>
-        </div>
-      </div>
-    );
-  }
+              Criar minha conta grátis
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+            <p className="mt-3 text-sm" style={{ color: TEXT_DIM }}>14 dias grátis · sem cartão de crédito</p>
+          </div>
+        </motion.div>
 
-  return null;
+        <motion.div
+          {...fadeUp}
+          transition={{ duration: 0.5, ease: EASE, delay: 0.12 }}
+          className="mt-10 rounded-2xl border p-6"
+          style={{ borderColor: HAIRLINE, background: SURFACE }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: CORAL }}>O que você testa nos 14 dias</p>
+          <ul className="mt-4 space-y-4">
+            {[
+              { icon: Sparkles, title: 'Cardápios gerados por IA', text: 'Plano personalizado do paciente; você só revisa e ajusta.' },
+              { icon: Smartphone, title: 'App do paciente', text: 'Lembretes e chat para o paciente seguir o plano até o retorno.' },
+              { icon: Users, title: 'Gestão da clínica', text: 'Pacientes, evolução e agenda em um só lugar.' },
+            ].map((b) => (
+              <li key={b.title} className="flex items-start gap-3">
+                <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(81,140,91,0.12)' }}>
+                  <b.icon className="h-4 w-4" style={{ color: GREEN }} />
+                </span>
+                <div>
+                  <p className="text-base font-semibold" style={{ color: INK }}>{b.title}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: TEXT_MUTED }}>{b.text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+
+        <footer className="mt-10 border-t pt-6 text-sm" style={{ borderColor: HAIRLINE, color: TEXT_DIM }}>
+          © {new Date().getFullYear()} NutriFlow · Dúvidas?{' '}
+          <a
+            href="https://wa.me/5513996205253?text=Ol%C3%A1!%20Fiz%20o%20diagn%C3%B3stico%20e%20quero%20saber%20mais."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium transition-colors"
+            style={{ color: GREEN }}
+          >
+            Fale conosco no WhatsApp
+          </a>
+        </footer>
+      </div>
+
+      {/* botão fixo no celular: o cadastro está sempre a um toque */}
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t px-4 pb-4 pt-3 backdrop-blur md:hidden" style={{ borderColor: HAIRLINE, background: 'rgba(247,246,242,0.96)' }}>
+        <Button
+          onClick={handleSignup}
+          size="lg"
+          className="h-14 w-full gap-2.5 rounded-xl text-base font-semibold text-white"
+          style={{ background: GREEN }}
+        >
+          Criar minha conta grátis
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+        <p className="mt-2 text-center text-xs" style={{ color: TEXT_DIM }}>14 dias grátis · sem cartão de crédito</p>
+      </div>
+    </div>
+  );
 }
