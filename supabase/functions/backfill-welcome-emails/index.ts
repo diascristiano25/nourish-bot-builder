@@ -35,35 +35,44 @@ const handler = async (req: Request): Promise<Response> => {
     let nutritionistsSent = 0;
     let patientsSent = 0;
 
+    const { data: logs } = await supabase
+      .from("email_logs")
+      .select("user_id, email_type")
+      .in("email_type", ["welcome", "patient-welcome"]);
+
+    const welcomed = new Set((logs || []).map((l) => `${l.email_type}:${l.user_id}`));
+
     // Backfill nutritionists who have no welcome email logged
-    const { data: nutritionists } = await supabase
+    // (the send function records the log itself when given user_id)
+    const { data: profiles } = await supabase
       .from("profiles")
-      .select("user_id, full_name, email")
-      .not("email", "is", null);
+      .select("user_id, full_name")
+      .eq("is_admin", false);
 
-    for (const n of nutritionists || []) {
-      const { data: existing } = await supabase
-        .from("email_logs")
-        .select("id")
-        .eq("user_id", n.user_id)
-        .eq("email_type", "welcome")
-        .maybeSingle();
+    // profiles has no email column; read it from auth.users
+    const emailById = new Map<string, string>();
+    const { data: authEmails, error: emailsError } = await supabase.rpc("get_auth_emails");
+    if (emailsError) throw emailsError;
+    for (const u of authEmails || []) emailById.set(u.id, u.email);
 
-      if (!existing) {
-        if (dryRun) {
-          nutritionistsSent++;
-          continue;
-        }
-        const { error } = await supabase.functions.invoke("send-welcome-email", {
-          body: { email: n.email, name: n.full_name },
-        });
-        if (!error) {
-          nutritionistsSent++;
-          await supabase.from("email_logs").insert({ user_id: n.user_id, email_type: "welcome" });
-          console.log(`Backfill welcome sent to nutritionist ${n.user_id}`);
-        } else {
-          console.error(`Backfill welcome failed for nutritionist ${n.user_id}:`, error);
-        }
+    const nutritionists = (profiles || [])
+      .filter((p) => emailById.has(p.user_id))
+      .map((p) => ({ ...p, email: emailById.get(p.user_id)! }));
+
+    for (const n of nutritionists) {
+      if (welcomed.has(`welcome:${n.user_id}`)) continue;
+      if (dryRun) {
+        nutritionistsSent++;
+        continue;
+      }
+      const { error } = await supabase.functions.invoke("send-welcome-email", {
+        body: { email: n.email, name: n.full_name, user_id: n.user_id },
+      });
+      if (!error) {
+        nutritionistsSent++;
+        console.log(`Backfill welcome sent to nutritionist ${n.user_id}`);
+      } else {
+        console.error(`Backfill welcome failed for nutritionist ${n.user_id}:`, error);
       }
     }
 
@@ -75,28 +84,19 @@ const handler = async (req: Request): Promise<Response> => {
       .not("email", "is", null);
 
     for (const p of patients || []) {
-      const { data: existing } = await supabase
-        .from("email_logs")
-        .select("id")
-        .eq("user_id", p.user_id)
-        .eq("email_type", "patient-welcome")
-        .maybeSingle();
-
-      if (!existing) {
-        if (dryRun) {
-          patientsSent++;
-          continue;
-        }
-        const { error } = await supabase.functions.invoke("send-patient-welcome-email", {
-          body: { email: p.email, name: p.full_name },
-        });
-        if (!error) {
-          patientsSent++;
-          await supabase.from("email_logs").insert({ user_id: p.user_id, email_type: "patient-welcome" });
-          console.log(`Backfill welcome sent to patient ${p.user_id}`);
-        } else {
-          console.error(`Backfill welcome failed for patient ${p.user_id}:`, error);
-        }
+      if (welcomed.has(`patient-welcome:${p.user_id}`)) continue;
+      if (dryRun) {
+        patientsSent++;
+        continue;
+      }
+      const { error } = await supabase.functions.invoke("send-patient-welcome-email", {
+        body: { email: p.email, name: p.full_name, user_id: p.user_id },
+      });
+      if (!error) {
+        patientsSent++;
+        console.log(`Backfill welcome sent to patient ${p.user_id}`);
+      } else {
+        console.error(`Backfill welcome failed for patient ${p.user_id}:`, error);
       }
     }
 

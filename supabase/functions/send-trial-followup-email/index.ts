@@ -529,13 +529,16 @@ const handler = async (req: Request): Promise<Response> => {
       }
       userData = data;
     } else {
+      // profiles has no email column; it lives in auth.users
       const { data, error } = await supabase
         .from("profiles")
-        .select("email, full_name")
+        .select("full_name")
         .eq("user_id", user_id)
         .single();
+      const { data: authEmails } = await supabase.rpc("get_auth_emails", { user_ids: [user_id] });
+      const authEmail = authEmails?.[0]?.email;
 
-      if (error || !data) {
+      if (error || !data || !authEmail) {
         return new Response(
           JSON.stringify({ success: false, error: "User not found" }),
           {
@@ -544,7 +547,7 @@ const handler = async (req: Request): Promise<Response> => {
           }
         );
       }
-      userData = data;
+      userData = { email: authEmail, full_name: data.full_name };
     }
 
     const { email, full_name } = userData;
