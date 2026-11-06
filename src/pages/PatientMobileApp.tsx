@@ -272,6 +272,8 @@ export default function PatientMobileApp() {
           mealPlan={mealPlan}
           waterLog={waterLog}
           onAddWater={handleAddWater}
+          onNavigateToRegistro={() => setActiveTab('registro')}
+          onNavigateToAgenda={() => setActiveTab('agenda')}
         />
       )}
       {activeTab === 'agenda' && patient && (

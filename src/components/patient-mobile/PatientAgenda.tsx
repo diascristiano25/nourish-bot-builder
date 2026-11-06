@@ -79,7 +79,7 @@ export function PatientAgenda({ patientId }: PatientAgendaProps) {
       {/* Próximas Consultas */}
       <div>
         <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-[#518C5B]" />
+          <Calendar className="w-5 h-5 text-primary" />
           Próximas Consultas
         </h2>
         {upcomingAppointments.length === 0 ? (
@@ -117,7 +117,7 @@ export function PatientAgenda({ patientId }: PatientAgendaProps) {
                     <Button
                       size="sm"
                       onClick={() => handleVideoClick(appointment.id)}
-                      className="bg-[#518C5B] hover:bg-[#3d7047] text-white"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                       <Video className="w-4 h-4 mr-1" />
                       Entrar
