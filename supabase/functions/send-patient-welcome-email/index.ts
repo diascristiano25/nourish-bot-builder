@@ -34,6 +34,50 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Name is required");
     }
 
+    // Callable without a session (first access, signup with email
+    // confirmation), so only send to a real, not-yet-welcomed account
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const respond = (status: number, body: Record<string, unknown>) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+
+    if (user_id) {
+      const { data: patientRow } = await supabase
+        .from("patients")
+        .select("email")
+        .eq("user_id", user_id)
+        .maybeSingle();
+      if (!patientRow || patientRow.email?.toLowerCase() !== email.toLowerCase()) {
+        return respond(403, { success: false, error: "Forbidden" });
+      }
+
+      const { data: alreadySent } = await supabase
+        .from("email_logs")
+        .select("id")
+        .eq("user_id", user_id)
+        .eq("email_type", "patient-welcome")
+        .maybeSingle();
+      if (alreadySent) {
+        return respond(200, { success: true, already_sent: true });
+      }
+    } else {
+      // Manual resend from the nutritionist screen: needs a valid user session
+      const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+      const userRes = token
+        ? await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/user`, {
+            headers: { Authorization: `Bearer ${token}`, apikey: Deno.env.get("SUPABASE_ANON_KEY") || "" },
+          })
+        : null;
+      if (!userRes?.ok) {
+        return respond(401, { success: false, error: "Unauthorized" });
+      }
+    }
+
     const firstName = name.split(" ")[0] || "Paciente";
     const nutriName = nutritionistName || "seu nutricionista";
 
@@ -125,10 +169,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Record the send so the backfill and cron never email this user again
     if (user_id) {
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-      );
       const { error: logError } = await supabase
         .from("email_logs")
         .insert({ user_id, email_type: "patient-welcome", metadata: { email_id: emailResponse.id } });
