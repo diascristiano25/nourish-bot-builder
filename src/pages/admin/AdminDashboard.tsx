@@ -47,16 +47,15 @@ export default function AdminDashboard() {
 
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, created_at, is_active, account_status, trial_ends_at, subscription_plan');
+        .select('id, created_at, is_active, is_admin, account_status, trial_ends_at');
 
       if (profilesError) throw profilesError;
 
       const nonAdminProfiles = (profiles || []).filter(p => !p.is_admin);
 
-      // Active: is_active=true AND has valid subscription (paid plan OR unexpired trial)
+      // Active: is_active=true AND has valid subscription (active status OR unexpired trial)
       const activeCount = nonAdminProfiles.filter(p => {
         if (!p.is_active) return false;
-        if (p.subscription_plan && p.subscription_plan !== 'free') return true;
         if (p.account_status === 'active') return true;
         if (p.trial_ends_at && new Date(p.trial_ends_at) > today) return true;
         return false;
@@ -130,10 +129,17 @@ export default function AdminDashboard() {
         });
       }
 
+      const statusLabels: Record<string, string> = {
+        active: 'Ativo',
+        trial: 'Trial',
+        expired: 'Expirado',
+        suspended: 'Suspenso',
+      };
       const planMap: Record<string, number> = {};
       nonAdminProfiles.forEach(p => {
-        const plan = p.subscription_plan || 'free';
-        planMap[plan] = (planMap[plan] || 0) + 1;
+        const status = p.account_status || 'active';
+        const label = statusLabels[status] || status;
+        planMap[label] = (planMap[label] || 0) + 1;
       });
       const planDist = Object.entries(planMap).map(([name, value]) => ({ name, value }));
 
@@ -290,7 +296,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GlassCard className="p-6">
             <NeonText as="h3" color="primary" className="font-semibold mb-4">
-              Distribuição por Plano
+              Distribuição por Status
             </NeonText>
             {planDistribution.length > 0 ? (
               <ResponsiveContainer width="100%" height={250}>

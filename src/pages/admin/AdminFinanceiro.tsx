@@ -24,7 +24,6 @@ interface FinancialRecord {
 interface ProfileSummary {
   id: string;
   full_name: string;
-  subscription_plan: string | null;
   account_status: string;
 }
 
@@ -81,19 +80,28 @@ export default function AdminFinanceiro() {
       }
       setMonthlyData(monthly);
 
-      // Plan distribution from profiles
-      const { data: profiles } = await supabase
+      // Status distribution from profiles
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, subscription_plan, account_status')
+        .select('id, full_name, account_status')
         .eq('is_admin', false);
 
+      if (profilesError) throw profilesError;
+
+      const statusLabels: Record<string, string> = {
+        active: 'Ativo',
+        trial: 'Trial',
+        expired: 'Expirado',
+        suspended: 'Suspenso',
+      };
       const nonAdmin = profiles || [];
       const planMap: Record<string, number> = {};
       let paying = 0;
       nonAdmin.forEach(p => {
-        const plan = p.subscription_plan || 'free';
-        planMap[plan] = (planMap[plan] || 0) + 1;
-        if (p.account_status === 'active' && plan !== 'free') paying++;
+        const status = p.account_status || 'active';
+        const label = statusLabels[status] || status;
+        planMap[label] = (planMap[label] || 0) + 1;
+        if (status === 'active') paying++;
       });
       setPlanDistribution(Object.entries(planMap).map(([name, value]) => ({ name, value })));
       setPayingNutris(paying);
@@ -173,7 +181,7 @@ export default function AdminFinanceiro() {
 
           <GlassCard className="p-6">
             <NeonText as="h3" color="primary" className="font-semibold mb-4">
-              Distribuição por Plano
+              Distribuição por Status
             </NeonText>
             {planDistribution.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
