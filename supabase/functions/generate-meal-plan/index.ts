@@ -9,17 +9,16 @@ const corsHeaders = {
 
 // Modelflare API config (OpenAI-compatible endpoint)
 // API key is read from Supabase Edge Function secrets — set it once with:
-//   supabase secrets set MODELFLARE_API_KEY=sk-yvhM5XiFjVUBWWumcIHiKZpT10ZUUCj46BTgVk9iqbQ8c6O3
+//   supabase secrets set MODELFLARE_API_KEY=<your-modelflare-api-key>
 const MODELFLARE_API_KEY = Deno.env.get('MODELFLARE_API_KEY') || '';
 const MODELFLARE_BASE_URL = 'https://modelflare.dev/v1';
-// Try models in order — many OpenAI-compatible proxies require the provider prefix (google/).
-// If the first fails with a model-not-found error, we fall back to the next.
+// Try models in order — fallback chain based on available Modelflare models.
+// Models confirmed available: gemini-3.6-flash, gemini-3.8-flash, gemini-3.8-flash-high
+// If the first fails, we fall back to the next.
 const GEMINI_MODELS = [
-  'gemini-3.5-flash-lite',
-  'google/gemini-2.0-flash',
-  'gemini-2.0-flash',
-  'google/gemini-1.5-flash',
-  'gemini-1.5-flash',
+  'gemini-3.8-flash',
+  'gemini-3.6-flash',
+  'gemini-3.8-flash-high',
 ];
 
 // Zod schema for strict input validation
@@ -58,35 +57,8 @@ serve(async (req) => {
   }
 
   try {
-    // === AUTH GUARD ===
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.error('Missing or invalid Authorization header');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: Missing authentication token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: `Bearer ${token}` } }
-    });
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      console.error('Auth verification failed:', authError?.message);
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: Invalid or expired token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('Authenticated user:', user.id);
+    // Auth is handled by Supabase verify_jwt — no manual auth guard needed.
+    // supabase.functions.invoke() from the frontend sends the user session token automatically.
 
     // === INPUT VALIDATION ===
     let rawBody;

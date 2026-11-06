@@ -1,4 +1,5 @@
 // Edge Function handles Gemini API calls
+import { supabase } from '@/integrations/supabase/client';
 
 export interface MealPlanRequest {
   patientName: string;
@@ -37,9 +38,15 @@ export interface Meal {
 export async function generateMealPlan(
   request: MealPlanRequest
 ): Promise<MealPlan> {
-  // Hardcoded Supabase credentials (public anon key - safe for client-side)
   const supabaseUrl = 'https://nwenbxqmfpyspxpibgwp.supabase.co';
-  const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZW5ieHFtZnB5c3B4cGliZ3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NjA0MjgsImV4cCI6MjEwNjUzNjQyOH0.W6LxzVqjiE9edLvNryO2QOudjxqQOHroCIu31e2UDf4';
+
+  // Get user session token — Edge Function requires verify_jwt: true
+  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    throw new Error("Você precisa estar logado para gerar um plano alimentar.");
+  }
 
   try {
     const response = await fetch(
@@ -48,7 +55,7 @@ export async function generateMealPlan(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${supabaseAnonKey}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(request),
       }
