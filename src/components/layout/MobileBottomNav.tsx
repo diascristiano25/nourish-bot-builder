@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, DollarSign, Send, TrendingUp, User, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, DollarSign, Send, TrendingUp, User, MoreHorizontal, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 const mainNavItems = [
   { name: 'Home', path: '/dashboard', icon: LayoutDashboard },
@@ -17,8 +18,13 @@ const moreNavItems = [
   { name: 'Perfil', path: '/perfil', icon: User },
 ];
 
+const adminNavItem = { name: 'Admin', path: '/admin', icon: ShieldCheck };
+
 export function MobileBottomNav() {
   const [showMore, setShowMore] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = user?.email?.toLowerCase() === 'diascristianoconsultor@gmail.com';
+  const moreItems = isAdmin ? [...moreNavItems, adminNavItem] : moreNavItems;
 
   return (
     <>
@@ -43,7 +49,7 @@ export function MobileBottomNav() {
               <div className="w-10 h-1 bg-border rounded-full mx-auto mb-6" />
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Mais opções</h3>
               <div className="grid grid-cols-3 gap-4">
-                {moreNavItems.map((item) => (
+                {moreItems.map((item) => (
                   <NavLink
                     key={item.path}
                     to={item.path}

@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: isAdmin, error: adminError } = await supabaseUser.rpc("is_current_user_admin");
+    const { data: isAdmin, error: adminError } = await supabaseUser.rpc("is_current_user_master_admin");
     if (adminError || !isAdmin) {
       console.error("Admin check failed:", adminError);
       throw new Error("Unauthorized: Admin access required");
