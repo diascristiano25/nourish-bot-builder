@@ -12,6 +12,17 @@ import { Loader2, Mail, Lock, User, ArrowRight, Sparkles, Activity, Users, Trend
 import { z } from 'zod';
 import logoImg from '@/assets/logo-nutriflow.png';
 
+/* ------------------------------------------------------------------ */
+/* Meta Pixel tracking                                                 */
+/* ------------------------------------------------------------------ */
+function trackPixel(event: string, params?: Record<string, any>) {
+  try {
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', event, params);
+    }
+  } catch { /* silent fail */ }
+}
+
 // Redirect based on user role: patients go to /meu-app, nutritionists to /dashboard
 const redirectByRole = async (navigate: (path: string) => void) => {
   try {
@@ -33,8 +44,8 @@ const loginSchema = z.object({
 
 const signupSchema = loginSchema.extend({
   fullName: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  phone: z.string().min(10, 'Telefone deve ter no mínimo 10 dígitos').regex(/^\+?[\d\s\-()]+$/, 'Formato de telefone inválido'),
-  crn: z.string().min(3, 'CRN deve ter no mínimo 3 caracteres'),
+  phone: z.string().min(10, 'Telefone deve ter no mínimo 10 dígitos').regex(/^\+?[\d\s\-()]+$/, 'Formato de telefone inválido').optional().or(z.literal('')),
+  crn: z.string().min(3, 'CRN deve ter no mínimo 3 caracteres').optional().or(z.literal('')),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Senhas não coincidem",
@@ -71,6 +82,13 @@ export default function Auth() {
       setActiveTab('signup');
       if (email) setSignupEmail(email);
       if (name) setSignupFullName(name);
+    }
+
+    // Pre-fill email from DesafioNutri capture or contextual redirect
+    const capturedEmail = params.get('email');
+    if (capturedEmail && !signupEmail) {
+      setSignupEmail(capturedEmail);
+      setActiveTab('signup');
     }
   }, []);
 
@@ -147,6 +165,18 @@ export default function Auth() {
         }
         toast({ title: "Erro no cadastro", description: message, variant: "destructive" });
       } else {
+        // Fire Meta Pixel conversion event on successful signup
+        const params = new URLSearchParams(window.location.search);
+        trackPixel('CompleteRegistration', {
+          content_type: 'subscription',
+          source: params.get('source') || 'direct',
+          value: 0,
+          currency: 'BRL',
+        });
+        trackPixel('Lead', {
+          content_type: 'signup',
+          source: params.get('source') || 'direct',
+        });
         toast({ title: "Conta criada!", description: "Bem-vindo ao NutriFlow." });
         redirectByRole(navigate);
       }
@@ -458,7 +488,7 @@ export default function Auth() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-phone" className="text-sm font-medium text-nf-text">
-                      Telefone <span className="text-nf-coral">*</span>
+                      Telefone <span className="text-nf-text-muted font-normal">(opcional)</span>
                     </Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
@@ -468,14 +498,13 @@ export default function Auth() {
                         placeholder="(11) 99999-9999"
                         value={signupPhone}
                         onChange={(e) => setSignupPhone(e.target.value)}
-                        required
                         className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-coral focus:ring-nf-coral/20 rounded-xl"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-crn" className="text-sm font-medium text-nf-text">
-                      CRN <span className="text-nf-coral">*</span>
+                      CRN <span className="text-nf-text-muted font-normal">(opcional)</span>
                     </Label>
                     <div className="relative">
                       <BadgeCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
@@ -485,7 +514,6 @@ export default function Auth() {
                         placeholder="CRN-1 12345"
                         value={signupCrn}
                         onChange={(e) => setSignupCrn(e.target.value)}
-                        required
                         className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-coral focus:ring-nf-coral/20 rounded-xl"
                       />
                     </div>
