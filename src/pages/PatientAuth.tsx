@@ -236,6 +236,7 @@ export default function PatientAuth() {
           body: {
             email,
             name: patient.full_name,
+            user_id: signUpData.user.id,
           },
         }).catch((err) => console.error('Patient welcome email failed:', err));
       }

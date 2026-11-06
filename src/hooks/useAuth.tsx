@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Fire-and-forget welcome email
         supabase.functions.invoke('send-welcome-email', {
-          body: { email, name: fullName },
+          body: { email, name: fullName, user_id: data.user.id },
         }).catch((err) => console.error('Welcome email failed:', err));
       }
 

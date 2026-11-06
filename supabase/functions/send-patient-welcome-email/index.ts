@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 
@@ -12,6 +13,7 @@ interface PatientWelcomeRequest {
   name: string;
   phone?: string;
   nutritionistName?: string;
+  user_id?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -22,7 +24,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, name, phone, nutritionistName }: PatientWelcomeRequest = await req.json();
+    const { email, name, phone, nutritionistName, user_id }: PatientWelcomeRequest = await req.json();
 
     if (!email) {
       throw new Error("Email is required");
@@ -120,6 +122,19 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log(`Patient welcome email sent successfully to ${email}`);
+
+    // Record the send so the backfill and cron never email this user again
+    if (user_id) {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      const { error: logError } = await supabase
+        .from("email_logs")
+        .insert({ user_id, email_type: "patient-welcome", metadata: { email_id: emailResponse.id } });
+      if (logError) console.error("Failed to log email:", logError);
+    }
+
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       status: 200,
