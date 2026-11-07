@@ -197,7 +197,7 @@ export default function NutritionistList() {
   const filteredNutritionists = nutritionists.filter(n => {
     const term = searchTerm.toLowerCase();
     const matchesSearch =
-      n.full_name.toLowerCase().includes(term) ||
+      (n.full_name || '').toLowerCase().includes(term) ||
       (n.crn && n.crn.toLowerCase().includes(term)) ||
       (n.phone && n.phone.includes(term)) ||
       (n.email && n.email.toLowerCase().includes(term));
@@ -312,14 +312,16 @@ export default function NutritionistList() {
                       <TableRow key={n.id} className="border-border/30 hover:bg-muted/20 transition-colors cursor-pointer" onClick={() => navigate(`/admin/nutris/${n.id}`)}>
                         <TableCell>
                           <div>
-                            <p className="font-medium">{n.full_name}</p>
+                            <p className="font-medium">{n.full_name || 'Sem nome'}</p>
                             {n.phone && <p className="text-xs text-muted-foreground">{n.phone}</p>}
                           </div>
                         </TableCell>
                         <TableCell>{n.crn || '-'}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{n.email || '-'}</TableCell>
                         <TableCell>
-                          {format(new Date(n.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                          {n.created_at && !isNaN(new Date(n.created_at).getTime())
+                            ? format(new Date(n.created_at), 'dd/MM/yyyy', { locale: ptBR })
+                            : '-'}
                         </TableCell>
                         <TableCell>
                           <Badge variant={license.variant} className={`text-xs ${license.color}`}>
