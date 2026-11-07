@@ -52,7 +52,7 @@ export function AdminSidebar({ isMobile = false, onNavigate }: AdminSidebarProps
     fetchPendingTickets();
 
     const channel = supabase
-      .channel('admin-sidebar-tickets')
+      .channel(`admin-sidebar-tickets-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'support_tickets' },
