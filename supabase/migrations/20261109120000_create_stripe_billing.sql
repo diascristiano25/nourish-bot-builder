@@ -4,7 +4,7 @@
 -- Purpose: store Stripe customers, subscriptions and processed webhook events.
 --
 -- Trial model: the trial is NOT created in Stripe. It lives in
--- profiles.trial_start_date / trial_ended (no card required). Stripe is only
+-- profiles.trial_ends_at (no card required). Stripe is only
 -- involved when the nutritionist chooses a plan (create-checkout function).
 --
 -- Writes to these tables happen only through Edge Functions using the
@@ -65,6 +65,7 @@ CREATE POLICY "Users read own subscriptions" ON public.subscriptions
 -- ============================================================================
 -- ACCESS HELPER
 -- Returns 'subscription', 'trial' or 'expired' for a user.
+-- The trial end date is profiles.trial_ends_at (the column used by the app).
 -- ============================================================================
 CREATE OR REPLACE FUNCTION public.get_billing_access(p_user_id UUID)
 RETURNS TEXT
@@ -74,11 +75,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_trial_start TIMESTAMPTZ;
-  v_trial_ended BOOLEAN;
-  -- Pricing page promises 14 days. app_settings.trial_duration_days says 33.
-  -- Confirm the real value before going live.
-  c_trial_days CONSTANT INTEGER := 14;
+  v_trial_ends_at TIMESTAMPTZ;
 BEGIN
   IF EXISTS (
     SELECT 1 FROM public.subscriptions s
@@ -89,14 +86,11 @@ BEGIN
     RETURN 'subscription';
   END IF;
 
-  SELECT p.trial_start_date, COALESCE(p.trial_ended, FALSE)
-    INTO v_trial_start, v_trial_ended
+  SELECT p.trial_ends_at INTO v_trial_ends_at
     FROM public.profiles p
    WHERE p.user_id = p_user_id;
 
-  IF v_trial_start IS NOT NULL
-     AND NOT v_trial_ended
-     AND v_trial_start + make_interval(days => c_trial_days) > NOW() THEN
+  IF v_trial_ends_at IS NOT NULL AND v_trial_ends_at > NOW() THEN
     RETURN 'trial';
   END IF;
 
