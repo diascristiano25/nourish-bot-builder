@@ -69,7 +69,7 @@ async function handle(req: Request): Promise<Response> {
       metadata: { supabase_user_id: user.id, plan },
     },
     success_url: `${APP_URL()}/assinatura?status=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${APP_URL()}/planos?status=cancelled`,
+    cancel_url: `${APP_URL()}/assinatura?status=cancelled`,
   });
 
   return json(200, { url: session.url });
