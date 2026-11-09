@@ -32,6 +32,7 @@ const DesignShowcase = lazy(() => import("./pages/DesignShowcase"));
 const Patients = lazy(() => import("./pages/Patients"));
 const PatientDetail = lazy(() => import("./pages/PatientDetail"));
 const NewPatient = lazy(() => import("./pages/NewPatient"));
+const ImportPatients = lazy(() => import("./pages/ImportPatients"));
 const EditPatient = lazy(() => import("./pages/EditPatient"));
 const Agenda = lazy(() => import("./pages/Agenda"));
 const Biblioteca = lazy(() => import("./pages/Biblioteca"));
@@ -263,6 +264,7 @@ function App() {
                       <Route path="/pacientes" element={<AccountStatusGuard><Patients /></AccountStatusGuard>} />
                       <Route path="/pacientes/:id" element={<AccountStatusGuard><PatientDetail /></AccountStatusGuard>} />
                       <Route path="/novo-paciente" element={<AccountStatusGuard><NewPatient /></AccountStatusGuard>} />
+                      <Route path="/importar-pacientes" element={<AccountStatusGuard><ImportPatients /></AccountStatusGuard>} />
                       <Route path="/editar-paciente/:id" element={<AccountStatusGuard><EditPatient /></AccountStatusGuard>} />
                       <Route path="/agenda" element={<AccountStatusGuard><Agenda /></AccountStatusGuard>} />
                       <Route path="/biblioteca" element={<AccountStatusGuard><Biblioteca /></AccountStatusGuard>} />
