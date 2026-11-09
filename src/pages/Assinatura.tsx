@@ -78,6 +78,10 @@ export default function Assinatura() {
   };
 
   const currentPlan = sub?.status === 'active' ? sub.plan : null;
+  const isCancelling = !!sub?.cancel_at_period_end && sub.status === 'active';
+  const endDateLabel = sub?.current_period_end
+    ? new Date(sub.current_period_end).toLocaleDateString('pt-BR')
+    : null;
 
   return (
     <ModernLayout>
@@ -85,9 +89,9 @@ export default function Assinatura() {
         <header className="space-y-1">
           <h1 className="text-2xl font-bold">Assinatura</h1>
           <p className="text-muted-foreground">
-            Status: <strong>{STATUS_LABEL[access]}</strong>
+            Status: <strong>{isCancelling && access === 'subscription' ? 'Assinatura cancelada' : STATUS_LABEL[access]}</strong>
             {remaining !== null && ` · ${remaining} ${remaining === 1 ? 'dia restante' : 'dias restantes'}`}
-            {sub && ` · Plano ${sub.plan}${sub.cancel_at_period_end ? ' (cancela no fim do período)' : ''}`}
+            {sub && ` · Plano ${sub.plan}`}
           </p>
         </header>
 
@@ -104,7 +108,21 @@ export default function Assinatura() {
           </div>
         )}
 
-        {access === 'subscription' && justPaid && (
+        {isCancelling && (
+          <div className="flex gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-semibold">Cancelamento agendado</p>
+              <p className="text-sm text-muted-foreground">
+                Sua assinatura não será renovada. Você continua com acesso completo
+                {endDateLabel ? ` até ${endDateLabel}` : ' até o fim do período já pago'}.
+                Para mudar de ideia, use "Gerenciar cartão e cancelamento" e reative a assinatura.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {access === 'subscription' && justPaid && !isCancelling && (
           <div className="flex gap-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500 mt-0.5" />
             <p className="text-sm">Assinatura ativada. Seu acesso e o dos seus pacientes está liberado.</p>
