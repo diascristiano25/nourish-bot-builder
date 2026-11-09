@@ -52,7 +52,7 @@ const SupportThreadList = lazy(() => import("./pages/admin/SupportThreadList"));
 const SupportChatView = lazy(() => import("./pages/admin/SupportChatView"));
 const AdminFinanceiro = lazy(() => import("./pages/admin/AdminFinanceiro"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
-const AdminAnalyticsPage = lazy(() => import("./components/admin/AdminAnalytics"));
+const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage"));
 const SubscriptionExpired = lazy(() => import("./pages/SubscriptionExpired"));
 const Sobre = lazy(() => import("./pages/Sobre"));
 const TermosSuporte = lazy(() => import("./pages/suporte/Termos"));
@@ -262,7 +262,7 @@ function App() {
                         <Route path="suporte" element={<SupportThreadList />} />
                         <Route path="suporte/:ticketId" element={<SupportChatView />} />
                         <Route path="financeiro" element={<AdminFinanceiro />} />
-                        <Route path="analytics" element={<AdminAnalyticsPage engagementData={[]} nutritionists={[]} loadingEngagement={false} onRefresh={() => {}} />} />
+                        <Route path="analytics" element={<AdminAnalyticsPage />} />
                         <Route path="configuracoes" element={<AdminSettings />} />
                       </Route>
                       <Route path="/subscription-expired" element={<SubscriptionExpired />} />

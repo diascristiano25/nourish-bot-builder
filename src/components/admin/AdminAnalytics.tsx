@@ -43,6 +43,7 @@ interface Nutritionist {
   is_active: boolean;
   is_admin: boolean;
   account_status: string;
+  trial_ends_at: string | null;
 }
 
 interface AdminAnalyticsProps {
@@ -134,15 +135,15 @@ export default function AdminAnalytics({
       ? (totalMealPlans / activeUsers.length).toFixed(1) 
       : '0';
 
-    // Trial users (within 33 days)
-    const trialUsers = nutritionists.filter(n => 
-      differenceInDays(now, new Date(n.created_at)) <= 33
+    // Same rules as the admin dashboard: trial = unexpired trial, expired = trial that ran out
+    const trialUsers = nutritionists.filter(n =>
+      n.is_active && n.account_status === 'trial' && n.trial_ends_at && new Date(n.trial_ends_at) > now
     );
-
-    // Expired trial users
-    const expiredTrialUsers = nutritionists.filter(n => 
-      differenceInDays(now, new Date(n.created_at)) > 33
+    const expiredTrialUsers = nutritionists.filter(n =>
+      n.account_status === 'expired' ||
+      (n.account_status === 'trial' && (!n.trial_ends_at || new Date(n.trial_ends_at) <= now))
     );
+    const paidUsers = nutritionists.filter(n => n.is_active && n.account_status === 'active');
 
     return {
       totalUsers: nutritionists.length,
@@ -163,6 +164,7 @@ export default function AdminAnalytics({
       avgMealPlansPerUser,
       trialUsers: trialUsers.length,
       expiredTrialUsers: expiredTrialUsers.length,
+      paidUsers: paidUsers.length,
       activeList: activeUsers,
       inactiveList: inactiveUsers,
     };
@@ -217,6 +219,7 @@ export default function AdminAnalytics({
   // License distribution
   const licenseDistribution = useMemo(() => [
     { name: 'Em Teste', value: stats.trialUsers, color: 'hsl(var(--info))' },
+    { name: 'Ativos', value: stats.paidUsers, color: 'hsl(var(--success))' },
     { name: 'Expirados', value: stats.expiredTrialUsers, color: 'hsl(var(--destructive))' },
   ], [stats]);
 
