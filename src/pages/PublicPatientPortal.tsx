@@ -206,6 +206,12 @@ export default function PublicPatientPortal() {
 
       if (fnError) {
         console.error('Function error:', fnError);
+        // 402: the nutritionist has no active trial or plan
+        if ((fnError as { context?: { status?: number } }).context?.status === 402) {
+          setError('O acesso ao seu plano alimentar está temporariamente indisponível. Entre em contato com o seu nutricionista.');
+          setLoading(false);
+          return;
+        }
         if (fnError.message?.includes('401') || fnError.message?.includes('Unauthorized')) {
           setIsAuthenticated(false);
           setLoading(false);

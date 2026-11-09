@@ -88,6 +88,19 @@ serve(async (req) => {
       );
     }
 
+    // Billing gate: the portal only works while the nutritionist has a trial,
+    // an active subscription or a manual license. 402 = Payment Required.
+    const { data: billingAccess, error: billingError } = await supabase
+      .rpc('get_patient_billing_access', { p_patient_id: patientId });
+    if (billingError) {
+      console.error('Billing check failed:', billingError.message);
+    } else if (billingAccess === 'expired') {
+      return new Response(
+        JSON.stringify({ error: 'billing_expired' }),
+        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Use service role only to fetch nutritionist public branding info (non-sensitive)
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);

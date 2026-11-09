@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, DollarSign, Send, TrendingUp, User, MoreHorizontal, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, DollarSign, Send, TrendingUp, User, MoreHorizontal, ShieldCheck, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -15,6 +15,7 @@ const mainNavItems = [
 const moreNavItems = [
   { name: 'Chat', path: '/mensagens', icon: Send },
   { name: 'Evolução', path: '/evolucao', icon: TrendingUp },
+  { name: 'Assinatura', path: '/assinatura', icon: CreditCard },
   { name: 'Perfil', path: '/perfil', icon: User },
 ];
 
