@@ -5,7 +5,7 @@ import {
   Plan, PLANS, priceIdFor, stripe,
 } from "../_shared/stripe.ts";
 
-Deno.serve(async (req) => {
+async function handle(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json(405, { error: "Method not allowed" });
 
@@ -62,9 +62,8 @@ Deno.serve(async (req) => {
     customer: customerId,
     client_reference_id: user.id,
     line_items: [{ price: priceId, quantity: 1 }],
-    // Card and Pix as requested. Confirm Pix works for recurring charges
-    // in your Stripe account (test mode) before going live.
-    payment_method_types: ["card", "pix"],
+    // Pix is NOT accepted by Stripe in subscription mode (tested in test mode).
+    payment_method_types: ["card"],
     locale: "pt-BR",
     subscription_data: {
       metadata: { supabase_user_id: user.id, plan },
@@ -74,4 +73,15 @@ Deno.serve(async (req) => {
   });
 
   return json(200, { url: session.url });
+}
+
+// Any unexpected error returns JSON with CORS headers, so the browser shows the real message.
+Deno.serve(async (req) => {
+  try {
+    return await handle(req);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("create-checkout failed:", message);
+    return json(500, { error: message });
+  }
 });

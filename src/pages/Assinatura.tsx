@@ -68,7 +68,7 @@ export default function Assinatura() {
                   disabled={busy !== null || (sub?.status === 'active' && sub.plan === p.id)}
                   onClick={() => run(p.id, () => startCheckout(p.id as Plan))}
                 >
-                  {sub?.plan === p.id && sub.status === 'active' ? 'Plano atual' : 'Assinar com cartão ou Pix'}
+                  {sub?.plan === p.id && sub.status === 'active' ? 'Plano atual' : 'Assinar com cartão'}
                 </Button>
               </CardContent>
             </Card>
