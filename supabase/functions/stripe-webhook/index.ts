@@ -71,9 +71,12 @@ Deno.serve(async (req) => {
 async function syncSubscription(
   // deno-lint-ignore no-explicit-any
   admin: any,
-  sub: Stripe.Subscription,
+  eventSub: Stripe.Subscription,
   deleted: boolean,
 ) {
+  // Stripe does not guarantee delivery order. An older event (e.g. "incomplete")
+  // can arrive after a newer one ("active"), so always use the current state.
+  const sub = await stripe.subscriptions.retrieve(eventSub.id);
   const customerId = sub.customer as string;
 
   // Resolve the user: metadata first, then the customer mapping
