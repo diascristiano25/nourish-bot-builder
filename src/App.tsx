@@ -55,6 +55,7 @@ const AdminFinanceiro = lazy(() => import("./pages/admin/AdminFinanceiro"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage"));
 const SubscriptionExpired = lazy(() => import("./pages/SubscriptionExpired"));
+const Assinatura = lazy(() => import("./pages/Assinatura"));
 const Sobre = lazy(() => import("./pages/Sobre"));
 const TermosSuporte = lazy(() => import("./pages/suporte/Termos"));
 const PrivacidadeSuporte = lazy(() => import("./pages/suporte/Privacidade"));
@@ -286,6 +287,7 @@ function App() {
                         <Route path="configuracoes" element={<AdminSettings />} />
                       </Route>
                       <Route path="/subscription-expired" element={<SubscriptionExpired />} />
+                      <Route path="/assinatura" element={<Assinatura />} />
                       <Route path="/portal/:patientId" element={<PublicPatientPortal />} />
                       <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
                       <Route path="/patient-portal" element={<AccountStatusGuard><PatientPortal /></AccountStatusGuard>} />
