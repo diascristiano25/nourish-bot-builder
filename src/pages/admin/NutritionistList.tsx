@@ -46,14 +46,17 @@ const buildTrialFollowUpMessage = (fullName: string | null) => {
   return `${saudacao} Tudo bem? Tudo certo por aí? Vi que você está no período de trial do NutriFlow. Qualquer dúvida, é só me chamar.`;
 };
 
-// Monta o link wa.me a partir do telefone cadastrado (texto livre). Retorna null se não for um número válido.
-const getWhatsappUrl = (phone: string | null, fullName: string | null): string | null => {
+// Normaliza o telefone cadastrado (texto livre) para o formato wa.me (55 + DDD + número). Retorna null se inválido.
+const getWhatsappNumber = (phone: string | null): string | null => {
   if (!phone) return null;
   let digits = phone.replace(/\D/g, '');
   if (digits.length === 10 || digits.length === 11) digits = `55${digits}`;
   if (!digits.startsWith('55') || digits.length < 12 || digits.length > 13) return null;
-  return `https://wa.me/${digits}?text=${encodeURIComponent(buildTrialFollowUpMessage(fullName))}`;
+  return digits;
 };
+
+const buildWhatsappUrl = (number: string, text: string) =>
+  `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
 
 export default function NutritionistList() {
   const navigate = useNavigate();
@@ -64,6 +67,7 @@ export default function NutritionistList() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [extendTrialDialog, setExtendTrialDialog] = useState<{ open: boolean; nutriId: string | null; days: number }>({ open: false, nutriId: null, days: 7 });
   const [notesDialog, setNotesDialog] = useState<{ open: boolean; nutriId: string | null; notes: string }>({ open: false, nutriId: null, notes: '' });
+  const [whatsappDialog, setWhatsappDialog] = useState<{ open: boolean; nutri: Nutritionist | null; message: string }>({ open: false, nutri: null, message: '' });
 
   useEffect(() => {
     fetchNutritionists();
@@ -336,19 +340,19 @@ export default function NutritionistList() {
                         <TableCell>{n.crn || '-'}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{n.email || '-'}</TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
-                          {(() => {
-                            const whatsappUrl = getWhatsappUrl(n.phone, n.full_name);
-                            return whatsappUrl ? (
-                              <Button asChild variant="outline" size="sm" className="gap-2 text-emerald-600 border-emerald-500/30 hover:bg-emerald-50">
-                                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                                  <MessageCircle className="w-4 h-4" />
-                                  {n.phone}
-                                </a>
-                              </Button>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">{n.phone || '-'}</span>
-                            );
-                          })()}
+                          {getWhatsappNumber(n.phone) ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-2 text-emerald-600 border-emerald-500/30 hover:bg-emerald-50"
+                              onClick={() => setWhatsappDialog({ open: true, nutri: n, message: buildTrialFollowUpMessage(n.full_name) })}
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                              {n.phone}
+                            </Button>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">{n.phone || '-'}</span>
+                          )}
                         </TableCell>
                         <TableCell>
                           {n.created_at && !isNaN(new Date(n.created_at).getTime())
@@ -450,6 +454,46 @@ export default function NutritionistList() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setNotesDialog({ open: false, nutriId: null, notes: '' })}>Cancelar</Button>
               <Button onClick={handleSaveNotes} className="bg-primary hover:bg-primary/90">Salvar</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* WhatsApp Dialog: mensagem pré-pronta, editável antes de abrir */}
+      <Dialog open={whatsappDialog.open} onOpenChange={(open) => setWhatsappDialog(prev => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enviar WhatsApp</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Para {whatsappDialog.nutri?.full_name || 'Sem nome'} ({whatsappDialog.nutri?.phone})
+            </p>
+            <div>
+              <Label htmlFor="whatsapp-message">Mensagem</Label>
+              <Textarea
+                id="whatsapp-message"
+                value={whatsappDialog.message}
+                onChange={(e) => setWhatsappDialog(prev => ({ ...prev, message: e.target.value }))}
+                rows={6}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setWhatsappDialog({ open: false, nutri: null, message: '' })}>Cancelar</Button>
+              <Button
+                onClick={() => {
+                  const number = getWhatsappNumber(whatsappDialog.nutri?.phone ?? null);
+                  if (!number) {
+                    toast.error('Telefone inválido');
+                    return;
+                  }
+                  window.open(buildWhatsappUrl(number, whatsappDialog.message), '_blank', 'noopener,noreferrer');
+                  setWhatsappDialog({ open: false, nutri: null, message: '' });
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                Abrir WhatsApp
+              </Button>
             </DialogFooter>
           </div>
         </DialogContent>
