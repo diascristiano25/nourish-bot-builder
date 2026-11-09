@@ -49,6 +49,19 @@ async function handle(req: Request): Promise<Response> {
     .maybeSingle();
 
   let customerId = customerRow?.stripe_customer_id as string | undefined;
+
+  // A stored customer may not exist in Stripe anymore (e.g. it was created in test mode
+  // and the account is now live). In that case create a fresh one.
+  if (customerId) {
+    try {
+      const existingCustomer = await stripe.customers.retrieve(customerId);
+      if ((existingCustomer as { deleted?: boolean }).deleted) customerId = undefined;
+    } catch (err) {
+      if ((err as { code?: string }).code === "resource_missing") customerId = undefined;
+      else throw err;
+    }
+  }
+
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: user.email,
@@ -57,7 +70,7 @@ async function handle(req: Request): Promise<Response> {
     customerId = customer.id;
     const { error } = await admin
       .from("stripe_customers")
-      .insert({ user_id: user.id, stripe_customer_id: customerId });
+      .upsert({ user_id: user.id, stripe_customer_id: customerId });
     if (error) return json(500, { error: "Could not save customer" });
   }
 
