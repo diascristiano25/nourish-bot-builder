@@ -6,14 +6,21 @@ import type { Database } from './types';
 const SUPABASE_URL = 'https://nwenbxqmfpyspxpibgwp.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZW5ieHFtZnB5c3B4cGliZ3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NjA0MjgsImV4cCI6MjEwNjUzNjQyOH0.W6LxzVqjiE9edLvNryO2QOudjxqQOHroCIu31e2UDf4';
 
-// AGGRESSIVE cleanup: Remove ALL Supabase/NutriFlow related localStorage keys
-// This prevents "String contains non ISO-8859-1 code point" errors from ANY stale/corrupted session data
+const SESSION_STORAGE_KEY = 'nutriflow_session';
+
+// Cleanup of stale Supabase/NutriFlow localStorage keys, which prevents
+// "String contains non ISO-8859-1 code point" errors from corrupted session data.
+// The live session key is only removed when its value is actually corrupted;
+// otherwise every full page load would sign the user out.
+const hasNonLatin1 = (value: string | null) => !!value && /[^\u0000-ÿ]/.test(value);
+
 if (typeof window !== 'undefined') {
   try {
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && (key.includes('supabase') || key.includes('nutriflow') || key.includes('sb-'))) {
+        if (key === SESSION_STORAGE_KEY && !hasNonLatin1(localStorage.getItem(key))) continue;
         keysToRemove.push(key);
       }
     }
@@ -34,6 +41,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    storageKey: 'nutriflow_session',
+    storageKey: SESSION_STORAGE_KEY,
   }
 });
