@@ -4,7 +4,7 @@ import { getMyBillingAccess, MyBillingAccess } from '@/services/billing';
 
 export const MY_BILLING_ACCESS_KEY = 'my-billing-access';
 
-// Access of the logged-in user (nutritionist or patient). Cached for a minute.
+// Access of the logged-in user (nutritionist or patient). Short cache so a cancellation takes effect fast.
 export function useMyBillingAccess(options?: { refetchInterval?: number | false }) {
   const { user, loading: authLoading } = useAuth();
 
@@ -12,7 +12,7 @@ export function useMyBillingAccess(options?: { refetchInterval?: number | false 
     queryKey: [MY_BILLING_ACCESS_KEY, user?.id],
     queryFn: getMyBillingAccess,
     enabled: !!user,
-    staleTime: 60_000,
+    staleTime: 10_000,
     retry: 1,
     refetchInterval: options?.refetchInterval ?? false,
   });
