@@ -8,6 +8,7 @@ const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "";
 
 const HANDLED = new Set([
   "checkout.session.completed",
+  "checkout.session.async_payment_succeeded", // Pix is confirmed asynchronously
   "customer.subscription.created",
   "customer.subscription.updated",
   "customer.subscription.deleted",
@@ -47,13 +48,19 @@ Deno.serve(async (req) => {
   if (!HANDLED.has(event.type)) return new Response("ignored", { status: 200 });
 
   try {
-    if (event.type === "checkout.session.completed") {
+    if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.mode === "subscription" && session.customer && session.client_reference_id) {
         await admin.from("stripe_customers").upsert({
           user_id: session.client_reference_id,
           stripe_customer_id: session.customer as string,
         });
+      } else if (
+        session.mode === "payment" &&
+        session.metadata?.kind === "pix_30d" &&
+        session.payment_status === "paid"
+      ) {
+        await grantPixAccess(admin, session);
       }
     } else {
       const sub = event.data.object as Stripe.Subscription;
@@ -118,6 +125,17 @@ async function syncSubscription(
   // The account goes back to "trial, already expired"; a new subscription (or an admin
   // extending the trial / re-activating the account) restores access.
   if (deleted || sub.status === "canceled") {
+    // Keep access if the user still has another paid period running (e.g. a Pix payment)
+    const { data: otherAccess } = await admin
+      .from("subscriptions")
+      .select("id")
+      .eq("user_id", userId)
+      .neq("stripe_subscription_id", sub.id)
+      .in("status", ["active", "trialing", "past_due"])
+      .gt("current_period_end", new Date().toISOString())
+      .limit(1);
+    if (otherAccess && otherAccess.length > 0) return;
+
     const { error: revokeError } = await admin
       .from("profiles")
       .update({ account_status: "trial", trial_ends_at: new Date().toISOString() })
@@ -125,4 +143,52 @@ async function syncSubscription(
       .eq("is_admin", false);
     if (revokeError) throw new Error(revokeError.message);
   }
+}
+
+// A Pix payment buys 30 days of access (one-off, not recurring). Renewing early adds
+// 30 days on top of the access that is still running. One row per payment, keyed by the
+// Checkout Session id (cs_...), so a repeated event never grants twice.
+async function grantPixAccess(
+  // deno-lint-ignore no-explicit-any
+  admin: any,
+  session: Stripe.Checkout.Session,
+) {
+  const userId = session.client_reference_id ?? session.metadata?.supabase_user_id;
+  const plan = session.metadata?.plan;
+  if (!userId) throw new Error(`Pix session ${session.id} has no user`);
+  if (!PLANS.includes(plan as never)) throw new Error(`Pix session ${session.id} has no valid plan`);
+
+  const { data: already } = await admin
+    .from("subscriptions")
+    .select("id")
+    .eq("stripe_subscription_id", session.id)
+    .limit(1);
+  if (already && already.length > 0) return; // already granted
+
+  const nowIso = new Date().toISOString();
+  const { data: running } = await admin
+    .from("subscriptions")
+    .select("current_period_end")
+    .eq("user_id", userId)
+    .in("status", ["active", "trialing", "past_due"])
+    .gt("current_period_end", nowIso)
+    .order("current_period_end", { ascending: false })
+    .limit(1);
+
+  const base = running?.[0]?.current_period_end ? new Date(running[0].current_period_end) : new Date();
+  const end = new Date(base.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+  const { error } = await admin.from("subscriptions").upsert(
+    {
+      user_id: userId,
+      stripe_subscription_id: session.id,
+      stripe_customer_id: (session.customer as string) ?? "",
+      plan,
+      status: "active",
+      current_period_end: end.toISOString(),
+      cancel_at_period_end: true, // does not renew by itself
+    },
+    { onConflict: "stripe_subscription_id" },
+  );
+  if (error) throw new Error(error.message);
 }

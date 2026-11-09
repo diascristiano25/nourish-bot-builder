@@ -27,16 +27,47 @@ export const PLAN_OPTIONS: { id: Plan; name: string; price: string; features: st
   { id: 'enterprise', name: 'Enterprise', price: 'R$ 109,90/mês', features: ['Pacientes ilimitados', 'IA customizada', 'Relatórios executive board', 'API integrada', 'Gerente de sucesso dedicado'] },
 ];
 
-export async function getActiveSubscription(userId: string) {
+export type PayMethod = 'card' | 'pix';
+
+export interface SubscriptionInfo {
+  plan: Plan;
+  status: string;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  // card = recurring Stripe subscription (sub_...), pix = one-off 30-day payment (cs_...)
+  kind: PayMethod;
+}
+
+// The access the user is paying for right now: an active card subscription wins,
+// otherwise the Pix payment that ends last. Falls back to the most recent row.
+export async function getActiveSubscription(userId: string): Promise<SubscriptionInfo | null> {
   const { data, error } = await supabase
     .from('subscriptions' as any)
-    .select('plan, status, current_period_end, cancel_at_period_end')
+    .select('plan, status, current_period_end, cancel_at_period_end, stripe_subscription_id, created_at')
     .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .order('created_at', { ascending: false });
   if (error) throw error;
-  return data as null | { plan: Plan; status: string; current_period_end: string | null; cancel_at_period_end: boolean };
+
+  const rows: SubscriptionInfo[] = ((data ?? []) as any[]).map((r) => ({
+    plan: r.plan,
+    status: r.status,
+    current_period_end: r.current_period_end,
+    cancel_at_period_end: r.cancel_at_period_end,
+    kind: String(r.stripe_subscription_id).startsWith('sub_') ? 'card' : 'pix',
+  }));
+
+  const now = Date.now();
+  const running = (r: SubscriptionInfo) =>
+    ['active', 'trialing', 'past_due'].includes(r.status) &&
+    (!r.current_period_end || new Date(r.current_period_end).getTime() > now);
+
+  const card = rows.find((r) => r.kind === 'card' && running(r));
+  if (card) return card;
+
+  const pix = rows
+    .filter(running)
+    .sort((a, b) => new Date(b.current_period_end ?? 0).getTime() - new Date(a.current_period_end ?? 0).getTime())[0];
+  return pix ?? rows[0] ?? null;
 }
 
 async function redirectTo(fn: 'create-checkout' | 'create-portal', body?: Record<string, unknown>) {
@@ -46,5 +77,6 @@ async function redirectTo(fn: 'create-checkout' | 'create-portal', body?: Record
   window.location.href = data.url as string;
 }
 
-export const startCheckout = (plan: Plan) => redirectTo('create-checkout', { plan });
+export const startCheckout = (plan: Plan, method: PayMethod = 'card') =>
+  redirectTo('create-checkout', { plan, method });
 export const openBillingPortal = () => redirectTo('create-portal');

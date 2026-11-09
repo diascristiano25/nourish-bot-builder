@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { AlertTriangle, CheckCircle2, MessageCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, MessageCircle, QrCode } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useMyBillingAccess, MY_BILLING_ACCESS_KEY } from '@/hooks/useMyBillingAccess';
 import {
-  PLAN_OPTIONS, Plan, BillingAccess, BILLING_WHATSAPP_URL,
+  PLAN_OPTIONS, Plan, PayMethod, BillingAccess, BILLING_WHATSAPP_URL,
   getActiveSubscription, startCheckout, openBillingPortal,
 } from '@/services/billing';
 
@@ -63,7 +63,7 @@ export default function Assinatura() {
   useEffect(() => {
     if (justPaid && access === 'subscription') {
       queryClient.invalidateQueries({ queryKey: [MY_BILLING_ACCESS_KEY] });
-      toast.success('Assinatura ativada! Seu acesso está liberado.');
+      toast.success('Acesso liberado!');
     }
   }, [justPaid, access, queryClient]);
 
@@ -77,11 +77,12 @@ export default function Assinatura() {
     }
   };
 
-  const currentPlan = sub?.status === 'active' ? sub.plan : null;
-  const isCancelling = !!sub?.cancel_at_period_end && sub.status === 'active';
-  const endDateLabel = sub?.current_period_end
-    ? new Date(sub.current_period_end).toLocaleDateString('pt-BR')
-    : null;
+  const hasCardSub = sub?.kind === 'card' && sub.status === 'active';
+  const pixActive = sub?.kind === 'pix' && sub.status === 'active' && (daysLeft(sub.current_period_end) ?? 0) > 0;
+  const isCancelling = hasCardSub && !!sub?.cancel_at_period_end;
+  const endDateLabel = sub?.current_period_end ? new Date(sub.current_period_end).toLocaleDateString('pt-BR') : null;
+
+  const statusText = isCancelling ? 'Assinatura cancelada' : STATUS_LABEL[access];
 
   return (
     <ModernLayout>
@@ -89,9 +90,9 @@ export default function Assinatura() {
         <header className="space-y-1">
           <h1 className="text-2xl font-bold">Assinatura</h1>
           <p className="text-muted-foreground">
-            Status: <strong>{isCancelling && access === 'subscription' ? 'Assinatura cancelada' : STATUS_LABEL[access]}</strong>
+            Status: <strong>{statusText}</strong>
             {remaining !== null && ` · ${remaining} ${remaining === 1 ? 'dia restante' : 'dias restantes'}`}
-            {sub && ` · Plano ${sub.plan}`}
+            {sub && access === 'subscription' && ` · Plano ${sub.plan}${sub.kind === 'pix' ? ' (Pix)' : ''}`}
           </p>
         </header>
 
@@ -122,29 +123,42 @@ export default function Assinatura() {
           </div>
         )}
 
+        {pixActive && (
+          <div className="flex gap-3 rounded-xl border border-sky-500/40 bg-sky-500/10 p-4">
+            <Info className="h-5 w-5 shrink-0 text-sky-500 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-semibold">Acesso via Pix{endDateLabel ? ` até ${endDateLabel}` : ''}</p>
+              <p className="text-sm text-muted-foreground">
+                O Pix não renova sozinho. Para continuar, pague de novo antes do vencimento:
+                os 30 dias novos são somados ao tempo que ainda resta.
+              </p>
+            </div>
+          </div>
+        )}
+
         {access === 'subscription' && justPaid && !isCancelling && (
           <div className="flex gap-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500 mt-0.5" />
-            <p className="text-sm">Assinatura ativada. Seu acesso e o dos seus pacientes está liberado.</p>
+            <p className="text-sm">Pagamento confirmado. Seu acesso e o dos seus pacientes está liberado.</p>
           </div>
         )}
 
         <div className="flex flex-wrap gap-3">
-          {sub && (
+          {hasCardSub && (
             <Button variant="outline" disabled={busy !== null} onClick={() => run('portal', openBillingPortal)}>
               Gerenciar cartão e cancelamento
             </Button>
-          )}
-          {sub && (
-            <p className="w-full text-xs text-muted-foreground">
-              Ao cancelar, o acesso é encerrado imediatamente, sem reembolso do período já pago.
-            </p>
           )}
           <Button asChild variant="outline" className="gap-2">
             <a href={BILLING_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="h-4 w-4" /> Tirar dúvidas no WhatsApp
             </a>
           </Button>
+          {hasCardSub && (
+            <p className="w-full text-xs text-muted-foreground">
+              Ao cancelar, o acesso é encerrado imediatamente, sem reembolso do período já pago.
+            </p>
+          )}
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -156,17 +170,31 @@ export default function Assinatura() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <ul className="text-sm space-y-1">{p.features.map((f) => <li key={f}>• {f}</li>)}</ul>
-                <Button
-                  className="w-full"
-                  disabled={busy !== null || currentPlan === p.id}
-                  onClick={() => run(p.id, () => startCheckout(p.id as Plan))}
-                >
-                  {currentPlan === p.id ? 'Plano atual' : 'Assinar com cartão'}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    className="w-full"
+                    disabled={busy !== null || hasCardSub}
+                    onClick={() => run(`${p.id}-card`, () => startCheckout(p.id as Plan, 'card' as PayMethod))}
+                  >
+                    {sub?.kind === 'card' && sub.plan === p.id && hasCardSub ? 'Plano atual' : 'Assinar com cartão (mensal)'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full gap-2"
+                    disabled={busy !== null || hasCardSub}
+                    onClick={() => run(`${p.id}-pix`, () => startCheckout(p.id as Plan, 'pix' as PayMethod))}
+                  >
+                    <QrCode className="h-4 w-4" />
+                    {pixActive ? 'Renovar 30 dias com Pix' : 'Pagar 30 dias com Pix'}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
+        <p className="text-xs text-muted-foreground">
+          Cartão: cobrança mensal automática, cancele quando quiser. Pix: pagamento único de 30 dias, sem renovação automática.
+        </p>
       </div>
     </ModernLayout>
   );
