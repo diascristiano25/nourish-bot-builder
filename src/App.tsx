@@ -32,6 +32,7 @@ const DesignShowcase = lazy(() => import("./pages/DesignShowcase"));
 const Patients = lazy(() => import("./pages/Patients"));
 const PatientDetail = lazy(() => import("./pages/PatientDetail"));
 const NewPatient = lazy(() => import("./pages/NewPatient"));
+const ImportPatients = lazy(() => import("./pages/ImportPatients"));
 const EditPatient = lazy(() => import("./pages/EditPatient"));
 const Agenda = lazy(() => import("./pages/Agenda"));
 const Biblioteca = lazy(() => import("./pages/Biblioteca"));
@@ -89,12 +90,17 @@ function PageLoader() {
 // Error boundary that auto-reloads on chunk load failures (stale deploy cache)
 class LazyErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean }
+  { hasError: boolean; isChunkError: boolean; errorMessage: string }
 > {
-  state = { hasError: false };
+  state = { hasError: false, isChunkError: false, errorMessage: '' };
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    const isChunkError =
+      error.message.includes('Failed to fetch dynamically imported module') ||
+      error.message.includes('Importing a named export') ||
+      error.message.includes('Loading chunk') ||
+      error.message.includes('Loading CSS chunk');
+    return { hasError: true, isChunkError, errorMessage: error.message };
   }
 
   componentDidCatch(error: Error) {
@@ -103,6 +109,8 @@ class LazyErrorBoundary extends React.Component<
       error.message.includes('Importing a named export') ||
       error.message.includes('Loading chunk') ||
       error.message.includes('Loading CSS chunk');
+
+    console.error('[LazyErrorBoundary]', error);
 
     if (isChunkError) {
       const reloadKey = '__nf_chunk_reload';
@@ -118,14 +126,25 @@ class LazyErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
+      const { isChunkError, errorMessage } = this.state;
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-6">
           <div className="text-center max-w-md space-y-4">
-            <Loader2 className="w-10 h-10 animate-spin text-emerald-500 mx-auto" />
-            <h2 className="text-xl font-semibold text-foreground">Atualizando aplicação...</h2>
-            <p className="text-sm text-muted-foreground">
-              Uma nova versão foi publicada. Se esta mensagem persistir, limpe o cache do navegador e recarregue.
-            </p>
+            {isChunkError ? (
+              <>
+                <Loader2 className="w-10 h-10 animate-spin text-emerald-500 mx-auto" />
+                <h2 className="text-xl font-semibold text-foreground">Atualizando aplicação...</h2>
+                <p className="text-sm text-muted-foreground">
+                  Uma nova versão foi publicada. Se esta mensagem persistir, limpe o cache do navegador e recarregue.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-semibold text-foreground">Algo deu errado nesta tela</h2>
+                <p className="text-sm text-muted-foreground">Tente recarregar. Se continuar, envie esta mensagem ao suporte:</p>
+                <p className="text-xs font-mono text-muted-foreground break-words bg-muted/40 rounded p-2">{errorMessage}</p>
+              </>
+            )}
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
@@ -245,6 +264,7 @@ function App() {
                       <Route path="/pacientes" element={<AccountStatusGuard><Patients /></AccountStatusGuard>} />
                       <Route path="/pacientes/:id" element={<AccountStatusGuard><PatientDetail /></AccountStatusGuard>} />
                       <Route path="/novo-paciente" element={<AccountStatusGuard><NewPatient /></AccountStatusGuard>} />
+                      <Route path="/importar-pacientes" element={<AccountStatusGuard><ImportPatients /></AccountStatusGuard>} />
                       <Route path="/editar-paciente/:id" element={<AccountStatusGuard><EditPatient /></AccountStatusGuard>} />
                       <Route path="/agenda" element={<AccountStatusGuard><Agenda /></AccountStatusGuard>} />
                       <Route path="/biblioteca" element={<AccountStatusGuard><Biblioteca /></AccountStatusGuard>} />

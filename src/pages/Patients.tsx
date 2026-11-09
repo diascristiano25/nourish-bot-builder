@@ -9,7 +9,7 @@ import { PatientFilters } from '@/components/nutritionist/patients/PatientFilter
 import { PatientTable } from '@/components/nutritionist/patients/PatientTable';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { RichCard } from '@/components/shared/RichCard';
-import { Users, UserPlus, Search } from 'lucide-react';
+import { Users, UserPlus, Search, FileSpreadsheet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
@@ -70,6 +70,15 @@ const Patients = () => {
           subtitle={`${(patients || []).length} pacientes cadastrados · ${activeCount} ativos`}
           icon={<Users className="w-7 h-7 text-white" />}
           actions={
+            <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => navigate('/importar-pacientes')}
+              variant="ghost"
+              className="gap-2 text-white hover:bg-card/20 border border-white/20 rounded-2xl font-semibold px-5 h-11"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Importar planilha
+            </Button>
             <Button
               onClick={() => navigate('/novo-paciente')}
               className="gap-2 bg-card/15 hover:bg-card/25 backdrop-blur-sm text-white border border-white/20 rounded-2xl font-semibold px-5 h-11 shadow-lg"
@@ -77,6 +86,7 @@ const Patients = () => {
               <UserPlus className="w-4 h-4" />
               Novo Paciente
             </Button>
+            </div>
           }
         />
 

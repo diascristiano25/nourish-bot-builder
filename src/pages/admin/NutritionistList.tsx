@@ -53,6 +53,28 @@ export default function NutritionistList() {
     fetchNutritionists();
   }, []);
 
+  const EMAIL_TIMEOUT_MS = 8000;
+
+  const fetchEmails = async (userIds: string[]): Promise<Record<string, string | null>> => {
+    if (userIds.length === 0) return {};
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), EMAIL_TIMEOUT_MS));
+    try {
+      const result = await Promise.race([
+        supabase.functions.invoke('get-user-emails', { body: { user_ids: userIds } }),
+        timeout,
+      ]);
+      if (!result) {
+        console.warn('get-user-emails timed out');
+        return {};
+      }
+      const { data: emailData } = result;
+      return emailData?.success ? emailData.emails || {} : {};
+    } catch (e) {
+      console.error('Error fetching emails:', e);
+      return {};
+    }
+  };
+
   const fetchNutritionists = async () => {
     setLoading(true);
     try {
@@ -64,32 +86,16 @@ export default function NutritionistList() {
 
       if (error) throw error;
 
-      // Fetch emails via edge function
-      const userIds = (data || []).map(p => p.user_id);
-      let emailMap: Record<string, string | null> = {};
-      if (userIds.length > 0) {
-        try {
-          const { data: emailData } = await supabase.functions.invoke('get-user-emails', {
-            body: { user_ids: userIds },
-          });
-          if (emailData?.success) {
-            emailMap = emailData.emails || {};
-          }
-        } catch (e) {
-          console.error('Error fetching emails:', e);
-        }
-      }
+      // Mostra a lista assim que os perfis chegam; e-mails entram depois (ou ficam vazios em timeout)
+      const profiles = data || [];
+      setNutritionists(profiles.map(p => ({ ...p, email: null })));
+      setLoading(false);
 
-      const withEmails = (data || []).map(p => ({
-        ...p,
-        email: emailMap[p.user_id] || null,
-      }));
-
-      setNutritionists(withEmails);
+      const emailMap = await fetchEmails(profiles.map(p => p.user_id).filter(Boolean) as string[]);
+      setNutritionists(prev => prev.map(n => ({ ...n, email: emailMap[n.user_id] || null })));
     } catch (error) {
       console.error('Error fetching nutritionists:', error);
       toast.error('Erro ao carregar nutricionistas');
-    } finally {
       setLoading(false);
     }
   };
@@ -191,7 +197,7 @@ export default function NutritionistList() {
   const filteredNutritionists = nutritionists.filter(n => {
     const term = searchTerm.toLowerCase();
     const matchesSearch =
-      n.full_name.toLowerCase().includes(term) ||
+      (n.full_name || '').toLowerCase().includes(term) ||
       (n.crn && n.crn.toLowerCase().includes(term)) ||
       (n.phone && n.phone.includes(term)) ||
       (n.email && n.email.toLowerCase().includes(term));
@@ -306,14 +312,16 @@ export default function NutritionistList() {
                       <TableRow key={n.id} className="border-border/30 hover:bg-muted/20 transition-colors cursor-pointer" onClick={() => navigate(`/admin/nutris/${n.id}`)}>
                         <TableCell>
                           <div>
-                            <p className="font-medium">{n.full_name}</p>
+                            <p className="font-medium">{n.full_name || 'Sem nome'}</p>
                             {n.phone && <p className="text-xs text-muted-foreground">{n.phone}</p>}
                           </div>
                         </TableCell>
                         <TableCell>{n.crn || '-'}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{n.email || '-'}</TableCell>
                         <TableCell>
-                          {format(new Date(n.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                          {n.created_at && !isNaN(new Date(n.created_at).getTime())
+                            ? format(new Date(n.created_at), 'dd/MM/yyyy', { locale: ptBR })
+                            : '-'}
                         </TableCell>
                         <TableCell>
                           <Badge variant={license.variant} className={`text-xs ${license.color}`}>
