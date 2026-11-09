@@ -135,6 +135,11 @@ export default function Assinatura() {
               Gerenciar cartão e cancelamento
             </Button>
           )}
+          {sub && (
+            <p className="w-full text-xs text-muted-foreground">
+              Ao cancelar, o acesso é encerrado imediatamente, sem reembolso do período já pago.
+            </p>
+          )}
           <Button asChild variant="outline" className="gap-2">
             <a href={BILLING_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="h-4 w-4" /> Tirar dúvidas no WhatsApp
