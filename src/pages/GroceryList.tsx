@@ -124,8 +124,11 @@ export default function GroceryList() {
     try {
       setGenerating(true);
 
+      // Some meal plans store `meals` as a bare array instead of { meals: [...] }
+      const normalizedPlan = Array.isArray(mealPlan) ? { meals: mealPlan } : mealPlan;
+
       const { data, error } = await supabase.functions.invoke('generate-grocery-list', {
-        body: { mealPlan, days }
+        body: { mealPlan: normalizedPlan, days }
       });
 
       if (error) throw error;

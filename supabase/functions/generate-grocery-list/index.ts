@@ -99,10 +99,10 @@ serve(async (req) => {
     const mealPlan = validationResult.data;
     const daysMultiplier = rawBody.days || 7;
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const MODELFLARE_API_KEY = Deno.env.get('MODELFLARE_API_KEY');
 
-    if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY is not configured');
+    if (!MODELFLARE_API_KEY) {
+      console.error('MODELFLARE_API_KEY is not configured');
       throw new Error('AI service not configured');
     }
 
@@ -158,20 +158,28 @@ Consolide os ingredientes, multiplique por ${daysMultiplier} dias, e organize po
 
     console.log('Calling AI gateway...');
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-      }),
-    });
+    // Same provider and model fallback chain used by generate-meal-plan
+    let response!: Response;
+    for (const model of ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.8-flash-high']) {
+      response = await fetch('https://modelflare.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${MODELFLARE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          max_tokens: 4096,
+          temperature: 0.3,
+        }),
+      });
+      if (response.ok || response.status === 429 || response.status === 402) break;
+      console.error(`Model ${model} failed:`, response.status);
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
