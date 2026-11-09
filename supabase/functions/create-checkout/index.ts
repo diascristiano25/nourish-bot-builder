@@ -62,9 +62,8 @@ async function handle(req: Request): Promise<Response> {
     customer: customerId,
     client_reference_id: user.id,
     line_items: [{ price: priceId, quantity: 1 }],
-    // Card and Pix as requested. Confirm Pix works for recurring charges
-    // in your Stripe account (test mode) before going live.
-    payment_method_types: ["card", "pix"],
+    // Pix is NOT accepted by Stripe in subscription mode (tested in test mode).
+    payment_method_types: ["card"],
     locale: "pt-BR",
     subscription_data: {
       metadata: { supabase_user_id: user.id, plan },
