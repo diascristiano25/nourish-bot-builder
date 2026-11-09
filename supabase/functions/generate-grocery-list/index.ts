@@ -173,7 +173,7 @@ Consolide os ingredientes, multiplique por ${daysMultiplier} dias, e organize po
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ],
-          max_tokens: 4096,
+          max_tokens: 8192,
           temperature: 0.3,
         }),
       });
@@ -211,18 +211,24 @@ Consolide os ingredientes, multiplique por ${daysMultiplier} dias, e organize po
       throw new Error('No content in AI response');
     }
 
-    // Parse the JSON from the response
+    // Parse the JSON from the response (tolerates code fences and trailing commas)
+    const finishReason = aiResponse.choices?.[0]?.finish_reason;
     let groceryList;
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        groceryList = JSON.parse(jsonMatch[0]);
-      } else {
+      const start = content.indexOf('{');
+      const end = content.lastIndexOf('}');
+      if (start === -1 || end <= start) {
         throw new Error('No valid JSON found in response');
       }
+      const jsonText = content.slice(start, end + 1);
+      try {
+        groceryList = JSON.parse(jsonText);
+      } catch {
+        groceryList = JSON.parse(jsonText.replace(/,(\s*[}\]])/g, '$1'));
+      }
     } catch (parseError) {
-      console.error('Failed to parse AI response:', content);
-      throw new Error('Failed to parse grocery list from AI response');
+      console.error('Failed to parse AI response:', { finishReason, content });
+      throw new Error(`Failed to parse grocery list from AI response (finish_reason: ${finishReason ?? 'unknown'})`);
     }
 
     console.log('Grocery list generated successfully with', groceryList.totalItems, 'items');
