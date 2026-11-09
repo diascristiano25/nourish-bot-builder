@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Users, Search, MoreVertical, Clock, CheckCircle, XCircle, UserCheck, UserX, CalendarPlus, StickyNote, Eye } from 'lucide-react';
+import { Users, Search, MoreVertical, Clock, CheckCircle, XCircle, UserCheck, UserX, CalendarPlus, StickyNote, Eye, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -38,6 +38,22 @@ interface Nutritionist {
 }
 
 type StatusFilter = 'all' | 'active' | 'trial' | 'inactive';
+
+// Mensagem automática de acompanhamento (edite aqui para mudar o texto)
+const buildTrialFollowUpMessage = (fullName: string | null) => {
+  const primeiroNome = (fullName || '').trim().split(/\s+/)[0] || '';
+  const saudacao = primeiroNome ? `Olá, ${primeiroNome}!` : 'Olá!';
+  return `${saudacao} Tudo bem? Tudo certo por aí? Vi que você está no período de trial do NutriFlow. Qualquer dúvida, é só me chamar.`;
+};
+
+// Monta o link wa.me a partir do telefone cadastrado (texto livre). Retorna null se não for um número válido.
+const getWhatsappUrl = (phone: string | null, fullName: string | null): string | null => {
+  if (!phone) return null;
+  let digits = phone.replace(/\D/g, '');
+  if (digits.length === 10 || digits.length === 11) digits = `55${digits}`;
+  if (!digits.startsWith('55') || digits.length < 12 || digits.length > 13) return null;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(buildTrialFollowUpMessage(fullName))}`;
+};
 
 export default function NutritionistList() {
   const navigate = useNavigate();
@@ -286,6 +302,7 @@ export default function NutritionistList() {
                   <TableHead>Nome</TableHead>
                   <TableHead>CRN</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>WhatsApp</TableHead>
                   <TableHead>Cadastro</TableHead>
                   <TableHead>Licença</TableHead>
                   <TableHead>Status</TableHead>
@@ -295,13 +312,13 @@ export default function NutritionistList() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
                       Carregando...
                     </TableCell>
                   </TableRow>
                 ) : filteredNutritionists.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
                       {searchTerm ? 'Nenhum resultado encontrado' : 'Nenhum nutricionista registrado'}
                     </TableCell>
                   </TableRow>
@@ -318,6 +335,21 @@ export default function NutritionistList() {
                         </TableCell>
                         <TableCell>{n.crn || '-'}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{n.email || '-'}</TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          {(() => {
+                            const whatsappUrl = getWhatsappUrl(n.phone, n.full_name);
+                            return whatsappUrl ? (
+                              <Button asChild variant="outline" size="sm" className="gap-2 text-emerald-600 border-emerald-500/30 hover:bg-emerald-50">
+                                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                                  <MessageCircle className="w-4 h-4" />
+                                  {n.phone}
+                                </a>
+                              </Button>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">{n.phone || '-'}</span>
+                            );
+                          })()}
+                        </TableCell>
                         <TableCell>
                           {n.created_at && !isNaN(new Date(n.created_at).getTime())
                             ? format(new Date(n.created_at), 'dd/MM/yyyy', { locale: ptBR })
