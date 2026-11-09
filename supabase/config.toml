@@ -38,3 +38,13 @@ verify_jwt = false
 
 [functions.process-daily-trial-emails]
 verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = true
+
+[functions.create-portal]
+verify_jwt = true
+
+# Called by Stripe, not by the browser. Authenticated by Stripe signature.
+[functions.stripe-webhook]
+verify_jwt = false
