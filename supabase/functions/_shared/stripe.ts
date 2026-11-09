@@ -1,6 +1,7 @@
 // Shared Stripe + Supabase helpers for billing Edge Functions.
 import Stripe from "https://esm.sh/stripe@14.25.0?target=deno";
-import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
