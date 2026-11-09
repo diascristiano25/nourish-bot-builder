@@ -112,4 +112,17 @@ async function syncSubscription(
     { onConflict: "stripe_subscription_id" },
   );
   if (error) throw new Error(error.message);
+
+  // A cancelled subscription ends access immediately, even for accounts that had a
+  // manual license (account_status = 'active'). Admins are never touched.
+  // The account goes back to "trial, already expired"; a new subscription (or an admin
+  // extending the trial / re-activating the account) restores access.
+  if (deleted || sub.status === "canceled") {
+    const { error: revokeError } = await admin
+      .from("profiles")
+      .update({ account_status: "trial", trial_ends_at: new Date().toISOString() })
+      .eq("user_id", userId)
+      .eq("is_admin", false);
+    if (revokeError) throw new Error(revokeError.message);
+  }
 }
