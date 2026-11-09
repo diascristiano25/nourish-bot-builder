@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Calendar, Users, FileText, DollarSign,
-  Settings, HelpCircle, LogOut, Send, Grid3X3, Info, TrendingUp, ShieldCheck, MessageCircle, Moon, Sun
+  Settings, HelpCircle, LogOut, Send, Grid3X3, Info, TrendingUp, ShieldCheck, MessageCircle, Moon, Sun, CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +28,7 @@ const navItems: NavItem[] = [
   { name: 'Mensagens', path: '/mensagens', icon: Send },
   { name: 'Financeiro', path: '/financeiro', icon: DollarSign },
   { name: 'Evolução', path: '/evolucao', icon: TrendingUp },
+  { name: 'Assinatura', path: '/assinatura', icon: CreditCard },
   { name: 'Suporte', path: '/support', icon: HelpCircle },
   { name: 'Perfil', path: '/perfil', icon: Info },
 ];

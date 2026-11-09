@@ -195,7 +195,7 @@ function App() {
                   {patientDomain ? (
                     <>
                       <Route path="/" element={<PatientMobileApp />} />
-                      <Route path="/meu-app" element={<PatientMobileApp />} />
+                      <Route path="/meu-app" element={<AccountStatusGuard><PatientMobileApp /></AccountStatusGuard>} />
                       <Route path="/patient-auth" element={<PatientAuth />} />
                       <Route path="/portal/:patientId" element={<PatientPortal />} />
                       <Route path="/paciente/:patientId" element={<PublicPatientPortal />} />
@@ -209,7 +209,7 @@ function App() {
                       <Route path="/new" element={<LandingPageNew />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/patient-auth" element={<PatientAuth />} />
-                      <Route path="/meu-app" element={<PatientMobileApp />} />
+                      <Route path="/meu-app" element={<AccountStatusGuard><PatientMobileApp /></AccountStatusGuard>} />
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="/privacy" element={<PrivacyPage />} />
                       <Route path="/lgpd" element={<LgpdPage />} />

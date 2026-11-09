@@ -62,7 +62,7 @@ export function TrialAlert({ userId: propUserId }: TrialAlertProps) {
             {getTrialAlertMessage(trialStatus.daysRemaining)}
           </p>
           <div className="flex gap-3">
-            <Link to="/pricing">
+            <Link to="/assinatura">
               <Button className={`${
                 isExpired
                   ? 'bg-red-600 hover:bg-red-700'
