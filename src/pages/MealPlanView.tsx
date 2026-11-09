@@ -24,7 +24,8 @@ import {
   Settings,
   Pencil,
   Apple,
-  Soup
+  Soup,
+  ShoppingCart
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -422,8 +423,19 @@ export default function MealPlanView() {
             >
               <Pencil className="w-4 h-4" />
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate(`/lista-compras/${mealPlanId}`)}
+              disabled={isEditing}
+              title="Lista de compras"
+              aria-label="Lista de compras"
+              className="border-border/50 hover:border-primary/50"
+            >
+              <ShoppingCart className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
               size="icon"
               onClick={handleShare}
               disabled={sharing || isEditing}
