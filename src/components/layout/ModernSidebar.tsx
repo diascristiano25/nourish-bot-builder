@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/theme-provider';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import logoImg from '@/assets/logo.png';
 
 const WHATSAPP_HELP_URL = "https://wa.me/5513996205253?text=Olá! Preciso de ajuda com o NutriFlow.";
@@ -74,7 +75,7 @@ export function ModernSidebar() {
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 25 }}
-      className="fixed left-4 top-4 bottom-4 w-[88px] bg-gradient-to-b from-[#518C5B] via-[#4a7d52] to-[#2d5a37] rounded-[2rem] flex flex-col items-center py-6 z-50"
+      className="fixed left-4 top-4 bottom-4 w-[88px] bg-gradient-to-b from-[#518C5B] via-[#4a7d52] to-[#2d5a37] rounded-[2rem] flex flex-col items-center py-4 [@media(min-height:900px)]:py-6 z-50"
       style={{
         boxShadow: '0 25px 50px -12px rgba(45, 90, 55, 0.35), inset 0 1px 0 rgba(255,255,255,0.1)'
       }}
@@ -84,7 +85,7 @@ export function ModernSidebar() {
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-        className="mb-8"
+        className="mb-4 [@media(min-height:900px)]:mb-8 shrink-0"
       >
         <div className="w-12 h-12 rounded-2xl bg-card/15 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-inner overflow-hidden">
           <img src={logoImg} alt="NutriFlow" className="w-10 h-10 object-contain" />
@@ -92,22 +93,22 @@ export function ModernSidebar() {
       </motion.div>
 
       {/* Navigation */}
-      <nav className="flex-1 flex flex-col items-center gap-2 w-full px-2">
+      <nav className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex flex-col items-center gap-1 [@media(min-height:900px)]:gap-2 w-full px-2">
         {navItems.map((item, index) => (
           <motion.div
             key={item.path + item.name}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 + index * 0.05 }}
-            className="relative w-full"
-            onMouseEnter={() => setHoveredItem(item.name)}
-            onMouseLeave={() => setHoveredItem(null)}
+            className="relative w-full shrink-0"
           >
+            <Tooltip>
+            <TooltipTrigger asChild>
             <NavLink
               to={item.path}
               className={({ isActive }) =>
                 cn(
-                  "relative flex items-center justify-center w-full h-12 rounded-2xl transition-all duration-300 group",
+                  "relative flex items-center justify-center w-full h-10 [@media(min-height:900px)]:h-12 rounded-2xl transition-all duration-300 group",
                   isActive
                     ? "shadow-lg"
                     : "hover:bg-card/10"
@@ -141,33 +142,24 @@ export function ModernSidebar() {
                       {item.badge}
                     </motion.span>
                   )}
-                  {/* Tooltip */}
-                  {hoveredItem === item.name && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      className="absolute left-full ml-3 px-3 py-1.5 bg-foreground/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
-                    >
-                      {item.name}
-                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900/95" />
-                    </motion.div>
-                  )}
                 </>
               )}
             </NavLink>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={12}>{item.name}</TooltipContent>
+            </Tooltip>
           </motion.div>
         ))}
       </nav>
 
       {/* Bottom Actions */}
-      <div className="flex flex-col items-center gap-2 w-full px-2 mt-auto">
+      <div className="shrink-0 flex flex-col items-center gap-1 [@media(min-height:900px)]:gap-2 w-full px-2 mt-auto">
         {/* Theme Toggle */}
         <motion.button
           whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="w-full h-12 rounded-2xl flex items-center justify-center text-white/60 hover:text-white transition-all relative group"
+          className="w-full h-10 [@media(min-height:900px)]:h-12 rounded-2xl flex items-center justify-center text-white/60 hover:text-white transition-all relative group"
           onMouseEnter={() => setHoveredItem('Tema')}
           onMouseLeave={() => setHoveredItem(null)}
         >
@@ -202,7 +194,7 @@ export function ModernSidebar() {
               to="/admin"
               className={({ isActive }) =>
                 cn(
-                  "relative flex items-center justify-center w-full h-12 rounded-2xl transition-all duration-300 group",
+                  "relative flex items-center justify-center w-full h-10 [@media(min-height:900px)]:h-12 rounded-2xl transition-all duration-300 group",
                   isActive ? "shadow-lg" : "hover:bg-card/10"
                 )
               }
@@ -242,7 +234,7 @@ export function ModernSidebar() {
           rel="noopener noreferrer"
           whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
           whileTap={{ scale: 0.95 }}
-          className="w-full h-12 rounded-2xl flex items-center justify-center text-white/60 hover:text-[#25D366] transition-all relative group"
+          className="w-full h-10 [@media(min-height:900px)]:h-12 rounded-2xl flex items-center justify-center text-white/60 hover:text-[#25D366] transition-all relative group"
           onMouseEnter={() => setHoveredItem('Ajuda')}
           onMouseLeave={() => setHoveredItem(null)}
         >
@@ -263,7 +255,7 @@ export function ModernSidebar() {
           whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
           whileTap={{ scale: 0.95 }}
           onClick={handleSignOut}
-          className="w-full h-12 rounded-2xl flex items-center justify-center text-white/60 hover:text-white transition-all"
+          className="w-full h-10 [@media(min-height:900px)]:h-12 rounded-2xl flex items-center justify-center text-white/60 hover:text-white transition-all"
         >
           <LogOut className="w-5 h-5" />
         </motion.button>
