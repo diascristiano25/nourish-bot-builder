@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/theme-provider';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import logoImg from '@/assets/logo.png';
 
 const WHATSAPP_HELP_URL = "https://wa.me/5513996205253?text=Olá! Preciso de ajuda com o NutriFlow.";
@@ -92,17 +93,17 @@ export function ModernSidebar() {
       </motion.div>
 
       {/* Navigation */}
-      <nav className="flex-1 min-h-0 flex flex-col items-center gap-1 [@media(min-height:900px)]:gap-2 w-full px-2">
+      <nav className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex flex-col items-center gap-1 [@media(min-height:900px)]:gap-2 w-full px-2">
         {navItems.map((item, index) => (
           <motion.div
             key={item.path + item.name}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 + index * 0.05 }}
-            className="relative w-full"
-            onMouseEnter={() => setHoveredItem(item.name)}
-            onMouseLeave={() => setHoveredItem(null)}
+            className="relative w-full shrink-0"
           >
+            <Tooltip>
+            <TooltipTrigger asChild>
             <NavLink
               to={item.path}
               className={({ isActive }) =>
@@ -141,21 +142,12 @@ export function ModernSidebar() {
                       {item.badge}
                     </motion.span>
                   )}
-                  {/* Tooltip */}
-                  {hoveredItem === item.name && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      className="absolute left-full ml-3 px-3 py-1.5 bg-foreground/95 backdrop-blur-sm text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none shadow-xl"
-                    >
-                      {item.name}
-                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900/95" />
-                    </motion.div>
-                  )}
                 </>
               )}
             </NavLink>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={12}>{item.name}</TooltipContent>
+            </Tooltip>
           </motion.div>
         ))}
       </nav>
