@@ -113,7 +113,7 @@ export function AdminSidebar({ isMobile = false, onNavigate }: AdminSidebarProps
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 min-h-0 overflow-y-auto space-y-1 p-3">
           {adminNavItems.map((item) => {
             const isActive = location.pathname === item.href ||
               (item.href !== '/admin' && location.pathname.startsWith(item.href));
@@ -149,7 +149,7 @@ export function AdminSidebar({ isMobile = false, onNavigate }: AdminSidebarProps
         </nav>
 
         {/* Bottom section */}
-        <div className="border-t border-border/30 p-3 space-y-1">
+        <div className="shrink-0 border-t border-border/30 p-3 space-y-1">
           {/* Back to App */}
           <Link
             to="/dashboard"

@@ -71,7 +71,7 @@ export function PatientSidebar({ collapsed = false, onToggleCollapse }: PatientS
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 min-h-0 overflow-y-auto px-3 space-y-1">
         {navItems.map((item, index) => (
           <motion.div
             key={item.path + item.name}
@@ -112,7 +112,7 @@ export function PatientSidebar({ collapsed = false, onToggleCollapse }: PatientS
       </nav>
 
       {/* Logout Button */}
-      <div className="px-3 py-4 border-t border-white/10">
+      <div className="shrink-0 px-3 py-4 border-t border-white/10">
         <Button
           variant="ghost"
           onClick={handleSignOut}
