@@ -4,3 +4,6 @@ out/*.png
 out/*.wav
 out/vo/*.wav
 out/nutriflow-reel-semvoz.mp4
+out/mix_brian.wav
+out/check_brian.png
+out/vo_brian/*.wav
