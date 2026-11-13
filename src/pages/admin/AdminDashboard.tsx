@@ -10,7 +10,7 @@ import { format, subMonths, startOfMonth, endOfMonth, isToday, differenceInDays 
 import { ptBR } from 'date-fns/locale';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, AreaChart, Area } from 'recharts';
 import { motion } from 'framer-motion';
-import { getAccessState, isPayingActive, isInactive, type SubscriptionRow } from '@/lib/account-access';
+import { getAccessState, getActivityStatus, type SubscriptionRow } from '@/lib/account-access';
 
 interface DashboardStats {
   totalNutris: number;
@@ -55,10 +55,10 @@ export default function AdminDashboard() {
       const nonAdminProfiles = (profiles || []).filter(p => !p.is_admin);
 
       const { data: subs } = await supabase.from('subscriptions').select('user_id, status, current_period_end');
-      const states = nonAdminProfiles.map(p => getAccessState(p, (subs || []) as SubscriptionRow[], today));
-      const activeCount = states.filter(isPayingActive).length;
+      const states = nonAdminProfiles.map(p => getActivityStatus(getAccessState(p, (subs || []) as SubscriptionRow[], today), p));
+      const activeCount = states.filter(st => st === 'active').length;
       const trialCount = states.filter(st => st === 'trial').length;
-      const inactiveCount = states.filter(isInactive).length;
+      const inactiveCount = states.filter(st => st === 'inactive').length;
 
       // New today: created_at within today's calendar day (local timezone)
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());

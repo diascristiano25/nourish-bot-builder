@@ -29,19 +29,22 @@ export const getAccessState = (
       (!s.current_period_end || new Date(s.current_period_end) > now),
   );
   if (hasSub) return 'subscription';
-  // Trial vigente, mas que nunca fez login, conta como inativo (cadastrou e não voltou).
-  if (p.trial_ends_at && new Date(p.trial_ends_at) > now && p.last_login_at) return 'trial';
+  if (p.trial_ends_at && new Date(p.trial_ends_at) > now) return 'trial';
   return 'expired';
 };
 
-// "Ativo" = licença ou assinatura. "Trial" = trial vigente com login. "Inativo" = trial vencido,
-// assinatura cancelada, ou conta que nunca fez login.
-export const isPayingActive = (s: AccessState) => s === 'licensed' || s === 'subscription';
-export const isInactive = (s: AccessState) => s === 'expired';
+// Licença (getAccessState) e atividade são coisas diferentes: uma conta nova com trial vigente
+// tem licença "Trial", mas conta como "Inativo" enquanto nunca tiver feito login.
+export type ActivityStatus = 'active' | 'trial' | 'inactive';
 
-export const ACCESS_LABEL: Record<AccessState, string> = {
-  licensed: 'Ativo (licença)',
-  subscription: 'Ativo (assinatura)',
+export const getActivityStatus = (access: AccessState, p: AccessProfile): ActivityStatus => {
+  if (access === 'licensed' || access === 'subscription') return 'active';
+  if (access === 'trial' && p.last_login_at) return 'trial';
+  return 'inactive';
+};
+
+export const ACTIVITY_LABEL: Record<ActivityStatus, string> = {
+  active: 'Ativo',
   trial: 'Trial',
-  expired: 'Inativo',
+  inactive: 'Inativo',
 };
