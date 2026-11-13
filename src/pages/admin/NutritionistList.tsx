@@ -14,13 +14,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Users, Search, MoreVertical, Clock, CheckCircle, XCircle, UserCheck, UserX, CalendarPlus, StickyNote, Eye, MessageCircle } from 'lucide-react';
+import { Users, Search, MoreVertical, Clock, CheckCircle, XCircle, UserCheck, UserX, CalendarPlus, StickyNote, Eye, MessageCircle, Mail, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { logAdminAction } from '@/lib/admin-audit';
 import { motion } from 'framer-motion';
+import { getAccessState, isPayingActive, isInactive, ACCESS_LABEL, type SubscriptionRow } from '@/lib/account-access';
 
 interface Nutritionist {
   id: string;
@@ -35,6 +36,7 @@ interface Nutritionist {
   account_status: string;
   trial_ends_at: string | null;
   admin_notes: string | null;
+  last_login_at: string | null;
 }
 
 type StatusFilter = 'all' | 'active' | 'trial' | 'inactive';
@@ -67,6 +69,9 @@ export default function NutritionistList() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [extendTrialDialog, setExtendTrialDialog] = useState<{ open: boolean; nutriId: string | null; days: number }>({ open: false, nutriId: null, days: 7 });
   const [notesDialog, setNotesDialog] = useState<{ open: boolean; nutriId: string | null; notes: string }>({ open: false, nutriId: null, notes: '' });
+  const [subscriptions, setSubscriptions] = useState<SubscriptionRow[]>([]);
+  const [sendingEmailTo, setSendingEmailTo] = useState<string | null>(null);
+  const [sendingBulk, setSendingBulk] = useState(false);
   const [whatsappDialog, setWhatsappDialog] = useState<{ open: boolean; nutri: Nutritionist | null; message: string }>({ open: false, nutri: null, message: '' });
 
   useEffect(() => {
@@ -100,7 +105,7 @@ export default function NutritionistList() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, user_id, crn, phone, created_at, is_active, is_admin, account_status, trial_ends_at, admin_notes')
+        .select('id, full_name, user_id, crn, phone, created_at, is_active, is_admin, account_status, trial_ends_at, admin_notes, last_login_at')
         .eq('is_admin', false)
         .order('created_at', { ascending: false });
 
@@ -110,6 +115,9 @@ export default function NutritionistList() {
       const profiles = data || [];
       setNutritionists(profiles.map(p => ({ ...p, email: null })));
       setLoading(false);
+
+      const { data: subs } = await supabase.from('subscriptions').select('user_id, status, current_period_end');
+      setSubscriptions((subs || []) as SubscriptionRow[]);
 
       const emailMap = await fetchEmails(profiles.map(p => p.user_id).filter(Boolean) as string[]);
       setNutritionists(prev => prev.map(n => ({ ...n, email: emailMap[n.user_id] || null })));
@@ -202,16 +210,49 @@ export default function NutritionistList() {
     }
   };
 
-  const getLicenseStatus = (createdAt: string, trialEndsAt: string | null) => {
-    if (trialEndsAt && new Date(trialEndsAt) > new Date()) {
-      const daysLeft = differenceInDays(new Date(trialEndsAt), new Date());
+  const accessOf = (n: Nutritionist) => getAccessState(n, subscriptions);
+
+  const getLicenseStatus = (n: Nutritionist) => {
+    const state = accessOf(n);
+    if (state === 'trial') {
+      const daysLeft = differenceInDays(new Date(n.trial_ends_at!), new Date());
       return { label: `Trial (${daysLeft}d)`, variant: 'default' as const, color: 'bg-blue-500/20 text-blue-600 border-blue-500/30' };
     }
-    const daysSinceCreation = differenceInDays(new Date(), new Date(createdAt));
-    if (daysSinceCreation <= 33) {
-      return { label: `Teste (${33 - daysSinceCreation}d)`, variant: 'default' as const, color: 'bg-info/20 text-info border-info/30' };
-    }
+    if (state === 'licensed') return { label: 'Licença', variant: 'default' as const, color: 'bg-success/20 text-success border-success/30' };
+    if (state === 'subscription') return { label: 'Assinante', variant: 'default' as const, color: 'bg-success/20 text-success border-success/30' };
     return { label: 'Expirado', variant: 'destructive' as const, color: '' };
+  };
+
+  const sendReactivationEmail = async (n: Nutritionist, silent = false): Promise<boolean> => {
+    if (!n.email) {
+      if (!silent) toast.error('Nutricionista sem e-mail cadastrado');
+      return false;
+    }
+    if (!silent) setSendingEmailTo(n.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-nudge-email', {
+        body: { name: n.full_name, email: n.email },
+      });
+      if (error || !data?.success) throw error || new Error(data?.error || 'Erro ao enviar e-mail');
+      if (!silent) toast.success('E-mail enviado!');
+      return true;
+    } catch (e: any) {
+      if (!silent) toast.error(e.message || 'Erro ao enviar e-mail');
+      return false;
+    } finally {
+      if (!silent) setSendingEmailTo(null);
+    }
+  };
+
+  const sendBulkToInactive = async () => {
+    const targets = nutritionists.filter(n => accessOf(n) === 'expired' && n.email);
+    if (targets.length === 0) { toast.error('Nenhum inativo com e-mail'); return; }
+    if (!window.confirm(`Enviar e-mail para ${targets.length} nutricionista(s) inativo(s)?`)) return;
+    setSendingBulk(true);
+    let ok = 0;
+    for (const n of targets) if (await sendReactivationEmail(n, true)) ok++;
+    setSendingBulk(false);
+    toast.success(`Enviados: ${ok} | Erros: ${targets.length - ok}`);
   };
 
   const filteredNutritionists = nutritionists.filter(n => {
@@ -225,16 +266,16 @@ export default function NutritionistList() {
     if (!matchesSearch) return false;
 
     switch (statusFilter) {
-      case 'active': return n.is_active;
-      case 'trial': return n.account_status === 'trial' || (n.trial_ends_at && new Date(n.trial_ends_at) > new Date());
-      case 'inactive': return !n.is_active;
+      case 'active': return isPayingActive(accessOf(n));
+      case 'trial': return accessOf(n) === 'trial';
+      case 'inactive': return accessOf(n) === 'expired';
       default: return true;
     }
   });
 
-  const activeCount = nutritionists.filter(n => n.is_active).length;
-  const trialCount = nutritionists.filter(n => n.account_status === 'trial' || (n.trial_ends_at && new Date(n.trial_ends_at) > new Date())).length;
-  const inactiveCount = nutritionists.filter(n => !n.is_active).length;
+  const activeCount = nutritionists.filter(n => isPayingActive(accessOf(n))).length;
+  const trialCount = nutritionists.filter(n => accessOf(n) === 'trial').length;
+  const inactiveCount = nutritionists.filter(n => accessOf(n) === 'expired').length;
 
   return (
     <AdminLayout>
@@ -287,6 +328,12 @@ export default function NutritionistList() {
                   <SelectItem value="inactive">Inativos</SelectItem>
                 </SelectContent>
               </Select>
+              {statusFilter === 'inactive' && (
+                <Button variant="outline" size="sm" onClick={sendBulkToInactive} disabled={sendingBulk || inactiveCount === 0} className="gap-2">
+                  {sendingBulk ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                  Enviar e-mail p/ inativos ({inactiveCount})
+                </Button>
+              )}
               <div className="relative flex-1 sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -328,7 +375,7 @@ export default function NutritionistList() {
                   </TableRow>
                 ) : (
                   filteredNutritionists.map((n) => {
-                    const license = getLicenseStatus(n.created_at, n.trial_ends_at);
+                    const license = getLicenseStatus(n);
                     return (
                       <TableRow key={n.id} className="border-border/30 hover:bg-muted/20 transition-colors cursor-pointer" onClick={() => navigate(`/admin/nutris/${n.id}`)}>
                         <TableCell>
@@ -366,10 +413,10 @@ export default function NutritionistList() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={n.is_active ? 'default' : 'secondary'}
-                            className={n.is_active ? 'bg-success/20 text-success border-success/30' : ''}
+                            variant={isInactive(accessOf(n)) ? 'secondary' : 'default'}
+                            className={isInactive(accessOf(n)) ? '' : accessOf(n) === 'trial' ? 'bg-blue-500/20 text-blue-600 border-blue-500/30' : 'bg-success/20 text-success border-success/30'}
                           >
-                            {n.is_active ? 'Ativo' : 'Inativo'}
+                            {ACCESS_LABEL[accessOf(n)]}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
@@ -390,6 +437,12 @@ export default function NutritionistList() {
                                   <Eye className="w-4 h-4 mr-2" />
                                   Ver Detalhes
                                 </DropdownMenuItem>
+                                {isInactive(accessOf(n)) && (
+                                  <DropdownMenuItem disabled={sendingEmailTo === n.id} onClick={() => sendReactivationEmail(n)}>
+                                    <Mail className="w-4 h-4 mr-2" />
+                                    Enviar e-mail
+                                  </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem onClick={() => setExtendTrialDialog({ open: true, nutriId: n.id, days: 7 })}>
                                   <CalendarPlus className="w-4 h-4 mr-2" />
                                   Estender Trial
