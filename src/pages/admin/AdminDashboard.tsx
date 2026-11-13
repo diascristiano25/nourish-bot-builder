@@ -10,6 +10,7 @@ import { format, subMonths, startOfMonth, endOfMonth, isToday, differenceInDays 
 import { ptBR } from 'date-fns/locale';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, AreaChart, Area } from 'recharts';
 import { motion } from 'framer-motion';
+import { getAccessState, isPayingActive, isInactive, type SubscriptionRow } from '@/lib/account-access';
 
 interface DashboardStats {
   totalNutris: number;
@@ -47,27 +48,17 @@ export default function AdminDashboard() {
 
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, created_at, is_active, is_admin, account_status, trial_ends_at');
+        .select('id, user_id, created_at, is_active, is_admin, account_status, trial_ends_at');
 
       if (profilesError) throw profilesError;
 
       const nonAdminProfiles = (profiles || []).filter(p => !p.is_admin);
 
-      // Active: is_active=true AND has valid subscription (active status OR unexpired trial)
-      const activeCount = nonAdminProfiles.filter(p => {
-        if (!p.is_active) return false;
-        if (p.account_status === 'active') return true;
-        if (p.trial_ends_at && new Date(p.trial_ends_at) > today) return true;
-        return false;
-      }).length;
-
-      // Trial: account_status='trial' AND trial not expired AND is_active
-      const trialCount = nonAdminProfiles.filter(p =>
-        p.is_active &&
-        p.account_status === 'trial' &&
-        p.trial_ends_at &&
-        new Date(p.trial_ends_at) > today
-      ).length;
+      const { data: subs } = await supabase.from('subscriptions').select('user_id, status, current_period_end');
+      const states = nonAdminProfiles.map(p => getAccessState(p, (subs || []) as SubscriptionRow[], today));
+      const activeCount = states.filter(isPayingActive).length;
+      const trialCount = states.filter(st => st === 'trial').length;
+      const inactiveCount = states.filter(isInactive).length;
 
       // New today: created_at within today's calendar day (local timezone)
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -163,7 +154,7 @@ export default function AdminDashboard() {
         totalNutris: nonAdminProfiles.length,
         activeNutris: activeCount,
         trialNutris: trialCount,
-        inactiveNutris: nonAdminProfiles.length - activeCount - trialCount,
+        inactiveNutris: inactiveCount,
         pendingTickets: ticketCount || 0,
         newToday: newTodayCount,
         monthlyRevenue,

@@ -213,7 +213,7 @@ export default function AdminAnalytics({
   // User status distribution
   const statusDistribution = useMemo(() => [
     { name: 'Ativos', value: stats.activeUsers, color: 'hsl(var(--success))' },
-    { name: 'Inativos', value: stats.inactiveUsers, color: 'hsl(var(--destructive))' },
+    { name: 'Sem uso', value: stats.inactiveUsers, color: 'hsl(var(--destructive))' },
   ], [stats]);
 
   // License distribution
@@ -284,7 +284,7 @@ export default function AdminAnalytics({
     const inactiveWithEmail = stats.inactiveList.filter(u => u.email);
     
     if (inactiveWithEmail.length === 0) {
-      toast.error('Nenhum usuário inativo com email');
+      toast.error('Nenhum usuário sem uso com email');
       return;
     }
 
@@ -324,7 +324,7 @@ export default function AdminAnalytics({
       u.total_meal_plans,
       u.total_appointments,
       u.last_activity ? format(new Date(u.last_activity), 'dd/MM/yyyy HH:mm') : '-',
-      (u.total_patients > 0 || u.total_meal_plans > 0) ? 'Ativo' : 'Inativo'
+      (u.total_patients > 0 || u.total_meal_plans > 0) ? 'Com uso' : 'Sem uso'
     ]);
 
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -457,7 +457,7 @@ export default function AdminAnalytics({
           bgColor="bg-success/10"
         />
         <StatCard 
-          title="Inativos" 
+          title="Sem uso" 
           value={stats.inactiveUsers}
           icon={UserX}
           iconColor="text-destructive"
@@ -712,8 +712,8 @@ export default function AdminAnalytics({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="active">Ativos</SelectItem>
-                <SelectItem value="inactive">Inativos</SelectItem>
+                <SelectItem value="active">Com uso</SelectItem>
+                <SelectItem value="inactive">Sem uso</SelectItem>
               </SelectContent>
             </Select>
             <Button 
@@ -728,7 +728,7 @@ export default function AdminAnalytics({
               ) : (
                 <Mail className="w-4 h-4 mr-1" />
               )}
-              Enviar p/ Inativos ({stats.inactiveUsers})
+              Enviar p/ Sem uso ({stats.inactiveUsers})
             </Button>
           </div>
         </div>
@@ -791,7 +791,7 @@ export default function AdminAnalytics({
                             variant={isActive ? 'default' : 'secondary'}
                             className={isActive ? 'bg-success/20 text-success border-success/30' : 'bg-destructive/20 text-destructive border-destructive/30'}
                           >
-                            {isActive ? 'Ativo' : 'Inativo'}
+                            {isActive ? 'Com uso' : 'Sem uso'}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
