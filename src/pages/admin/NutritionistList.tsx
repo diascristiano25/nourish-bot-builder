@@ -21,7 +21,7 @@ import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { logAdminAction } from '@/lib/admin-audit';
 import { motion } from 'framer-motion';
-import { getAccessState, isPayingActive, isInactive, ACCESS_LABEL, type SubscriptionRow } from '@/lib/account-access';
+import { getAccessState, getActivityStatus, ACTIVITY_LABEL, type SubscriptionRow } from '@/lib/account-access';
 
 interface Nutritionist {
   id: string;
@@ -211,6 +211,7 @@ export default function NutritionistList() {
   };
 
   const accessOf = (n: Nutritionist) => getAccessState(n, subscriptions);
+  const statusOf = (n: Nutritionist) => getActivityStatus(accessOf(n), n);
 
   const getLicenseStatus = (n: Nutritionist) => {
     const state = accessOf(n);
@@ -245,7 +246,7 @@ export default function NutritionistList() {
   };
 
   const sendBulkToInactive = async () => {
-    const targets = nutritionists.filter(n => accessOf(n) === 'expired' && n.email);
+    const targets = nutritionists.filter(n => statusOf(n) === 'inactive' && n.email);
     if (targets.length === 0) { toast.error('Nenhum inativo com e-mail'); return; }
     if (!window.confirm(`Enviar e-mail para ${targets.length} nutricionista(s) inativo(s)?`)) return;
     setSendingBulk(true);
@@ -266,16 +267,16 @@ export default function NutritionistList() {
     if (!matchesSearch) return false;
 
     switch (statusFilter) {
-      case 'active': return isPayingActive(accessOf(n));
-      case 'trial': return accessOf(n) === 'trial';
-      case 'inactive': return accessOf(n) === 'expired';
+      case 'active': return statusOf(n) === 'active';
+      case 'trial': return statusOf(n) === 'trial';
+      case 'inactive': return statusOf(n) === 'inactive';
       default: return true;
     }
   });
 
-  const activeCount = nutritionists.filter(n => isPayingActive(accessOf(n))).length;
-  const trialCount = nutritionists.filter(n => accessOf(n) === 'trial').length;
-  const inactiveCount = nutritionists.filter(n => accessOf(n) === 'expired').length;
+  const activeCount = nutritionists.filter(n => statusOf(n) === 'active').length;
+  const trialCount = nutritionists.filter(n => statusOf(n) === 'trial').length;
+  const inactiveCount = nutritionists.filter(n => statusOf(n) === 'inactive').length;
 
   return (
     <AdminLayout>
@@ -413,10 +414,10 @@ export default function NutritionistList() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={isInactive(accessOf(n)) ? 'secondary' : 'default'}
-                            className={isInactive(accessOf(n)) ? '' : accessOf(n) === 'trial' ? 'bg-blue-500/20 text-blue-600 border-blue-500/30' : 'bg-success/20 text-success border-success/30'}
+                            variant={statusOf(n) === 'inactive' ? 'secondary' : 'default'}
+                            className={statusOf(n) === 'inactive' ? '' : statusOf(n) === 'trial' ? 'bg-blue-500/20 text-blue-600 border-blue-500/30' : 'bg-success/20 text-success border-success/30'}
                           >
-                            {ACCESS_LABEL[accessOf(n)]}
+                            {ACTIVITY_LABEL[statusOf(n)]}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
@@ -437,7 +438,7 @@ export default function NutritionistList() {
                                   <Eye className="w-4 h-4 mr-2" />
                                   Ver Detalhes
                                 </DropdownMenuItem>
-                                {isInactive(accessOf(n)) && (
+                                {statusOf(n) === 'inactive' && (
                                   <DropdownMenuItem disabled={sendingEmailTo === n.id} onClick={() => sendReactivationEmail(n)}>
                                     <Mail className="w-4 h-4 mr-2" />
                                     Enviar e-mail
