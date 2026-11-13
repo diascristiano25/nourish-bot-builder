@@ -7,6 +7,7 @@ export interface AccessProfile {
   user_id: string;
   account_status: string | null;
   trial_ends_at: string | null;
+  last_login_at?: string | null;
 }
 
 export interface SubscriptionRow {
@@ -28,11 +29,13 @@ export const getAccessState = (
       (!s.current_period_end || new Date(s.current_period_end) > now),
   );
   if (hasSub) return 'subscription';
-  if (p.trial_ends_at && new Date(p.trial_ends_at) > now) return 'trial';
+  // Trial vigente, mas que nunca fez login, conta como inativo (cadastrou e não voltou).
+  if (p.trial_ends_at && new Date(p.trial_ends_at) > now && p.last_login_at) return 'trial';
   return 'expired';
 };
 
-// "Ativo" = tem acesso pago/liberado. "Inativo" = sem acesso (trial vencido ou cancelado).
+// "Ativo" = licença ou assinatura. "Trial" = trial vigente com login. "Inativo" = trial vencido,
+// assinatura cancelada, ou conta que nunca fez login.
 export const isPayingActive = (s: AccessState) => s === 'licensed' || s === 'subscription';
 export const isInactive = (s: AccessState) => s === 'expired';
 

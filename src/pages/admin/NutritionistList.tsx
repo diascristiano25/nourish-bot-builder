@@ -36,6 +36,7 @@ interface Nutritionist {
   account_status: string;
   trial_ends_at: string | null;
   admin_notes: string | null;
+  last_login_at: string | null;
 }
 
 type StatusFilter = 'all' | 'active' | 'trial' | 'inactive';
@@ -104,7 +105,7 @@ export default function NutritionistList() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, user_id, crn, phone, created_at, is_active, is_admin, account_status, trial_ends_at, admin_notes')
+        .select('id, full_name, user_id, crn, phone, created_at, is_active, is_admin, account_status, trial_ends_at, admin_notes, last_login_at')
         .eq('is_admin', false)
         .order('created_at', { ascending: false });
 

@@ -48,7 +48,7 @@ export default function AdminDashboard() {
 
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, user_id, created_at, is_active, is_admin, account_status, trial_ends_at');
+        .select('id, user_id, created_at, is_active, is_admin, account_status, trial_ends_at, last_login_at');
 
       if (profilesError) throw profilesError;
 
