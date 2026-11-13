@@ -329,12 +329,10 @@ export default function NutritionistList() {
                   <SelectItem value="inactive">Inativos</SelectItem>
                 </SelectContent>
               </Select>
-              {statusFilter === 'inactive' && (
-                <Button variant="outline" size="sm" onClick={sendBulkToInactive} disabled={sendingBulk || inactiveCount === 0} className="gap-2">
-                  {sendingBulk ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-                  Enviar e-mail p/ inativos ({inactiveCount})
-                </Button>
-              )}
+              <Button variant="outline" size="sm" onClick={sendBulkToInactive} disabled={sendingBulk || inactiveCount === 0} className="gap-2 shrink-0">
+                {sendingBulk ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                Enviar e-mail p/ todos inativos ({inactiveCount})
+              </Button>
               <div className="relative flex-1 sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
