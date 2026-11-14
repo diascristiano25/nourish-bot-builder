@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
 import logoImg from '@/assets/logo-nutriflow.png';
 import { motion } from 'framer-motion';
 
@@ -167,6 +168,14 @@ export default function DesafioNutri() {
       const v = current.get(k);
       if (v) out.set(k, v);
     });
+    // Grava o lead e dispara o WhatsApp sem travar a navegação; falha aqui não impede o cadastro
+    const utm: Record<string, string> = {};
+    SIGNUP_UTMS.forEach((k) => { const v = current.get(k); if (v) utm[k] = v; });
+    void supabase.functions
+      .invoke('capture-desafio-lead', {
+        body: { email: leadEmail.trim(), whatsapp: leadPhone, lost_hours: lostHours, utm },
+      })
+      .catch(() => { /* silent fail */ });
     navigate(`/auth?${out.toString()}`);
   };
 
