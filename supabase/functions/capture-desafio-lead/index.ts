@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 //   EVOLUTION_API_URL      ex.: https://evolution.seudominio.com
 //   EVOLUTION_API_KEY      apikey da instância
 //   EVOLUTION_INSTANCE     nome da instância conectada ao seu WhatsApp
+//   FOUNDER_NAME           (opcional) seu primeiro nome, usado na apresentação
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -28,14 +29,18 @@ function normalizePhone(raw: string): string | null {
 }
 
 function buildMessage(lostHours: number | null): string {
+  // FOUNDER_NAME (secret opcional): seu primeiro nome, para a mensagem soar pessoal
+  const nome = Deno.env.get("FOUNDER_NAME")?.trim();
+  const quem = nome ? `Aqui é ${nome}` : "Tudo bem?";
   const resultado = lostHours && lostHours > 0
-    ? `Vi que você perde cerca de ${lostHours} horas por semana montando cardápio na mão. `
+    ? `Vi no seu diagnóstico que você gasta cerca de ${lostHours} horas por semana montando cardápio na mão. `
     : "";
   return (
-    `Oi! Aqui é do NutriFlow 👋\n\n` +
-    `Você acabou de fazer o diagnóstico no Desafio Nutri. ${resultado}\n\n` +
+    `Oi! ${quem}, eu criei o NutriFlow, o sistema que ajuda nutricionistas a montar cardápio com IA e a acompanhar os pacientes. 👋\n\n` +
+    `Você acabou de fazer o diagnóstico no Desafio Nutri. ${resultado}` +
+    `Fiquei feliz de você ter passado por aqui!\n\n` +
     `Seu teste grátis de 14 dias já está liberado: é só terminar o cadastro com nome e senha. ` +
-    `Se travar em qualquer etapa, é só me responder aqui que eu te ajudo.`
+    `Eu mesmo acompanho cada cadastro, então se travar em qualquer etapa ou tiver dúvida, é só me responder aqui que eu te ajudo.`
   );
 }
 
