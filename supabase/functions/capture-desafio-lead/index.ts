@@ -31,12 +31,14 @@ function normalizePhone(raw: string): string | null {
 function buildMessage(lostHours: number | null): string {
   // FOUNDER_NAME (secret opcional): seu primeiro nome, para a mensagem soar pessoal
   const nome = Deno.env.get("FOUNDER_NAME")?.trim();
-  const quem = nome ? `Aqui é ${nome}` : "Tudo bem?";
+  const abertura = nome
+    ? `Oi! Aqui é ${nome}, eu criei o NutriFlow`
+    : "Oi! Eu criei o NutriFlow";
   const resultado = lostHours && lostHours > 0
     ? `Vi no seu diagnóstico que você gasta cerca de ${lostHours} horas por semana montando cardápio na mão. `
     : "";
   return (
-    `Oi! ${quem}, eu criei o NutriFlow, o sistema que ajuda nutricionistas a montar cardápio com IA e a acompanhar os pacientes. 👋\n\n` +
+    `${abertura}, o sistema que ajuda nutricionistas a montar cardápio com IA e a acompanhar os pacientes. 👋\n\n` +
     `Você acabou de fazer o diagnóstico no Desafio Nutri. ${resultado}` +
     `Fiquei feliz de você ter passado por aqui!\n\n` +
     `Seu teste grátis de 14 dias já está liberado: é só terminar o cadastro com nome e senha. ` +
