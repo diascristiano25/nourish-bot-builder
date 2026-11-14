@@ -82,11 +82,16 @@ export default function Auth() {
     const mode = params.get('mode');
     const email = params.get('email');
     const name = params.get('name');
+    const phone = params.get('phone');
 
     if (mode === 'signup') {
       setActiveTab('signup');
       if (email) setSignupEmail(email);
       if (name) setSignupFullName(name);
+      if (phone) {
+        setSignupPhone(phone);
+        setShowExtras(true);
+      }
     }
 
     // Pre-fill email from DesafioNutri capture or contextual redirect
