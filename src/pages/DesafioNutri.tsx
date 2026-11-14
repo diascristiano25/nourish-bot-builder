@@ -5,6 +5,11 @@ import {
   ArrowRight, Check, ChevronRight,
   Clock, MessageCircle, Heart, Activity, Sparkles, Smartphone, Users,
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import logoImg from '@/assets/logo-nutriflow.png';
 import { motion } from 'framer-motion';
 
@@ -88,6 +93,17 @@ const quizQuestions: QuizQuestion[] = [
 
 const optionGlyph: Record<number, typeof Clock> = { 1: Clock, 2: MessageCircle, 3: Heart };
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* Mantém só dígitos e aplica máscara (DD) 9XXXX-XXXX */
+function maskPhone(raw: string) {
+  const d = raw.replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 2) return d.length ? `(${d}` : '';
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
 const SIGNUP_UTMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
 
 /* ------------------------------------------------------------------ */
@@ -100,6 +116,10 @@ export default function DesafioNutri() {
   const [locked, setLocked] = useState(false);
   const [lostHours, setLostHours] = useState(0);
   const leadFired = useRef(false);
+  const [leadOpen, setLeadOpen] = useState(false);
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadPhone, setLeadPhone] = useState('');
+  const [leadError, setLeadError] = useState<string | null>(null);
 
   useEffect(() => { fb('track', 'ViewContent'); }, []);
 
@@ -131,10 +151,33 @@ export default function DesafioNutri() {
     }, 380);
   };
 
+  // Clicar em "Criar minha conta grátis" abre o formulário de e-mail + WhatsApp
   const handleSignup = () => {
     fb('trackCustom', 'SignupClick', { source: 'desafio-nutri' });
+    setLeadError(null);
+    setLeadOpen(true);
+  };
+
+  // Depois de preencher (obrigatório), segue para /auth com e-mail e telefone já preenchidos
+  const handleLeadSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = leadEmail.trim();
+    const phoneDigits = leadPhone.replace(/\D/g, '');
+    if (!EMAIL_RE.test(email)) {
+      setLeadError('Digite um e-mail válido.');
+      return;
+    }
+    if (phoneDigits.length < 10) {
+      setLeadError('Digite seu WhatsApp com DDD.');
+      return;
+    }
     const current = new URLSearchParams(window.location.search);
-    const out = new URLSearchParams({ mode: 'signup', source: 'desafio-nutri' });
+    const out = new URLSearchParams({
+      mode: 'signup',
+      source: 'desafio-nutri',
+      email,
+      phone: leadPhone,
+    });
     SIGNUP_UTMS.forEach((k) => {
       const v = current.get(k);
       if (v) out.set(k, v);
@@ -411,6 +454,58 @@ export default function DesafioNutri() {
         </Button>
         <p className="mt-2 text-center text-xs" style={{ color: TEXT_DIM }}>14 dias grátis · sem cartão de crédito</p>
       </div>
+
+      <Dialog open={leadOpen} onOpenChange={setLeadOpen}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl">Quase lá! Onde te avisamos?</DialogTitle>
+            <DialogDescription>
+              Informe seu e-mail e WhatsApp para criar sua conta grátis. Falta só nome e senha.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleLeadSubmit} className="space-y-4" noValidate>
+            <div className="space-y-2">
+              <Label htmlFor="lead-email">E-mail</Label>
+              <Input
+                id="lead-email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="seu@email.com"
+                value={leadEmail}
+                onChange={(e) => setLeadEmail(e.target.value)}
+                required
+                className="h-12 rounded-xl"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lead-phone">WhatsApp</Label>
+              <Input
+                id="lead-phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="(11) 99999-9999"
+                value={leadPhone}
+                onChange={(e) => setLeadPhone(maskPhone(e.target.value))}
+                required
+                className="h-12 rounded-xl"
+              />
+            </div>
+            {leadError && <p role="alert" className="text-sm text-red-600">{leadError}</p>}
+            <Button
+              type="submit"
+              size="lg"
+              className="h-14 w-full gap-2.5 rounded-xl text-base font-semibold text-white"
+              style={{ background: GREEN }}
+            >
+              Criar minha conta grátis
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+            <p className="text-center text-xs" style={{ color: TEXT_DIM }}>14 dias grátis · sem cartão de crédito</p>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
