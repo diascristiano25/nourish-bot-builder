@@ -5,7 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 //   EVOLUTION_API_URL      ex.: https://evolution.seudominio.com
 //   EVOLUTION_API_KEY      apikey da instância
 //   EVOLUTION_INSTANCE     nome da instância conectada ao seu WhatsApp
-//   FOUNDER_NAME           (opcional) seu primeiro nome, usado na apresentação
+//   FOUNDER_NAME           (opcional) troca o nome da apresentação; padrão: Cristiano
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -29,11 +29,11 @@ function normalizePhone(raw: string): string | null {
 }
 
 function buildMessage(lostHours: number | null): string {
-  // FOUNDER_NAME (secret opcional): seu primeiro nome, para a mensagem soar pessoal
-  const nome = Deno.env.get("FOUNDER_NAME")?.trim();
+  // FOUNDER_NAME (secret opcional): troca o nome na apresentação; o padrão é Cristiano
+  const nome = Deno.env.get("FOUNDER_NAME")?.trim() || "Cristiano";
   const abertura = nome
-    ? `Oi! Aqui é ${nome}, eu criei o NutriFlow`
-    : "Oi! Eu criei o NutriFlow";
+    ? `Olá! Aqui é ${nome}, eu criei o NutriFlow`
+    : "Olá! Eu criei o NutriFlow";
   const resultado = lostHours && lostHours > 0
     ? `Vi no seu diagnóstico que você gasta cerca de ${lostHours} horas por semana montando cardápio na mão. `
     : "";
