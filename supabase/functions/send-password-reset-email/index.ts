@@ -30,34 +30,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Find user by email (paginado: listUsers() sem args só retorna os 50 primeiros)
-    let user: any = null;
-    for (let page = 1; !user; page++) {
-      const { data: users, error: listError } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
-      if (listError) {
-        throw new Error(`Failed to list users: ${listError.message}`);
-      }
-      user = users?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase()) ?? null;
-      if (!users?.users || users.users.length < 1000) break;
+    // Gera o link direto pelo email (sem listUsers, que falha com
+    // "Database error finding users" quando há usuários com colunas nulas).
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+      type: "recovery",
+      email: email.trim().toLowerCase(),
+    });
+
+    if (linkError && !/not found/i.test(linkError.message) && (linkError as any).status !== 404) {
+      throw new Error(`Failed to generate reset link: ${linkError.message}`);
     }
-    if (!user) {
-      // Don't reveal whether the email exists — return success silently
+
+    if (linkError || !linkData?.user) {
+      // Não revela se o email existe — retorna sucesso silenciosamente
       console.log(`Password reset requested for unknown email: ${email}`);
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
-
-    // Generate password reset link via Supabase Auth
-    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-      type: "recovery",
-      email: user.email!,
-    });
-
-    if (linkError) {
-      throw new Error(`Failed to generate reset link: ${linkError.message}`);
-    }
+    const user = linkData.user;
 
     const resetUrl = linkData.properties?.hashed_token
       ? `${req.headers.get("origin") || "https://nutriflow.inf.br"}/reset-password?token_hash=${linkData.properties.hashed_token}`
