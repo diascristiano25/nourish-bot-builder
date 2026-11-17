@@ -13,7 +13,14 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { NeonText } from '@/components/ui/NeonText';
 import { CriticalTagsBadges } from '@/components/CriticalTagsBadges';
 import { ArrowLeft, Loader2, Plus, X, User, Activity, Heart, Scale, Save, AlertTriangle, Calculator, FlaskConical, TrendingUp } from 'lucide-react';
-import { differenceInYears, parseISO } from 'date-fns';
+import { differenceInYears, parseISO, isValid } from 'date-fns';
+
+// Idade segura: retorna NaN-safe 0 quando a data é vazia/inválida (evita "Invalid time value")
+const safeAge = (birth: string): number => {
+  if (!birth) return 0;
+  const d = parseISO(birth.slice(0, 10));
+  return isValid(d) ? differenceInYears(new Date(), d) : 0;
+};
 import { calculateNutritionalNeeds, classifyBMI, calculateBodyFatFromSkinfolds } from '@/lib/nutritional-calculations';
 import { LabResultsPanel } from '@/components/LabResultsPanel';
 
@@ -111,7 +118,7 @@ export default function EditPatient() {
       setFullName(data.full_name || '');
       setEmail(data.email || '');
       setPhone(data.phone || '');
-      setBirthDate(data.birth_date || '');
+      setBirthDate(data.birth_date ? String(data.birth_date).slice(0, 10) : '');
       setGender(data.gender || '');
       setGoal(data.goal || '');
       setActivityLevel(data.activity_level || '');
@@ -492,7 +499,7 @@ export default function EditPatient() {
                           });
                           return;
                         }
-                        const age = differenceInYears(new Date(), parseISO(birthDate));
+                        const age = safeAge(birthDate);
                         const estimated = estimateBodyFatCunBae(w, h, age, gender);
                         if (estimated == null) {
                           toast({
@@ -581,7 +588,7 @@ export default function EditPatient() {
 
           {/* Nutritional Calculations (TMB/GET/VET) */}
           {weight && height && birthDate && gender && activityLevel && (() => {
-            const age = differenceInYears(new Date(), parseISO(birthDate));
+            const age = safeAge(birthDate);
             const w = parseFloat(weight);
             const h = parseFloat(height);
             if (!w || !h || age < 1) return null;
@@ -703,7 +710,7 @@ export default function EditPatient() {
                       toast({ title: "Dados insuficientes", description: "Preencha Data de Nascimento e Sexo.", variant: "destructive" });
                       return;
                     }
-                    const age = differenceInYears(new Date(), parseISO(birthDate));
+                    const age = safeAge(birthDate);
                     const isMale = gender === 'male' || gender === 'masculino';
                     const bf = calculateBodyFatFromSkinfolds({
                       triceps: parseFloat(tricepsSkinfold) || undefined,

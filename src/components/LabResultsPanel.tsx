@@ -287,7 +287,9 @@ export function LabResultsPanel({ patientId, readOnly = false }: LabResultsPanel
 
       const { error } = await supabase.from('lab_results').insert({
         patient_id: patientId,
-        exam_date: examDate || new Date().toISOString().split('T')[0],
+        exam_date: /^\d{4}-\d{2}-\d{2}$/.test(examDate) && !isNaN(new Date(examDate + 'T12:00:00').getTime())
+          ? examDate
+          : new Date().toISOString().split('T')[0],
         exam_type: examType || 'outro',
         value: value ? parseFloat(value) : null,
         unit: unit || null,
@@ -333,7 +335,9 @@ export function LabResultsPanel({ patientId, readOnly = false }: LabResultsPanel
   const getExamLabel = (type: string) => EXAM_TYPES.find(e => e.value === type)?.label || type;
 
   const groupedExams = results.reduce((acc, r) => {
-    const dateKey = r.exam_date;
+    // Normaliza para YYYY-MM-DD (aceita timestamp completo); vazio/inválido vai para um grupo seguro
+    const rawDate = typeof r.exam_date === 'string' ? r.exam_date.slice(0, 10) : '';
+    const dateKey = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : 'sem-data';
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(r);
     return acc;
@@ -503,7 +507,12 @@ export function LabResultsPanel({ patientId, readOnly = false }: LabResultsPanel
               .map(([dateKey, exams]) => (
                 <div key={dateKey}>
                   <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                    📅 {format(new Date(dateKey + 'T12:00:00'), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                    📅 {(() => {
+                      const d = new Date(dateKey + 'T12:00:00');
+                      return isNaN(d.getTime())
+                        ? 'Data não informada'
+                        : format(d, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+                    })()}
                   </p>
                   <div className="space-y-2">
                     {exams.map(result => {
