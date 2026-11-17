@@ -394,6 +394,8 @@ export default function EditPatient() {
                   <Input
                     id="birthDate"
                     type="date"
+                    min="1900-01-01"
+                    max="2100-12-31"
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
                     className="bg-background/50 border-border/50 focus:border-primary"

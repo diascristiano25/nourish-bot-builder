@@ -374,6 +374,8 @@ export function LabResultsPanel({ patientId, readOnly = false }: LabResultsPanel
                 <Label className="text-xs">Data do Exame</Label>
                 <Input
                   type="date"
+                  min="1900-01-01"
+                  max="2100-12-31"
                   value={examDate}
                   onChange={(e) => setExamDate(e.target.value)}
                   className="h-9 text-sm"
