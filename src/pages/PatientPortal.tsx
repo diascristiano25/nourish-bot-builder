@@ -2,6 +2,7 @@
 * PatientPortal - Patient dashboard main entry point
 * Redesigned with NutriFlow sage/terracotta palette and motion design
 */
+import { SectionErrorBoundary } from '@/components/SectionErrorBoundary';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -196,7 +197,9 @@ transition={{ delay: 0.55, duration: 0.5 }}
 <p className="text-xs text-muted-foreground">Envie seus exames — seu nutricionista vê na hora, sem precisar de consulta</p>
 </div>
 </div>
-<LabResultsPanel patientId={patientData.id} />
+<SectionErrorBoundary label="os exames laboratoriais">
+                <LabResultsPanel patientId={patientData.id} />
+              </SectionErrorBoundary>
 </RichCard>
 </motion.div>
 )}

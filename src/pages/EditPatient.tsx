@@ -23,6 +23,7 @@ const safeAge = (birth: string): number => {
 };
 import { calculateNutritionalNeeds, classifyBMI, calculateBodyFatFromSkinfolds } from '@/lib/nutritional-calculations';
 import { LabResultsPanel } from '@/components/LabResultsPanel';
+import { SectionErrorBoundary } from '@/components/SectionErrorBoundary';
 
 /**
  * CUN-BAE formula: estimates body fat % from BMI, age and sex.
@@ -739,7 +740,11 @@ export default function EditPatient() {
           </GlassCard>
 
           {/* Lab Results */}
-          {id && <LabResultsPanel patientId={id} />}
+          {id && (
+            <SectionErrorBoundary label="os exames laboratoriais">
+              <LabResultsPanel patientId={id} />
+            </SectionErrorBoundary>
+          )}
 
           {/* Critical Tags */}
           <GlassCard className="p-6 border-destructive/30">
