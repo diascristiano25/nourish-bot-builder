@@ -59,22 +59,22 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-md bg-card text-card-foreground border border-border rounded-2xl shadow-lg p-8 space-y-6">
         <img src={logoImg} alt="NutriFlow" className="h-10 mx-auto" />
         {status === 'verifying' && (
           <div className="flex justify-center py-6"><Loader2 className="h-6 w-6 animate-spin" /></div>
         )}
         {status === 'invalid' && (
           <div className="text-center space-y-4">
-            <h1 className="text-2xl font-semibold">Link inválido ou expirado</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Link inválido ou expirado</h1>
             <p className="text-sm text-muted-foreground">Solicite um novo link para redefinir sua senha.</p>
             <Button asChild className="w-full"><Link to="/forgot-password">Solicitar novo link</Link></Button>
           </div>
         )}
         {status === 'ready' && (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h1 className="text-2xl font-semibold text-center">Criar nova senha</h1>
+            <h1 className="text-2xl font-semibold text-foreground text-center">Criar nova senha</h1>
             <div className="space-y-2">
               <Label htmlFor="new-password">Nova senha</Label>
               <Input id="new-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required />
