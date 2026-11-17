@@ -51,12 +51,12 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-md bg-card text-card-foreground border border-border rounded-2xl shadow-lg p-8 space-y-6">
         <img src={logoImg} alt="NutriFlow" className="h-10 mx-auto" />
         {sent ? (
           <div className="text-center space-y-3">
-            <h1 className="text-2xl font-semibold">Verifique seu email</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Verifique seu email</h1>
             <p className="text-sm text-muted-foreground">
               Se existir uma conta para <strong>{email}</strong>, enviamos um link para redefinir a senha. O link vale por 1 hora.
             </p>
@@ -64,7 +64,7 @@ const ForgotPassword = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="text-center space-y-1">
-              <h1 className="text-2xl font-semibold">Esqueceu a senha?</h1>
+              <h1 className="text-2xl font-semibold text-foreground">Esqueceu a senha?</h1>
               <p className="text-sm text-muted-foreground">Informe seu email e enviaremos um link para criar uma nova senha.</p>
             </div>
             <div className="space-y-2">
