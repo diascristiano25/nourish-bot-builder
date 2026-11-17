@@ -19,6 +19,8 @@ const LgpdPage = lazy(() => import("./pages/LgpdPage"));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const PatientAuth = lazy(() => import("./pages/PatientAuth"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PatientPortal = lazy(() => import("./pages/PatientPortal"));
 const PatientApp = lazy(() => import("./pages/PatientApp"));
 const PatientMobileApp = lazy(() => import("./pages/PatientMobileApp"));
@@ -208,6 +210,8 @@ function App() {
                       <Route path="/old" element={<LandingPageProfessional />} />
                       <Route path="/new" element={<LandingPageNew />} />
                       <Route path="/auth" element={<Auth />} />
+                      <Route path="/forgot-password" element={<ForgotPassword />} />
+                      <Route path="/reset-password" element={<ResetPassword />} />
                       <Route path="/patient-auth" element={<PatientAuth />} />
                       <Route path="/meu-app" element={<AccountStatusGuard><PatientMobileApp /></AccountStatusGuard>} />
                       <Route path="/terms" element={<TermsPage />} />

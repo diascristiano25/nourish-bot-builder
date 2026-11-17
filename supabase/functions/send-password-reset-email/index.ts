@@ -30,13 +30,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Find user by email
-    const { data: users, error: listError } = await supabase.auth.admin.listUsers();
-    if (listError) {
-      throw new Error(`Failed to list users: ${listError.message}`);
+    // Find user by email (paginado: listUsers() sem args só retorna os 50 primeiros)
+    let user: any = null;
+    for (let page = 1; !user; page++) {
+      const { data: users, error: listError } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
+      if (listError) {
+        throw new Error(`Failed to list users: ${listError.message}`);
+      }
+      user = users?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase()) ?? null;
+      if (!users?.users || users.users.length < 1000) break;
     }
-
-    const user = users?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
     if (!user) {
       // Don't reveal whether the email exists — return success silently
       console.log(`Password reset requested for unknown email: ${email}`);
@@ -57,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const resetUrl = linkData.properties?.hashed_token
-      ? `${req.headers.get("origin") || "https://nutriflow.inf.br"}/auth?type=recovery&token=${linkData.properties.hashed_token}`
+      ? `${req.headers.get("origin") || "https://nutriflow.inf.br"}/reset-password?token_hash=${linkData.properties.hashed_token}`
       : linkData.properties?.action_link;
 
     const firstName = (user.user_metadata?.full_name as string)?.split(" ")[0] || "Nutricionista";

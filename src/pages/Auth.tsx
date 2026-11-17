@@ -79,6 +79,11 @@ export default function Auth() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    // Compatibilidade com emails de recuperação antigos: /auth?type=recovery&token=...
+    if (params.get('type') === 'recovery' && (params.get('token') || params.get('token_hash'))) {
+      navigate(`/reset-password?token_hash=${encodeURIComponent(params.get('token_hash') || params.get('token')!)}`, { replace: true });
+      return;
+    }
     const mode = params.get('mode');
     const email = params.get('email');
     const name = params.get('name');
