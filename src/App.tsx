@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AccountStatusGuard } from "@/components/AccountStatusGuard";
@@ -92,10 +92,17 @@ function PageLoader() {
 
 // Error boundary that auto-reloads on chunk load failures (stale deploy cache)
 class LazyErrorBoundary extends React.Component<
-  { children: React.ReactNode },
+  { children: React.ReactNode; resetKey?: string },
   { hasError: boolean; isChunkError: boolean; errorMessage: string }
 > {
   state = { hasError: false, isChunkError: false, errorMessage: '' };
+
+  // Navegar para outra rota limpa o erro: uma tela com problema não trava o app inteiro
+  componentDidUpdate(prev: { resetKey?: string }) {
+    if (this.state.hasError && prev.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false, isChunkError: false, errorMessage: '' });
+    }
+  }
 
   static getDerivedStateFromError(error: Error) {
     const isChunkError =
@@ -148,18 +155,40 @@ class LazyErrorBoundary extends React.Component<
                 <p className="text-xs font-mono text-muted-foreground break-words bg-muted/40 rounded p-2">{errorMessage}</p>
               </>
             )}
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
-            >
-              Recarregar agora
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {!isChunkError && (
+                <button
+                  onClick={() => this.setState({ hasError: false, isChunkError: false, errorMessage: '' })}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  Tentar de novo
+                </button>
+              )}
+              <button
+                onClick={() => window.location.reload()}
+                className="px-5 py-2 border border-border hover:bg-muted/40 text-foreground rounded-lg font-medium transition-colors"
+              >
+                Recarregar
+              </button>
+              <button
+                onClick={() => { window.location.href = '/'; }}
+                className="px-5 py-2 border border-border hover:bg-muted/40 text-foreground rounded-lg font-medium transition-colors"
+              >
+                Ir para o início
+              </button>
+            </div>
           </div>
         </div>
       );
     }
     return this.props.children;
   }
+}
+
+// Fica dentro do Router para resetar o erro a cada mudança de rota
+function RouteErrorBoundary({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  return <LazyErrorBoundary resetKey={location.pathname}>{children}</LazyErrorBoundary>;
 }
 
 // Optimized QueryClient with aggressive caching
@@ -190,8 +219,8 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <LazyErrorBoundary>
-              <BrowserRouter>
+            <BrowserRouter>
+              <RouteErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
                   {patientDomain ? (
@@ -318,8 +347,8 @@ function App() {
                   )}
                 </Routes>
               </Suspense>
+              </RouteErrorBoundary>
             </BrowserRouter>
-            </LazyErrorBoundary>
           </TooltipProvider>
         </AuthProvider>
       </ThemeProvider>
