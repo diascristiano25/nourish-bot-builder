@@ -209,7 +209,11 @@ export default function GenerateMealPlan() {
         body: patientData
       });
 
-      if (error) throw error;
+      if (error) {
+        let detail = '';
+        try { const b = await (error as any).context?.json?.(); detail = b?.error ? `${b.error}${b.details ? ': ' + JSON.stringify(b.details) : ''}` : ''; } catch { /* ignore */ }
+        throw new Error(detail || error.message);
+      }
 
       const { data: savedPlan, error: saveError } = await supabase
         .from('meal_plans')

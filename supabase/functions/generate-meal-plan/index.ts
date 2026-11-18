@@ -28,16 +28,17 @@ const PatientDataSchema = z.object({
     .max(100, "Patient name too long")
     .transform(s => s.trim()),
   age: z.number().int().min(0).max(150).nullable(),
-  gender: z.enum(['male', 'female', 'other']).nullable(),
+  // DB also allows 'prefer_not_to_say' — treat unknown values as null instead of rejecting
+  gender: z.preprocess(v => (v === 'male' || v === 'female' || v === 'other') ? v : null, z.enum(['male', 'female', 'other']).nullable()),
   weight: z.number().min(1).max(500).nullable(),
   height: z.number().min(30).max(300).nullable(),
-  goal: z.string().max(100).nullable(),
-  activityLevel: z.string().max(50).nullable(),
+  goal: z.string().nullable().transform(s => s ? s.slice(0, 100) : s),
+  activityLevel: z.string().nullable().transform(s => s ? s.slice(0, 50) : s),
   allergies: z.array(z.string().max(100)).max(20).default([]),
   dietaryRestrictions: z.array(z.string().max(100)).max(20).default([]),
-  medicalConditions: z.string().max(500).nullable(),
-  targetCalories: z.number().int().min(500).max(10000).nullable(),
-  additionalNotes: z.string().max(1000).default("")
+  medicalConditions: z.string().nullable().transform(s => s ? s.slice(0, 500) : s),
+  targetCalories: z.number().min(500).max(10000).nullable().transform(n => n === null ? n : Math.round(n)),
+  additionalNotes: z.string().default("")
     .transform(s => s.trim()),
 });
 
