@@ -43,9 +43,12 @@ const goalLabels: Record<string, string> = {
 const activityLabels: Record<string, string> = {
   sedentary: 'Sedentário',
   light: 'Leve (1-2x/semana)',
+  lightly_active: 'Leve (1-2x/semana)',
   moderate: 'Moderado (3-4x/semana)',
+  moderately_active: 'Moderado (3-4x/semana)',
   active: 'Ativo (5-6x/semana)',
   very_active: 'Muito Ativo (atleta)',
+  extremely_active: 'Extremo (atleta)',
 };
 
 export default function GenerateMealPlan() {
@@ -147,9 +150,12 @@ export default function GenerateMealPlan() {
     const activityMultipliers: Record<string, number> = {
       sedentary: 1.2,
       light: 1.375,
+      lightly_active: 1.375,
       moderate: 1.55,
+      moderately_active: 1.55,
       active: 1.725,
-      very_active: 1.9,
+      very_active: 1.725,
+      extremely_active: 1.9,
     };
 
     const multiplier = activityMultipliers[patient?.activity_level || 'moderate'] || 1.55;
@@ -196,8 +202,8 @@ export default function GenerateMealPlan() {
         gender: patient.gender || null,
         weight: anthropometric?.weight_kg ?? null,
         height: anthropometric?.height_cm ?? null,
-        goal: patient.goal ? goalLabels[patient.goal] : null,
-        activityLevel: patient.activity_level ? activityLabels[patient.activity_level] : null,
+        goal: patient.goal ? (goalLabels[patient.goal] ?? null) : null,
+        activityLevel: patient.activity_level ? (activityLabels[patient.activity_level] ?? null) : null,
         allergies: patient.allergies || [],
         dietaryRestrictions: patient.dietary_restrictions || [],
         medicalConditions: patient.medical_conditions || null,
@@ -209,7 +215,11 @@ export default function GenerateMealPlan() {
         body: patientData
       });
 
-      if (error) throw error;
+      if (error) {
+        let detail = '';
+        try { const b = await (error as any).context?.json?.(); detail = b?.error ? `${b.error}${b.details ? ': ' + JSON.stringify(b.details) : ''}` : ''; } catch { /* ignore */ }
+        throw new Error(detail || error.message);
+      }
 
       const { data: savedPlan, error: saveError } = await supabase
         .from('meal_plans')
