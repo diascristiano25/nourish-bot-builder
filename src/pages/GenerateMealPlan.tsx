@@ -111,8 +111,18 @@ export default function GenerateMealPlan() {
     }
   };
 
+  // Altura pode ter sido salva em metros (ex.: 1.75) — converte para cm.
+  // Valores fora de 30–300 cm são descartados para não quebrar a validação da edge function.
+  const normalizeHeightCm = (h: number | null | undefined): number | null => {
+    if (h == null || !Number.isFinite(h) || h <= 0) return null;
+    const cm = h < 3 ? h * 100 : h;
+    return cm >= 30 && cm <= 300 ? Math.round(cm * 10) / 10 : null;
+  };
+
+  const heightCm = normalizeHeightCm(anthropometric?.height_cm);
+
   const calculateBMR = () => {
-    if (!anthropometric?.weight_kg || !anthropometric?.height_cm || !patient?.birth_date) {
+    if (!anthropometric?.weight_kg || !heightCm || !patient?.birth_date) {
       return null;
     }
 
@@ -134,7 +144,7 @@ export default function GenerateMealPlan() {
     }
 
     const weight = anthropometric.weight_kg;
-    const height = anthropometric.height_cm;
+    const height = heightCm;
 
     if (patient.gender === 'male') {
       return Math.round(10 * weight + 6.25 * height - 5 * age + 5);
@@ -201,7 +211,7 @@ export default function GenerateMealPlan() {
         age: age !== null && age >= 0 ? age : null,
         gender: patient.gender || null,
         weight: anthropometric?.weight_kg ?? null,
-        height: anthropometric?.height_cm ?? null,
+        height: heightCm,
         goal: patient.goal ? (goalLabels[patient.goal] ?? null) : null,
         activityLevel: patient.activity_level ? (activityLabels[patient.activity_level] ?? null) : null,
         allergies: patient.allergies || [],
@@ -318,7 +328,7 @@ export default function GenerateMealPlan() {
 
   const bmr = calculateBMR();
   const tdee = calculateTDEE();
-  const hasBasicData = anthropometric?.weight_kg && anthropometric?.height_cm;
+  const hasBasicData = anthropometric?.weight_kg && heightCm;
 
   return (
     <AppLayout>
@@ -379,7 +389,7 @@ export default function GenerateMealPlan() {
               </div>
               <div className="text-center p-3 rounded-xl glass">
                 <p className="text-sm text-muted-foreground">Altura</p>
-                <p className="font-semibold font-mono text-primary">{anthropometric?.height_cm || '-'} cm</p>
+                <p className="font-semibold font-mono text-primary">{heightCm ?? '-'} cm</p>
               </div>
               <div className="text-center p-3 rounded-xl glass">
                 <p className="text-sm text-muted-foreground">TMB</p>
