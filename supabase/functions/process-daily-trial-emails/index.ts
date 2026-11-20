@@ -59,11 +59,14 @@ const handler = async (req: Request): Promise<Response> => {
     const processUser = async (
       userId: string,
       days: number,
-      steps: { day: number; type: string }[]
+      steps: { day: number; type: string }[],
+      skipTypes: Set<string> = new Set()
     ) => {
       const sent = sentByUser.get(userId) || new Set<string>();
       const latestSentDay = Math.max(0, ...steps.filter((step) => sent.has(step.type)).map((step) => step.day));
-      const target = steps.filter((step) => days >= step.day && step.day > latestSentDay).pop();
+      const target = steps
+        .filter((step) => days >= step.day && step.day > latestSentDay && !skipTypes.has(step.type))
+        .pop();
 
       if (!target) return;
 
@@ -91,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data: nutritionists, error: nutritionistsError } = await supabase
       .from('profiles')
-      .select('user_id, created_at, trial_ends_at')
+      .select('id, user_id, created_at, trial_ends_at')
       .eq('account_status', 'trial')
       .eq('is_admin', false);
 
@@ -100,13 +103,25 @@ const handler = async (req: Request): Promise<Response> => {
       throw nutritionistsError;
     }
 
+    // O e-mail do dia 3 pede o primeiro paciente: não faz sentido para quem já cadastrou
+    const { data: patientOwners } = await supabase
+      .from('patients')
+      .select('nutritionist_id')
+      .in('nutritionist_id', (nutritionists || []).map((n) => n.id));
+    const hasPatients = new Set((patientOwners || []).map((p) => p.nutritionist_id));
+
     for (const nutritionist of nutritionists || []) {
       let days = Math.floor((Date.now() - new Date(nutritionist.created_at).getTime()) / 86400000);
       // A trial already past its end date is due the expiry email, whatever its length
       if (nutritionist.trial_ends_at && new Date(nutritionist.trial_ends_at).getTime() < Date.now()) {
         days = Math.max(days, 33);
       }
-      await processUser(nutritionist.user_id, days, nutritionistSteps);
+      await processUser(
+        nutritionist.user_id,
+        days,
+        nutritionistSteps,
+        hasPatients.has(nutritionist.id) ? new Set(['trial-day-3']) : new Set()
+      );
     }
 
     const patientSteps = [

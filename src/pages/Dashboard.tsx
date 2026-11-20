@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { LoadingState } from '@/components/shared/LoadingState';
+import { ActivationChecklist } from '@/components/nutritionist/ActivationChecklist';
 import { StatsCards } from '@/components/nutritionist/dashboard/StatsCards';
 import { AppointmentsPanel } from '@/components/nutritionist/dashboard/AppointmentsPanel';
 import { RevenueChart } from '@/components/nutritionist/dashboard/RevenueChart';
@@ -272,6 +273,8 @@ export default function Dashboard() {
             <h1 className="text-4xl font-bold text-foreground mb-2">Dashboard</h1>
             <p className="text-muted-foreground">Bem-vindo de volta, {data.profile?.full_name?.split(' ')[0]}</p>
           </div>
+
+          {user && <ActivationChecklist userId={user.id} />}
 
           {/* Stats Cards */}
           <StatsCards stats={stats} />

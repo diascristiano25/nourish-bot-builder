@@ -15,7 +15,95 @@ interface TrialFollowupRequest {
   email_type: string;
 }
 
-function getTemplate(emailType: string, firstName: string): { subject: string; html: string } {
+interface ActivationStats {
+  patients: number;
+  plans: number;
+}
+
+function activationLayout(opts: { firstName: string; heading: string; paragraphs: string[]; cta: string; url: string }): string {
+  const paragraphs = opts.paragraphs
+    .map((p) => `<p style="color: #52525b; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">${p}</p>`)
+    .join("");
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+    <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f5;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px 16px 0 0; padding: 28px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 26px; font-weight: 600;">🥗 NutriFlow</h1>
+        </div>
+        <div style="background: white; padding: 36px 32px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <h2 style="color: #18181b; margin: 0 0 16px 0; font-size: 22px;">${opts.heading}</h2>
+          ${paragraphs}
+          <div style="text-align: center; margin: 32px 0 8px 0;">
+            <a href="${opts.url}" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">${opts.cta}</a>
+          </div>
+          <p style="color: #a1a1aa; font-size: 14px; text-align: center; margin: 28px 0 0 0; padding-top: 20px; border-top: 1px solid #e4e4e7;">
+            Travou em algum ponto? É só responder este e-mail que a gente te ajuda.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>`;
+}
+
+function getActivationTemplate(emailType: string, firstName: string, stats: ActivationStats): { subject: string; html: string } | null {
+  switch (emailType) {
+    case "activation-no-patient":
+      return {
+        subject: `${firstName}, cadastre seu primeiro paciente em 1 minuto`,
+        html: activationLayout({
+          firstName,
+          heading: `Olá, ${firstName}! 👋`,
+          paragraphs: [
+            "Vimos que sua conta já está pronta, mas você ainda não cadastrou nenhum paciente.",
+            "Leva cerca de 1 minuto: nome, data de nascimento, peso e altura. Com isso o NutriFlow já calcula TMB e gasto energético e deixa tudo pronto para gerar o plano alimentar com IA.",
+          ],
+          cta: "Cadastrar meu primeiro paciente →",
+          url: "https://nutriflow.inf.br/novo-paciente",
+        }),
+      };
+    case "activation-no-plan":
+      return {
+        subject: `${firstName}, falta só gerar o plano alimentar`,
+        html: activationLayout({
+          firstName,
+          heading: `Falta pouco, ${firstName}! 🚀`,
+          paragraphs: [
+            "Você já cadastrou seu paciente. O próximo passo é o que mais economiza seu tempo: gerar o plano alimentar com IA.",
+            "Em poucos segundos sai um cardápio completo, que você ajusta do seu jeito e envia ao paciente em PDF ou pelo portal.",
+          ],
+          cta: "Gerar meu primeiro plano →",
+          url: "https://nutriflow.inf.br/pacientes",
+        }),
+      };
+    case "trial-last-day": {
+      const used: string[] = [];
+      if (stats.patients > 0) used.push(`${stats.patients} paciente${stats.patients > 1 ? "s" : ""} cadastrado${stats.patients > 1 ? "s" : ""}`);
+      if (stats.plans > 0) used.push(`${stats.plans} plano${stats.plans > 1 ? "s" : ""} alimentar${stats.plans > 1 ? "es" : ""} criado${stats.plans > 1 ? "s" : ""}`);
+      const personal = used.length
+        ? `Até agora você tem ${used.join(" e ")} no NutriFlow. Para não perder esse trabalho nem o acesso, escolha seu plano.`
+        : "Seu período de teste termina amanhã. Ainda dá tempo de cadastrar um paciente e gerar um plano com IA para ver o resultado na prática.";
+      return {
+        subject: "Seu teste do NutriFlow termina amanhã",
+        html: activationLayout({
+          firstName,
+          heading: `Olá, ${firstName}! ⏳`,
+          paragraphs: [personal, "Seus dados ficam guardados e você continua de onde parou ao assinar."],
+          cta: used.length ? "Escolher meu plano →" : "Usar antes de acabar →",
+          url: used.length ? "https://nutriflow.inf.br/assinatura" : "https://nutriflow.inf.br/dashboard",
+        }),
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+function getTemplate(emailType: string, firstName: string, stats: ActivationStats = { patients: 0, plans: 0 }): { subject: string; html: string } {
+  const activation = getActivationTemplate(emailType, firstName, stats);
+  if (activation) return activation;
   const templates: Record<string, { subject: string; html: string }> = {
     "trial-day-3": {
       subject: "Seu primeiro paciente no NutriFlow 🎯",
@@ -511,6 +599,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Query user data
     let userData;
+    let profileId: string | null = null;
     if (isPatient) {
       const { data, error } = await supabase
         .from("patients")
@@ -532,7 +621,7 @@ const handler = async (req: Request): Promise<Response> => {
       // profiles has no email column; it lives in auth.users
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("id, full_name")
         .eq("user_id", user_id)
         .single();
       const { data: authEmails } = await supabase.rpc("get_auth_emails", { user_ids: [user_id] });
@@ -548,6 +637,7 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
       userData = { email: authEmail, full_name: data.full_name };
+      profileId = data.id;
     }
 
     const { email, full_name } = userData;
@@ -573,7 +663,16 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Get template
-    const template = getTemplate(email_type, firstName);
+    const stats: ActivationStats = { patients: 0, plans: 0 };
+    if (profileId && email_type === "trial-last-day") {
+      const [patients, plans] = await Promise.all([
+        supabase.from("patients").select("id", { count: "exact", head: true }).eq("nutritionist_id", profileId),
+        supabase.from("meal_plans").select("id", { count: "exact", head: true }).eq("nutritionist_id", profileId),
+      ]);
+      stats.patients = patients.count ?? 0;
+      stats.plans = plans.count ?? 0;
+    }
+    const template = getTemplate(email_type, firstName, stats);
 
     if (!template.subject || !template.html) {
       throw new Error(`Invalid email_type: ${email_type}`);

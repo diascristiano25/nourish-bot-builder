@@ -46,7 +46,9 @@ const loginSchema = z.object({
 
 const signupSchema = loginSchema.extend({
   fullName: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  phone: z.string().min(10, 'Telefone deve ter no mínimo 10 dígitos').regex(/^\+?[\d\s\-()]+$/, 'Formato de telefone inválido').optional().or(z.literal('')),
+  phone: z.string()
+    .regex(/^\+?[\d\s\-()]+$/, 'Formato de WhatsApp inválido')
+    .refine((v) => v.replace(/\D/g, '').length >= 10, 'Informe seu WhatsApp com DDD'),
   crn: z.string().min(3, 'CRN deve ter no mínimo 3 caracteres').optional().or(z.literal('')),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -539,24 +541,30 @@ export default function Auth() {
                   </div>
                 </div>
 
-                {showExtras ? (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-phone" className="text-sm font-medium text-nf-text">
-                      Telefone <span className="text-nf-text-muted font-normal">(opcional)</span>
-                    </Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
-                      <Input
-                        id="signup-phone"
-                        type="tel"
-                        placeholder="(11) 99999-9999"
-                        value={signupPhone}
-                        onChange={(e) => setSignupPhone(e.target.value)}
-                        className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-coral focus:ring-nf-coral/20 rounded-xl"
-                      />
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-phone" className="text-sm font-medium text-nf-text">
+                    WhatsApp
+                  </Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nf-text-muted" />
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      placeholder="(11) 99999-9999"
+                      value={signupPhone}
+                      onChange={(e) => setSignupPhone(e.target.value)}
+                      required
+                      className="pl-10 h-12 bg-nf-bg-alt/50 border-nf-border focus:border-nf-coral focus:ring-nf-coral/20 rounded-xl"
+                    />
                   </div>
+                  <p className="text-xs text-nf-text-muted">
+                    Para te ajudar a configurar sua conta. Sem spam.
+                  </p>
+                </div>
+
+                {showExtras ? (
                   <div className="space-y-2">
                     <Label htmlFor="signup-crn" className="text-sm font-medium text-nf-text">
                       CRN <span className="text-nf-text-muted font-normal">(opcional)</span>
@@ -573,14 +581,13 @@ export default function Auth() {
                       />
                     </div>
                   </div>
-                </div>
                 ) : (
                   <button
                     type="button"
                     onClick={() => setShowExtras(true)}
                     className="text-xs font-medium text-nf-teal hover:underline"
                   >
-                    + Adicionar telefone e CRN (opcional)
+                    + Adicionar CRN (opcional)
                   </button>
                 )}
 
