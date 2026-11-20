@@ -1122,6 +1122,13 @@ export type Database = {
       }
       profiles: {
         Row: {
+          landing_referrer: string | null
+          signup_source: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
           account_status: string | null
           admin_notes: string | null
           created_at: string | null
@@ -1145,6 +1152,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          landing_referrer?: string | null
+          signup_source?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
           account_status?: string | null
           admin_notes?: string | null
           created_at?: string | null
@@ -1168,6 +1182,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          landing_referrer?: string | null
+          signup_source?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
           account_status?: string | null
           admin_notes?: string | null
           created_at?: string | null

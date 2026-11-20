@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { getAttribution } from '@/lib/attribution';
 import type { User as SupabaseUser, Session as SupabaseSession } from '@supabase/supabase-js';
 
 interface User {
@@ -30,6 +31,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+async function syncAttribution(userId: string) {
+  try {
+    const attribution = getAttribution();
+    await supabase
+      .from('profiles')
+      .update({ ...attribution })
+      .eq('user_id', userId)
+      .is('signup_source', null);
+  } catch {
+    /* não bloqueia o login */
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -56,7 +70,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, supabaseSession) => {
+    } = supabase.auth.onAuthStateChange((event, supabaseSession) => {
+      if (supabaseSession && event === 'SIGNED_IN') {
+        // Cadastro via Google não passa pelo signUp: grava a origem depois (só se ainda vazia)
+        void syncAttribution(supabaseSession.user.id);
+      }
       if (supabaseSession) {
         const sessionData = {
           access_token: supabaseSession.access_token,
@@ -86,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             full_name: fullName,
             phone: options?.phone || null,
             crn: options?.crn || null,
+            ...getAttribution(),
           },
           emailRedirectTo: `${window.location.origin}/auth`,
         },
