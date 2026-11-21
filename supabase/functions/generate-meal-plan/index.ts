@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { findViolations, buildRestrictionGuidance, formatViolations } from "./diet-guard.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -166,6 +167,9 @@ ${patientData.dietaryRestrictions.length > 0 ? `RESTRIÇÕES ALIMENTARES: ${pati
 ${patientData.medicalConditions ? `CONDIÇÕES MÉDICAS: ${patientData.medicalConditions}` : ''}
 ${patientData.additionalNotes ? `INSTRUÇÕES ADICIONAIS: ${patientData.additionalNotes}` : ''}
 
+${buildRestrictionGuidance(patientData.allergies, patientData.dietaryRestrictions)}
+Café da manhã e lanches devem ter alimentos típicos desses horários (pães ou tapioca, frutas, aveia, cereais, bebidas vegetais ou leite, café/chá, pastas e castanhas quando permitidos). Não coloque arroz nem feijão como refeição de café da manhã ou lanche. Almoço e jantar podem ter arroz, feijão, legumes e proteínas.
+
 Use a Tabela TACO como referência. Retorne APENAS o JSON válido, sem texto adicional.`;
 
     // === CALL MODELFLARE API (OpenAI-compatible with Gemini) ===
@@ -174,97 +178,101 @@ Use a Tabela TACO como referência. Retorne APENAS o JSON válido, sem texto adi
     console.log('Calling Modelflare API with Gemini model fallback chain...');
 
     let aiResponse: any = null;
+    let mealPlan: any = null;
     let lastError: any = null;
+    let lastViolations = '';
+    const startedAt = Date.now();
+    const TIME_BUDGET_MS = 100_000; // edge functions are killed at ~150s; leave room for one in-flight call
 
+    outer:
     for (const model of GEMINI_MODELS) {
-      console.log(`Trying model: ${model}`);
-      try {
-        const response = await fetch(`${MODELFLARE_BASE_URL}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${MODELFLARE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt }
-            ],
-            max_tokens: 8192,
-            ...(supportsTemperature(model) ? { temperature: 0.7 } : {}),
-          }),
-        });
+      // Up to 3 attempts per model (bounded by TIME_BUDGET_MS): retries tell the model exactly what it got wrong.
+      let feedback = '';
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        if (Date.now() - startedAt > TIME_BUDGET_MS) break outer;
+        console.log(`Trying model: ${model} (attempt ${attempt})`);
+        try {
+          const response = await fetch(`${MODELFLARE_BASE_URL}/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${MODELFLARE_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model,
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt + feedback }
+              ],
+              max_tokens: 8192,
+              ...(supportsTemperature(model) ? { temperature: 0.7 } : {}),
+            }),
+          });
 
-        console.log(`Model ${model} response status:`, response.status);
+          console.log(`Model ${model} response status:`, response.status);
 
-        if (response.ok) {
-          const json = await response.json();
-          // A 200 with empty or unparseable content (e.g. reasoning used all tokens) is a failure: try the next model.
-          const text = json?.choices?.[0]?.message?.content;
-          let usable = false;
-          if (text) { try { extractJson(text); usable = true; } catch { /* fall through to next model */ } }
-          if (usable) {
-            aiResponse = json;
-            console.log(`AI response received using model: ${model}`);
-            break; // Success — exit the loop
+          if (!response.ok) {
+            const errorText = await response.text();
+            let errorDetail;
+            try { errorDetail = JSON.parse(errorText); } catch { errorDetail = errorText; }
+            console.error(`Model ${model} failed:`, { status: response.status, errorDetail });
+            lastError = { status: response.status, errorDetail };
+
+            // 429 = rate limit — stop trying, return immediately
+            if (response.status === 429) {
+              return new Response(
+                JSON.stringify({ error: 'Limite de requisições atingido. Aguarde alguns minutos e tente novamente.' }),
+                { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              );
+            }
+            // 401 = auth error — stop trying, return immediately
+            if (response.status === 401) {
+              return new Response(
+                JSON.stringify({ error: 'Erro de autenticação com o serviço de IA. Verifique a chave API.' }),
+                { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              );
+            }
+            break; // other errors (503, 404 model not found...): go to the next model
           }
-          console.error(`Model ${model} returned empty/invalid content:`, JSON.stringify(json).slice(0, 500));
-          lastError = { status: 200, errorDetail: 'empty or invalid content', model };
-          continue;
+
+          const json = await response.json();
+          const text = json?.choices?.[0]?.message?.content;
+          let parsed: any = null;
+          if (text) { try { parsed = extractJson(text); } catch { /* handled below */ } }
+          if (!parsed || !Array.isArray(parsed.meals) || parsed.meals.length === 0) {
+            console.error(`Model ${model} returned empty/invalid content:`, JSON.stringify(json).slice(0, 500));
+            lastError = { status: 200, errorDetail: 'empty or invalid content', model };
+            continue; // retry same model once, then next
+          }
+
+          // Never trust the model: verify allergies and dietary restrictions ourselves.
+          const violations = findViolations(parsed, patientData.allergies, patientData.dietaryRestrictions);
+          if (violations.length > 0) {
+            lastViolations = formatViolations(violations);
+            console.error(`Model ${model} violated restrictions:`, lastViolations);
+            lastError = { status: 200, errorDetail: 'restriction violation', model, violations: lastViolations };
+            feedback = `\n\nATENÇÃO: sua resposta anterior foi REJEITADA por violar as restrições do paciente: ${lastViolations}. Refaça o cardápio completo sem NENHUM desses alimentos nem equivalentes.`;
+            continue;
+          }
+
+          aiResponse = json;
+          mealPlan = parsed;
+          console.log(`AI response received and validated using model: ${model} (attempt ${attempt})`);
+          break outer;
+        } catch (fetchError) {
+          console.error(`Fetch error for model ${model}:`, fetchError);
+          lastError = fetchError;
+          break; // next model
         }
-
-        const errorText = await response.text();
-        let errorDetail;
-        try { errorDetail = JSON.parse(errorText); } catch { errorDetail = errorText; }
-
-        console.error(`Model ${model} failed:`, { status: response.status, errorDetail });
-        lastError = { status: response.status, errorDetail };
-
-        // 429 = rate limit — stop trying, return immediately
-        if (response.status === 429) {
-          return new Response(
-            JSON.stringify({ error: 'Limite de requisições atingido. Aguarde alguns minutos e tente novamente.' }),
-            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-
-        // 401 = auth error — stop trying, return immediately
-        if (response.status === 401) {
-          return new Response(
-            JSON.stringify({ error: 'Erro de autenticação com o serviço de IA. Verifique a chave API.' }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-
-        // For other errors (e.g. 404 model not found), try the next model
-      } catch (fetchError) {
-        console.error(`Fetch error for model ${model}:`, fetchError);
-        lastError = fetchError;
-        // Continue to next model
       }
     }
 
-    if (!aiResponse) {
+    if (!aiResponse || !mealPlan) {
       console.error('All models failed. Last error:', lastError);
+      if (lastViolations) {
+        throw new Error(`Não foi possível gerar um cardápio que respeite todas as restrições deste paciente (${lastViolations}). Revise as restrições cadastradas e tente novamente.`);
+      }
       throw new Error(`Todos os modelos de IA falharam. Último erro: ${JSON.stringify(lastError)}`);
-    }
-
-    // Extract content from OpenAI-compatible response format
-    const content = aiResponse.choices?.[0]?.message?.content;
-
-    if (!content) {
-      console.error('Unexpected Modelflare response:', JSON.stringify(aiResponse));
-      throw new Error('No content in AI response');
-    }
-
-    // Parse the JSON from the response
-    let mealPlan;
-    try {
-      mealPlan = extractJson(content);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', content.slice(0, 500));
-      throw new Error('Failed to parse meal plan from AI response');
     }
 
     console.log('Meal plan generated successfully');
