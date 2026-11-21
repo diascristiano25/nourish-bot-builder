@@ -34,9 +34,14 @@ weight: '',
 height: '',
 });
 const [saving, setSaving] = useState(false);
+const setField = (patch: Partial<typeof formData>) => setFormData(prev => ({ ...prev, ...patch }));
 if (authLoading) return null;
 const handleSave = async () => {
-if (!user || !formData.fullName.trim()) {
+if (!user) {
+toast({ title: 'Sessão expirada', description: 'Sua sessão expirou. Faça login novamente para cadastrar o paciente.', variant: 'destructive' });
+return;
+}
+if (!formData.fullName.trim()) {
 toast({ title: 'Campos obrigatórios', description: 'Nome completo é obrigatório.', variant: 'destructive' });
 return;
 }
@@ -94,25 +99,25 @@ actions={
 <div>
 <h3 className="text-lg font-bold text-[#518C5B] mb-4 flex items-center gap-2"><UserPlus className="w-5 h-5" /> Dados Pessoais</h3>
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div><Label>Nome completo *</Label><Input value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} placeholder="Maria da Silva" /></div>
-<div><Label>Email</Label><Input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="paciente@email.com" /></div>
-<div><Label>Telefone</Label><Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="(11) 99999-9999" /></div>
-<div><Label>Data de Nascimento</Label><Input type="date" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} /></div>
-<div><Label>Sexo</Label><Select value={formData.gender} onValueChange={v => setFormData({...formData, gender: v})}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent><SelectItem value="female">Feminino</SelectItem><SelectItem value="male">Masculino</SelectItem><SelectItem value="other">Outro</SelectItem></SelectContent></Select></div>
+<div><Label>Nome completo *</Label><Input value={formData.fullName} onChange={e => setField({fullName: e.target.value})} placeholder="Maria da Silva" /></div>
+<div><Label>Email</Label><Input type="email" value={formData.email} onChange={e => setField({email: e.target.value})} placeholder="paciente@email.com" /></div>
+<div><Label>Telefone</Label><Input value={formData.phone} onChange={e => setField({phone: e.target.value})} placeholder="(11) 99999-9999" /></div>
+<div><Label>Data de Nascimento</Label><Input type="date" value={formData.birthDate} onChange={e => setField({birthDate: e.target.value})} /></div>
+<div><Label>Sexo</Label><Select value={formData.gender} onValueChange={v => setField({gender: v})}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent><SelectItem value="female">Feminino</SelectItem><SelectItem value="male">Masculino</SelectItem><SelectItem value="other">Outro</SelectItem></SelectContent></Select></div>
 </div>
 </div>
 <div>
 <h3 className="text-lg font-bold text-[#C4764A] mb-4 flex items-center gap-2"><Save className="w-5 h-5" /> Medidas Atuais</h3>
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div><Label>Peso (kg)</Label><Input type="number" step="0.1" value={formData.weight} onChange={e => setFormData({...formData, weight: e.target.value})} placeholder="70.5" /></div>
-<div><Label>Altura (cm)</Label><Input type="number" value={formData.height} onChange={e => setFormData({...formData, height: e.target.value})} placeholder="170" /></div>
+<div><Label>Peso (kg)</Label><Input type="number" step="0.1" value={formData.weight} onChange={e => setField({weight: e.target.value})} placeholder="70.5" /></div>
+<div><Label>Altura (cm)</Label><Input type="number" value={formData.height} onChange={e => setField({height: e.target.value})} placeholder="170" /></div>
 </div>
 </div>
 <div>
 <h3 className="text-lg font-bold text-[#518C5B] mb-4 flex items-center gap-2"><UserPlus className="w-5 h-5" /> Objetivo & Atividade</h3>
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div><Label>Objetivo</Label><Select value={formData.goal} onValueChange={v => setFormData({...formData, goal: v})}><SelectTrigger><SelectValue placeholder="Selecione o objetivo" /></SelectTrigger><SelectContent><SelectItem value="weight_loss">Emagrecimento</SelectItem><SelectItem value="muscle_gain">Hipertrofia</SelectItem><SelectItem value="maintenance">Manutenção</SelectItem><SelectItem value="health_improvement">Saúde</SelectItem><SelectItem value="sports_performance">Performance Esportiva</SelectItem></SelectContent></Select></div>
-<div><Label>Nível de Atividade</Label><Select value={formData.activityLevel} onValueChange={v => setFormData({...formData, activityLevel: v})}><SelectTrigger><SelectValue placeholder="Selecione o nível" /></SelectTrigger><SelectContent><SelectItem value="sedentary">Sedentário</SelectItem><SelectItem value="lightly_active">Leve</SelectItem><SelectItem value="moderately_active">Moderado</SelectItem><SelectItem value="very_active">Intenso</SelectItem><SelectItem value="extremely_active">Extremo</SelectItem></SelectContent></Select></div>
+<div><Label>Objetivo</Label><Select value={formData.goal} onValueChange={v => setField({goal: v})}><SelectTrigger><SelectValue placeholder="Selecione o objetivo" /></SelectTrigger><SelectContent><SelectItem value="weight_loss">Emagrecimento</SelectItem><SelectItem value="muscle_gain">Hipertrofia</SelectItem><SelectItem value="maintenance">Manutenção</SelectItem><SelectItem value="health_improvement">Saúde</SelectItem><SelectItem value="sports_performance">Performance Esportiva</SelectItem></SelectContent></Select></div>
+<div><Label>Nível de Atividade</Label><Select value={formData.activityLevel} onValueChange={v => setField({activityLevel: v})}><SelectTrigger><SelectValue placeholder="Selecione o nível" /></SelectTrigger><SelectContent><SelectItem value="sedentary">Sedentário</SelectItem><SelectItem value="lightly_active">Leve</SelectItem><SelectItem value="moderately_active">Moderado</SelectItem><SelectItem value="very_active">Intenso</SelectItem><SelectItem value="extremely_active">Extremo</SelectItem></SelectContent></Select></div>
 </div>
 </div>
 <div>
@@ -123,8 +128,8 @@ actions={
 <h3 className="text-lg font-bold text-foreground mb-3">Restrições Alimentares</h3>
 <div className="flex flex-wrap gap-2">{commonRestrictions.map(r => <Button key={r} type="button" size="sm" variant={formData.restrictions.includes(r) ? 'default' : 'outline'} onClick={() => toggleRestriction(r)} className={formData.restrictions.includes(r) ? 'bg-[#C4764A]' : ''}>{r}</Button>)}</div>
 </div>
-<div><Label>Condições Médicas</Label><Textarea value={formData.medicalConditions} onChange={e => setFormData({...formData, medicalConditions: e.target.value})} placeholder="Diabetes, hipertensão, etc." /></div>
-<div><Label>Observações</Label><Textarea value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} placeholder="Notas adicionais..." /></div>
+<div><Label>Condições Médicas</Label><Textarea value={formData.medicalConditions} onChange={e => setField({medicalConditions: e.target.value})} placeholder="Diabetes, hipertensão, etc." /></div>
+<div><Label>Observações</Label><Textarea value={formData.notes} onChange={e => setField({notes: e.target.value})} placeholder="Notas adicionais..." /></div>
 <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-to-r from-[#518C5B] to-[#3d7047] hover:opacity-90 text-white py-3 text-lg">
 {saving ? 'Salvando...' : <><Save className="w-5 h-5 mr-2" /> Cadastrar Paciente</>}
 </Button>
