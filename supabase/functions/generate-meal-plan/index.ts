@@ -18,9 +18,17 @@ const MODELFLARE_BASE_URL = 'https://modelflare.dev/v1';
 const GEMINI_MODELS = [
   'gemini-3.8-flash',
   'claude-haiku-5-5',
-  'deepseek-v4-flash',
   'claude-sonnet-5-5',
 ];
+// Claude models reject a non-default temperature (400), so only send it to the others.
+const supportsTemperature = (model: string) => !model.startsWith('claude');
+
+// Extract the JSON object from a model reply (tolerates markdown fences / extra text).
+function extractJson(content: string): any {
+  const match = content.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No valid JSON found in response');
+  return JSON.parse(match[0]);
+}
 
 // Zod schema for strict input validation
 const PatientDataSchema = z.object({
@@ -182,17 +190,27 @@ Use a Tabela TACO como referência. Retorne APENAS o JSON válido, sem texto adi
               { role: 'system', content: systemPrompt },
               { role: 'user', content: userPrompt }
             ],
-            max_tokens: 4096,
-            temperature: 0.7,
+            max_tokens: 8192,
+            ...(supportsTemperature(model) ? { temperature: 0.7 } : {}),
           }),
         });
 
         console.log(`Model ${model} response status:`, response.status);
 
         if (response.ok) {
-          aiResponse = await response.json();
-          console.log(`AI response received using model: ${model}`);
-          break; // Success — exit the loop
+          const json = await response.json();
+          // A 200 with empty or unparseable content (e.g. reasoning used all tokens) is a failure: try the next model.
+          const text = json?.choices?.[0]?.message?.content;
+          let usable = false;
+          if (text) { try { extractJson(text); usable = true; } catch { /* fall through to next model */ } }
+          if (usable) {
+            aiResponse = json;
+            console.log(`AI response received using model: ${model}`);
+            break; // Success — exit the loop
+          }
+          console.error(`Model ${model} returned empty/invalid content:`, JSON.stringify(json).slice(0, 500));
+          lastError = { status: 200, errorDetail: 'empty or invalid content', model };
+          continue;
         }
 
         const errorText = await response.text();
@@ -242,13 +260,7 @@ Use a Tabela TACO como referência. Retorne APENAS o JSON válido, sem texto adi
     // Parse the JSON from the response
     let mealPlan;
     try {
-      // Try to extract JSON from the response (in case there's extra text/markdown)
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        mealPlan = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('No valid JSON found in response');
-      }
+      mealPlan = extractJson(content);
     } catch (parseError) {
       console.error('Failed to parse AI response:', content.slice(0, 500));
       throw new Error('Failed to parse meal plan from AI response');

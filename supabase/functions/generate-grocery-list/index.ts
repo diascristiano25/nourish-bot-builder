@@ -160,7 +160,7 @@ Consolide os ingredientes, multiplique por ${daysMultiplier} dias, e organize po
 
     // Same provider and model fallback chain used by generate-meal-plan
     let response!: Response;
-    for (const model of ['gemini-3.8-flash', 'claude-haiku-5-5', 'deepseek-v4-flash', 'claude-sonnet-5-5']) {
+    for (const model of ['gemini-3.8-flash', 'claude-haiku-5-5', 'claude-sonnet-5-5']) {
       response = await fetch('https://modelflare.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -173,8 +173,9 @@ Consolide os ingredientes, multiplique por ${daysMultiplier} dias, e organize po
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ],
-          max_tokens: 4096,
-          temperature: 0.3,
+          max_tokens: 8192,
+          // Claude models reject a non-default temperature (400)
+          ...(model.startsWith('claude') ? {} : { temperature: 0.3 }),
         }),
       });
       if (response.ok || response.status === 429 || response.status === 402) break;
