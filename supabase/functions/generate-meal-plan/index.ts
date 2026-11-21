@@ -12,13 +12,14 @@ const corsHeaders = {
 //   supabase secrets set MODELFLARE_API_KEY=<your-modelflare-api-key>
 const MODELFLARE_API_KEY = Deno.env.get('MODELFLARE_API_KEY') || '';
 const MODELFLARE_BASE_URL = 'https://modelflare.dev/v1';
-// Try models in order — fallback chain based on available Modelflare models.
-// Models confirmed available: gemini-3.6-flash, gemini-3.8-flash, gemini-3.8-flash-high
-// If the first fails, we fall back to the next.
+// Try models in order — fallback chain based on the models Modelflare lists at /v1/models.
+// Gemini first (cheapest); if it is down or removed, fall back to other available providers.
+// Keep this list in sync with GET https://modelflare.dev/v1/models.
 const GEMINI_MODELS = [
   'gemini-3.8-flash',
-  'gemini-3.6-flash',
-  'gemini-3.8-flash-high',
+  'claude-haiku-5-5',
+  'deepseek-v4-flash',
+  'claude-sonnet-5-5',
 ];
 
 // Zod schema for strict input validation
