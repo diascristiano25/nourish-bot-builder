@@ -17,8 +17,9 @@ const MODELFLARE_BASE_URL = 'https://modelflare.dev/v1';
 // Keep this list in sync with GET https://modelflare.dev/v1/models.
 const GEMINI_MODELS = [
   'gemini-3.8-flash',
-  'claude-haiku-5-5',
+  // Sonnet before Haiku: Haiku ignored allergies/restrictions in testing.
   'claude-sonnet-5-5',
+  'claude-haiku-5-5',
 ];
 // Claude models reject a non-default temperature (400), so only send it to the others.
 const supportsTemperature = (model: string) => !model.startsWith('claude');
