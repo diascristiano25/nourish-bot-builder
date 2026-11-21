@@ -160,7 +160,7 @@ Consolide os ingredientes, multiplique por ${daysMultiplier} dias, e organize po
 
     // Same provider and model fallback chain used by generate-meal-plan
     let response!: Response;
-    for (const model of ['gemini-3.8-flash', 'claude-haiku-5-5', 'claude-sonnet-5-5']) {
+    for (const model of ['gemini-3.8-flash', 'claude-sonnet-5-5', 'claude-haiku-5-5']) {
       response = await fetch('https://modelflare.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
